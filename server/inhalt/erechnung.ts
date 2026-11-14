@@ -72,12 +72,14 @@ export function inCent(wert: string | null): number | null {
   return vorzeichen === "-" ? -cent : cent;
 }
 
-/** CII-Datum im Format 102 (JJJJMMTT) oder schon JJJJ-MM-TT */
+/** CII-Datum im Format 102 (JJJJMMTT) oder schon JJJJ-MM-TT; nur Tage, die es gibt */
 function datum(wert: string | null): string | null {
-  const t = wert?.trim();
+  const t = wert?.trim().match(/^(\d{4})-?(\d{2})-?(\d{2})$/);
   if (!t) return null;
-  if (/^\d{8}$/.test(t)) return `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`;
-  return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null;
+  const [, j, m, d] = t.map(Number) as [number, number, number, number];
+  const probe = new Date(Date.UTC(j, m - 1, d));
+  if (probe.getUTCFullYear() !== j || probe.getUTCMonth() !== m - 1 || probe.getUTCDate() !== d) return null;
+  return `${t[1]}-${t[2]}-${t[3]}`;
 }
 
 function cii(r: Knoten): ERechnung {
