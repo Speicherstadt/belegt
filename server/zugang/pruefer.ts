@@ -13,6 +13,7 @@ const ERLAUBT = [
   /^\/api\/dokumente\/[^/]+(\/(datei|inhalt|mail|verlauf))?$/,
   /^\/api\/export$/,
   /^\/api\/pruefung$/,
+  /^\/api\/zeitstempel(\/[^/]+\/token)?$/,
 ];
 
 export const prueferDarf = (methode: string, pfad: string): boolean =>

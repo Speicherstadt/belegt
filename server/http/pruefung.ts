@@ -7,9 +7,10 @@ import {
 import { z3Export } from "../export/z3.ts";
 import { bericht } from "../pruefung/bericht.ts";
 import { verfahrensdoku } from "../verfahrensdoku/verfahrensdoku.ts";
+import { listen as zeitstempelListen, token as zeitstempelToken } from "../zeitstempel/zeitstempel.ts";
 import { schnitt } from "../zugang/pruefer.ts";
 
-import { type App, type AppUmgebung, akteur, VERSION, Zeitraum } from "./gemeinsam.ts";
+import { type App, type AppUmgebung, akteur, Id, VERSION, Zeitraum } from "./gemeinsam.ts";
 
 export function pruefungRouten(app: App, umgebung: AppUmgebung) {
   // Angaben zum Betrieb: lesen dürfen Inhaber und Steuerberatung, ändern nur der Inhaber
@@ -44,6 +45,20 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
     return c.body(stream, 200, {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="belegt-z3-${teil.von}-${teil.bis}.zip"`,
+      "X-Content-Type-Options": "nosniff",
+    });
+  });
+
+  app.get("/api/zeitstempel", async (c) => c.json(await zeitstempelListen(umgebung.db)));
+
+  app.get("/api/zeitstempel/:id/token", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const z = id.success ? await zeitstempelToken(umgebung.db, id.data) : null;
+    if (!z) return c.json({ fehler: "Nicht gefunden" }, 404);
+    // Prüfen etwa mit: openssl ts -verify -token_in -in <Datei> -digest <hash> -CAfile <Zertifikat des Dienstes>
+    return c.body(new Uint8Array(z.token), 200, {
+      "Content-Type": "application/octet-stream",
+      "Content-Disposition": `attachment; filename="zeitstempel-${z.seq}.tst"`,
       "X-Content-Type-Options": "nosniff",
     });
   });

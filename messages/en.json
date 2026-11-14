@@ -301,5 +301,9 @@
   "oidc_or": "or with email and password",
   "oidc_link": "Connect {name}",
   "oidc_not_linked": "This account is not connected to Belegt yet. Sign in once with email and password, then connect it at the bottom left.",
-  "oidc_failed": "Signing in through the provider did not work."
+  "oidc_failed": "Signing in through the provider did not work.",
+  "report_timestamp": "Timestamp",
+  "report_timestamp_value": "{zeit} over entry {nr} ({dienst})",
+  "report_timestamp_download": "Download token",
+  "report_timestamp_none": "none (TSA_URL not set or no run yet)"
 }

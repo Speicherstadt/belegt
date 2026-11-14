@@ -9,6 +9,7 @@ import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
+import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu und liest
@@ -67,6 +68,17 @@ async function objektsperren(speicher: SperrbarerSpeicher) {
   }
 }
 
+/** Mit TSA_URL: einmal am Tag ein Zeitstempel über den Kopf der Kette, wenn etwas dazukam */
+async function zeitstempel(dienst: string) {
+  for (;;) {
+    await zeitstempelSetzen(db, dienst, { abstandStunden: 24 }).then(
+      (z) => z && console.log(`Zeitstempel über Eintrag ${z.seq}: ${z.zeit.toISOString()}`),
+      (err) => console.error(`Zeitstempel fehlgeschlagen: ${meldung(err)}`),
+    );
+    await Bun.sleep(3_600_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -74,4 +86,10 @@ async function postfaecher() {
   }
 }
 
-await Promise.all([postfaecher(), webhooks(), inhalte(), ...(sperrbar ? [objektsperren(sperrbar)] : [])]);
+await Promise.all([
+  postfaecher(),
+  webhooks(),
+  inhalte(),
+  ...(sperrbar ? [objektsperren(sperrbar)] : []),
+  ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
+]);

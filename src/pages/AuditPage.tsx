@@ -8,6 +8,7 @@ import { m } from "../paraglide/messages.js";
 
 export function AuditPage() {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
+  const stempel = useQuery({ queryKey: ["zeitstempel"], queryFn: api.zeitstempel });
   const [dateien, setDateien] = useState(false);
   const pruefung = useQuery({ queryKey: ["pruefung", dateien], queryFn: () => api.pruefung(dateien) });
   return (
@@ -72,6 +73,25 @@ export function AuditPage() {
             </dd>
             <dt className="text-muted">{m.report_value()}</dt>
             <dd className="m-0 break-all font-mono text-xs">{pruefung.data.bericht.pruefwert ?? "–"}</dd>
+            <dt className="text-muted">{m.report_timestamp()}</dt>
+            <dd className="m-0">
+              {pruefung.data.bericht.zeitstempel ? (
+                <>
+                  {m.report_timestamp_value({
+                    zeit: zeitpunkt(pruefung.data.bericht.zeitstempel.zeit),
+                    nr: String(pruefung.data.bericht.zeitstempel.seq),
+                    dienst: pruefung.data.bericht.zeitstempel.dienst,
+                  })}{" "}
+                  {stempel.data?.[0] && (
+                    <a href={`/api/zeitstempel/${stempel.data[0].id}/token`} className="underline print:hidden">
+                      {m.report_timestamp_download()}
+                    </a>
+                  )}
+                </>
+              ) : (
+                m.report_timestamp_none()
+              )}
+            </dd>
           </dl>
           <p className="m-0 text-muted text-xs">{m.report_hint()}</p>
         </section>

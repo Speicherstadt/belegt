@@ -1,6 +1,7 @@
 import { formatPruefwert } from "@firsttris/gobd-kern/pruefwert";
 import { sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
+import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 
 /**
  * Was zu einem Prüfbericht neben den Befunden gehört: Zeitpunkt, Kopf der Hash-Kette als Prüfwert (wer ihn notiert,
@@ -13,9 +14,12 @@ export interface Bericht {
   geloescht: number;
   siegel: number;
   protokoll: number;
+  /** Der neueste Zeitstempel über die Kette (RFC 3161) */
+  zeitstempel: { seq: number; zeit: string; dienst: string } | null;
 }
 
 export async function bericht(db: Datenbank): Promise<Bericht> {
+  const [letzter] = await zeitstempelListen(db);
   const [z] = await db.execute<{
     dokumente: string;
     geloescht: string;
@@ -37,5 +41,6 @@ export async function bericht(db: Datenbank): Promise<Bericht> {
     geloescht: Number(z?.geloescht ?? 0),
     siegel: Number(z?.siegel ?? 0),
     protokoll: Number(z?.protokoll ?? 0),
+    zeitstempel: letzter ? { seq: letzter.seq, zeit: letzter.zeit.toISOString(), dienst: letzter.dienst } : null,
   };
 }

@@ -327,3 +327,19 @@ export const objektsperren = pgTable("objektsperren", {
   bis: date("bis").notNull(),
   gesetztAm: timestamp("gesetzt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Zeitstempel nach RFC 3161 über den Kopf der Hash-Kette: belegt, dass alle Einträge bis seq zu diesem Zeitpunkt so
+ * bestanden. Versiegelt ab dem Einfügen.
+ */
+export const zeitstempel = pgTable("zeitstempel", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  seq: bigint("seq", { mode: "number" }).notNull(),
+  /** SHA-256 des Kopfs der Kette (hex), über den der Zeitstempel geht */
+  hash: text("hash").notNull(),
+  dienst: text("dienst").notNull(),
+  zeit: timestamp("zeit", { withTimezone: true }).notNull(),
+  seriennummer: text("seriennummer").notNull(),
+  token: bytea("token").notNull(),
+  erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+});

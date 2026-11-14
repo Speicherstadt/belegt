@@ -31,3 +31,16 @@ Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prü
 
 Die Tabellen sind UTF-8 mit BOM, Semikolon als Trenner und CRLF als Zeilenende. Fehlt ein Original oder passt es
 nicht mehr zu seinem Hash, bricht der Download ab; die Prüfung zeigt dann, welche Datei es ist.
+
+## Zeitstempel (RFC 3161)
+
+Mit `TSA_URL` (etwa `https://freetsa.org/tsr` oder der Dienst eines Vertrauensdiensteanbieters) lässt der Worker
+einmal am Tag den Kopf der Hash-Kette von diesem Zeitstempeldienst bestätigen, wenn seit dem letzten etwas dazukam.
+Das Token belegt, dass alle Einträge bis zu dieser Nummer zu diesem Zeitpunkt so bestanden; die Zeitstempel sind
+versiegelt. Der Prüfbericht nennt den neuesten mit dem Token zum Herunterladen, der Z3-Export enthält alle
+(`zeitstempel.csv`, `zeitstempel/<Nr>.tst`). Prüfen lässt sich ein Token unabhängig von Belegt, mit dem Hash aus der
+Liste und dem Zertifikat des Dienstes:
+
+```bash
+openssl ts -verify -token_in -in zeitstempel-123.tst -digest <Hash> -CAfile tsa.pem
+```

@@ -6,6 +6,7 @@ import { sperrenListen } from "../einordnung/einordnung.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
+import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as zugaengeListen } from "../zugang/einladungen.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
 
@@ -67,7 +68,7 @@ export async function verfahrensdoku(
     objektsperre = false,
   }: { abrufMinuten: number; version: string; jetzt?: Date; objektsperre?: boolean },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde] = await Promise.all([
+  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel] = await Promise.all([
     einstellungenLaden(db),
     zugaengeListen(db),
     tokensListen(db),
@@ -76,6 +77,7 @@ export async function verfahrensdoku(
     sperrenListen(db),
     zahlen(db),
     pruefen(db),
+    zeitstempelListen(db),
   ]);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
@@ -142,10 +144,13 @@ export async function verfahrensdoku(
           ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
           : "Die Dateien liegen unter ihrem SHA-256 im Dateisystem des Servers; eine Änderung fällt beim Lesen und bei der Prüfung auf.",
         "Die Prüfung unter „Prüfung“ rechnet Kette, Kopf und Siegel nach und vergleicht auf Wunsch jede Datei mit ihrem Hash.",
+        stempel[0]
+          ? `Einmal am Tag lässt Belegt den Kopf der Kette von einem Zeitstempeldienst nach RFC 3161 bestätigen (${stempel[0].dienst}); der letzte Zeitstempel vom ${tag(stempel[0].zeit)} belegt den Stand bis Eintrag ${stempel[0].seq}.`
+          : "",
         befunde.length
           ? `Bei Erstellung dieses Dokuments meldete die Prüfung ${befunde.length} Befunde.`
           : "Bei Erstellung dieses Dokuments meldete die Prüfung von Kette und Siegeln keine Befunde.",
-      ],
+      ].filter(Boolean),
     },
     {
       titel: "5. Löschung",

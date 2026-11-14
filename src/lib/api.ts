@@ -177,6 +177,7 @@ export interface Bericht {
   geloescht: number;
   siegel: number;
   protokoll: number;
+  zeitstempel: { seq: number; zeit: string; dienst: string } | null;
 }
 
 export interface Einstellungen {
@@ -337,6 +338,10 @@ export const api = {
     ordner: string;
     art: "imap" | "jmap";
   }) => aufruf<Quelle>("/api/quellen", json(q)),
+  zeitstempel: () =>
+    aufruf<{ id: string; seq: number; hash: string; dienst: string; zeit: string; seriennummer: string }[]>(
+      "/api/zeitstempel",
+    ),
   oauthAnbieter: () => aufruf<{ anbieter: ("microsoft" | "google")[] }>("/api/oauth"),
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),

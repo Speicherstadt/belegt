@@ -50,6 +50,7 @@ services:
       S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
       S3_PFAD_STIL: ${S3_PFAD_STIL:-}
       S3_SPERRE_TAGE: ${S3_SPERRE_TAGE:-}
+      TSA_URL: ${TSA_URL:-}
     ports:
       - "${BELEGT_PORT:-3000}:3000"
     volumes:

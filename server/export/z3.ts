@@ -4,6 +4,7 @@ import { makeZip } from "client-zip";
 import { sql } from "drizzle-orm";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
+import { listen as zeitstempelListen, token as zeitstempelToken } from "../zeitstempel/zeitstempel.ts";
 
 /**
  * Datenträgerüberlassung (Z3, GoBD Rz. 167): ein ZIP mit den Originalen und je einer CSV für Dokumente, Mails und
@@ -221,6 +222,7 @@ export async function z3Export(
 ): Promise<ReadableStream<Uint8Array>> {
   const dokumente = await dokumenteImZeitraum(umgebung, zeitraum);
   const betrieb = await einstellungenLaden(umgebung.db);
+  const stempel = await zeitstempelListen(umgebung.db);
   const pfade = new Map(
     dokumente.map((d) => [d.id, `dokumente/${d.id}/${sichererName(d.dateiname, d.sha256)}`] as const),
   );
@@ -267,6 +269,13 @@ export async function z3Export(
       }),
     },
     { name: "pruefwert.txt", inhalt: await pruefwert(umgebung) },
+    {
+      name: "zeitstempel.csv",
+      inhalt: csv(
+        ["Nr", "Hash", "Zeit", "Dienst", "Seriennummer", "Datei"],
+        stempel.map((z) => [z.seq, z.hash, z.zeit.toISOString(), z.dienst, z.seriennummer, `zeitstempel/${z.seq}.tst`]),
+      ),
+    },
   ];
 
   const summen: string[] = [];
@@ -274,6 +283,14 @@ export async function z3Export(
     for (const d of dateien) {
       summen.push(`${await sha256Hex(d.inhalt)}  ${d.name}`);
       yield { name: d.name, input: d.inhalt, lastModified: new Date() };
+    }
+    // Zeitstempel über die Kette: wer sie prüft, braucht das Token und das Zertifikat des Dienstes
+    for (const z of stempel) {
+      const t = await zeitstempelToken(umgebung.db, z.id);
+      if (!t) continue;
+      const bytes = new Uint8Array(t.token);
+      summen.push(`${await sha256Hex(bytes)}  zeitstempel/${z.seq}.tst`);
+      yield { name: `zeitstempel/${z.seq}.tst`, input: bytes, lastModified: z.zeit };
     }
     for (const d of dokumente) {
       const bytes = await umgebung.speicher.laden(d.sha256);

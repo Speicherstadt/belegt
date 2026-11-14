@@ -93,6 +93,7 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
         "protokoll.csv",
         "pruefsummen.sha256",
         "pruefwert.txt",
+        "zeitstempel.csv",
         pfadBeleg,
         `dokumente/${offen.id}/eingang.txt`,
       ].sort(),
