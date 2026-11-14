@@ -17,6 +17,7 @@
     "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy preferredLanguage baseLocale"
   },
   "dependencies": {
+    "@firsttris/gobd-kern": "https://github.com/firsttris/haben/releases/download/gobd-kern-v0.1.0/firsttris-gobd-kern-0.1.0.tgz",
     "@tanstack/react-router": "^1.170.46",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.18",

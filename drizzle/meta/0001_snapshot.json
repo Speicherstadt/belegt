@@ -1,0 +1,116 @@
+{
+  "id": "47729718-f99a-478d-9e5a-7cc8cf65db8f",
+  "prevId": "2079b64e-126c-4329-9367-a6af4a054d2f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.dokumente": {
+      "name": "dokumente",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "groesse": {
+          "name": "groesse",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateiname": {
+          "name": "dateiname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quelle": {
+          "name": "quelle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eingegangen_am": {
+          "name": "eingegangen_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "dokumente_eingegangen": {
+          "name": "dokumente_eingegangen",
+          "columns": [
+            {
+              "expression": "eingegangen_am",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "dokumente_sha256_idx": {
+          "name": "dokumente_sha256_idx",
+          "columns": [
+            {
+              "expression": "sha256",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "dokumente_sha256": {
+          "name": "dokumente_sha256",
+          "value": "\"dokumente\".\"sha256\" ~ '^[0-9a-f]{64}$'"
+        },
+        "dokumente_groesse": {
+          "name": "dokumente_groesse",
+          "value": "\"dokumente\".\"groesse\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
