@@ -6,6 +6,7 @@ import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 
 export function AuditPage() {
+  const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const [dateien, setDateien] = useState(false);
   const pruefung = useQuery({ queryKey: ["pruefung", dateien], queryFn: () => api.pruefung(dateien) });
   return (
@@ -64,7 +65,7 @@ export function AuditPage() {
           </table>
         </section>
       )}
-      <Export />
+      {ich.data && <Export freigabe={ich.data.zeitraum} />}
     </div>
   );
 }

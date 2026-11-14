@@ -12,6 +12,9 @@ const ITEMS = [
   { to: "/verfahrensdoku", label: () => m.nav_procedure() },
 ] as const;
 
+/** Der Prüfer sieht nur, was er für die Prüfung braucht; die übrigen Schnittstellen lehnt der Server für ihn ab */
+const PRUEFER = new Set(["/", "/archiv", "/pruefung"]);
+
 export function Sidebar({ ich }: { ich: Ich }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -28,7 +31,7 @@ export function Sidebar({ ich }: { ich: Ich }) {
       </div>
       <nav aria-label={m.nav_label()} className="flex flex-col gap-0.5">
         {[
-          ...ITEMS,
+          ...ITEMS.filter((item) => ich.role !== "pruefer" || PRUEFER.has(item.to)),
           ...(ich.role === "inhaber" ? ([{ to: "/zugaenge", label: () => m.nav_access() }] as const) : []),
         ].map((item) => (
           <Link

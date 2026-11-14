@@ -2,18 +2,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
-import { zeitpunkt } from "../lib/format.ts";
+import { tag, zeitpunkt } from "../lib/format.ts";
 import { rolleLabel } from "../lib/rollen.ts";
 import { m } from "../paraglide/messages.js";
+
+const zeitraumText = (von: string, bis: string) => m.access_period({ von: tag(von), bis: tag(bis) });
 
 /** Zugänge: Konten, Einladungen anlegen und zurückziehen; nur für den Inhaber */
 export function AccessPage() {
   const queryClient = useQueryClient();
   const daten = useQuery({ queryKey: ["zugaenge"], queryFn: api.zugaenge });
   const [rolle, setRolle] = useState<"steuerberatung" | "pruefer">("steuerberatung");
+  const jahr = String(new Date().getFullYear() - 1);
+  const [von, setVon] = useState(`${jahr}-01-01`);
+  const [bis, setBis] = useState(`${jahr}-12-31`);
   const [link, setLink] = useState<string | null>(null);
+  const zeitraumOk = rolle !== "pruefer" || (!!von && !!bis && von <= bis);
   const einladen = useMutation({
-    mutationFn: () => api.einladen(rolle),
+    mutationFn: () => api.einladen(rolle, rolle === "pruefer" ? { von, bis } : undefined),
     onSuccess: async (e) => {
       setLink(`${window.location.origin}${e.pfad}`);
       await queryClient.invalidateQueries({ queryKey: ["zugaenge"] });
@@ -42,7 +48,10 @@ export function AccessPage() {
           {daten.data?.zugaenge.map((z) => (
             <li key={z.id} className="flex flex-wrap justify-between gap-2 rounded-lg border border-border p-3 text-sm">
               <span className="font-medium">{z.email}</span>
-              <span className="text-muted">{rolleLabel(z.rolle)}</span>
+              <span className="text-muted">
+                {rolleLabel(z.rolle)}
+                {z.zeitraumVon && z.zeitraumBis && ` · ${zeitraumText(z.zeitraumVon, z.zeitraumBis)}`}
+              </span>
             </li>
           ))}
         </ul>
@@ -63,10 +72,33 @@ export function AccessPage() {
               <option value="pruefer">{m.role_pruefer()}</option>
             </select>
           </label>
+          {rolle === "pruefer" && (
+            <>
+              <label className="flex flex-col gap-1.5 font-medium text-sm">
+                {m.export_from()}
+                <input
+                  type="date"
+                  value={von}
+                  onChange={(e) => setVon(e.target.value)}
+                  className="h-9 rounded-md border border-border bg-bg px-3 font-normal"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5 font-medium text-sm">
+                {m.export_to()}
+                <input
+                  type="date"
+                  value={bis}
+                  onChange={(e) => setBis(e.target.value)}
+                  className="h-9 rounded-md border border-border bg-bg px-3 font-normal"
+                />
+              </label>
+            </>
+          )}
           <button
             type="button"
+            disabled={!zeitraumOk}
             onClick={() => einladen.mutate()}
-            className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+            className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
           >
             {m.access_invite()}
           </button>
@@ -84,7 +116,8 @@ export function AccessPage() {
               className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3 text-sm"
             >
               <span>
-                <span className="font-medium">{rolleLabel(e.rolle)}</span> ·{" "}
+                <span className="font-medium">{rolleLabel(e.rolle)}</span>
+                {e.zeitraumVon && e.zeitraumBis && ` (${zeitraumText(e.zeitraumVon, e.zeitraumBis)})`} ·{" "}
                 <span className="text-muted">{zustand(e)}</span>
               </span>
               {!e.eingeloestAm && !e.zurueckgezogenAm && new Date(e.gueltigBis) > new Date() && (

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { ROLLEN } from "../../shared/rollen.ts";
 
 /* Tabellen für Better Auth (Kern), wie in Haben, mit der Rolle am Zugang */
@@ -16,11 +16,18 @@ export const user = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     /** Vorgabe ist die mit den wenigsten Rechten; Inhaber wird nur das erste Konto (Hook in server/auth.ts) */
     role: text("role", { enum: ROLLEN }).notNull().default("pruefer"),
+    /** Nur für Prüfer: der freigegebene Zeitraum (Z1); außerhalb sieht der Zugang nichts */
+    zeitraumVon: date("zeitraum_von"),
+    zeitraumBis: date("zeitraum_bis"),
   },
   // Genau ein Inhaber, auch bei zwei gleichzeitigen Einrichtungen
   (t) => [
     uniqueIndex("user_inhaber_single").on(t.role).where(sql`${t.role} = 'inhaber'`),
     check("user_role", sql`${t.role} in ('inhaber', 'steuerberatung', 'pruefer')`),
+    check(
+      "user_zeitraum",
+      sql`case when ${t.role} = 'pruefer' then ${t.zeitraumVon} is not null and ${t.zeitraumBis} is not null and ${t.zeitraumVon} <= ${t.zeitraumBis} else ${t.zeitraumVon} is null and ${t.zeitraumBis} is null end`,
+    ),
   ],
 );
 
@@ -82,6 +89,8 @@ export const einladungen = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     tokenHash: text("token_hash").notNull().unique(),
     rolle: text("rolle", { enum: ROLLEN }).notNull(),
+    zeitraumVon: date("zeitraum_von"),
+    zeitraumBis: date("zeitraum_bis"),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
     gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
     eingeloestAm: timestamp("eingeloest_am", { withTimezone: true }),
@@ -89,5 +98,12 @@ export const einladungen = pgTable(
     zurueckgezogenAm: timestamp("zurueckgezogen_am", { withTimezone: true }),
   },
   // Einladen lässt sich nur in Rollen ohne Schreibrecht; Inhaber gibt es genau einen
-  (t) => [check("einladungen_rolle", sql`${t.rolle} in ('steuerberatung', 'pruefer')`)],
+  (t) => [
+    check("einladungen_rolle", sql`${t.rolle} in ('steuerberatung', 'pruefer')`),
+    // Ein Prüfer bekommt immer einen Zeitraum, die Steuerberatung nie
+    check(
+      "einladungen_zeitraum",
+      sql`case when ${t.rolle} = 'pruefer' then ${t.zeitraumVon} is not null and ${t.zeitraumBis} is not null and ${t.zeitraumVon} <= ${t.zeitraumBis} else ${t.zeitraumVon} is null and ${t.zeitraumBis} is null end`,
+    ),
+  ],
 );

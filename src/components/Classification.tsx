@@ -25,7 +25,8 @@ export function Classification({
   const vorschlag = useQuery({
     queryKey: ["vorschlag", dokumentId],
     queryFn: () => api.vorschlag(dokumentId),
-    enabled: !einordnung,
+    // Vorschläge gibt es nur für den, der einordnen darf
+    enabled: !einordnung && ich.data?.role === "inhaber",
   });
   const speichern = useMutation({
     mutationFn: (eingabe: Parameters<typeof api.einordnen>[1]) => api.einordnen(dokumentId, eingabe),

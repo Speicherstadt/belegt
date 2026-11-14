@@ -43,7 +43,14 @@ export function createAuth({
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: { enabled: true, minPasswordLength: 12 },
     rateLimit: { enabled: begrenzen, storage: "memory", window: 60, max: 20 },
-    user: { additionalFields: { role: { type: "string", input: false, required: false } } },
+    user: {
+      additionalFields: {
+        role: { type: "string", input: false, required: false },
+        // Zeitraum eines Prüfers als JJJJ-MM-TT; nur der Hook setzt ihn aus der Einladung
+        zeitraumVon: { type: "string", input: false, required: false },
+        zeitraumBis: { type: "string", input: false, required: false },
+      },
+    },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
         // Name, Bild und E-Mail ändert Belegt nicht über Better Auth: das schriebe ohne Akteur und an der Rollenprüfung vorbei
@@ -67,9 +74,16 @@ export function createAuth({
             if (ctx?.path !== "/sign-up/email") throw verboten("Konten entstehen nur über Einrichtung oder Einladung.");
             const token = ctx.headers?.get(EINLADUNG_HEADER);
             if (token) {
-              const rolle = await einloesen(db, token, user.email);
-              if (!rolle) throw verboten("Die Einladung ist ungültig, abgelaufen oder schon eingelöst.");
-              return { data: { ...user, role: rolle satisfies Rolle } };
+              const zugang = await einloesen(db, token, user.email);
+              if (!zugang) throw verboten("Die Einladung ist ungültig, abgelaufen oder schon eingelöst.");
+              return {
+                data: {
+                  ...user,
+                  role: zugang.rolle satisfies Rolle,
+                  zeitraumVon: zugang.zeitraum?.von ?? null,
+                  zeitraumBis: zugang.zeitraum?.bis ?? null,
+                },
+              };
             }
             // Der eindeutige Index user_inhaber_single verhindert zwei Inhaber auch bei gleichzeitiger Einrichtung
             if (await eingerichtet(db))
@@ -93,4 +107,6 @@ export interface Angemeldet {
   id: string;
   email: string;
   role: Rolle;
+  /** Nur beim Prüfer: was er sehen darf */
+  zeitraum?: { von: string; bis: string };
 }

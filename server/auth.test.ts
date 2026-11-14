@@ -95,7 +95,11 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
     expect(res.status).toBe(201);
     const { pfad } = await res.json();
     const token = pfad.split("/").pop();
-    expect(await (await t.anfrage(`/api/einladung/${token}`)).json()).toEqual({ rolle: "steuerberatung" });
+    expect(await (await t.anfrage(`/api/einladung/${token}`)).json()).toEqual({
+      rolle: "steuerberatung",
+      zeitraumVon: null,
+      zeitraumBis: null,
+    });
     expect(await t.sql`select 1 from einladungen where token_hash = ${token}`).toHaveLength(0);
 
     const kanzlei = await t.registrieren("kanzlei@example.org", "ein-langes-passwort", { "x-belegt-einladung": token });
@@ -118,7 +122,11 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
     const zweite = await (
       await t.anfrage(
         "/api/einladungen",
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ rolle: "pruefer" }) },
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ rolle: "pruefer", zeitraum: { von: "2024-01-01", bis: "2024-12-31" } }),
+        },
         inhaber,
       )
     ).json();

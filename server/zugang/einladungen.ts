@@ -25,41 +25,59 @@ const einloesbar = (token: string) =>
 
 export type Einladung = Omit<typeof einladungen.$inferSelect, "tokenHash">;
 
+/** Der Zeitraum, den ein Prüfer sehen darf (Z1), beide Tage eingeschlossen */
+export interface Zeitraum {
+  von: string;
+  bis: string;
+}
+
+export type Zugang = { rolle: "steuerberatung"; zeitraum?: undefined } | { rolle: "pruefer"; zeitraum: Zeitraum };
+
 export async function einladen(
   db: Datenbank,
-  rolle: "steuerberatung" | "pruefer",
+  { rolle, zeitraum }: Zugang,
   akteur: string,
 ): Promise<{ einladung: Einladung; token: string }> {
   const token = randomBytes(32).toString("base64url");
   const [neu] = await mitAkteur(db, akteur, (tx) =>
     tx
       .insert(einladungen)
-      .values({ tokenHash: hash(token), rolle, gueltigBis: new Date(Date.now() + GUELTIG_STUNDEN * 3600_000) })
+      .values({
+        tokenHash: hash(token),
+        rolle,
+        zeitraumVon: zeitraum?.von ?? null,
+        zeitraumBis: zeitraum?.bis ?? null,
+        gueltigBis: new Date(Date.now() + GUELTIG_STUNDEN * 3600_000),
+      })
       .returning(),
   );
   const { tokenHash: _, ...einladung } = neu!;
   return { einladung, token };
 }
 
-export async function offen(db: Datenbank, token: string): Promise<{ rolle: string } | null> {
-  const [e] = await db.select({ rolle: einladungen.rolle }).from(einladungen).where(einloesbar(token));
+export async function offen(
+  db: Datenbank,
+  token: string,
+): Promise<{ rolle: string; zeitraumVon: string | null; zeitraumBis: string | null } | null> {
+  const [e] = await db
+    .select({ rolle: einladungen.rolle, zeitraumVon: einladungen.zeitraumVon, zeitraumBis: einladungen.zeitraumBis })
+    .from(einladungen)
+    .where(einloesbar(token));
   return e ?? null;
 }
 
 /** Löst die Einladung in derselben Anweisung ein, die sie prüft: zwei gleichzeitige Registrierungen bekommen sie nicht beide */
-export async function einloesen(
-  db: Datenbank,
-  token: string,
-  email: string,
-): Promise<"steuerberatung" | "pruefer" | null> {
+export async function einloesen(db: Datenbank, token: string, email: string): Promise<Zugang | null> {
   const [e] = await mitAkteur(db, "system:einladung", (tx) =>
     tx
       .update(einladungen)
       .set({ eingeloestAm: sql`now()`, eingeloestVon: email })
       .where(einloesbar(token))
-      .returning({ rolle: einladungen.rolle }),
+      .returning({ rolle: einladungen.rolle, von: einladungen.zeitraumVon, bis: einladungen.zeitraumBis }),
   );
-  return (e?.rolle as "steuerberatung" | "pruefer" | undefined) ?? null;
+  if (!e) return null;
+  if (e.rolle === "pruefer" && e.von && e.bis) return { rolle: "pruefer", zeitraum: { von: e.von, bis: e.bis } };
+  return e.rolle === "steuerberatung" ? { rolle: "steuerberatung" } : null;
 }
 
 export async function zurueckziehen(db: Datenbank, id: string, akteur: string): Promise<boolean> {
@@ -78,6 +96,8 @@ export async function listen(db: Datenbank) {
     .select({
       id: einladungen.id,
       rolle: einladungen.rolle,
+      zeitraumVon: einladungen.zeitraumVon,
+      zeitraumBis: einladungen.zeitraumBis,
       erstelltAm: einladungen.erstelltAm,
       gueltigBis: einladungen.gueltigBis,
       eingeloestAm: einladungen.eingeloestAm,
@@ -87,7 +107,14 @@ export async function listen(db: Datenbank) {
     .from(einladungen)
     .orderBy(desc(einladungen.erstelltAm));
   const zugaenge = await db
-    .select({ id: user.id, email: user.email, rolle: user.role, erstelltAm: user.createdAt })
+    .select({
+      id: user.id,
+      email: user.email,
+      rolle: user.role,
+      zeitraumVon: user.zeitraumVon,
+      zeitraumBis: user.zeitraumBis,
+      erstelltAm: user.createdAt,
+    })
     .from(user)
     .orderBy(user.createdAt);
   return { einladungen: liste, zugaenge };

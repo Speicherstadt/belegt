@@ -55,7 +55,13 @@ export interface Eintrag extends Dokument {
  */
 export async function listen(
   db: Datenbank,
-  { suche, limit = 50, gruppe = "alle", heute }: { suche?: string; limit?: number; gruppe?: Gruppe; heute: string },
+  {
+    suche,
+    limit = 50,
+    gruppe = "alle",
+    heute,
+    zeitraum,
+  }: { suche?: string; limit?: number; gruppe?: Gruppe; heute: string; zeitraum?: { von: string; bis: string } },
 ): Promise<Eintrag[]> {
   const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
   const zeilen = await db.execute<{
@@ -75,6 +81,8 @@ export async function listen(
       left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
       left join suchtexte st on st.dokument_id = d.id
      where ${gruppenBedingung(gruppe, heute)}
+       and (${zeitraum?.von ?? null}::date is null
+            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
             or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""}))
      order by d.eingegangen_am desc, d.id desc

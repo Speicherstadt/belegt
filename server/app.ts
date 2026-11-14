@@ -42,6 +42,7 @@ import {
   vorschlag,
 } from "./mail/regeln.ts";
 import { einladen, offen as einladungOffen, listen as zugaengeListen, zurueckziehen } from "./zugang/einladungen.ts";
+import { dokumentImPfad, imZeitraum, prueferDarf, prueferZeitraum, schnitt } from "./zugang/pruefer.ts";
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
 const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
@@ -53,6 +54,10 @@ const Id = z.uuid();
 
 /** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
 const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
+const ZugangEingabe = z.discriminatedUnion("rolle", [
+  z.object({ rolle: z.literal("steuerberatung") }),
+  z.object({ rolle: z.literal("pruefer"), zeitraum: Zeitraum }),
+]);
 
 const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
 
@@ -109,10 +114,13 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
         return next();
       const sitzung = await auth.api.getSession({ headers: c.req.raw.headers });
       if (!sitzung) return c.json({ fehler: "Nicht angemeldet" }, 401);
-      const nutzer = {
+      const u = sitzung.user as { role?: Rolle; zeitraumVon?: unknown; zeitraumBis?: unknown };
+      const role = u.role ?? "pruefer";
+      const nutzer: Angemeldet = {
         id: sitzung.user.id,
         email: sitzung.user.email,
-        role: (sitzung.user as { role?: Rolle }).role ?? "pruefer",
+        role,
+        ...(role === "pruefer" ? { zeitraum: prueferZeitraum(u.zeitraumVon, u.zeitraumBis) } : {}),
       };
       const schreibt = c.req.method !== "GET" && c.req.method !== "HEAD";
       // Einzige Ausnahme: Die Steuerberatung bestätigt als zweite Person eine Löschung, die der Inhaber beantragt hat
@@ -124,6 +132,13 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
         return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
       if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {
         return c.json({ fehler: "Anfrage von einer fremden Seite" }, 403);
+      }
+      if (nutzer.zeitraum) {
+        if (!prueferDarf(c.req.method, c.req.path)) return c.json({ fehler: "Nicht für den Prüferzugang" }, 403);
+        // Ein Dokument außerhalb des Zeitraums gibt es für den Prüfer nicht
+        const id = dokumentImPfad(c.req.path);
+        if (id && !(await imZeitraum(umgebung.db, [id], nutzer.zeitraum)).has(id))
+          return c.json({ fehler: "Nicht gefunden" }, 404);
       }
       c.set("nutzer", nutzer);
       return next();
@@ -138,9 +153,10 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
     });
 
     app.post("/api/einladungen", async (c) => {
-      const rolle = z.enum(["steuerberatung", "pruefer"]).safeParse((await c.req.json().catch(() => null))?.rolle);
-      if (!rolle.success) return c.json({ fehler: "Rolle steuerberatung oder pruefer" }, 400);
-      const { einladung, token } = await einladen(umgebung.db, rolle.data, akteur(c.get("nutzer")));
+      const zugang = ZugangEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!zugang.success || (zugang.data.rolle === "pruefer" && zugang.data.zeitraum.von > zugang.data.zeitraum.bis))
+        return c.json({ fehler: "Rolle steuerberatung, oder pruefer mit zeitraum (von, bis)" }, 400);
+      const { einladung, token } = await einladen(umgebung.db, zugang.data, akteur(c.get("nutzer")));
       // Das Token steht nur in dieser Antwort; gespeichert ist nur sein Hash
       return c.json({ ...einladung, pfad: `/einladung/${token}` }, 201);
     });
@@ -172,7 +188,15 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
     app.get("/api/dokumente", async (c) => {
       const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
       const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
-      return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit, gruppe, heute: heute() }));
+      return c.json(
+        await listen(umgebung.db, {
+          suche: c.req.query("suche"),
+          limit,
+          gruppe,
+          heute: heute(),
+          zeitraum: c.get("nutzer").zeitraum,
+        }),
+      );
     });
 
     app.get("/api/dokumente/:id", async (c) => {
@@ -260,7 +284,21 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
     app.get("/api/dokumente/:id/mail", async (c) => {
       const id = Id.safeParse(c.req.param("id"));
       const mail = id.success ? await mailZuDokument(umgebung.db, id.data) : null;
-      return mail ? c.json(mail) : c.json({ fehler: "Keine Mail" }, 404);
+      if (!mail) return c.json({ fehler: "Keine Mail" }, 404);
+      const zeitraum = c.get("nutzer").zeitraum;
+      if (!zeitraum) return c.json(mail);
+      // Der Prüfer sieht von Unterhaltung, Anhängen und Mail nur, was im Zeitraum liegt
+      const sichtbar = await imZeitraum(
+        umgebung.db,
+        [...mail.unterhaltung.map((u) => u.dokumentId), ...mail.anhaenge.map((a) => a.dokumentId), mail.ausMail ?? ""],
+        zeitraum,
+      );
+      return c.json({
+        ...mail,
+        unterhaltung: mail.unterhaltung.filter((u) => sichtbar.has(u.dokumentId)),
+        anhaenge: mail.anhaenge.filter((a) => sichtbar.has(a.dokumentId)),
+        ausMail: mail.ausMail && sichtbar.has(mail.ausMail) ? mail.ausMail : null,
+      });
     });
 
     app.get("/api/dokumente/:id/vorschlag", async (c) => {
@@ -360,10 +398,14 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
       const zeitraum = Zeitraum.safeParse({ von: c.req.query("von"), bis: c.req.query("bis") });
       if (!zeitraum.success || zeitraum.data.von > zeitraum.data.bis)
         return c.json({ fehler: "Zeitraum mit von und bis (JJJJ-MM-TT) angeben" }, 400);
-      const stream = await z3Export(umgebung, zeitraum.data);
+      // Der Prüfer bekommt nur den Teil, der in seinem Zeitraum liegt
+      const freigabe = c.get("nutzer").zeitraum;
+      const teil = freigabe ? schnitt(zeitraum.data, freigabe) : zeitraum.data;
+      if (!teil) return c.json({ fehler: "Der Zeitraum liegt außerhalb der Freigabe" }, 403);
+      const stream = await z3Export(umgebung, teil);
       return c.body(stream, 200, {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="belegt-z3-${zeitraum.data.von}-${zeitraum.data.bis}.zip"`,
+        "Content-Disposition": `attachment; filename="belegt-z3-${teil.von}-${teil.bis}.zip"`,
         "X-Content-Type-Options": "nosniff",
       });
     });

@@ -226,5 +226,8 @@
   "export_from": "Von",
   "export_to": "Bis",
   "export_download": "ZIP herunterladen",
-  "export_invalid": "Der Beginn muss vor dem Ende liegen."
+  "export_invalid": "Der Beginn muss vor dem Ende liegen.",
+  "export_freigabe": "Freigegeben für deinen Zugang: {von} bis {bis}.",
+  "access_period": "Zeitraum {von} bis {bis}",
+  "invite_period": "Freigegeben ist der Zeitraum {von} bis {bis}; Belegt zeigt nur Dokumente aus dieser Zeit."
 }

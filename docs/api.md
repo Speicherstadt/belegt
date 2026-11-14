@@ -4,7 +4,7 @@ Alles unter `/api` außer `/api/auth`, `/api/status` und `/api/einladung/:token`
 Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
 Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
 Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
-lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Schreibt ein
+lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Ein Prüfer liest nur Dokumente, Export und Prüfung, und nur in seinem Zeitraum (`404` für ein Dokument außerhalb, [`pruefung.md`](pruefung.md)). Schreibt ein
 Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Site`), antwortet Belegt ebenfalls mit
 `403`. Das Audit-Log nennt als Akteur `nutzer:<E-Mail>`.
 
@@ -13,7 +13,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 | `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` | Einrichten, Anmelden, Abmelden (Better Auth) |
 | `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; ohne Sitzung |
 | `GET /api/ich` | der angemeldete Zugang mit Rolle |
-| `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung` oder `pruefer`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
+| `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung`, oder `pruefer` mit `zeitraum`: `{von, bis}`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
 | `GET /api/einladung/:token` | öffentlich: ob ein Link noch gilt und für welche Rolle |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail und über Teile von Dateiname und Titel |

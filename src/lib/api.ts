@@ -35,6 +35,8 @@ export interface Ich {
   id: string;
   email: string;
   role: Rolle;
+  /** Nur beim Prüfer: der freigegebene Zeitraum */
+  zeitraum?: { von: string; bis: string };
 }
 
 export interface Dokument {
@@ -129,10 +131,19 @@ export interface Uebersicht {
 }
 
 export interface Zugaenge {
-  zugaenge: { id: string; email: string; rolle: Rolle; erstelltAm: string }[];
+  zugaenge: {
+    id: string;
+    email: string;
+    rolle: Rolle;
+    zeitraumVon: string | null;
+    zeitraumBis: string | null;
+    erstelltAm: string;
+  }[];
   einladungen: {
     id: string;
     rolle: Rolle;
+    zeitraumVon: string | null;
+    zeitraumBis: string | null;
     erstelltAm: string;
     gueltigBis: string;
     eingeloestAm: string | null;
@@ -165,15 +176,21 @@ export const api = {
       ...json({ email, password: passwort, name: email }),
       headers: { "content-type": "application/json", "x-belegt-einrichtungscode": code },
     }),
-  einladung: (token: string) => aufruf<{ rolle: Rolle }>(`/api/einladung/${encodeURIComponent(token)}`),
+  einladung: (token: string) =>
+    aufruf<{ rolle: Rolle; zeitraumVon: string | null; zeitraumBis: string | null }>(
+      `/api/einladung/${encodeURIComponent(token)}`,
+    ),
   einladungAnnehmen: (token: string, email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-up/email", {
       ...json({ email, password: passwort, name: email }),
       headers: { "content-type": "application/json", "x-belegt-einladung": token },
     }),
   zugaenge: () => aufruf<Zugaenge>("/api/zugaenge"),
-  einladen: (rolle: "steuerberatung" | "pruefer") =>
-    aufruf<{ id: string; pfad: string }>("/api/einladungen", json({ rolle })),
+  einladen: (rolle: "steuerberatung" | "pruefer", zeitraum?: { von: string; bis: string }) =>
+    aufruf<{ id: string; pfad: string }>(
+      "/api/einladungen",
+      json(rolle === "pruefer" ? { rolle, zeitraum } : { rolle }),
+    ),
   zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),

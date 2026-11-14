@@ -3,6 +3,13 @@
 Unter **Prüfung** prüft Belegt Hash-Kette, Kopf und Siegel; „Auch alle Dateien prüfen“ liest zusätzlich jedes
 Original und vergleicht es mit seinem Hash.
 
+## Prüferzugang (Z1)
+
+Unter **Zugänge** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
+Der Prüfer liest nur: Eingang, Archiv und Prüfung, und von den Dokumenten nur die, deren Tag (Entstanden, sonst
+Eingang) im Zeitraum liegt. Seinen Z3-Export schneidet Belegt auf diesen Zeitraum zu. Fristen, Sperren, Löschungen,
+Regeln und Postfächer sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein.
+
 ## Datenträger für die Betriebsprüfung (Z3)
 
 Für die Datenträgerüberlassung (GoBD Rz. 167) wählst du einen Zeitraum und lädst ein ZIP herunter. Ein Dokument

@@ -1,12 +1,14 @@
 import { useId, useState } from "react";
 import { exportUrl } from "../lib/api.ts";
+import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
 /** Datenträgerüberlassung (Z3): Zeitraum wählen, das ZIP lädt der Browser direkt vom Server */
-export function Export() {
+export function Export({ freigabe }: { freigabe?: { von: string; bis: string } }) {
   const jahr = String(new Date().getFullYear() - 1);
-  const [von, setVon] = useState(`${jahr}-01-01`);
-  const [bis, setBis] = useState(`${jahr}-12-31`);
+  // Der Prüfer beginnt mit seinem Zeitraum; der Server schneidet ohnehin darauf zu
+  const [von, setVon] = useState(freigabe?.von ?? `${jahr}-01-01`);
+  const [bis, setBis] = useState(freigabe?.bis ?? `${jahr}-12-31`);
   const id = useId();
   const gueltig = !!von && !!bis && von <= bis;
   return (
@@ -15,6 +17,9 @@ export function Export() {
         {m.export_title()}
       </h2>
       <p className="m-0 text-muted text-sm">{m.export_intro()}</p>
+      {freigabe && (
+        <p className="m-0 text-sm">{m.export_freigabe({ von: tag(freigabe.von), bis: tag(freigabe.bis) })}</p>
+      )}
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
           {m.export_from()}

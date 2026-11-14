@@ -226,5 +226,8 @@
   "export_from": "From",
   "export_to": "To",
   "export_download": "Download ZIP",
-  "export_invalid": "The start must be before the end."
+  "export_invalid": "The start must be before the end.",
+  "export_freigabe": "Released for your access: {von} to {bis}.",
+  "access_period": "Period {von} to {bis}",
+  "invite_period": "The period {von} to {bis} is released; Belegt only shows documents from that time."
 }

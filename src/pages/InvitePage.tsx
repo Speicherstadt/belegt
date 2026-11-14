@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
+import { tag } from "../lib/format.ts";
 import { rolleLabel } from "../lib/rollen.ts";
 import { m } from "../paraglide/messages.js";
 
@@ -43,6 +44,11 @@ export function InvitePage() {
         {einladung.data && (
           <form onSubmit={absenden} className="flex flex-col gap-4">
             <p className="m-0 text-muted text-sm">{m.invite_intro({ rolle: rolleLabel(einladung.data.rolle) })}</p>
+            {einladung.data.zeitraumVon && einladung.data.zeitraumBis && (
+              <p className="m-0 text-sm">
+                {m.invite_period({ von: tag(einladung.data.zeitraumVon), bis: tag(einladung.data.zeitraumBis) })}
+              </p>
+            )}
             <label className="flex flex-col gap-1.5 font-medium text-sm">
               {m.login_email()}
               <input name="email" type="email" required autoComplete="email" className={feld} />
