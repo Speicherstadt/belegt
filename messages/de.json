@@ -220,5 +220,11 @@
   "mailboxes_result": "{neu} neu, {doppelt} schon vorhanden",
   "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}",
   "audit_check_files": "Auch alle Dateien prüfen",
-  "audit_files_checked": "{anzahl} Dateien gegen ihren Hash geprüft."
+  "audit_files_checked": "{anzahl} Dateien gegen ihren Hash geprüft.",
+  "export_title": "Datenträger für die Betriebsprüfung (Z3)",
+  "export_intro": "Ein ZIP mit den Originalen des Zeitraums, Tabellen zu Dokumenten, Mails und Protokoll, index.xml nach dem Beschreibungsstandard, Prüfwert und Prüfsummen.",
+  "export_from": "Von",
+  "export_to": "Bis",
+  "export_download": "ZIP herunterladen",
+  "export_invalid": "Der Beginn muss vor dem Ende liegen."
 }

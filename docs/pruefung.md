@@ -1,0 +1,23 @@
+# Prüfung
+
+Unter **Prüfung** prüft Belegt Hash-Kette, Kopf und Siegel; „Auch alle Dateien prüfen“ liest zusätzlich jedes
+Original und vergleicht es mit seinem Hash.
+
+## Datenträger für die Betriebsprüfung (Z3)
+
+Für die Datenträgerüberlassung (GoBD Rz. 167) wählst du einen Zeitraum und lädst ein ZIP herunter. Ein Dokument
+gehört zum Zeitraum, wenn der Tag seiner Einordnung („Entstanden“) darin liegt, sonst der Tag des Eingangs. Gelöschte
+Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prüfer dürfen ebenfalls exportieren.
+
+| Datei | Inhalt |
+| --- | --- |
+| `dokumente/<ID>/<Dateiname>` | die Originale, Byte für Byte |
+| `dokumente.csv` | je Dokument Typ, Größe, SHA-256, Eingang, Quelle, Einordnung, Frist und Pfad im ZIP |
+| `mails.csv` | Kopf der Mails (Message-ID, Antwort auf, Von, An, Betreff, Gesendet) |
+| `protokoll.csv` | Einträge des Audit-Logs im Zeitraum, je mit dem Hash des Vorgängers und dem eigenen |
+| `index.xml` | Beschreibung der drei Tabellen nach dem Beschreibungsstandard |
+| `pruefwert.txt` | Nummer und Hash des letzten Eintrags im Audit-Log beim Export |
+| `pruefsummen.sha256` | SHA-256 jeder Datei im ZIP, prüfbar mit `sha256sum -c pruefsummen.sha256` |
+
+Die Tabellen sind UTF-8 mit BOM, Semikolon als Trenner und CRLF als Zeilenende. Fehlt ein Original oder passt es
+nicht mehr zu seinem Hash, bricht der Download ab; die Prüfung zeigt dann, welche Datei es ist.

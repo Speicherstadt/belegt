@@ -16,6 +16,7 @@ import {
   sperrenListen,
   uebersicht,
 } from "./einordnung/einordnung.ts";
+import { z3Export } from "./export/z3.ts";
 import {
   beantragen,
   bestaetigen,
@@ -51,6 +52,8 @@ export const MAX_UPLOAD = 100 * 1024 * 1024;
 const Id = z.uuid();
 
 /** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
+const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
+
 const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
 
 /** Dateiname für filename* nach RFC 8187: encodeURIComponent lässt ' ( ) * stehen, die dort nicht erlaubt sind */
@@ -351,6 +354,18 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
       const id = Id.safeParse(c.req.param("id"));
       const dokument = id.success ? await laden(umgebung.db, id.data) : null;
       return dokument ? c.json(await verlauf(umgebung.db, dokument.id)) : c.json({ fehler: "Nicht gefunden" }, 404);
+    });
+
+    app.get("/api/export", async (c) => {
+      const zeitraum = Zeitraum.safeParse({ von: c.req.query("von"), bis: c.req.query("bis") });
+      if (!zeitraum.success || zeitraum.data.von > zeitraum.data.bis)
+        return c.json({ fehler: "Zeitraum mit von und bis (JJJJ-MM-TT) angeben" }, 400);
+      const stream = await z3Export(umgebung, zeitraum.data);
+      return c.body(stream, 200, {
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename="belegt-z3-${zeitraum.data.von}-${zeitraum.data.bis}.zip"`,
+        "X-Content-Type-Options": "nosniff",
+      });
     });
 
     app.get("/api/pruefung", async (c) => {

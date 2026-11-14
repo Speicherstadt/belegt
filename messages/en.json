@@ -220,5 +220,11 @@
   "mailboxes_result": "{neu} new, {doppelt} already there",
   "mailboxes_failed": "Mailbox failed: {meldung}",
   "audit_check_files": "Also check all files",
-  "audit_files_checked": "{anzahl} files checked against their hash."
+  "audit_files_checked": "{anzahl} files checked against their hash.",
+  "export_title": "Data medium for the tax audit (Z3)",
+  "export_intro": "A ZIP with the originals of the period, tables of documents, mails and log, index.xml following the description standard, check value and checksums.",
+  "export_from": "From",
+  "export_to": "To",
+  "export_download": "Download ZIP",
+  "export_invalid": "The start must be before the end."
 }

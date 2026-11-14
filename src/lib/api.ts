@@ -236,4 +236,7 @@ export const api = {
     aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number }>(`/api/pruefung${dateien ? "?dateien=1" : ""}`),
 };
 
+export const exportUrl = (von: string, bis: string) =>
+  `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
+
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

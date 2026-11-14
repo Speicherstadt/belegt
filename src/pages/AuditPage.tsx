@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Export } from "../components/Export.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
@@ -63,6 +64,7 @@ export function AuditPage() {
           </table>
         </section>
       )}
+      <Export />
     </div>
   );
 }
