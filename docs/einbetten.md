@@ -15,6 +15,7 @@ Zugänge entstehen weiter nur mit Einladung. Wer schon ein Konto hat, verbindet 
 anmelden, unten links „Mit … verbinden“. Danach meldet „Anmelden mit …“ auf der Anmeldeseite direkt an; Belegt erkennt
 die Person an ihrer festen Kennung beim Anbieter (`sub`), nicht an der Adresse. Eine Verknüpfung allein über die
 Adresse gibt es nicht: Belegt bestätigt keine Adressen, und wer einen Einladungslink öffnet, wählt seine Adresse selbst.
+Ob der Anbieter die Adresse als bestätigt meldet, spielt deshalb keine Rolle. Tokens des Anbieters speichert Belegt nicht.
 
 ## Einbetten
 

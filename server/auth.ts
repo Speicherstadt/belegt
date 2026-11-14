@@ -33,6 +33,11 @@ export interface OidcKonfig {
 }
 export const OIDC_ANBIETER = "oidc";
 
+/** Ein Konto ohne Access-, Refresh- und ID-Token, beim Anlegen und bei jeder Aktualisierung */
+function ohneTokens<T extends object>(account: T): T {
+  return { ...account, accessToken: null, refreshToken: null, idToken: null };
+}
+
 export function createAuth({
   db,
   secret,
@@ -58,7 +63,16 @@ export function createAuth({
     // Mit dem Anbieter verbindet nur, wer angemeldet ist (link-social): Belegt bestätigt keine Adressen, und wer einen
     // Einladungslink öffnet, wählt seine Adresse selbst; eine Verknüpfung über die Adresse wäre daher unsicher. Danach
     // meldet der Anbieter über sein sub an. Neue Konten entstehen weiter nur mit Einladung (Hook unten).
-    account: { accountLinking: { enabled: true, disableImplicitLinking: true, allowDifferentEmails: true } },
+    // Ob der Anbieter die Adresse bestätigt, zählt deshalb auch nicht (Microsoft Entra sendet email_verified gar nicht):
+    // trustedProviders erlaubt das Verbinden ohne, disableImplicitLinking verbietet weiter jede Verknüpfung über die Adresse.
+    account: {
+      accountLinking: {
+        enabled: true,
+        disableImplicitLinking: true,
+        allowDifferentEmails: true,
+        trustedProviders: [OIDC_ANBIETER],
+      },
+    },
     plugins: oidc
       ? [
           genericOAuth({
@@ -105,6 +119,11 @@ export function createAuth({
       }),
     },
     databaseHooks: {
+      // Tokens des Anbieters braucht Belegt nach der Anmeldung nicht; gespeichert wären sie ein Geheimnis im Klartext
+      account: {
+        create: { before: async (account) => ({ data: ohneTokens(account) }) },
+        update: { before: async (account) => ({ data: ohneTokens(account) }) },
+      },
       user: {
         create: {
           before: async (user, ctx) => {
