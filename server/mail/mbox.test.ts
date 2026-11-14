@@ -21,6 +21,21 @@ describe("mboxAufteilen", () => {
     expect(text(mboxAufteilen(archiv)[0]!)).toBe("Subject: Zitat\n\nFrom damals\n>From noch früher\n");
   });
 
+  it("gibt gleichen Mails gleiche Bytes, auch der letzten mit Leerzeile am Dateiende (RFC 4155)", () => {
+    // So schreibt etwa Pythons mailbox: nach jeder Mail eine Leerzeile, auch nach der letzten
+    const mail = "Subject: X\n\n>From hier\nText\n";
+    const lf = `From MAILER-DAEMON Sat Nov 14 12:06:33 2026\n${mail}\n`.repeat(2);
+    expect(mboxAufteilen(Buffer.from(lf, "latin1")).map(text)).toEqual([
+      "Subject: X\n\nFrom hier\nText\n",
+      "Subject: X\n\nFrom hier\nText\n",
+    ]);
+    const crlf = lf.replaceAll("\n", "\r\n");
+    expect(mboxAufteilen(Buffer.from(crlf, "latin1")).map(text)).toEqual([
+      "Subject: X\r\n\r\nFrom hier\r\nText\r\n",
+      "Subject: X\r\n\r\nFrom hier\r\nText\r\n",
+    ]);
+  });
+
   it("lässt Bytes außerhalb von ASCII unverändert", () => {
     const bytes = new Uint8Array([...Buffer.from("From a@x Tue Nov  3 08:12:04 2026\n\n"), 0xc3, 0xbc, 0xff, 0x0a]);
     expect([...mboxAufteilen(bytes)[0]!]).toEqual([0x0a, 0xc3, 0xbc, 0xff, 0x0a]);
