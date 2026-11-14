@@ -1,8 +1,10 @@
 # Schnittstelle
 
-Alles unter `/api` außer `/api/auth` und `/api/status` verlangt eine Sitzung (Cookie von Better Auth). Das erste
-Konto (`POST /api/auth/sign-up/email`) ist der Inhaber; jede weitere Registrierung lehnt Belegt ab, weitere Zugänge
-kommen per Einladung. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Schreibt ein
+Alles unter `/api` außer `/api/auth`, `/api/status` und `/api/einladung/:token` verlangt eine Sitzung (Cookie von
+Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
+Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
+Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
+lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Schreibt ein
 Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Site`), antwortet Belegt ebenfalls mit
 `403`. Das Audit-Log nennt als Akteur `nutzer:<E-Mail>`.
 
