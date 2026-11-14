@@ -10,7 +10,9 @@ COPY . .
 # Danach nur die Laufzeitabhängigkeiten; ohne Skripte, denn postinstall (Paraglide) braucht Entwicklungswerkzeuge
 RUN bun run build \
  && rm -rf node_modules \
- && bun install --frozen-lockfile --production --ignore-scripts
+ && bun install --frozen-lockfile --production --ignore-scripts \
+ # Beispieldaten von pst-extractor (fast 50 MB) gehören nicht ins Image
+ && rm -rf node_modules/pst-extractor/example
 
 FROM docker.io/oven/bun:1.4.4-slim
 # tesseract-ocr mit Deutsch und Englisch: Texterkennung für Scans; poppler-utils: pdftoppm rastert gescannte PDFs.

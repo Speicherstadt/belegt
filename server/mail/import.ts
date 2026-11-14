@@ -3,8 +3,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import { dokumente, mailAnhaenge, mails } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { aufnehmen } from "../dokumente/dokumente.ts";
 import { emlLesen } from "./eml.ts";
 import { mboxAufteilen } from "./mbox.ts";
+import { istPst, pstMails } from "./pst.ts";
 
 /** Ein MBOX-Archiv beginnt mit einer From-Zeile (RFC 4155), eine einzelne Mail nicht */
 const istMbox = (bytes: Uint8Array) => Buffer.from(bytes.subarray(0, 5)).toString("latin1") === "From ";
@@ -23,6 +25,8 @@ export interface Ergebnis {
   neu: string[];
   /** schon vorhanden (gleiche Rohdaten): nicht doppelt aufgenommen */
   doppelt: string[];
+  /** Bei einer Outlook-Datei (PST, OST) das Dokument der Datei selbst */
+  pst?: string;
 }
 
 /**
@@ -90,9 +94,20 @@ export async function mailAufnehmen(
 }
 
 /** Eine .eml oder ein MBOX-Archiv: jede Mail für sich, in ihrer Reihenfolge */
-export async function importieren(umgebung: Umgebung, bytes: Uint8Array, akteur: string): Promise<Ergebnis> {
+export async function importieren(
+  umgebung: Umgebung,
+  bytes: Uint8Array,
+  akteur: string,
+  dateiname: string | null = null,
+): Promise<Ergebnis> {
   const ergebnis: Ergebnis = { neu: [], doppelt: [] };
-  for (const roh of istMbox(bytes) ? mboxAufteilen(bytes) : [bytes]) {
+  if (istPst(bytes)) {
+    // Die PST selbst ist das Original; die Mails daraus sind aus ihren Feldern gebaut (pst.ts)
+    const original = await aufnehmen(umgebung, { bytes, dateiname, quelle: "upload", akteur });
+    ergebnis.pst = original.id;
+  }
+  const mails = istPst(bytes) ? pstMails(bytes) : istMbox(bytes) ? mboxAufteilen(bytes) : [bytes];
+  for (const roh of mails) {
     const { id, neu } = await mailAufnehmen(umgebung, roh, "mail", akteur);
     (neu ? ergebnis.neu : ergebnis.doppelt).push(id);
   }

@@ -62,6 +62,15 @@ Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der T
 einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
 und Ausschlüsse mit Minus.
 
+## Outlook-Datendateien (PST, OST)
+
+„Mails importieren“ nimmt auch eine PST oder OST aus Outlook. Die Datei selbst kommt unverändert als eigenes Dokument
+ins Archiv; sie ist das Original. Outlook speichert Mails darin nicht als MIME, sondern als Felder; Belegt baut aus jeder
+Mail eine .eml mit den Kopfzeilen, wie sie beim Empfang ankamen (sonst aus Absender, Empfängern, Betreff und Datum),
+mit Text, HTML und Anhängen, und nimmt sie wie jede andere Mail auf. Termine, Kontakte und Aufgaben übernimmt Belegt
+nicht. Dieselbe Datei ein zweites Mal ergibt dieselben .eml, also keine doppelten Mails. Größer als 100 MB darf die
+Datei nicht sein; eine größere teilst du in Outlook auf.
+
 ## SMTP-Journal
 
 Statt Postfächer abzurufen, kann der Mailserver jede Mail zusätzlich per SMTP an Belegt schicken (Journal, etwa per

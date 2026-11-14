@@ -106,7 +106,7 @@ export function DocumentList({
               ref={mailEingabe}
               type="file"
               multiple
-              accept=".eml,.mbox,message/rfc822,application/mbox"
+              accept=".eml,.mbox,.pst,.ost,message/rfc822,application/mbox"
               className="sr-only"
               tabIndex={-1}
               aria-hidden="true"

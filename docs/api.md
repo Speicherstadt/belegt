@@ -31,7 +31,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/dokumente/:id/datei` | das Original; `409`, wenn die Datei fehlt oder ihr Hash nicht mehr stimmt |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
 | `GET /api/dokumente?gruppe=offen\|pflicht\|freiwillig\|frei\|loeschbar\|geloescht` | nur der Eingang, eine Art der Aufbewahrung, was gelöscht werden darf, oder die Löschnachweise; ohne `gruppe` keine gelöschten |
-| `POST /api/mails` (multipart, Feld `datei`: `.eml` oder MBOX) | nimmt Mails samt Anhängen auf; Antwort `neu` und `doppelt` (Dokument-IDs) |
+| `POST /api/mails` (multipart, Feld `datei`: `.eml`, MBOX, PST oder OST) | nimmt Mails samt Anhängen auf; Antwort `neu` und `doppelt` (Dokument-IDs), bei PST/OST dazu `pst` (das Dokument der Datei) |
 | `GET /api/dokumente/:id/mail` | Kopf, Text, Anhänge und Unterhaltung; für einen Anhang mit `ausMail` |
 | `GET /api/dokumente/:id/vorschlag` | `vorschlag`: die erste passende aktive Regel oder `null`; `erechnung`: Kopfdaten einer erkannten E-Rechnung oder `null` |
 | `GET /api/dokumente/:id/inhalt` | Was der Worker gelesen hat: `erechnung` (Beträge in Cent), `textLaenge`, `fehler`; `null`, solange nichts gelesen ist |

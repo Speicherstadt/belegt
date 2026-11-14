@@ -26,7 +26,12 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
     async (c) => {
       const datei = (await c.req.formData()).get("datei");
       if (!(datei instanceof File)) return c.json({ fehler: "Feld „datei“ fehlt (.eml oder MBOX)" }, 400);
-      const ergebnis = await importieren(umgebung, new Uint8Array(await datei.arrayBuffer()), akteur(c.get("nutzer")));
+      const ergebnis = await importieren(
+        umgebung,
+        new Uint8Array(await datei.arrayBuffer()),
+        akteur(c.get("nutzer")),
+        datei.name || null,
+      );
       return c.json(ergebnis, 201);
     },
   );
