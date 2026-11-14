@@ -157,6 +157,30 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
     expect(await suche("Lagerhalle")).toEqual([alt.id]);
   });
 
+  it("hält nichts fest, wenn die Warteschlange voll ist oder der Speicher kurz fehlt", async () => {
+    const d = await hoch(cfb("Workbook"), "warten.xls");
+    const voll = dienst(() => new Response("", { status: 429 }));
+    expect(await ansichtenErzeugen(t, "http://vorschau", { abfragen: voll.abfragen })).toMatchObject({
+      erzeugt: 0,
+      fehler: 0,
+      meldung: "Vorschau-Dienst ausgelastet (429)",
+    });
+    const ohneSpeicher = { db: t.db, speicher: { ...t.speicher, laden: () => Promise.reject(new Error("S3 weg")) } };
+    expect(await ansichtenErzeugen(ohneSpeicher, "http://vorschau", { abfragen: voll.abfragen })).toMatchObject({
+      erzeugt: 0,
+      fehler: 0,
+      meldung: "Speicher nicht erreichbar",
+    });
+    expect(await t.sql`select 1 from ansichten where dokument_id = ${d.id}`).toHaveLength(0);
+    const pdf = await pdfMit("Später umgewandelt");
+    expect(
+      await ansichtenErzeugen(t, "http://vorschau", { abfragen: dienst(() => new Response(pdf)).abfragen }),
+    ).toEqual({
+      erzeugt: 1,
+      fehler: 0,
+    });
+  });
+
   it("hält fest, was nicht umwandelbar ist, und fragt dafür nicht wieder", async () => {
     const kaputt = await hoch(cfb("PowerPoint Document"), "kaputt.ppt");
     const d = dienst(() => new Response("Fehler beim Umwandeln", { status: 400 }));
@@ -182,6 +206,37 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
     // Auch ein Worker, der gerade umwandelt, bringt sie nicht zurück
     await t.sql`insert into ansichten (dokument_id, pdf) values (${d.id}, ${Buffer.from(pdf)})`;
     expect(await t.sql`select 1 from ansichten where dokument_id = ${d.id}`).toHaveLength(0);
+  });
+
+  it("löscht Ansicht und Text auch, wenn der Worker sie gerade schreibt, während die Löschung bestätigt wird", async () => {
+    const d = await hoch(cfbDatei([{ name: "Workbook", typ: 2, daten: strToU8("nebenläufig") }]), "liste2.xls");
+    await als(`/api/dokumente/${d.id}/einordnung`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ art: "frei", entstanden: "2026-01-02" }),
+    });
+    // Der Worker hat geschrieben, aber noch nicht abgeschlossen (READ COMMITTED: die Löschung sieht die Zeilen nicht)
+    let abschliessen = () => {};
+    let geschrieben = () => {};
+    const istGeschrieben = new Promise<void>((r) => {
+      geschrieben = r;
+    });
+    const worker = t.sql.begin(async (tx) => {
+      await tx`insert into ansichten (dokument_id, pdf) values (${d.id}, ${Buffer.from("%PDF-")})`;
+      await tx`insert into inhalte (dokument_id, text) values (${d.id}, 'Inventur Sägewerk')`;
+      geschrieben();
+      await new Promise<void>((r) => {
+        abschliessen = r;
+      });
+    });
+    await istGeschrieben;
+    const loeschung = als(`/api/dokumente/${d.id}/loeschung`, { method: "POST" });
+    await new Promise((r) => setTimeout(r, 300));
+    abschliessen();
+    await worker;
+    expect((await loeschung).status).toBe(201);
+    expect(await t.sql`select 1 from ansichten where dokument_id = ${d.id}`).toHaveLength(0);
+    expect(await t.sql`select 1 from inhalte where dokument_id = ${d.id}`).toHaveLength(0);
   });
 
   it("hält eine Datei fest, an der der Dienst sein Zeitlimit überschreitet, statt alle späteren aufzuhalten", async () => {
