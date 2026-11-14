@@ -18,7 +18,10 @@ services:
       retries: 20
 
   server:
-    build: .
+    build:
+      context: .
+      # Docker sucht sonst nach Dockerfile; Podman fände Containerfile auch so
+      dockerfile: Containerfile
     image: belegt:lokal
     restart: unless-stopped
     depends_on:
