@@ -46,6 +46,8 @@ async function s3Server() {
         if (req.headers["content-md5"] !== createHash("md5").update(body).digest("base64"))
           return fehler(400, "BadDigest");
         const bis = Date.parse(/<RetainUntilDate>([^<]+)</.exec(body.toString())?.[1] ?? "");
+        // Wie AWS: eine Sperre bis in die Vergangenheit lehnt der Server ab
+        if (bis <= Date.now()) return fehler(400, "InvalidArgument");
         if (bis < aktuell.sperre) return fehler(403, "AccessDenied");
         aktuell.sperre = bis;
         return res.end();
@@ -190,5 +192,22 @@ describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", ()
     expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
     expect(s.objekte.get(schluessel(d.sha256))!.at(-1)!.sperre).toBe(Date.parse("2036-12-31T23:00:00Z"));
     expect(await t.sql`select bis::text from objektsperren`).toEqual([{ bis: "2036-12-31" }]);
+  });
+
+  it("sperrt nichts, dessen Frist schon abgelaufen ist, und versucht es nicht jede Minute neu", async () => {
+    const speicher = s3Speicher({ ...k, sperreTage: 0 });
+    const bytes = new TextEncoder().encode("%PDF-1.7\n% Altbestand 2010\n");
+    await speicher.speichern(bytes);
+    const form = new FormData();
+    form.append("datei", new File([bytes], "alt.pdf"));
+    const d = await (await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie)).json();
+    await t.anfrage(
+      `/api/dokumente/${d.id}/einordnung`,
+      json({ art: "geschaeftsbrief", entstanden: "2010-03-01" }),
+      cookie,
+    );
+    const vorher = s.anfragen.length;
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 0, fehler: null });
+    expect(s.anfragen.slice(vorher).filter((a) => a.pfad.includes("?retention"))).toEqual([]);
   });
 });
