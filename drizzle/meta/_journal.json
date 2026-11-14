@@ -197,6 +197,13 @@
       "when": 1794689737130,
       "tag": "0027_ordnung",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794691805948,
+      "tag": "0028_regeln_ordnung",
+      "breakpoints": true
     }
   ]
 }

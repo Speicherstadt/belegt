@@ -2,9 +2,10 @@ import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { archivnummern, dokumente } from "../db/schema.ts";
+import { archivnummern, dokumente, dokumentTags } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
 import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
+import { tagMitNamen } from "../ordnung/ordnung.ts";
 import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
@@ -21,11 +22,12 @@ export type Quelle = (typeof QUELLEN)[number];
 
 /**
  * Nimmt ein Original auf: zuerst die Datei unter ihrem Hash, dann die Zeile, versiegelt und im Audit-Log. Scheitert die
- * Zeile, liegt die Datei schon sicher; eine zweite Aufnahme derselben Datei schreibt sie nicht neu.
+ * Zeile, liegt die Datei schon sicher; eine zweite Aufnahme derselben Datei schreibt sie nicht neu. tags (Namen, etwa
+ * die Unterordner des Eingangsordners) setzt sie in derselben Transaktion und legt fehlende Tags an.
  */
 export async function aufnehmen(
   { db, speicher }: Umgebung,
-  eingang: { bytes: Uint8Array; dateiname: string | null; quelle: Quelle; akteur: string },
+  eingang: { bytes: Uint8Array; dateiname: string | null; quelle: Quelle; akteur: string; tags?: string[] },
 ): Promise<Dokument> {
   const sha256 = await speicher.speichern(eingang.bytes);
   const mimeType = dateityp(eingang.bytes);
@@ -44,6 +46,10 @@ export async function aufnehmen(
       .select({ nummer: archivnummern.nummer })
       .from(archivnummern)
       .where(eq(archivnummern.dokumentId, neu!.id));
+    for (const name of eingang.tags ?? []) {
+      const tag = await tagMitNamen(tx, name);
+      await tx.insert(dokumentTags).values({ dokumentId: neu!.id, tagId: tag.id }).onConflictDoNothing();
+    }
     return { ...neu!, asn: a!.nummer };
   });
 }

@@ -14,12 +14,16 @@ describe("readEnv", () => {
       S3_PFAD_STIL: true,
       S3_SPERRE_TAGE: 0,
       TRENNBLATT_CODE: "BELEGT-TRENNER",
+      EINGANG_ORDNER_TAGS: false,
     });
   });
 
   it("liest den Eingangsordner", () => {
     expect(readEnv({ EINGANG_ORDNER: "/var/lib/belegt/eingang" }).EINGANG_ORDNER).toBe("/var/lib/belegt/eingang");
     expect(readEnv({ EINGANG_ORDNER: "" }).EINGANG_ORDNER).toBeUndefined();
+    expect(readEnv({}).EINGANG_ORDNER_TAGS).toBe(false);
+    expect(readEnv({ EINGANG_ORDNER_TAGS: "true" }).EINGANG_ORDNER_TAGS).toBe(true);
+    expect(() => readEnv({ EINGANG_ORDNER_TAGS: "ja" })).toThrow(/EINGANG_ORDNER_TAGS/);
   });
 
   it("liest Port und Datenbank", () => {

@@ -13,9 +13,10 @@ import {
   aktivSetzen,
   RegelEingabe,
   anlegen as regelAnlegen,
-  listen as regelnListen,
+  listenMitOrdnung as regelnListen,
   vorschlag,
 } from "../mail/regeln.ts";
+import { istKonflikt } from "../ordnung/ordnung.ts";
 import { imZeitraum } from "../zugang/pruefer.ts";
 
 import { type App, type AppUmgebung, akteur, Id, MAX_UPLOAD } from "./gemeinsam.ts";
@@ -76,7 +77,13 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
   app.post("/api/regeln", async (c) => {
     const eingabe = RegelEingabe.safeParse(await c.req.json().catch(() => null));
     if (!eingabe.success) return c.json({ fehler: "Ungültige Regel", details: eingabe.error.issues }, 400);
-    return c.json(await regelAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+    try {
+      return c.json(await regelAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+    } catch (err) {
+      // Unbekannter Tag, Dokumenttyp oder Feld im Vorschlag, oder ein Wert, der nicht zum Feld passt
+      if (!istKonflikt(err)) throw err;
+      return c.json({ fehler: err.message }, "ungueltig" in err ? 400 : 409);
+    }
   });
 
   app.post("/api/regeln/:id/:schalter{aktivieren|deaktivieren}", async (c) => {

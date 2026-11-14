@@ -418,5 +418,10 @@
   "bulk_rolled_back": "Nothing changed: at least one document could not be changed.",
   "bulk_failed_item": "{name}: {fehler}",
   "bulk_select_page": "Select all on this page",
-  "bulk_select": "Select {name}"
+  "bulk_select": "Select {name}",
+  "suggest_doctype_short": "Document type {typ}",
+  "rules_tags": "Suggest tags",
+  "rules_doctype": "Suggest document type",
+  "rules_field": "Suggest field",
+  "rules_field_value": "Value"
 }

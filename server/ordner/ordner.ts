@@ -128,15 +128,23 @@ async function pruefenUndLesen(pfad: string, groesse: number): Promise<Uint8Arra
   return lesenOhneSymlink(pfad);
 }
 
+/** Die Unterordner einer Datei relativ zum Eingangsordner, je Ebene ein Name: „Steuer/2026/a.pdf“ → Steuer, 2026 */
+export function unterordner(rel: string): string[] {
+  return dirname(rel)
+    .split(sep)
+    .map((n) => n.trim())
+    .filter((n) => n && n !== ".");
+}
+
 /** Nimmt die Teile auf, die noch nicht im Archiv liegen */
-async function teileAufnehmen(umgebung: Umgebung, teile: Teil[], ergebnis: Ergebnis): Promise<void> {
+async function teileAufnehmen(umgebung: Umgebung, teile: Teil[], ergebnis: Ergebnis, tags: string[]): Promise<void> {
   for (const teil of teile) {
     const sha256 = createHash("sha256").update(teil.bytes).digest("hex");
     if (await schonImArchiv(umgebung.db, sha256)) {
       ergebnis.doppelt++;
       continue;
     }
-    await aufnehmen(umgebung, { bytes: teil.bytes, dateiname: teil.dateiname, quelle: "ordner", akteur: AKTEUR });
+    await aufnehmen(umgebung, { bytes: teil.bytes, dateiname: teil.dateiname, quelle: "ordner", akteur: AKTEUR, tags });
     ergebnis.neu++;
   }
 }
@@ -144,11 +152,17 @@ async function teileAufnehmen(umgebung: Umgebung, teile: Teil[], ergebnis: Ergeb
 /**
  * Ein Blick in den Ordner: nimmt auf, was seit dem letzten Blick unverändert ist, und gibt den neuen Zustand für den
  * nächsten Blick zurück. Eine Datei, die schon im Archiv liegt, wird nur entfernt. Scheitert die Aufnahme selbst
- * (Datenbank, Speicher), bleibt die Datei liegen; nichts geht verloren, weil sie erst danach entfernt wird.
+ * (Datenbank, Speicher), bleibt die Datei liegen; nichts geht verloren, weil sie erst danach entfernt wird. Mit
+ * ordnerTags (EINGANG_ORDNER_TAGS) bekommt ein neues Dokument die Namen seiner Unterordner als Tags.
  */
 export async function ordnerEinlesen(
   umgebung: Umgebung,
-  { ordner, zustand, teilen }: { ordner: string; zustand: Zustand; teilen?: Teilen },
+  {
+    ordner,
+    zustand,
+    teilen,
+    ordnerTags = false,
+  }: { ordner: string; zustand: Zustand; teilen?: Teilen; ordnerTags?: boolean },
 ): Promise<{ zustand: Zustand; ergebnis: Ergebnis }> {
   const jetzt = await auflisten(ordner);
   const ergebnis: Ergebnis = { neu: 0, doppelt: 0, fehler: [], spaeter: [] };
@@ -165,7 +179,12 @@ export async function ordnerEinlesen(
       continue;
     }
     try {
-      await teileAufnehmen(umgebung, (await teilen?.(bytes, name)) ?? [{ bytes, dateiname: name }], ergebnis);
+      await teileAufnehmen(
+        umgebung,
+        (await teilen?.(bytes, name)) ?? [{ bytes, dateiname: name }],
+        ergebnis,
+        ordnerTags ? unterordner(rel) : [],
+      );
     } catch (err) {
       ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) });
       continue;

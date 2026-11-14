@@ -58,6 +58,7 @@ löschen sie wieder.
 | `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern und Geheimnisse von Webhooks, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 | `EINGANG_ORDNER` | Ordner, den der Worker überwacht (docs/eingang.md) | – |
+| `EINGANG_ORDNER_TAGS` | Unterordner im Eingangsordner als Tags (`true` oder `false`, docs/eingang.md) | `false` |
 | `TRENNBLATT_CODE` | Inhalt des Codes auf Trennblättern, an denen gescannte Stapel geteilt werden | `BELEGT-TRENNER` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
 | `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |

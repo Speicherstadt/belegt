@@ -90,9 +90,9 @@ export function tagLoeschen(db: Datenbank, id: string, akteur: string): Promise<
   });
 }
 
-/** Den Tag mit diesem Namen (ohne Groß- und Kleinschreibung), angelegt, falls es ihn nicht gibt */
+/** Den Tag mit diesem Namen (ohne Groß- und Kleinschreibung), angelegt, falls es ihn nicht gibt; gekürzt auf 100 Zeichen */
 export async function tagMitNamen(tx: Tx, name: string): Promise<Tag> {
-  const sauber = Name.parse(name);
+  const sauber = Name.parse(name.trim().slice(0, 100));
   await tx.execute(sql`insert into tags (name) values (${sauber}) on conflict ((lower(name))) do nothing`);
   const [t] = await tx.select().from(tags).where(sql`lower(${tags.name}) = lower(${sauber})`);
   return t!;

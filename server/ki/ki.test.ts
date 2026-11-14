@@ -64,6 +64,31 @@ describe("Vorschläge eines Sprachmodells", () => {
   });
 });
 
+describe("Tags und Dokumenttyp vom Sprachmodell", () => {
+  const auswahl = { tags: ["Strom", "Auto"], dokumenttypen: ["Vertrag"] };
+
+  it("bietet nur vorhandene an und behält nur, was es gibt, ohne Groß- und Kleinschreibung", async () => {
+    const o = ollama(() => ({ ...gut, dokumenttyp: "vertrag", tags: ["strom", "Neu erfunden", "Strom"] }));
+    const v = await kiFragen({ ...kontext, auswahl }, konfig, o.abfragen);
+    expect(v).toEqual({ ...gut, dokumenttyp: "Vertrag", tags: ["Strom"] });
+    const format = o.anfragen[0]!.body.format as {
+      properties: Record<string, { enum?: unknown[] }>;
+      required: string[];
+    };
+    expect(format.properties.dokumenttyp!.enum).toEqual(["Vertrag", null]);
+    expect(format.required).toContain("tags");
+    expect((o.anfragen[0]!.body.messages as { content: string }[])[1]!.content).toContain(
+      "Vorhandene Tags: Strom, Auto",
+    );
+  });
+
+  it("fragt ohne Tags und Dokumenttypen nicht danach und verwirft, was trotzdem kommt", async () => {
+    const o = ollama(() => ({ ...gut, dokumenttyp: "Vertrag", tags: ["Strom"] }));
+    expect(await kiFragen(kontext, konfig, o.abfragen)).toEqual(gut);
+    expect((o.anfragen[0]!.body.format as { properties: object }).properties).not.toHaveProperty("tags");
+  });
+});
+
 describe.skipIf(!testDatenbankUrl)("Vorschläge im Eingang gegen Postgres", () => {
   let t: Awaited<ReturnType<typeof testApp>>;
   let cookie: string;

@@ -58,6 +58,11 @@ const Schema = z.object({
   VORSCHAU_URL: z.string().url().optional(),
   /** Ordner, den der Worker überwacht (etwa Ziel eines Scanners), im Container /var/lib/belegt/eingang */
   EINGANG_ORDNER: z.string().min(1).optional(),
+  /** Unterordner im Eingangsordner als Tags (jede Ebene ein Tag, angelegt, falls es ihn nicht gibt) */
+  EINGANG_ORDNER_TAGS: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   /** Inhalt des Barcodes auf Trennblättern, an denen ein gescannter Stapel geteilt wird */
   TRENNBLATT_CODE: z.string().trim().min(1).max(200).default("BELEGT-TRENNER"),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */

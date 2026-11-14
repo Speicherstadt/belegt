@@ -99,7 +99,7 @@ Dann in `compose.yml` beim Worker die Zeile `- ./eingang:/var/lib/belegt/eingang
 `EINGANG_ORDNER=/var/lib/belegt/eingang` setzen und `docker compose up -d`. Was dort ankommt, beschreibt
 [Eingang](eingang.md#eingangsordner); Fehler stehen im Log des Workers (`docker compose logs worker`). Stapel mit
 [Trennblättern](eingang.md#trennblätter) teilt der Worker; einen eigenen Code für die Trennblätter setzt
-`TRENNBLATT_CODE` in `.env`.
+`TRENNBLATT_CODE` in `.env`. Mit `EINGANG_ORDNER_TAGS=true` werden Unterordner zu Tags.
 
 ## Texterkennung
 

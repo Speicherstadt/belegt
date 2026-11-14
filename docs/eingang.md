@@ -30,6 +30,11 @@ lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht. Leere Dateien un
 `fehler/` im Ordner; dort bleiben sie liegen, bis du sie klärst. Ist die Datenbank oder der Speicher gerade nicht
 erreichbar, bleibt die Datei im Ordner, und der Worker versucht es wieder.
 
+Mit `EINGANG_ORDNER_TAGS=true` bekommt jedes neue Dokument die Namen seiner Unterordner als [Tags](ordnung.md), jede
+Ebene einen: `Steuer/2026/beleg.pdf` bekommt „Steuer“ und „2026“. Fehlt ein Tag, legt Belegt ihn an; einen
+vorhandenen erkennt es ohne Unterschied zwischen Groß- und Kleinschreibung. Ohne die Einstellung bleiben Unterordner
+ohne Bedeutung.
+
 ## Trennblätter
 
 Damit du einen ganzen Stapel Belege in einem Rutsch scannen kannst, legst du zwischen zwei Belege ein Trennblatt. Es
@@ -92,7 +97,11 @@ gelten die Merkmale seiner Mail. Eine Regel kann auf Absender,
 Domain (auch Subdomains), einen Teil des Betreffs und den Typ eines Anhangs prüfen; alle Bedingungen müssen
 zutreffen, die erste passende Regel gewinnt. Eine Regel ohne Bedingung trifft nichts.
 
-Ein Vorschlag setzt noch keine Frist. Erst wenn du ihn übernimmst, wird das Dokument eingeordnet und gesperrt.
+Eine Regel kann zusätzlich Tags, einen Dokumenttyp und einen Feldwert vorschlagen ([Ordnung](ordnung.md)). Was
+seitdem gelöscht wurde, schlägt sie nicht mehr vor.
+
+Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Dokumenttyp und Feldwert sofort und trägt die Art ins
+Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt.
 
 ## Suche
 
@@ -113,7 +122,8 @@ Datei nicht sein; eine größere teilst du in Outlook auf.
 ## Vorschläge eines Sprachmodells
 
 Mit `KI_URL` und `KI_MODELL` fragt der Worker ein Sprachmodell nach einer Einordnung für jedes Dokument im Eingang: Art,
-Tag der Entstehung, Titel, Korrespondent und eine kurze Begründung. Er schickt dafür Dateiname, Mailkopf und Text des
+Tag der Entstehung, Titel, Korrespondent und eine kurze Begründung; gibt es Tags und Dokumenttypen, wählt es passende
+davon aus, neue legt es nie an. Er schickt dafür Dateiname, Mailkopf und Text des
 Dokuments an das Modell; deshalb gehört es auf einen eigenen Server, etwa Ollama im selben Netz (in Compose mit
 `--profile ki`, dann einmal `docker compose exec ollama ollama pull <Modell>`). Ein Vorschlag ist nur ein Vorschlag: Auf
 der Seite des Dokuments übernimmt „Übernehmen“ die Felder ins Formular, eingeordnet wird erst mit „Einordnen“. Belegt

@@ -42,6 +42,13 @@ Eigene Felder halten Werte je Dokument, etwa eine Vertragsnummer oder eine Summe
 Belegt prüft jeden Wert auf dem Server. Ein leerer Wert entfernt ihn. Ein Feld zu löschen löscht seine Werte, jeden
 einzeln im Audit-Log.
 
+## Vorschläge und Eingangsordner
+
+[Regeln](eingang.md#regeln) schlagen neben der Art auch Tags, einen Dokumenttyp und einen Feldwert vor, das
+[Sprachmodell](eingang.md#vorschläge-eines-sprachmodells) passende vorhandene Tags und einen Dokumenttyp. „Übernehmen“
+auf der Seite des Dokuments setzt sie. Mit `EINGANG_ORDNER_TAGS=true` werden die Unterordner des
+[Eingangsordners](eingang.md#eingangsordner) zu Tags.
+
 ## Filter und Suche
 
 Im Archiv filterst du nach Tags (das Dokument hat alle gewählten), nach Dokumenttyp (auch „Ohne Dokumenttyp“) und nach

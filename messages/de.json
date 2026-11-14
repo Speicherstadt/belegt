@@ -418,5 +418,10 @@
   "bulk_rolled_back": "Nichts geändert: Bei mindestens einem Dokument ging es nicht.",
   "bulk_failed_item": "{name}: {fehler}",
   "bulk_select_page": "Alle auf dieser Seite auswählen",
-  "bulk_select": "{name} auswählen"
+  "bulk_select": "{name} auswählen",
+  "suggest_doctype_short": "Dokumenttyp {typ}",
+  "rules_tags": "Tags vorschlagen",
+  "rules_doctype": "Dokumenttyp vorschlagen",
+  "rules_field": "Feld vorschlagen",
+  "rules_field_value": "Wert"
 }

@@ -162,6 +162,13 @@ export interface MailAnsicht {
   ausMail: string | null;
 }
 
+/** Vorschlag für Tags, Dokumenttyp und Feldwerte aus einer Regel oder vom Sprachmodell, mit Namen */
+export interface OrdnungsVorschlag {
+  tags: TagKurz[];
+  dokumenttyp: { id: string; name: string } | null;
+  felder: { feldId: string; name: string; typ: Feldtyp; wert: Feldwert }[];
+}
+
 export interface Regel {
   id: string;
   name: string;
@@ -169,6 +176,7 @@ export interface Regel {
   bedingung: { absender?: string; domain?: string; betreffEnthaelt?: string; anhangTyp?: string };
   art: Art;
   aktiv: boolean;
+  ordnung: OrdnungsVorschlag | null;
 }
 
 export interface Quelle {
@@ -433,7 +441,7 @@ export const api = {
   },
   vorschlag: (id: string) =>
     aufruf<{
-      vorschlag: { art: Art; regel: { id: string; name: string } } | null;
+      vorschlag: { art: Art; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
       erechnung: ERechnung | null;
       ki: {
         art: Art;
@@ -442,10 +450,16 @@ export const api = {
         korrespondent: string | null;
         begruendung: string;
         modell: string;
+        ordnung: OrdnungsVorschlag | null;
       } | null;
     }>(`/api/dokumente/${id}/vorschlag`),
   regeln: () => aufruf<Regel[]>("/api/regeln"),
-  regelAnlegen: (r: { name: string; wenn: Regel["bedingung"]; dann: Art }) => aufruf<Regel>("/api/regeln", json(r)),
+  regelAnlegen: (r: {
+    name: string;
+    wenn: Regel["bedingung"];
+    dann: Art;
+    ordnung?: { tags: string[]; dokumenttyp: string | null; felder: { feldId: string; wert: Feldwert }[] };
+  }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>
     aufruf<Regel>(`/api/regeln/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),
   quellen: () => aufruf<Quelle[]>("/api/quellen"),

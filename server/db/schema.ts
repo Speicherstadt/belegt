@@ -184,6 +184,8 @@ export const regeln = pgTable(
     art: text("art").notNull(),
     aktiv: boolean("aktiv").notNull().default(true),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    /** Zusätzlich vorgeschlagen: Tags, Dokumenttyp und Feldwerte (server/ordnung/vorschlag.ts) */
+    ordnung: jsonb("ordnung"),
   },
   (t) => [
     check(

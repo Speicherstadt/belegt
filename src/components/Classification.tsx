@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { type Art, api, type Einordnung } from "../lib/api.ts";
+import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
@@ -39,6 +40,12 @@ export function Classification({
       setOffen(false);
       await queryClient.invalidateQueries();
     },
+  });
+
+  // Tags, Dokumenttyp und Feldwerte eines Vorschlags sind Metadaten: Übernehmen setzt sie sofort, die Art erst beim Einordnen
+  const ordnen = useMutation({
+    mutationFn: (o: OrdnungsVorschlag) => api.ordnen(dokumentId, alsAenderung(o)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["dokument", dokumentId] }),
   });
 
   function absenden(e: FormEvent<HTMLFormElement>) {
@@ -97,9 +104,14 @@ export function Classification({
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.vorschlag && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {m.suggest_label({ art: artLabel(vorschlag.data.vorschlag.art), regel: vorschlag.data.vorschlag.regel.name })}
+          {vorschlag.data.vorschlag.ordnung && <SuggestionOrder ordnung={vorschlag.data.vorschlag.ordnung} />}
           <button
             type="button"
-            onClick={() => setArt(vorschlag.data!.vorschlag!.art)}
+            onClick={() => {
+              const v = vorschlag.data!.vorschlag!;
+              setArt(v.art);
+              if (v.ordnung) ordnen.mutate(v.ordnung);
+            }}
             className="h-8 rounded-md border border-border bg-bg px-3 font-medium"
           >
             {m.suggest_apply()}
@@ -135,11 +147,13 @@ export function Classification({
             {m.suggest_ki({ art: artLabel(vorschlag.data.ki.art), modell: vorschlag.data.ki.modell })}{" "}
             <span className="text-muted">{vorschlag.data.ki.begruendung}</span>
           </p>
+          {vorschlag.data.ki.ordnung && <SuggestionOrder ordnung={vorschlag.data.ki.ordnung} />}
           <button
             type="button"
             onClick={() => {
               const k = vorschlag.data!.ki!;
               setArt(k.art);
+              if (k.ordnung) ordnen.mutate(k.ordnung);
               setVorgabe({
                 entstanden: k.entstanden ?? undefined,
                 titel: k.titel ?? undefined,
@@ -199,6 +213,11 @@ export function Classification({
             />
           </label>
           {einordnung && <p className="m-0 text-muted text-xs">{m.classify_hint()}</p>}
+          {ordnen.error && (
+            <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+              {m.order_failed({ meldung: ordnen.error.message })}
+            </p>
+          )}
           {speichern.error && (
             <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
               {m.classify_failed({ meldung: speichern.error.message })}

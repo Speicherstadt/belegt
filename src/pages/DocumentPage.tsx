@@ -94,7 +94,7 @@ export function DocumentPage() {
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && (
             <Classification
-              key={`${d.einordnung?.id ?? "neu"}:${d.dokumenttyp?.id ?? ""}`}
+              key={d.einordnung?.id ?? "neu"}
               dokumentId={d.id}
               einordnung={d.einordnung}
               eingang={d.eingegangenAm}

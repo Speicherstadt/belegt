@@ -1,6 +1,6 @@
-import { eq, sql } from "drizzle-orm";
+import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
-import { kiVorschlaege } from "../db/schema.ts";
+import { dokumenttypen, kiVorschlaege, tags } from "../db/schema.ts";
 import { inhaltZu, LESBAR, textZu } from "../inhalt/inhalt.ts";
 import { mailZuDokument } from "../mail/import.ts";
 import { type Abfragen, type KiKonfig, KiVorschlag, kiFragen } from "./ki.ts";
@@ -28,6 +28,15 @@ export async function kiVorschlaegeErzeugen(
      order by d.eingegangen_am limit ${stapel}`);
   let erzeugt = 0;
   let fehler = 0;
+  // Das Modell wählt nur aus vorhandenen Tags und Dokumenttypen (höchstens je 200)
+  const auswahl = offen.length
+    ? {
+        tags: (await db.select({ name: tags.name }).from(tags).orderBy(asc(tags.name)).limit(200)).map((t) => t.name),
+        dokumenttypen: (
+          await db.select({ name: dokumenttypen.name }).from(dokumenttypen).orderBy(asc(dokumenttypen.name)).limit(200)
+        ).map((t) => t.name),
+      }
+    : undefined;
   for (const d of offen) {
     try {
       const [mail, inhalt, text] = await Promise.all([
@@ -49,6 +58,7 @@ export async function kiVorschlaegeErzeugen(
                 verkaeufer: inhalt.erechnung.verkaeufer,
               }
             : null,
+          auswahl,
         },
         konfig,
         abfragen,
@@ -67,9 +77,33 @@ export async function kiVorschlaegeErzeugen(
   return { erzeugt, fehler };
 }
 
+/**
+ * Der Vorschlag mit Tags und Dokumenttyp, wie es sie heute gibt (IDs und Farben); was seitdem gelöscht wurde, fällt weg
+ */
 export async function kiVorschlagZu(db: Datenbank, dokumentId: string) {
   const [k] = await db.select().from(kiVorschlaege).where(eq(kiVorschlaege.dokumentId, dokumentId));
   if (!k?.vorschlag) return null;
   const v = KiVorschlag.safeParse(k.vorschlag);
-  return v.success ? { ...v.data, modell: k.modell } : null;
+  if (!v.success) return null;
+  const namen = (v.data.tags ?? []).map((t) => t.toLowerCase());
+  const [t, typ] = await Promise.all([
+    namen.length
+      ? db
+          .select({ id: tags.id, name: tags.name, farbe: tags.farbe })
+          .from(tags)
+          .where(inArray(sql`lower(${tags.name})`, namen))
+      : [],
+    v.data.dokumenttyp
+      ? db
+          .select({ id: dokumenttypen.id, name: dokumenttypen.name })
+          .from(dokumenttypen)
+          .where(sql`lower(${dokumenttypen.name}) = lower(${v.data.dokumenttyp})`)
+      : [],
+  ]);
+  const { tags: _t, dokumenttyp: _d, ...rest } = v.data;
+  return {
+    ...rest,
+    modell: k.modell,
+    ordnung: t.length || typ[0] ? { tags: t, dokumenttyp: typ[0] ?? null, felder: [] } : null,
+  };
 }

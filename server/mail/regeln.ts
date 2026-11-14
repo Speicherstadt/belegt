@@ -6,6 +6,12 @@ import type { Datenbank } from "../db/client.ts";
 import { regeln } from "../db/schema.ts";
 import { laden } from "../dokumente/dokumente.ts";
 import { ARTEN } from "../einordnung/einordnung.ts";
+import {
+  type AufgeloesterVorschlag,
+  OrdnungsVorschlag,
+  vorschlagAufloesen,
+  vorschlagPruefen,
+} from "../ordnung/vorschlag.ts";
 import { mailZuDokument } from "./import.ts";
 
 const Bedingung = z
@@ -22,20 +28,37 @@ export const RegelEingabe = z.object({
   wenn: Bedingung,
   dann: z.enum(ARTEN),
   reihenfolge: z.number().int().min(0).max(10_000).default(0),
+  /** Zusätzlich vorgeschlagen: Tags, Dokumenttyp und Feldwerte */
+  ordnung: OrdnungsVorschlag.optional(),
 });
 
 export async function listen(db: Datenbank) {
   return db.select().from(regeln).orderBy(asc(regeln.reihenfolge), asc(regeln.erstelltAm));
 }
 
+/** Legt eine Regel an; Tags, Dokumenttyp und Felder im Vorschlag muss es geben, Werte passen zu ihrem Feld */
 export async function anlegen(db: Datenbank, eingabe: z.infer<typeof RegelEingabe>, akteur: string) {
+  const ordnung = eingabe.ordnung ? await vorschlagPruefen(db, eingabe.ordnung) : null;
+  const leer = !ordnung || (!ordnung.tags.length && !ordnung.dokumenttyp && !ordnung.felder.length);
   const [neu] = await mitAkteur(db, akteur, (tx) =>
     tx
       .insert(regeln)
-      .values({ name: eingabe.name, bedingung: eingabe.wenn, art: eingabe.dann, reihenfolge: eingabe.reihenfolge })
+      .values({
+        name: eingabe.name,
+        bedingung: eingabe.wenn,
+        art: eingabe.dann,
+        reihenfolge: eingabe.reihenfolge,
+        ordnung: leer ? null : ordnung,
+      })
       .returning(),
   );
   return neu!;
+}
+
+/** Regeln mit aufgelöstem Vorschlag für Tags, Dokumenttyp und Felder (Namen statt IDs) */
+export async function listenMitOrdnung(db: Datenbank) {
+  const alle = await listen(db);
+  return Promise.all(alle.map(async (r) => ({ ...r, ordnung: await vorschlagAufloesen(db, r.ordnung) })));
 }
 
 export async function aktivSetzen(db: Datenbank, id: string, aktiv: boolean, akteur: string) {
@@ -45,17 +68,29 @@ export async function aktivSetzen(db: Datenbank, id: string, aktiv: boolean, akt
   return r ?? null;
 }
 
-/** Vorschlag für ein Dokument: Merkmale aus seiner Mail (bei einem Anhang aus der Mail, aus der er stammt) */
-export async function vorschlag(db: Datenbank, dokumentId: string): Promise<Vorschlag | null> {
+/**
+ * Vorschlag für ein Dokument: Merkmale aus seiner Mail (bei einem Anhang aus der Mail, aus der er stammt); dazu, was
+ * die Regel an Tags, Dokumenttyp und Feldwerten vorschlägt
+ */
+export async function vorschlag(
+  db: Datenbank,
+  dokumentId: string,
+): Promise<(Vorschlag & { ordnung: AufgeloesterVorschlag | null }) | null> {
   const dokument = await laden(db, dokumentId);
   if (!dokument) return null;
   const mail = await mailZuDokument(db, dokumentId);
-  const aktive: Regel[] = (await listen(db))
-    .filter((r) => r.aktiv)
-    .map((r) => ({ id: r.id, name: r.name, wenn: r.bedingung as Regel["wenn"], dann: r.art as Regel["dann"] }));
-  return vorschlagen(aktive, {
+  const zeilen = (await listen(db)).filter((r) => r.aktiv);
+  const aktive: Regel[] = zeilen.map((r) => ({
+    id: r.id,
+    name: r.name,
+    wenn: r.bedingung as Regel["wenn"],
+    dann: r.art as Regel["dann"],
+  }));
+  const v = vorschlagen(aktive, {
     absender: mail?.von ?? null,
     betreff: mail?.betreff ?? dokument.dateiname ?? "",
     anhangTypen: mail ? mail.anhaenge.map((a) => a.mimeType) : [dokument.mimeType],
   });
+  if (!v) return null;
+  return { ...v, ordnung: await vorschlagAufloesen(db, zeilen.find((r) => r.id === v.regel.id)?.ordnung) };
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "regeln" ADD COLUMN "ordnung" jsonb;

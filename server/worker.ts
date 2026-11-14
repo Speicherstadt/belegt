@@ -135,7 +135,10 @@ async function eingangsordner(ordner: string) {
     });
   for (;;) {
     try {
-      const r = await ordnerEinlesen({ db, speicher }, { ordner, zustand, teilen });
+      const r = await ordnerEinlesen(
+        { db, speicher },
+        { ordner, zustand, teilen, ordnerTags: env.EINGANG_ORDNER_TAGS },
+      );
       zustand = r.zustand;
       letzterFehler = "";
       const { neu, doppelt, fehler, spaeter } = r.ergebnis;

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
-import { ignoriert, ordnerEinlesen, stabile, type Zustand } from "./ordner.ts";
+import { ignoriert, ordnerEinlesen, stabile, unterordner, type Zustand } from "./ordner.ts";
 
 describe("stabile", () => {
   it("nimmt nur, was beim letzten Blick schon mit derselben Größe und Zeit da war", () => {
@@ -21,6 +21,13 @@ describe("stabile", () => {
     ]);
     expect(stabile(vorher, jetzt)).toEqual(["fertig.pdf"]);
     expect(stabile(new Map(), jetzt)).toEqual([]);
+  });
+});
+
+describe("unterordner", () => {
+  it("nennt jede Ebene über der Datei, oben im Ordner keine", () => {
+    expect(unterordner(join("Steuer", "2026", "a.pdf"))).toEqual(["Steuer", "2026"]);
+    expect(unterordner("a.pdf")).toEqual([]);
   });
 });
 
@@ -53,8 +60,8 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     zustand = new Map();
   });
 
-  async function blick(teilen?: Parameters<typeof ordnerEinlesen>[1]["teilen"]) {
-    const r = await ordnerEinlesen({ db: t.db, speicher: t.speicher }, { ordner, zustand, teilen });
+  async function blick(teilen?: Parameters<typeof ordnerEinlesen>[1]["teilen"], ordnerTags = false) {
+    const r = await ordnerEinlesen({ db: t.db, speicher: t.speicher }, { ordner, zustand, teilen, ordnerTags });
     zustand = r.zustand;
     return r.ergebnis;
   }
@@ -130,6 +137,36 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     expect(await dokumente("link.pdf")).toHaveLength(0);
     expect((await readdir(ordner)).sort()).toEqual([".versteckt.pdf", "Rechnungen", "link-ordner", "link.pdf"]);
     expect(await readFile(join(draussen, "geheim.pdf"), "utf8")).toContain("geheim");
+  });
+
+  const tagsVon = async (dateiname: string) =>
+    (
+      await t.sql<{ name: string }[]>`select t.name from dokumente d join dokument_tags dt on dt.dokument_id = d.id
+        join tags t on t.id = dt.tag_id where d.dateiname = ${dateiname} order by t.name`
+    ).map((z) => z.name);
+
+  it("setzt mit EINGANG_ORDNER_TAGS die Unterordner als Tags, legt fehlende an und nutzt vorhandene", async () => {
+    await t.sql`insert into tags (name, farbe) values ('steuer', 'blau')`;
+    await mkdir(join(ordner, "Steuer", "2026"), { recursive: true });
+    await writeFile(join(ordner, "Steuer", "2026", "beleg-tag.pdf"), "%PDF-1.7\n% getaggt\n");
+    await writeFile(join(ordner, "oben-tag.pdf"), "%PDF-1.7\n% oben\n");
+    await blick(undefined, true);
+    expect(await blick(undefined, true)).toMatchObject({ neu: 2, fehler: [], spaeter: [] });
+    expect(await tagsVon("beleg-tag.pdf")).toEqual(["2026", "steuer"]);
+    expect(await tagsVon("oben-tag.pdf")).toEqual([]);
+    expect(await t.sql`select 1 from tags where lower(name) = 'steuer'`).toHaveLength(1);
+    const [eintrag] = await t.sql<{ actor: string }[]>`
+      select actor from audit_log where table_name = 'tags' and new_value ->> 'name' = '2026'`;
+    expect(eintrag!.actor).toBe("system:ordner");
+  });
+
+  it("setzt ohne die Einstellung keine Tags", async () => {
+    await mkdir(join(ordner, "Privat"), { recursive: true });
+    await writeFile(join(ordner, "Privat", "ohne-tag.pdf"), "%PDF-1.7\n% ohne\n");
+    await blick();
+    expect(await blick()).toMatchObject({ neu: 1 });
+    expect(await tagsVon("ohne-tag.pdf")).toEqual([]);
+    expect(await t.sql`select 1 from tags where name = 'Privat'`).toHaveLength(0);
   });
 
   it("nimmt jedes Teil einer geteilten Datei als eigenes Dokument auf", async () => {
