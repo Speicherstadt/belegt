@@ -2,7 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { extractText, getDocumentProxy } from "unpdf";
 import { inhalte } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { type ERechnung, eRechnungLesen } from "./erechnung.ts";
+import { type ERechnung, eRechnungLesen, speicherbar } from "./erechnung.ts";
 
 /** So viel Text wird höchstens gespeichert; für die Suche reicht das, das Original bleibt vollständig */
 const MAX_TEXT = 1_000_000;
@@ -27,7 +27,7 @@ async function pdfLesen(bytes: Uint8Array): Promise<Gelesen> {
       erechnung = inhalt ? eRechnungLesen(new TextDecoder().decode(inhalt)) : null;
       if (erechnung) break;
     }
-    return { text: text.slice(0, MAX_TEXT), erechnung };
+    return { text: speicherbar(text.slice(0, MAX_TEXT)), erechnung };
   } finally {
     await pdf.loadingTask.destroy();
   }
@@ -64,9 +64,11 @@ export async function inhalteErzeugen({ db, speicher }: Umgebung, { stapel = 20 
       await db.insert(inhalte).values({ dokumentId: d.id, text: g.text, erechnung: g.erechnung });
       gelesen++;
     } catch (err) {
+      // Die Meldung eines Datenbankfehlers enthält die Parameter, also den Text; sie gehört nicht in die Zeile
+      const meldung = err instanceof Error && !(err.cause || "code" in err) ? err.message : "Nicht lesbar";
       await db
         .insert(inhalte)
-        .values({ dokumentId: d.id, fehler: err instanceof Error ? err.message.slice(0, 500) : "Nicht lesbar" })
+        .values({ dokumentId: d.id, fehler: speicherbar(meldung.split("\n")[0]!.slice(0, 500)) })
         .onConflictDoNothing();
       fehler++;
     }

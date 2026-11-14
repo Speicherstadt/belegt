@@ -57,8 +57,17 @@ const entitaeten = (t: string) =>
     return VORDEFINIERT[e] ?? ganz;
   });
 
+/**
+ * Postgres nimmt U+0000 weder in text noch in jsonb, einzelne Surrogate nicht in jsonb; kaputte Schriften in PDFs und
+ * Zeichenreferenzen liefern beides. Für Suche und Kopfdaten zählen diese Zeichen nicht.
+ */
+export const speicherbar = (t: string) =>
+  t
+    .replaceAll(String.fromCharCode(0), "")
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "");
+
 const text = (k: unknown): string | null => {
-  const t = typeof k === "string" || typeof k === "number" ? entitaeten(String(k)).trim() : null;
+  const t = typeof k === "string" || typeof k === "number" ? speicherbar(entitaeten(String(k))).trim() : null;
   return t ? t.slice(0, 300) : null;
 };
 
