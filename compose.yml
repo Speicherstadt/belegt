@@ -1,0 +1,54 @@
+# Belegt mit Postgres: docker compose up -d (oder podman compose). Geheimnisse in .env, siehe docs/betrieb.md.
+name: belegt
+
+services:
+  postgres:
+    image: docker.io/library/postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: belegt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD in .env setzen}
+      POSTGRES_DB: belegt
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U belegt -d belegt"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  server:
+    build: .
+    image: belegt:lokal
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment: &umgebung
+      DATABASE_URL: postgres://belegt:${POSTGRES_PASSWORD}@postgres:5432/belegt
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET in .env setzen (mindestens 32 Zeichen)}
+      BETTER_AUTH_URL: ${BELEGT_URL:-http://localhost:3000}
+      BELEGT_SCHLUESSEL: ${BELEGT_SCHLUESSEL:?BELEGT_SCHLUESSEL in .env setzen (openssl rand -base64 32)}
+      ABRUF_MINUTEN: ${ABRUF_MINUTEN:-5}
+    ports:
+      - "${BELEGT_PORT:-3000}:3000"
+    volumes:
+      - dokumente:/var/lib/belegt
+
+  # Postfächer, Webhooks, Text und Texterkennung; startet, wenn der Server die Migrationen angewendet hat
+  worker:
+    image: belegt:lokal
+    restart: unless-stopped
+    command: ["bun", "server/worker.ts"]
+    depends_on:
+      server:
+        condition: service_healthy
+    environment: *umgebung
+    volumes:
+      - dokumente:/var/lib/belegt
+    healthcheck:
+      disable: true
+
+volumes:
+  postgres:
+  dokumente:

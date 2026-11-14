@@ -37,6 +37,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
+      # Texterkennung: ohne Tesseract und pdftoppm würden die Tests dazu übersprungen
+      - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run lint
@@ -67,3 +69,31 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
       - run: bun run e2e
+
+  container:
+    name: Container bauen und starten
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Geheimnisse nur für diesen Lauf
+        run: |
+          {
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)"
+            echo "BELEGT_SCHLUESSEL=$(openssl rand -base64 32)"
+          } > .env
+      - run: docker compose build
+      - run: docker compose up -d --wait --wait-timeout 180
+      - name: Server, Oberfläche und Worker antworten
+        run: |
+          curl -fsS http://localhost:3000/healthz
+          curl -fsS http://localhost:3000/api/status | grep -q '"eingerichtet":false'
+          curl -fsS http://localhost:3000/archiv | grep -q '<html'
+          docker compose ps --status running --services | grep -qx worker
+          docker compose exec -T server tesseract --list-langs | grep -qx deu
+          docker compose exec -T server pdftoppm -v
+      - if: failure()
+        run: docker compose logs
+      - if: always()
+        run: docker compose down -v

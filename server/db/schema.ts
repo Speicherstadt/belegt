@@ -301,5 +301,7 @@ export const inhalte = pgTable("inhalte", {
   text: text("text").notNull().default(""),
   erechnung: jsonb("erechnung"),
   fehler: text("fehler"),
+  /** Text kommt aus der Texterkennung (Scan), nicht aus der Datei selbst */
+  ocr: boolean("ocr").notNull().default(false),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });

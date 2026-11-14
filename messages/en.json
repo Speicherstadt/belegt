@@ -280,5 +280,9 @@
   "einvoice_total": "Total amount",
   "einvoice_credit": "Credit note",
   "einvoice_hint": "Read from the invoice XML; the original remains authoritative.",
-  "tokens_mcp": "AI assistants connect via MCP (Streamable HTTP) with the same header at"
+  "tokens_mcp": "AI assistants connect via MCP (Streamable HTTP) with the same header at",
+  "doc_text": "Text",
+  "doc_text_file": "{anzahl} characters from the file",
+  "doc_text_ocr": "{anzahl} characters from text recognition",
+  "doc_text_error": "not readable"
 }

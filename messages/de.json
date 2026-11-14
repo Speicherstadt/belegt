@@ -280,5 +280,9 @@
   "einvoice_total": "Gesamtbetrag",
   "einvoice_credit": "Gutschrift",
   "einvoice_hint": "Gelesen aus dem XML der Rechnung; maßgeblich bleibt das Original.",
-  "tokens_mcp": "KI-Assistenten verbinden sich per MCP (Streamable HTTP) mit derselben Kopfzeile unter"
+  "tokens_mcp": "KI-Assistenten verbinden sich per MCP (Streamable HTTP) mit derselben Kopfzeile unter",
+  "doc_text": "Text",
+  "doc_text_file": "{anzahl} Zeichen aus der Datei",
+  "doc_text_ocr": "{anzahl} Zeichen aus der Texterkennung",
+  "doc_text_error": "nicht lesbar"
 }

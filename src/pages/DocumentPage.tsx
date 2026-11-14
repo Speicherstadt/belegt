@@ -27,6 +27,7 @@ export function DocumentPage() {
   const { id } = useParams({ from: "/app/dokumente/$id" });
   const dok = useQuery({ queryKey: ["dokument", id], queryFn: () => api.dokument(id) });
   const verlauf = useQuery({ queryKey: ["verlauf", id], queryFn: () => api.verlauf(id) });
+  const inhalt = useQuery({ queryKey: ["inhalt", id], queryFn: () => api.inhalt(id) });
 
   if (dok.error) return <EmptyState title={m.doc_not_found()} text="" />;
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
@@ -92,6 +93,18 @@ export function DocumentPage() {
               <dd className="m-0">{d.mimeType}</dd>
               <dt className="text-muted">{m.doc_size()}</dt>
               <dd className="m-0 tabular-nums">{groesse(d.groesse)}</dd>
+              {inhalt.data && (
+                <>
+                  <dt className="text-muted">{m.doc_text()}</dt>
+                  <dd className="m-0">
+                    {inhalt.data.fehler
+                      ? m.doc_text_error()
+                      : inhalt.data.ocr
+                        ? m.doc_text_ocr({ anzahl: String(inhalt.data.textLaenge) })
+                        : m.doc_text_file({ anzahl: String(inhalt.data.textLaenge) })}
+                  </dd>
+                </>
+              )}
             </dl>
           </section>
           <section aria-labelledby="verlauf" className="flex flex-col gap-2 rounded-lg border border-border p-4">

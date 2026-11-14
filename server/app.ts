@@ -6,6 +6,7 @@ import { mailRouten } from "./http/mail.ts";
 import { openapi } from "./http/openapi.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
+import { statischRouten } from "./http/statisch.ts";
 import { zugangRouten } from "./http/zugang.ts";
 import { offen as einladungOffen } from "./zugang/einladungen.ts";
 
@@ -44,6 +45,7 @@ export function createApp(umgebung?: AppUmgebung) {
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);
+    if (umgebung.oberflaeche) statischRouten(app, umgebung.oberflaeche);
   }
 
   app.notFound((c) => c.json({ fehler: "Nicht gefunden" }, 404));

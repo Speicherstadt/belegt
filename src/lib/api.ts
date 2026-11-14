@@ -218,7 +218,7 @@ export interface ERechnung {
 
 export const api = {
   inhalt: (id: string) =>
-    aufruf<{ erechnung: ERechnung | null; fehler: string | null; textLaenge: number } | null>(
+    aufruf<{ erechnung: ERechnung | null; fehler: string | null; ocr: boolean; textLaenge: number } | null>(
       `/api/dokumente/${id}/inhalt`,
     ),
   webhooks: () => aufruf<Webhook[]>("/api/webhooks"),

@@ -6,7 +6,14 @@ import type { Umgebung } from "../dokumente/dokumente.ts";
 import type { Oeffnen } from "../mail/abruf.ts";
 
 /** Was die HTTP-Schnittstelle von außen bekommt */
-export type AppUmgebung = Umgebung & { auth: Auth; schluessel?: Buffer; oeffnen?: Oeffnen; abrufMinuten?: number };
+export type AppUmgebung = Umgebung & {
+  auth: Auth;
+  schluessel?: Buffer;
+  oeffnen?: Oeffnen;
+  abrufMinuten?: number;
+  /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
+  oberflaeche?: string;
+};
 export type App = Hono<{ Variables: { nutzer: Angemeldet } }>;
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */

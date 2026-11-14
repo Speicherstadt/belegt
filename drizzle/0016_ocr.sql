@@ -1,0 +1,1 @@
+ALTER TABLE "inhalte" ADD COLUMN "ocr" boolean DEFAULT false NOT NULL;

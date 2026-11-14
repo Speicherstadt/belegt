@@ -20,7 +20,8 @@ Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Parag
 ## Tests
 
 Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests gegen Postgres brauchen
-`TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer.
+`TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer. Die Tests der Texterkennung brauchen `tesseract` (mit
+Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, und werden sonst übersprungen.
 
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
@@ -48,6 +49,7 @@ löschen sie wieder.
 | `BETTER_AUTH_URL` | Adresse, unter der Belegt erreichbar ist | `http://localhost:3000` |
 | `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern und Geheimnisse von Webhooks, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
+| `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
 
 ## Migrationen
 
