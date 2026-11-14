@@ -22,7 +22,8 @@ Betrieb ordnungsmäßig arbeitet, hängt auch an seinen eigenen Abläufen (unten
 
 Die Tests laufen gegen eine echte PostgreSQL-Datenbank, die Oberflächentests mit Playwright und axe gegen einen echten
 Server ([`entwicklung.md`](entwicklung.md)). Die CI führt bei jeder Änderung alle aus, dazu `bun audit` und einen Bau
-und Start des Containers. Jede Änderung an Belegt prüft vor dem Zusammenführen ein unabhängiges Review mit Tests.
+und Start des Containers. Jeden Funktionsbereich hat nach dem Einbau ein unabhängiges Review geprüft; jeder Fund kam mit einem
+roten Test und blieb als Test erhalten.
 
 ## Was der Betrieb beiträgt
 
