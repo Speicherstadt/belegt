@@ -2,7 +2,9 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { testApp } from "./test-app.ts";
+import { createApp } from "./app.ts";
+import { createAuth } from "./auth.ts";
+import { EINRICHTUNGSCODE, testApp } from "./test-app.ts";
 import { testDatenbankUrl } from "./test-db.ts";
 
 /** Nachgebauter OpenID-Connect-Anbieter: Discovery, Token mit signiertem ID-Token, Schlüssel */
@@ -76,10 +78,12 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung über OpenID Connect", () => {
   /** Startet Anmeldung oder Verknüpfung, „meldet sich beim Anbieter an“ und kehrt mit einem Code zurück */
   async function zumAnbieter(
     person: { sub: string; email: string; email_verified: boolean },
-    { verbinden }: { verbinden?: string } = {},
+    { verbinden, bei }: { verbinden?: string; bei?: { anfrage: typeof t.anfrage; anbieter: typeof a } } = {},
   ) {
-    a.zustand.naechster = person;
-    const start = await t.anfrage(
+    const anfrage = bei?.anfrage ?? t.anfrage;
+    const ap = bei?.anbieter ?? a;
+    ap.zustand.naechster = person;
+    const start = await anfrage(
       verbinden ? "/api/auth/link-social" : "/api/auth/sign-in/social",
       {
         method: "POST",
@@ -90,11 +94,11 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung über OpenID Connect", () => {
     );
     expect(start.status).toBe(200);
     const ziel = new URL(((await start.json()) as { url: string }).url);
-    expect(ziel.origin).toBe(a.zustand.issuer);
+    expect(ziel.origin).toBe(ap.zustand.issuer);
     expect(ziel.searchParams.get("code_challenge_method")).toBe("S256");
     // Was der Anbieter beim Anmelden aus der Adresse übernimmt
-    a.zustand.nonce = ziel.searchParams.get("nonce") ?? "";
-    const zurueck = await t.anfrage(
+    ap.zustand.nonce = ziel.searchParams.get("nonce") ?? "";
+    const zurueck = await anfrage(
       `/api/auth/callback/oidc?code=abc&state=${ziel.searchParams.get("state")}`,
       {},
       [verbinden, cookies(start)].filter(Boolean).join("; "),
@@ -174,5 +178,39 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung über OpenID Connect", () => {
 
   it("nennt die Anmeldung über den Anbieter in /api/status", async () => {
     expect(await (await t.anfrage("/api/status")).json()).toMatchObject({ oidc: { name: "Firmenkonto" } });
+  });
+
+  it("meldet nach einem Wechsel des Anbieters niemanden über dieselbe Kennung beim neuen an", async () => {
+    // Belegt mit derselben Datenbank, aber OIDC_ISSUER auf einen anderen Anbieter umgestellt
+    const b = await anbieter();
+    try {
+      const auth = createAuth({
+        db: t.db,
+        secret: "x".repeat(32),
+        baseURL: "http://localhost:3000",
+        einrichtungscode: EINRICHTUNGSCODE,
+        begrenzen: false,
+        oidc: { issuer: b.zustand.issuer, clientId: "belegt-client", clientSecret: "geheim", name: "Neu" },
+      });
+      const app = createApp({ db: t.db, speicher: t.speicher, auth, schluessel: t.schluessel, oidcName: "Neu" });
+      const anfrage: typeof t.anfrage = (pfad, init = {}, cookie) =>
+        app.request(`http://localhost:3000${pfad}`, {
+          ...init,
+          headers: {
+            origin: "http://localhost:3000",
+            ...(cookie ? { cookie } : {}),
+            ...(init.headers as Record<string, string> | undefined),
+          },
+        });
+      // Beim neuen Anbieter hat eine andere Person zufällig dieselbe Kennung wie anna beim alten
+      const fremd = await zumAnbieter(
+        { sub: anna.sub, email: "jemand@anders.example", email_verified: true },
+        { bei: { anfrage, anbieter: b } },
+      );
+      expect(fremd.ort).toMatch(/^\/anmelden\?error=/);
+      expect(fremd.sitzung).toBe("");
+    } finally {
+      await new Promise<void>((ok) => b.server.close(() => ok()));
+    }
   });
 });
