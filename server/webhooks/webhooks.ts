@@ -57,6 +57,17 @@ export async function aktivSetzen(db: Datenbank, id: string, aktiv: boolean, akt
 export const signatur = (geheimnis: string, rumpf: string) =>
   `sha256=${createHmac("sha256", geheimnis).update(rumpf).digest("hex")}`;
 
+/** Letzten Fehler und letzte Zustellung festhalten; nur bei einer Änderung, sonst stünde jeder leere Lauf im Audit-Log */
+async function vermerken(db: Datenbank, w: typeof webhooks.$inferSelect, zugestellt: number, fehler: string | null) {
+  if (zugestellt === 0 && fehler === w.letzterFehler) return;
+  await mitAkteur(db, "system:webhooks", (tx) =>
+    tx
+      .update(webhooks)
+      .set({ letzterFehler: fehler, ...(zugestellt > 0 ? { letzteZustellung: new Date() } : {}) })
+      .where(eq(webhooks.id, w.id)),
+  );
+}
+
 export type Senden = (url: string, init: RequestInit) => Promise<Response>;
 
 /**
@@ -72,7 +83,16 @@ export async function zustellen(
   const ergebnis: Record<string, { zugestellt: number; fehler: string | null }> = {};
   const aktive = (await db.select().from(webhooks)).filter((w) => w.aktiv);
   for (const w of aktive) {
-    const geheimnis = entschluesseln(schluessel, w.ciphertext).toString();
+    let geheimnis: string;
+    try {
+      geheimnis = entschluesseln(schluessel, w.ciphertext).toString();
+    } catch {
+      // Etwa nach einem Wechsel von BELEGT_SCHLUESSEL; die übrigen Webhooks laufen weiter
+      const fehler = "Geheimnis lässt sich nicht entschlüsseln (BELEGT_SCHLUESSEL geändert?)";
+      await vermerken(db, w, 0, fehler);
+      ergebnis[w.name] = { zugestellt: 0, fehler };
+      continue;
+    }
     const offen = await db.execute<{ id: string; art: string; dokument_id: string; zeitpunkt: Date }>(sql`
       select e.id, e.art, e.dokument_id, e.zeitpunkt from webhook_ereignisse e
        where e.zeitpunkt >= ${w.erstelltAm.toISOString()}::timestamptz and e.art = any(${sql`array[${sql.join(
@@ -110,15 +130,7 @@ export async function zustellen(
       await db.insert(webhookZustellungen).values({ webhookId: w.id, ereignisId: Number(e.id) });
       zugestellt++;
     }
-    // Nur bei einer Änderung schreiben, sonst stünde jeder leere Lauf im Audit-Log
-    if (zugestellt > 0 || fehler !== w.letzterFehler) {
-      await mitAkteur(db, "system:webhooks", (tx) =>
-        tx
-          .update(webhooks)
-          .set({ letzterFehler: fehler, ...(zugestellt > 0 ? { letzteZustellung: new Date() } : {}) })
-          .where(eq(webhooks.id, w.id)),
-      );
-    }
+    await vermerken(db, w, zugestellt, fehler);
     ergebnis[w.name] = { zugestellt, fehler };
   }
   return ergebnis;
