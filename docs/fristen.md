@@ -49,6 +49,7 @@ eingeordnet.
 
 Ob gelöscht werden darf, prüft Postgres bei Antrag und Bestätigung selbst: Einordnung vorhanden, Frist abgelaufen
 (Tag in Deutschland) oder frei, keine offene Sperre, zwei Personen. Nach der Bestätigung ist die Datei entfernt, außer
-ein anderes Dokument hat denselben Inhalt. Die Zeile mit Hash, Angaben und Verlauf bleibt als Löschnachweis,
+ein anderes Dokument hat denselben Inhalt; der aus ihr gelesene Text und die Kopfdaten einer E-Rechnung sind es
+immer, auch in der Suche. Die Zeile mit Hash, Angaben und Verlauf bleibt als Löschnachweis,
 versiegelt; das Dokument lässt sich danach nicht mehr einordnen. Im Archiv zeigt der Filter „Gelöscht“ diese
 Nachweise.
