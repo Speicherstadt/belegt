@@ -127,4 +127,74 @@ describe.skipIf(!testDatenbankUrl)("Prüferzugang gegen Postgres", () => {
     expect(dokumente).not.toContain(draussen.id);
     expect((await als(pruefer)("/api/export?von=2020-01-01&bis=2021-12-31")).status).toBe(403);
   });
+  it("zeigt zu einem Anhang im Zeitraum nicht die Mail außerhalb", async () => {
+    const eml = [
+      "From: Lieferant <rechnung@example.org>",
+      "To: anna@example.org",
+      "Subject: Vertraulich 2022",
+      "Message-ID: <alt-2022@example.org>",
+      "Date: Mon, 02 May 2022 10:00:00 +0200",
+      'Content-Type: multipart/mixed; boundary="g"',
+      "",
+      "--g",
+      "Content-Type: text/plain; charset=utf-8",
+      "",
+      "Geheimer Text aus 2022.",
+      "--g",
+      'Content-Type: application/pdf; name="Anhang.pdf"',
+      'Content-Disposition: attachment; filename="Anhang.pdf"',
+      "Content-Transfer-Encoding: base64",
+      "",
+      Buffer.from("%PDF-1.7\n% Anhang\n").toString("base64"),
+      "--g--",
+      "",
+    ].join("\r\n");
+    const form = new FormData();
+    form.append("datei", new File([eml], "alt.eml"));
+    const { neu } = await (await als(inhaber)("/api/mails", { method: "POST", body: form })).json();
+    const mail = await (await als(inhaber)(`/api/dokumente/${neu[0]}/mail`)).json();
+    const anhang = mail.anhaenge[0].dokumentId as string;
+    await als(inhaber)(`/api/dokumente/${neu[0]}/einordnung`, json({ art: "beleg", entstanden: "2022-05-02" }));
+    await als(inhaber)(`/api/dokumente/${anhang}/einordnung`, json({ art: "beleg", entstanden: "2024-05-02" }));
+
+    expect((await als(pruefer)(`/api/dokumente/${anhang}`)).status).toBe(200);
+    const res = await als(pruefer)(`/api/dokumente/${anhang}/mail`);
+    const text = await res.text();
+    expect(text).not.toContain("Vertraulich 2022");
+    expect(text).not.toContain("Geheimer Text");
+    expect(text).not.toContain("alt-2022@example.org");
+  });
+
+  it("nimmt in das Protokoll des Prüfer-Exports nur Einträge zu Dokumenten seines Zeitraums", async () => {
+    const heute = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
+    const jahr = heute.slice(0, 4);
+    const jetzt = await dokument("beleg-jetzt", `${jahr}-03-01`);
+    expect(
+      (await als(inhaber)("/api/sperren", json({ grund: "Sperre-Geheim", von: "2020-01-01", bis: "2020-12-31" })))
+        .status,
+    ).toBe(201);
+    const { pfad } = await (
+      await als(inhaber)(
+        "/api/einladungen",
+        json({ rolle: "pruefer", zeitraum: { von: `${jahr}-01-01`, bis: `${jahr}-12-31` } }),
+      )
+    ).json();
+    const zweiter = (
+      await t.registrieren("pruefer2@example.org", "ein-langes-passwort", {
+        "x-belegt-einladung": pfad.split("/").pop(),
+      })
+    ).cookie;
+
+    const res = await als(zweiter)(`/api/export?von=${jahr}-01-01&bis=${jahr}-12-31`);
+    expect(res.status).toBe(200);
+    const protokoll = strFromU8(unzipSync(new Uint8Array(await res.arrayBuffer()))["protokoll.csv"]!);
+    expect(protokoll).toContain(jetzt.id);
+    // Hochgeladen im Zeitraum, entstanden 2022: gehört nicht zur Freigabe, auch nicht sein Eintrag im Audit-Log
+    expect(protokoll).not.toContain(draussen.id);
+    expect(protokoll).not.toContain("beleg-2022");
+    // Sperren, Einladungen und Zugänge sieht der Prüfer nicht
+    expect(protokoll).not.toContain("Sperre-Geheim");
+    expect(protokoll).not.toContain('anna@example.org"');
+    expect(protokoll).not.toContain("pruefer@example.org");
+  });
 });
