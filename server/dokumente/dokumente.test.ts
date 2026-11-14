@@ -71,6 +71,35 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");
   });
 
+  it("kodiert den Dateinamen im Header nach RFC 8187, auch mit Klammern und Apostroph", async () => {
+    const name = "Max's Rechnung (1) *.pdf";
+    const dok = await (await hochladen(pdf, name)).json();
+    const header = (await app.request(`/api/dokumente/${dok.id}/datei`)).headers.get("content-disposition")!;
+    const wert = header.match(/filename\*=UTF-8''(.*)$/)![1]!;
+    // attr-char nach RFC 8187, Abschnitt 3.2.1; alles andere als %XX
+    expect(wert).toMatch(/^(?:[A-Za-z0-9!#$&+\-.^_`|~]|%[0-9A-F]{2})+$/);
+    expect(decodeURIComponent(wert)).toBe(name);
+  });
+
+  it("lehnt Schreiben von einer fremden Seite ab, auch mit gültiger Sitzung (CSRF)", async () => {
+    const form = new FormData();
+    form.append("datei", new File([pdf], "untergeschoben.pdf"));
+    const fremd = await app.request("/api/dokumente", {
+      method: "POST",
+      body: form,
+      headers: { origin: "https://boese.example" },
+    });
+    expect(fremd.status).toBe(403);
+    // Nachbar unter derselben Domain (andere Subdomain): Der Browser schickt das Cookie mit
+    const nachbar = await app.request("/api/dokumente", {
+      method: "POST",
+      body: form,
+      headers: { "sec-fetch-site": "same-site" },
+    });
+    expect(nachbar.status).toBe(403);
+    expect(await t.sql`select 1 from dokumente where dateiname = 'untergeschoben.pdf'`).toHaveLength(0);
+  });
+
   it("lehnt Ändern und Löschen eines Originals in der Datenbank ab", async () => {
     const dok = await (await hochladen(pdf, "fest.pdf")).json();
     await expect(t.sql`update dokumente set dateiname = 'anders.pdf' where id = ${dok.id}`).rejects.toThrow(
