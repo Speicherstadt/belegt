@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
-import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
 import { smtpServer } from "./mail/smtp.ts";
+import { speicherAusEnv } from "./speicher/auswahl.ts";
 
 /*
  * SMTP-Journal als eigener Prozess: nimmt Mails per SMTP an und archiviert sie (server/mail/smtp.ts). Migrationen
@@ -11,7 +11,7 @@ import { smtpServer } from "./mail/smtp.ts";
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
 const { db } = verbinden(env.DATABASE_URL);
-const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
+const { speicher } = speicherAusEnv(env);
 const tls =
   env.SMTP_TLS_KEY && env.SMTP_TLS_CERT
     ? { key: readFileSync(env.SMTP_TLS_KEY), cert: readFileSync(env.SMTP_TLS_CERT) }

@@ -317,3 +317,13 @@ export const inhalte = pgTable("inhalte", {
   ocr: boolean("ocr").notNull().default(false),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Bis zu welchem Tag die Datei eines Hashs im S3-Bucket gesperrt ist (Object Lock); abgeleitet aus den Fristen,
+ * damit der Worker nur verlängert, was sich geändert hat.
+ */
+export const objektsperren = pgTable("objektsperren", {
+  sha256: text("sha256").primaryKey(),
+  bis: date("bis").notNull(),
+  gesetztAm: timestamp("gesetzt_am", { withTimezone: true }).notNull().defaultNow(),
+});

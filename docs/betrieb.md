@@ -22,9 +22,23 @@ docker compose up -d
 Beim ersten Start schreibt der Server einen Einrichtungscode ins Log (`docker compose logs server`). Mit ihm legst du
 unter `BELEGT_URL` das erste Konto an, den Inhaber; der Code gilt bis zum nächsten Neustart.
 
+## Dateien in S3 mit Object Lock
+
+Statt im Volume `dokumente` können die Originale in einem S3-Bucket liegen (AWS S3 oder ein selbst betriebener Dienst,
+der Object Lock kann). Den Bucket legst du mit Object Lock an; dann setzt du `S3_ENDPUNKT`, `S3_BUCKET`,
+`S3_ZUGANG_ID`, `S3_ZUGANG_GEHEIMNIS`, bei AWS `S3_REGION` und `S3_PFAD_STIL=false`.
+
+Belegt lädt jede Datei mit SHA-256-Prüfsumme hoch und sperrt sie im Modus COMPLIANCE bis zum Ende der längsten Frist
+ihrer Dokumente; der Worker verlängert die Sperre, sobald ein Dokument eingeordnet oder länger eingeordnet wird. Eine
+solche Sperre kann niemand verkürzen oder aufheben, auch nicht mit dem Schlüssel des Kontos. Mit `S3_SPERRE_TAGE`
+sperrt Belegt schon ab dem Hochladen für so viele Tage, also auch, was noch im Eingang liegt; frei Abgelegtes lässt
+sich dann erst danach aus dem Bucket entfernen. Lehnt der Bucket das Entfernen nach einer bestätigten Löschung ab,
+bleibt die Datei bis zum Ende ihrer Sperre liegen; Belegt liefert sie nicht mehr aus.
+
 ## Sichern
 
-Zu sichern sind die Datenbank und das Volume `dokumente` (die Originale unter ihrem SHA-256), dazu `.env`: Ohne
+Zu sichern sind die Datenbank und das Volume `dokumente` (die Originale unter ihrem SHA-256; mit S3 der Bucket, etwa
+mit Replikation in einen zweiten), dazu `.env`: Ohne
 `BELEGT_SCHLUESSEL` lassen sich Postfach-Passwörter und Webhook-Geheimnisse nicht mehr entschlüsseln.
 
 ```bash

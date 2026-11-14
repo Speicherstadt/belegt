@@ -10,6 +10,9 @@ describe("readEnv", () => {
       ABRUF_MINUTEN: 5,
       SMTP_PORT: 2525,
       OIDC_NAME: "Firmenkonto",
+      S3_REGION: "us-east-1",
+      S3_PFAD_STIL: true,
+      S3_SPERRE_TAGE: 0,
     });
   });
 

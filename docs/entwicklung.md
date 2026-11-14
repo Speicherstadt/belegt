@@ -55,6 +55,7 @@ löschen sie wieder.
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Apps für IMAP mit OAuth (docs/eingang.md) | – (Mandant `common`) |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_NAME` | Anmelden über einen OpenID-Connect-Anbieter (docs/einbetten.md) | –, Name `Firmenkonto` |
 | `BELEGT_EMBED_ORIGIN` | Die eine Seite, die Belegt in einem Frame zeigen darf | – |
+| `S3_ENDPUNKT`, `S3_BUCKET`, `S3_REGION`, `S3_ZUGANG_ID`, `S3_ZUGANG_GEHEIMNIS`, `S3_PFAD_STIL`, `S3_SPERRE_TAGE` | Dateien in S3 mit Object Lock statt `DOCUMENTS_DIR` (docs/betrieb.md) | –, `us-east-1`, `true`, `0` |
 
 ## Migrationen
 

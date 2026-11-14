@@ -60,7 +60,12 @@ async function zahlen(db: Datenbank) {
 
 export async function verfahrensdoku(
   db: Datenbank,
-  { abrufMinuten, version, jetzt = new Date() }: { abrufMinuten: number; version: string; jetzt?: Date },
+  {
+    abrufMinuten,
+    version,
+    jetzt = new Date(),
+    objektsperre = false,
+  }: { abrufMinuten: number; version: string; jetzt?: Date; objektsperre?: boolean },
 ): Promise<Verfahrensdoku> {
   const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde] = await Promise.all([
     einstellungenLaden(db),
@@ -133,6 +138,9 @@ export async function verfahrensdoku(
       absaetze: [
         "Die Unveränderbarkeit liegt in der Datenbank (PostgreSQL), nicht nur in der Anwendung: Dokumente, Einordnungen, Mails und Löschnachweise sind ab dem Einfügen versiegelt, Ändern, Löschen und Leeren der Tabellen lehnt die Datenbank ab.",
         "Jede Änderung an protokollierten Tabellen schreibt die Datenbank in ein Protokoll, das nur anwächst. Jeder Eintrag enthält den SHA-256 seines Vorgängers (Hash-Kette); Akteur und Zeitpunkt stehen in jedem Eintrag.",
+        objektsperre
+          ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
+          : "Die Dateien liegen unter ihrem SHA-256 im Dateisystem des Servers; eine Änderung fällt beim Lesen und bei der Prüfung auf.",
         "Die Prüfung unter „Prüfung“ rechnet Kette, Kopf und Siegel nach und vergleicht auf Wunsch jede Datei mit ihrem Hash.",
         befunde.length
           ? `Bei Erstellung dieses Dokuments meldete die Prüfung ${befunde.length} Befunde.`

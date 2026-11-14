@@ -22,7 +22,13 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
   });
 
   app.get("/api/verfahrensdoku", async (c) =>
-    c.json(await verfahrensdoku(umgebung.db, { abrufMinuten: umgebung.abrufMinuten ?? 5, version: VERSION })),
+    c.json(
+      await verfahrensdoku(umgebung.db, {
+        abrufMinuten: umgebung.abrufMinuten ?? 5,
+        version: VERSION,
+        objektsperre: umgebung.objektsperre ?? false,
+      }),
+    ),
   );
 
   app.get("/api/export", async (c) => {

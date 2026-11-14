@@ -134,6 +134,13 @@
       "when": 1794674995828,
       "tag": "0018_oauth",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794676814457,
+      "tag": "0019_objektsperren",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,5 @@
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
-import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { createApp } from "./app.ts";
 import { createAuth } from "./auth.ts";
 import { schluesselAus } from "./crypto.ts";
@@ -10,6 +9,7 @@ import { eingerichtet } from "./db/status.ts";
 import { readEnv } from "./env.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
+import { speicherAusEnv } from "./speicher/auswahl.ts";
 
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -17,7 +17,7 @@ if (!env.BETTER_AUTH_SECRET) throw new Error("BETTER_AUTH_SECRET fehlt (mindeste
 
 await migrieren(env.DATABASE_URL);
 const { db } = verbinden(env.DATABASE_URL);
-const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
+const { speicher, sperrbar } = speicherAusEnv(env);
 // Einrichtungscode für das erste Konto: bei jedem Start neu, nur im Log
 const einrichtungscode = randomBytes(9).toString("base64url");
 if (!(await eingerichtet(db))) console.log(`Belegt ist noch nicht eingerichtet. Einrichtungscode: ${einrichtungscode}`);
@@ -44,6 +44,7 @@ const app = createApp({
   oauth: oauthAusEnv(env),
   oidcName: oidc?.name,
   embedOrigin: env.BELEGT_EMBED_ORIGIN,
+  objektsperre: !!sperrbar,
   oberflaeche,
 });
 

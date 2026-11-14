@@ -102,7 +102,12 @@ async function dateiEntfernen(db: Datenbank, speicher: Dateispeicher, dokumentId
     select count(*) as n from dokumente x
      where x.sha256 = ${d.sha256} and x.id <> ${dokumentId}
        and not exists (select 1 from loeschungen l where l.dokument_id = x.id and l.bestaetigt_am is not null)`);
-  if (Number(andere?.n ?? 0) === 0) await speicher.entfernen(d.sha256);
+  if (Number(andere?.n ?? 0) > 0) return;
+  // Die Löschung steht in der Datenbank; lehnt der Speicher ab (S3: noch gesperrt), bleibt die Datei bis zum Ende der
+  // Sperre liegen, ohne dass die bestätigte Löschung scheitert. Ausliefern tut Belegt sie ohnehin nicht mehr (410).
+  await speicher
+    .entfernen(d.sha256)
+    .catch((err) => console.error(`Datei ${d.sha256} nicht entfernt: ${err instanceof Error ? err.message : err}`));
 }
 
 /** Bedingung: Dokument ist nicht (bestätigt) gelöscht; d ist die Zeile aus dokumente */

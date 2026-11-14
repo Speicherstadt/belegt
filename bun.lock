@@ -8,6 +8,7 @@
         "@firsttris/gobd-kern": "https://github.com/firsttris/haben/releases/download/gobd-kern-v0.1.0/firsttris-gobd-kern-0.1.0.tgz",
         "@tanstack/react-query": "^5.107.1",
         "@tanstack/react-router": "^1.170.46",
+        "aws4fetch": "^1.0.20",
         "better-auth": "1.7.15",
         "client-zip": "2",
         "drizzle-orm": "^0.45.4",
@@ -423,6 +424,8 @@
     "assertion-error": ["assertion-error@2.0.1", "", {}, "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA=="],
 
     "atomic-sleep": ["atomic-sleep@1.0.0", "", {}, "sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ=="],
+
+    "aws4fetch": ["aws4fetch@1.0.20", "", {}, "sha512-/djoAN709iY65ETD6LKCtyyEI04XIBP5xVvfmNxsEP0uJB5tyaGBztSryRr4HqMStr9R06PisQE7m9zDTXKu6g=="],
 
     "axe-core": ["axe-core@4.14.0", "", {}, "sha512-9WTZxEjsZ7b13TH8JPmbV2z8CHbl80/2hm3XPEG4JgNdQLK81IBRXmSxHfMAOkSqQeRxT/0dwNDz2GOm3zzpcQ=="],
 

@@ -117,6 +117,22 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
     expect((await als(inhaber)(`/api/loeschungen/${id}`, { method: "DELETE" })).status).toBe(404);
   });
 
+  it("bestätigt die Löschung auch, wenn der Speicher die Datei noch nicht entfernen darf (S3 gesperrt)", async () => {
+    const d = await dokument("noch-gesperrt", "frei", "2026-01-01");
+    const vorher = t.speicher.entfernen;
+    t.speicher.entfernen = async () => {
+      throw new Error("S3 Löschen: 403 AccessDenied");
+    };
+    try {
+      const res = await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" });
+      expect(res.status).toBe(201);
+      expect((await res.json()).bestaetigtAm).toBeTruthy();
+      expect((await als(inhaber)(`/api/dokumente/${d.id}/datei`)).status).toBe(410);
+    } finally {
+      t.speicher.entfernen = vorher;
+    }
+  });
+
   it("verlangt die zweite Person auch, wenn ein Pflichtdokument nachträglich als frei eingeordnet wird", async () => {
     const d = await dokument("beleg-umgeordnet", "beleg", "2026-03-01");
     await als(inhaber)(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-03-01" }));

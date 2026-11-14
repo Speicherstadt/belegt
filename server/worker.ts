@@ -1,4 +1,3 @@
-import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
@@ -6,6 +5,9 @@ import { inhalteErzeugen } from "./inhalt/inhalt.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
+import { speicherAusEnv } from "./speicher/auswahl.ts";
+import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
+import type { SperrbarerSpeicher } from "./speicher/s3.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
 
 /*
@@ -18,7 +20,7 @@ if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
 if (!env.BELEGT_SCHLUESSEL) throw new Error("BELEGT_SCHLUESSEL fehlt");
 const schluessel = schluesselAus(env.BELEGT_SCHLUESSEL);
 const { db } = verbinden(env.DATABASE_URL);
-const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
+const { speicher, sperrbar } = speicherAusEnv(env);
 
 async function runde() {
   const ergebnisse = await alleAbrufen({ db, speicher }, schluessel, imapOeffnen, { oauth: oauthAusEnv(env) });
@@ -55,6 +57,16 @@ async function inhalte() {
   }
 }
 
+/** Mit S3: Sperren im Bucket bis zum Fristende verlängern, jede Minute */
+async function objektsperren(speicher: SperrbarerSpeicher) {
+  for (;;) {
+    const r = await sperrenAbgleichen(db, speicher).catch((err) => ({ gesetzt: 0, fehler: meldung(err) }));
+    if (r.gesetzt || r.fehler)
+      console.log(`Sperren im Bucket: ${r.gesetzt} verlängert${r.fehler ? `, Fehler: ${r.fehler}` : ""}`);
+    await Bun.sleep(60_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -62,4 +74,4 @@ async function postfaecher() {
   }
 }
 
-await Promise.all([postfaecher(), webhooks(), inhalte()]);
+await Promise.all([postfaecher(), webhooks(), inhalte(), ...(sperrbar ? [objektsperren(sperrbar)] : [])]);

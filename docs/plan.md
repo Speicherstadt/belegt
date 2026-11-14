@@ -71,7 +71,7 @@ Stand im November 2026:
 - **Fertig:** Phasen 1 bis 5: SMTP-Journal, IMAP, JMAP, Microsoft 365 und Google per OAuth, MBOX und EML;
   XRechnung und ZUGFeRD, REST-API mit OpenAPI, Webhooks, Tokens, Einbetten mit OIDC und MCP; Prüferzugang, Z3-Export,
   Prüfbericht und Verfahrensdokumentation. Dazu Texterkennung, Container und Compose.
-- **Offen:** Phase 6.
+- **Offen:** aus Phase 6 RFC 3161, PST, KI-Regeln, Testat (S3 mit Object Lock ist fertig; Mandanten nicht nötig, eine Instanz je Firma).
 
 ## Anbindung der Produkte
 

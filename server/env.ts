@@ -31,6 +31,17 @@ const Schema = z.object({
   OIDC_CLIENT_ID: z.string().min(1).optional(),
   OIDC_CLIENT_SECRET: z.string().min(1).optional(),
   OIDC_NAME: z.string().min(1).default("Firmenkonto"),
+  /** Dateien in einem S3-Bucket mit Object Lock statt in DOCUMENTS_DIR (docs/betrieb.md) */
+  S3_ENDPUNKT: z.string().url().optional(),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_REGION: z.string().min(1).default("us-east-1"),
+  S3_ZUGANG_ID: z.string().min(1).optional(),
+  S3_ZUGANG_GEHEIMNIS: z.string().min(1).optional(),
+  S3_PFAD_STIL: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  S3_SPERRE_TAGE: z.coerce.number().int().min(0).max(36500).default(0),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
   BELEGT_EMBED_ORIGIN: z
     .string()
