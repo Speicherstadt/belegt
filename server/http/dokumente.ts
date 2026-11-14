@@ -1,0 +1,163 @@
+import { bodyLimit } from "hono/body-limit";
+import { aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
+import {
+  aktuelle,
+  EinordnungEingabe,
+  einordnen,
+  Gruppe,
+  SperreEingabe,
+  sperreAnlegen,
+  sperreAufheben,
+  sperrenListen,
+  uebersicht,
+} from "../einordnung/einordnung.ts";
+import {
+  beantragen,
+  bestaetigen,
+  fuerDokument,
+  listen as loeschungenListen,
+  zurueckziehen as loeschungZurueckziehen,
+  regelVerletzt,
+} from "../loeschung/loeschung.ts";
+
+import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
+
+export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
+  app.post(
+    "/api/dokumente",
+    bodyLimit({ maxSize: MAX_UPLOAD, onError: (c) => c.json({ fehler: "Datei zu groß" }, 413) }),
+    async (c) => {
+      const form = await c.req.formData();
+      const datei = form.get("datei");
+      if (!(datei instanceof File)) return c.json({ fehler: "Feld „datei“ fehlt" }, 400);
+      const bytes = new Uint8Array(await datei.arrayBuffer());
+      const dokument = await aufnehmen(umgebung, {
+        bytes,
+        dateiname: datei.name || null,
+        quelle: "upload",
+        akteur: akteur(c.get("nutzer")),
+      });
+      return c.json(dokument, 201);
+    },
+  );
+
+  app.get("/api/dokumente", async (c) => {
+    const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
+    const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
+    return c.json(
+      await listen(umgebung.db, {
+        suche: c.req.query("suche"),
+        limit,
+        gruppe,
+        heute: heute(),
+        zeitraum: c.get("nutzer").zeitraum,
+      }),
+    );
+  });
+
+  app.get("/api/dokumente/:id", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    return c.json({
+      ...dokument,
+      einordnung: await aktuelle(umgebung.db, dokument.id),
+      loeschung: await fuerDokument(umgebung.db, dokument.id),
+    });
+  });
+
+  app.post("/api/dokumente/:id/einordnung", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    const eingabe = EinordnungEingabe.safeParse(await c.req.json().catch(() => null));
+    if (!eingabe.success) return c.json({ fehler: "Ungültige Einordnung", details: eingabe.error.issues }, 400);
+    try {
+      return c.json(await einordnen(umgebung.db, dokument.id, eingabe.data, akteur(c.get("nutzer"))), 201);
+    } catch (err) {
+      // Ein Trigger lehnt ab (etwa: schon gelöscht); seine Meldung ist für Menschen geschrieben
+      const meldung = regelVerletzt(err);
+      if (meldung) return c.json({ fehler: meldung }, 409);
+      // fristende lehnt etwa einen Tag ab, den es nicht gibt, oder freiwillig ohne Datum; Datenbankfehler (mit cause
+      // oder code) gehen nie mit ihrem Text an den Aufrufer, sie könnten SQL enthalten
+      if (err instanceof Error && !("code" in err) && !("cause" in err && err.cause))
+        return c.json({ fehler: err.message }, 400);
+      throw err;
+    }
+  });
+
+  app.post("/api/dokumente/:id/loeschung", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    if (await fuerDokument(umgebung.db, dokument.id))
+      return c.json({ fehler: "Für dieses Dokument gibt es schon eine Löschung" }, 409);
+    try {
+      return c.json(await beantragen(umgebung.db, umgebung.speicher, dokument.id, akteur(c.get("nutzer"))), 201);
+    } catch (err) {
+      const meldung = regelVerletzt(err);
+      if (meldung) return c.json({ fehler: meldung }, 409);
+      throw err;
+    }
+  });
+
+  app.get("/api/loeschungen", async (c) => c.json(await loeschungenListen(umgebung.db)));
+
+  app.post("/api/loeschungen/:id/bestaetigen", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+    try {
+      const l = await bestaetigen(umgebung.db, umgebung.speicher, id.data, akteur(c.get("nutzer")));
+      return l ? c.json(l) : c.json({ fehler: "Kein offener Antrag mit dieser ID" }, 404);
+    } catch (err) {
+      const meldung = regelVerletzt(err);
+      if (meldung) return c.json({ fehler: meldung }, 409);
+      throw err;
+    }
+  });
+
+  app.delete("/api/loeschungen/:id", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const ok = id.success && (await loeschungZurueckziehen(umgebung.db, id.data, akteur(c.get("nutzer"))));
+    return ok ? c.json({ ok: true }) : c.json({ fehler: "Kein offener Antrag mit dieser ID" }, 404);
+  });
+
+  app.get("/api/sperren", async (c) => c.json(await sperrenListen(umgebung.db)));
+
+  app.post("/api/sperren", async (c) => {
+    const eingabe = SperreEingabe.safeParse(await c.req.json().catch(() => null));
+    if (!eingabe.success) return c.json({ fehler: "Ungültige Sperre", details: eingabe.error.issues }, 400);
+    return c.json(await sperreAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+  });
+
+  app.post("/api/sperren/:id/aufheben", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const sperre = id.success ? await sperreAufheben(umgebung.db, id.data, akteur(c.get("nutzer"))) : null;
+    return sperre ? c.json(sperre) : c.json({ fehler: "Keine offene Sperre mit dieser ID" }, 404);
+  });
+
+  app.get("/api/fristen/uebersicht", async (c) => c.json(await uebersicht(umgebung.db, heute())));
+
+  app.get("/api/dokumente/:id/datei", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    if ((await fuerDokument(umgebung.db, dokument.id))?.bestaetigtAm)
+      return c.json({ fehler: "Das Dokument ist gelöscht" }, 410);
+    const bytes = await umgebung.speicher.laden(dokument.sha256).catch(() => null);
+    // Fehlt die Datei oder passt ihr Hash nicht mehr, wird nichts ausgeliefert, was als Original gelten könnte
+    if (!bytes) return c.json({ fehler: "Die Datei fehlt oder wurde verändert" }, 409);
+    return c.body(new Uint8Array(bytes), 200, {
+      "Content-Type": dokument.mimeType,
+      // ?ansicht=1 zeigt PDFs und Bilder im Browser an, alles andere wird immer heruntergeladen
+      "Content-Disposition": `${c.req.query("ansicht") === "1" && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
+      "X-Content-Type-Options": "nosniff",
+    });
+  });
+
+  app.get("/api/dokumente/:id/verlauf", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    return dokument ? c.json(await verlauf(umgebung.db, dokument.id)) : c.json({ fehler: "Nicht gefunden" }, 404);
+  });
+}
