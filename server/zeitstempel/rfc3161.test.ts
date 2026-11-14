@@ -30,6 +30,17 @@ describe.skipIf(!opensslDa)("Zeitstempel nach RFC 3161 (gegen OpenSSL als Dienst
     expect(() => antwortLesen(antwort.subarray(0, 40), hash, nonce)).toThrow();
   });
 
+  it("lehnt eine Zeit ab, die es nicht gibt (Monat 13), statt ein ungültiges Datum zu liefern", async () => {
+    const hash = randomBytes(32);
+    const nonce = randomBytes(8);
+    const res = await fetch(tsa.url, { method: "POST", body: new Uint8Array(anfrage(hash, nonce)) });
+    const antwort = Buffer.from(await res.arrayBuffer());
+    // GeneralizedTime: Tag 0x18, Länge, dann JJJJMMTT…; der Monat steht an den Stellen 4 und 5
+    const zeit = antwort.findIndex((b, i) => b === 0x18 && /^\d{14}/.test(antwort.toString("ascii", i + 2, i + 16)));
+    antwort.write("13", zeit + 2 + 4, "ascii");
+    expect(() => antwortLesen(new Uint8Array(antwort), hash, nonce)).toThrow("Zeit nicht lesbar");
+  });
+
   it("meldet einen Fehler des Dienstes", async () => {
     tsa.zustand.ablehnen = true;
     await expect(zeitstempelHolen(tsa.url, randomBytes(32))).rejects.toThrow("Zeitstempel: Antwort 503");
