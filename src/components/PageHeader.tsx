@@ -1,4 +1,11 @@
+import { useEffect } from "react";
+import { m } from "../paraglide/messages.js";
+
 export function PageHeader({ title, intro }: { title: string; intro: string }) {
+  // WCAG 2.4.2: Der Titel im Tab nennt die Seite, nicht nur die App
+  useEffect(() => {
+    document.title = `${title} · ${m.app_name()}`;
+  }, [title]);
   return (
     <header className="flex flex-col gap-1">
       <h1 className="m-0 font-semibold text-2xl tracking-tight">{title}</h1>

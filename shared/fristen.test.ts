@@ -50,6 +50,12 @@ describe("fristende (§ 147 Abs. 4 AO: ab Schluss des Kalenderjahres)", () => {
   it("lehnt Daten in anderem Format ab", () => {
     expect(() => fristende("beleg", "11.11.2026")).toThrow(/JJJJ-MM-TT/);
   });
+
+  it("lehnt Tage ab, die es nicht gibt", () => {
+    expect(() => fristende("freiwillig", "2026-11-11", { freiwilligBis: "2026-13-99" })).toThrow(/gibt es nicht/);
+    expect(() => fristende("beleg", "2026-02-30")).toThrow(/gibt es nicht/);
+    expect(fristende("beleg", "2028-02-29").bis).toBe("2036-12-31");
+  });
 });
 
 describe("loeschbar", () => {

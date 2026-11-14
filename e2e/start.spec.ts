@@ -52,6 +52,8 @@ for (const seite of SEITEN) {
       await page.emulateMedia({ colorScheme });
       await page.goto(seite.pfad);
       await expect(page.getByRole("heading", { level: 1, name: seite.titel })).toBeVisible();
+      // WCAG 2.4.2: jede Seite hat ihren eigenen Titel
+      await expect(page).toHaveTitle(`${seite.titel} · Belegt`);
       const ergebnis = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
       expect(ergebnis.violations, colorScheme).toEqual([]);
     }

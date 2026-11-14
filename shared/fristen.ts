@@ -65,7 +65,12 @@ const ISO_DATUM = /^(\d{4})-(\d{2})-(\d{2})$/;
 function jahrVon(datum: string): number {
   const treffer = ISO_DATUM.exec(datum);
   if (!treffer) throw new Error(`Kein Datum im Format JJJJ-MM-TT: ${datum}`);
-  return Number(treffer[1]);
+  const [jahr, monat, tag] = [Number(treffer[1]), Number(treffer[2]), Number(treffer[3])];
+  // Date rechnet einen 30. Februar in den März um; stimmt der Tag danach nicht mehr, gibt es ihn nicht
+  const probe = new Date(Date.UTC(jahr, monat - 1, tag));
+  if (probe.getUTCMonth() !== monat - 1 || probe.getUTCDate() !== tag)
+    throw new Error(`Den Tag ${datum} gibt es nicht`);
+  return jahr;
 }
 
 export interface Frist {
