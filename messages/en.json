@@ -50,7 +50,7 @@
   "audit_title": "Audit",
   "audit_intro": "Access for tax auditors, data export by the official description standard, audit report and procedure documentation.",
   "sources_title": "Sources and interfaces",
-  "sources_intro": "Where documents come from and which rules help with classification.",
+  "sources_intro": "Where documents come from, which rules help with classification and which programs may use Belegt.",
   "procedure_title": "Procedure documentation",
   "procedure_intro": "Belegt describes how it captures, retains, protects and deletes records. Enter below what only you can know.",
   "login_title": "Sign in",
@@ -243,5 +243,17 @@
   "procedure_stand": "As of {datum}",
   "procedure_complete": "All details are filled in.",
   "procedure_incomplete": "Some details are still missing.",
-  "procedure_missing": "Missing: {was}"
+  "procedure_missing": "Missing: {was}",
+  "tokens_title": "API tokens",
+  "tokens_intro": "For programs that read or add documents (header Authorization: Bearer …). A token cannot delete or manage anything.",
+  "tokens_name": "Name",
+  "tokens_right": "Permission",
+  "tokens_read": "Read",
+  "tokens_write": "Read, add and classify",
+  "tokens_create": "Create token",
+  "tokens_once": "The token is only shown now. Copy it into the program:",
+  "tokens_revoke": "Revoke",
+  "tokens_revoked": "revoked {datum}",
+  "tokens_created": "created {datum}",
+  "tokens_none": "No tokens yet."
 }

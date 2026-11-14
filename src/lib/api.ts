@@ -184,7 +184,19 @@ export interface Verfahrensdoku {
   abschnitte: { titel: string; absaetze: string[]; liste?: string[]; luecken?: string[] }[];
 }
 
+export interface ApiToken {
+  id: string;
+  name: string;
+  recht: "lesen" | "schreiben";
+  erstelltAm: string;
+  widerrufenAm: string | null;
+}
+
 export const api = {
+  tokens: () => aufruf<ApiToken[]>("/api/tokens"),
+  tokenAnlegen: (name: string, recht: ApiToken["recht"]) =>
+    aufruf<ApiToken & { klartext: string }>("/api/tokens", json({ name, recht })),
+  tokenWiderrufen: (id: string) => aufruf<unknown>(`/api/tokens/${id}/widerrufen`, { method: "POST" }),
   einstellungen: () => aufruf<Einstellungen>("/api/einstellungen"),
   einstellungenSpeichern: (e: Einstellungen) => aufruf<Einstellungen>("/api/einstellungen", json(e)),
   verfahrensdoku: () => aufruf<Verfahrensdoku>("/api/verfahrensdoku"),

@@ -225,3 +225,23 @@ export const einstellungen = pgTable(
   },
   (t) => [check("einstellungen_eine_zeile", sql`${t.id} = 1`)],
 );
+
+/**
+ * Zugang für Programme (Schnittstelle): gespeichert ist nur der SHA-256 des Tokens. „lesen“ liest Dokumente,
+ * „schreiben“ nimmt zusätzlich Dokumente und Mails auf und ordnet ein; verwalten, löschen oder bestätigen kann kein Token.
+ */
+export const apiTokens = pgTable(
+  "api_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    recht: text("recht", { enum: ["lesen", "schreiben"] }).notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    widerrufenAm: timestamp("widerrufen_am", { withTimezone: true }),
+  },
+  (t) => [
+    check("api_tokens_recht", sql`${t.recht} in ('lesen', 'schreiben')`),
+    check("api_tokens_name", sql`length(trim(${t.name})) > 0`),
+  ],
+);

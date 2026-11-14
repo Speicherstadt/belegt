@@ -109,4 +109,6 @@ export interface Angemeldet {
   role: Rolle;
   /** Nur beim Prüfer: was er sehen darf */
   zeitraum?: { von: string; bis: string };
+  /** Nur bei einem Programm mit API-Token */
+  token?: { name: string; recht: "lesen" | "schreiben" };
 }

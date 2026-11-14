@@ -2,6 +2,14 @@ import { darfSchreiben, type Rolle } from "../../shared/rollen.ts";
 import type { Angemeldet } from "../auth.ts";
 import { einladen, listen as zugaengeListen, zurueckziehen } from "../zugang/einladungen.ts";
 import { dokumentImPfad, imZeitraum, prueferDarf, prueferZeitraum } from "../zugang/pruefer.ts";
+import {
+  finden,
+  TokenEingabe,
+  anlegen as tokenAnlegen,
+  tokenDarf,
+  listen as tokensListen,
+  widerrufen,
+} from "../zugang/tokens.ts";
 
 import { type App, type AppUmgebung, akteur, Id, vonFremderSeite, ZugangEingabe } from "./gemeinsam.ts";
 
@@ -12,6 +20,21 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
   app.use("/api/*", async (c, next) => {
     if (c.req.path.startsWith("/api/auth/") || c.req.path === "/api/status" || c.req.path.startsWith("/api/einladung/"))
       return next();
+    // Programme melden sich mit einem API-Token an, nicht mit dem Cookie; deshalb gilt für sie keine CSRF-Prüfung
+    const kopf = c.req.header("authorization");
+    if (kopf?.startsWith("Bearer ")) {
+      const token = await finden(umgebung.db, kopf.slice(7).trim());
+      if (!token) return c.json({ fehler: "Token ungültig oder widerrufen" }, 401);
+      if (!tokenDarf(token.recht, c.req.method, c.req.path))
+        return c.json({ fehler: "Für dieses Token nicht erlaubt" }, 403);
+      c.set("nutzer", {
+        id: token.id,
+        email: "",
+        role: token.recht === "schreiben" ? "inhaber" : "steuerberatung",
+        token: { name: token.name, recht: token.recht },
+      });
+      return next();
+    }
     const sitzung = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!sitzung) return c.json({ fehler: "Nicht angemeldet" }, 401);
     const u = sitzung.user as { role?: Rolle; zeitraumVon?: unknown; zeitraumBis?: unknown };
@@ -65,5 +88,25 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
     const id = Id.safeParse(c.req.param("id"));
     const ok = id.success && (await zurueckziehen(umgebung.db, id.data, akteur(c.get("nutzer"))));
     return ok ? c.json({ ok: true }) : c.json({ fehler: "Keine offene Einladung mit dieser ID" }, 404);
+  });
+
+  // API-Tokens verwaltet nur der Inhaber mit seiner Sitzung; ein Token erreicht diese Aufrufe nicht (tokenDarf)
+  app.get("/api/tokens", async (c) => {
+    if (c.get("nutzer").role !== "inhaber") return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    return c.json(await tokensListen(umgebung.db));
+  });
+
+  app.post("/api/tokens", async (c) => {
+    const eingabe = TokenEingabe.safeParse(await c.req.json().catch(() => null));
+    if (!eingabe.success) return c.json({ fehler: "name und recht (lesen oder schreiben) angeben" }, 400);
+    const { token, klartext } = await tokenAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer")));
+    // Den Klartext gibt es nur in dieser Antwort; gespeichert ist nur sein Hash
+    return c.json({ ...token, klartext }, 201);
+  });
+
+  app.post("/api/tokens/:id/widerrufen", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const ok = id.success && (await widerrufen(umgebung.db, id.data, akteur(c.get("nutzer"))));
+    return ok ? c.json({ ok: true }) : c.json({ fehler: "Kein gültiges Token mit dieser ID" }, 404);
   });
 }

@@ -44,4 +44,4 @@ export function vonFremderSeite(headers: Headers, eigeneHerkunft: string): boole
 }
 
 /** Akteur im Audit-Log: wer angemeldet ist, mit Adresse, damit das Protokoll ohne die Tabelle user lesbar bleibt */
-export const akteur = (n: Angemeldet) => `nutzer:${n.email}`;
+export const akteur = (n: Angemeldet) => (n.token ? `token:${n.token.name}` : `nutzer:${n.email}`);

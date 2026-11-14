@@ -50,7 +50,7 @@
   "audit_title": "Prüfung",
   "audit_intro": "Zugang für die Betriebsprüfung, Datenträger nach dem Beschreibungsstandard, Prüfbericht und Verfahrensdokumentation.",
   "sources_title": "Quellen und Schnittstellen",
-  "sources_intro": "Woher Dokumente kommen und welche Regeln beim Einordnen helfen.",
+  "sources_intro": "Woher Dokumente kommen, welche Regeln beim Einordnen helfen und welche Programme Belegt nutzen dürfen.",
   "procedure_title": "Verfahrensdokumentation",
   "procedure_intro": "Belegt beschreibt, wie es Unterlagen erfasst, aufbewahrt, schützt und löscht. Was nur du wissen kannst, trägst du unten ein.",
   "login_title": "Anmelden",
@@ -243,5 +243,17 @@
   "procedure_stand": "Stand {datum}",
   "procedure_complete": "Alle Angaben sind gemacht.",
   "procedure_incomplete": "Es fehlen noch Angaben.",
-  "procedure_missing": "Fehlt: {was}"
+  "procedure_missing": "Fehlt: {was}",
+  "tokens_title": "API-Tokens",
+  "tokens_intro": "Für Programme, die Dokumente lesen oder aufnehmen (Kopfzeile Authorization: Bearer …). Ein Token kann nichts löschen und nichts verwalten.",
+  "tokens_name": "Name",
+  "tokens_right": "Recht",
+  "tokens_read": "Lesen",
+  "tokens_write": "Lesen, aufnehmen und einordnen",
+  "tokens_create": "Token anlegen",
+  "tokens_once": "Das Token erscheint nur jetzt. Kopiere es in das Programm:",
+  "tokens_revoke": "Widerrufen",
+  "tokens_revoked": "widerrufen {datum}",
+  "tokens_created": "angelegt {datum}",
+  "tokens_none": "Noch keine Tokens."
 }
