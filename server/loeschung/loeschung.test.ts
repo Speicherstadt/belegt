@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
+import { entfernenNachholen } from "./loeschung.ts";
 
 describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
   let t: Awaited<ReturnType<typeof testApp>>;
@@ -131,6 +132,33 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
     } finally {
       t.speicher.entfernen = vorher;
     }
+  });
+
+  it("entfernt die Datei später, sobald der Speicher sie freigibt, außer es kam derselbe Inhalt neu dazu", async () => {
+    const vorher = t.speicher.entfernen;
+    t.speicher.entfernen = async () => {
+      throw new Error("S3 Löschen: 403 AccessDenied");
+    };
+    const a = await dokument("sperre-endet", "frei", "2026-01-01");
+    const b = await dokument("kommt-wieder", "frei", "2026-01-01");
+    try {
+      await als(inhaber)(`/api/dokumente/${a.id}/loeschung`, { method: "POST" });
+      await als(inhaber)(`/api/dokumente/${b.id}/loeschung`, { method: "POST" });
+      expect(await entfernenNachholen(t.db, t.speicher)).toEqual({
+        entfernt: 0,
+        fehler: "S3 Löschen: 403 AccessDenied",
+      });
+      expect(existsSync(t.speicher.pfad(a.sha256))).toBe(true);
+    } finally {
+      t.speicher.entfernen = vorher;
+    }
+    // Die Sperre ist abgelaufen; derselbe Inhalt wie b liegt inzwischen als neues Dokument im Archiv
+    await dokument("kommt-wieder", "frei", "2026-01-01");
+    expect(await entfernenNachholen(t.db, t.speicher)).toEqual({ entfernt: 1, fehler: null });
+    expect(existsSync(t.speicher.pfad(a.sha256))).toBe(false);
+    expect(existsSync(t.speicher.pfad(b.sha256))).toBe(true);
+    // Erledigt ist erledigt: der nächste Lauf versucht nichts mehr
+    expect(await entfernenNachholen(t.db, t.speicher)).toEqual({ entfernt: 0, fehler: null });
   });
 
   it("verlangt die zweite Person auch, wenn ein Pflichtdokument nachträglich als frei eingeordnet wird", async () => {
