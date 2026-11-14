@@ -4,3 +4,5 @@ data/
 *.log
 .env
 src/paraglide
+test-results/
+playwright-report/
