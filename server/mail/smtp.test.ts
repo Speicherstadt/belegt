@@ -106,6 +106,14 @@ describe.skipIf(!testDatenbankUrl)("SMTP-Journal gegen Postgres", () => {
     expect(mail).toMatchObject({ betreff: "Datum im Jahr 10000", gesendetAm: null });
   });
 
+  it("antwortet in ASCII (RFC 5321, 2.4)", async () => {
+    const antworten = await Promise.all([
+      senden(lesen, "nur lesen").catch((e: { response: string }) => e.response),
+      senden(schreiben.klartext, "fremd", "jemand@anders.example").catch((e: { response: string }) => e.response),
+    ]);
+    for (const a of antworten) expect(a).toMatch(/^[\x20-\x7e]+$/);
+  });
+
   it("nimmt nach dem Widerruf des Tokens nichts mehr an", async () => {
     await t.anfrage(`/api/tokens/${schreiben.id}/widerrufen`, { method: "POST" }, inhaber);
     await expect(senden(schreiben.klartext, "nach Widerruf")).rejects.toMatchObject({ responseCode: 535 });
