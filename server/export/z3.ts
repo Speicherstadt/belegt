@@ -5,10 +5,11 @@ import { sql } from "drizzle-orm";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 import { listen as zeitstempelListen, token as zeitstempelToken } from "../zeitstempel/zeitstempel.ts";
+import { FELDER, feldZeilen, ORDNUNG_IM_PROTOKOLL, TAGS, tagZeilen } from "./z3-ordnung.ts";
 
 /**
- * Datenträgerüberlassung (Z3, GoBD Rz. 167): ein ZIP mit den Originalen und je einer CSV für Dokumente, Mails und
- * Audit-Log, beschrieben in einer index.xml nach dem Beschreibungsstandard. Ein Dokument gehört zum Zeitraum, wenn
+ * Datenträgerüberlassung (Z3, GoBD Rz. 167): ein ZIP mit den Originalen und je einer CSV für Dokumente, Mails, Tags,
+ * eigene Felder und Audit-Log, beschrieben in einer index.xml nach dem Beschreibungsstandard. Ein Dokument gehört zum Zeitraum, wenn
  * seine neueste Einordnung in ihn fällt, sonst sein Eingang. Gelöschte fehlen; ihr Nachweis steht im Audit-Log.
  */
 
@@ -25,6 +26,8 @@ const feld = (wert: string | number | null | undefined): string => {
   const text = wert == null ? "" : String(wert);
   return /[;"\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
+
+const spaltenVon = (t: BeschriebeneTabelle) => t.spalten.map((s) => s.name);
 
 export const csv = (kopf: string[], zeilen: (string | number | null)[][]): string =>
   BOM + [kopf, ...zeilen].map((z) => z.map(feld).join(";")).join(ZEILE) + ZEILE;
@@ -62,6 +65,9 @@ const DOKUMENTE: BeschriebeneTabelle = {
     { name: "Titel", typ: { art: "text" } },
     { name: "Korrespondent", typ: { art: "text" } },
     { name: "Pfad", typ: { art: "text" } },
+    { name: "ASN", typ: { art: "zahl", nachkommastellen: 0 } },
+    { name: "Dokumenttyp", typ: { art: "text" } },
+    { name: "Tags", typ: { art: "text" } },
   ],
 };
 
@@ -101,14 +107,23 @@ type DokumentZeile = {
   frist_bis: string | null;
   titel: string | null;
   korrespondent: string | null;
+  asn: string;
+  dokumenttyp: string | null;
+  tags: string | null;
 };
 
 async function dokumenteImZeitraum({ db }: Umgebung, { von, bis }: Zeitraum): Promise<DokumentZeile[]> {
   return [
     ...(await db.execute<DokumentZeile>(sql`
     select d.id, d.dateiname, d.mime_type, d.groesse, d.sha256, d.eingegangen_am, d.quelle,
-           e.art, e.entstanden::text as entstanden, e.frist_bis::text as frist_bis, e.titel, e.korrespondent
+           e.art, e.entstanden::text as entstanden, e.frist_bis::text as frist_bis, e.titel, e.korrespondent,
+           a.nummer as asn,
+           (select ty.name from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
+             where dd.dokument_id = d.id) as dokumenttyp,
+           (select string_agg(t.name, ', ' order by lower(t.name)) from dokument_tags dt join tags t on t.id = dt.tag_id
+             where dt.dokument_id = d.id) as tags
       from dokumente d
+      join archivnummern a on a.dokument_id = d.id
       left join lateral (select * from einordnungen x where x.dokument_id = d.id
                           order by x.erstellt_am desc, x.id desc limit 1) e on true
      where coalesce(e.entstanden, (d.eingegangen_am at time zone 'Europe/Berlin')::date) between ${von}::date and ${bis}::date
@@ -152,6 +167,7 @@ async function mailsCsv({ db }: Umgebung, ids: string[]): Promise<string> {
 /**
  * Die Zeilen, deren Einträge im Audit-Log zu Dokumenten des Zeitraums gehören: die Dokumente selbst (auch gelöschte,
  * damit ihr Löschnachweis bleibt), ihre Einordnungen, Löschungen, Mails und Anhänge zwischen zwei solchen Dokumenten.
+ * Tags, Dokumenttyp und Feldwerte kommen über ihre dokument_id dazu (ordnungDerFreigabe), auch entfernte.
  */
 const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     with dok as (select d.id from dokumente d where belegt_dokument_tag(d.id) between ${von}::date and ${bis}::date)
@@ -161,6 +177,14 @@ const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     union all select x.id::text from mails x where x.dokument_id in (select id from dok)
     union all select x.id::text from mail_anhaenge x
                where x.mail_dokument_id in (select id from dok) and x.anhang_dokument_id in (select id from dok)`;
+
+const ordnungDerFreigabe = ({ von, bis }: Zeitraum) => sql`
+    (table_name in (${sql.join(
+      ORDNUNG_IM_PROTOKOLL.map((t) => sql`${t}`),
+      sql`, `,
+    )})
+     and coalesce(new_value, old_value) ->> 'dokument_id' in (
+       select d.id::text from dokumente d where belegt_dokument_tag(d.id) between ${von}::date and ${bis}::date))`;
 
 async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigabe: boolean): Promise<string> {
   const zeilen = await db.execute<{
@@ -182,7 +206,8 @@ async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigab
          nurFreigabe
            ? sql`and ((table_name in ('dokumente', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
                        and row_id in (${zeilenDerFreigabe({ von, bis })}))
-                   or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })})))`
+                   or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })}))
+                   or ${ordnungDerFreigabe({ von, bis })})`
            : sql``
        }
      order by seq`);
@@ -221,6 +246,7 @@ export async function z3Export(
   { nurFreigabe = false }: { nurFreigabe?: boolean } = {},
 ): Promise<ReadableStream<Uint8Array>> {
   const dokumente = await dokumenteImZeitraum(umgebung, zeitraum);
+  const ids = dokumente.map((d) => d.id);
   const betrieb = await einstellungenLaden(umgebung.db);
   const stempel = await zeitstempelListen(umgebung.db);
   const pfade = new Map(
@@ -245,16 +271,18 @@ export async function z3Export(
           d.titel,
           d.korrespondent,
           pfade.get(d.id) ?? null,
+          Number(d.asn),
+          d.dokumenttyp,
+          d.tags,
         ]),
       ),
     },
     {
       name: MAILS.path,
-      inhalt: await mailsCsv(
-        umgebung,
-        dokumente.map((d) => d.id),
-      ),
+      inhalt: await mailsCsv(umgebung, ids),
     },
+    { name: TAGS.path, inhalt: csv(spaltenVon(TAGS), await tagZeilen(umgebung.db, ids)) },
+    { name: FELDER.path, inhalt: csv(spaltenVon(FELDER), await feldZeilen(umgebung.db, ids)) },
     { name: PROTOKOLL.path, inhalt: await protokollCsv(umgebung, zeitraum, nurFreigabe) },
     {
       name: "index.xml",
@@ -265,7 +293,7 @@ export async function z3Export(
           kommentar: `Zeitraum ${zeitraum.von} bis ${zeitraum.bis}`,
         },
         medium: `Belegt ${zeitraum.von} bis ${zeitraum.bis}`,
-        tabellen: [DOKUMENTE, MAILS, PROTOKOLL],
+        tabellen: [DOKUMENTE, MAILS, TAGS, FELDER, PROTOKOLL],
       }),
     },
     { name: "pruefwert.txt", inhalt: await pruefwert(umgebung) },

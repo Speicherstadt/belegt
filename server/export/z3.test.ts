@@ -74,6 +74,21 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
       titel: 'Rechnung "Nr. 42"',
       korrespondent: "Muster GmbH",
     });
+    const tag = async (name: string) => (await (await als(inhaber)("/api/tags", json({ name }))).json()).id;
+    const typ = (await (await als(inhaber)("/api/dokumenttypen", json({ name: "Eingangsrechnung" }))).json()).id;
+    const summe = (await (await als(inhaber)("/api/felder", json({ name: "Summe", typ: "betrag" }))).json()).id;
+    const faellig = (await (await als(inhaber)("/api/felder", json({ name: "Fällig", typ: "datum" }))).json()).id;
+    await als(inhaber)(
+      `/api/dokumente/${beleg.id}/ordnung`,
+      json({
+        tagsHinzu: [await tag("Steuer; 2026"), await tag("Auto")],
+        dokumenttyp: typ,
+        felder: [
+          { feldId: summe, wert: "1.234,56" },
+          { feldId: faellig, wert: `${jahr}-04-01` },
+        ],
+      }),
+    );
     alt = await hochladen("%PDF-1.7\n% alter Beleg\n", "alt.pdf", { art: "beleg", entstanden: "2019-05-01" });
     offen = await hochladen("noch nicht eingeordnet", "eingang.txt");
     geloescht = await hochladen("frei abgelegt", "frei.txt", { art: "frei", entstanden: `${jahr}-02-01` });
@@ -88,9 +103,11 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     expect(namen).toEqual(
       [
         "dokumente.csv",
+        "felder.csv",
         "index.xml",
         "mails.csv",
         "protokoll.csv",
+        "tags.csv",
         "pruefsummen.sha256",
         "pruefwert.txt",
         "zeitstempel.csv",
@@ -106,13 +123,40 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     const zeile = dokumente.split("\r\n").find((z) => z.startsWith(beleg.id))!;
     expect(zeile).toContain(`;beleg;${jahr}-03-01;${Number(jahr) + 8}-12-31;"Rechnung ""Nr. 42""";Muster GmbH;`);
     expect(zeile).toContain(`"${pfadBeleg}"`);
+    // ASN, Dokumenttyp und Tags hinten angehängt; ein Tag mit Semikolon steht in Anführungszeichen
+    const [{ nummer }] = (await t.sql`select nummer from archivnummern where dokument_id = ${beleg.id}`) as unknown as [
+      { nummer: string },
+    ];
+    expect(zeile.endsWith(`;${nummer};Eingangsrechnung;"Auto, Steuer; 2026"`)).toBe(true);
+    expect(dokumente.split("\r\n")[0]!.endsWith(";Pfad;ASN;Dokumenttyp;Tags")).toBe(true);
+
+    const tags = strFromU8(zip["tags.csv"]!).split("\r\n");
+    expect(tags[0]).toBe("\uFEFFDokument-ID;ASN;Tag");
+    expect(tags).toContain(`${beleg.id};${nummer};Auto`);
+    expect(tags).toContain(`${beleg.id};${nummer};"Steuer; 2026"`);
+    const felder = strFromU8(zip["felder.csv"]!).split("\r\n");
+    expect(felder[0]).toBe("\uFEFFDokument-ID;ASN;Feld;Feldtyp;Text;Zahl;Betrag EUR;Datum;Ja/Nein");
+    expect(felder).toContain(`${beleg.id};${nummer};Summe;betrag;;;1234,56;;`);
+    expect(felder).toContain(`${beleg.id};${nummer};Fällig;datum;;;;${jahr}-04-01;`);
     expect(dokumente).not.toContain(alt.id);
     expect(dokumente).not.toContain(geloescht.id);
 
     const index = strFromU8(zip["index.xml"]!);
     expect(index).toContain('<!DOCTYPE DataSet SYSTEM "gdpdu-01-03-2019.dtd">');
-    for (const csvDatei of ["dokumente.csv", "mails.csv", "protokoll.csv"])
+    for (const csvDatei of ["dokumente.csv", "mails.csv", "tags.csv", "felder.csv", "protokoll.csv"])
       expect(index).toContain(`<URL>${csvDatei}</URL>`);
+    // Der Betrag ist eine Zahl mit zwei Nachkommastellen, das Datum ein Datum, die ASN ganzzahlig
+    expect(index).toMatch(/<Name>Betrag EUR<\/Name>\s*<Numeric><Accuracy>2<\/Accuracy><\/Numeric>/);
+    expect(index).toMatch(/<Name>Datum<\/Name>\s*<Date><Format>YYYY-MM-DD<\/Format><\/Date>/);
+    expect(index).toMatch(/<Name>ASN<\/Name>\s*<Numeric><Accuracy>0<\/Accuracy><\/Numeric>/);
+    // Jede Tabelle in der index.xml hat so viele Spalten wie ihre Kopfzeile
+    for (const csvDatei of ["dokumente.csv", "tags.csv", "felder.csv"]) {
+      const tabelle = index.split("<Table>").find((x) => x.includes(`<URL>${csvDatei}</URL>`))!;
+      const spalten = (tabelle.match(/<VariableColumn>/g) ?? []).length;
+      expect(spalten, csvDatei).toBe(strFromU8(zip[csvDatei]!).split("\r\n")[0]!.split(";").length);
+    }
+    // Zuordnungen stehen im Protokoll
+    expect(strFromU8(zip["protokoll.csv"]!)).toContain(";dokument_tags;");
 
     // Jede Datei außer der Liste selbst steht mit ihrem SHA-256 in pruefsummen.sha256
     const summen = strFromU8(zip["pruefsummen.sha256"]!).trim().split("\n");
@@ -129,6 +173,29 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     const protokoll = strFromU8(zip["protokoll.csv"]!);
     expect(protokoll).toContain(";loeschungen;");
     expect(protokoll.split("\r\n")[0]).toBe("﻿Nr;Zeitpunkt;Akteur;Tabelle;Zeile;Aktion;Neuer Wert;Hash Vorgänger;Hash");
+  });
+
+  it("gibt dem Prüfer im Protokoll die Zuordnungen seiner Dokumente, nicht die Verwaltung der Tags", async () => {
+    const { pfad } = await (
+      await als(inhaber)(
+        "/api/einladungen",
+        json({ rolle: "pruefer", zeitraum: { von: `${jahr}-01-01`, bis: `${jahr}-12-31` } }),
+      )
+    ).json();
+    const pruefer = (
+      await t.registrieren("pruefer@example.org", "ein-langes-passwort", {
+        "x-belegt-einladung": pfad.split("/").pop(),
+      })
+    ).cookie;
+    const zip = await exportieren(pruefer, `${jahr}-01-01`, `${jahr}-12-31`);
+    const zeilen = strFromU8(zip["protokoll.csv"]!).split("\r\n");
+    const tabellen = new Set(zeilen.slice(1).map((z) => z.split(";")[3]));
+    expect(tabellen).toContain("dokument_tags");
+    expect(tabellen).toContain("feldwerte");
+    expect(tabellen).toContain("dokument_dokumenttypen");
+    expect(tabellen).not.toContain("tags");
+    expect(tabellen).not.toContain("felder");
+    expect(strFromU8(zip["tags.csv"]!)).toContain("Auto");
   });
 
   it("nimmt Mails mit ihrem Kopf auf", async () => {

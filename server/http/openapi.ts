@@ -1,4 +1,5 @@
 import { VERSION } from "./gemeinsam.ts";
+import { feldwert, listenParameter, ordnungPfade, ordnungsFelder } from "./openapi-ordnung.ts";
 
 /**
  * OpenAPI 3.1 für die Aufrufe, die Programme mit einem API-Token erreichen. Von Hand geschrieben, damit es kurz und
@@ -29,6 +30,7 @@ const dokument = {
     dateiname: { type: ["string", "null"] },
     quelle: { type: "string", enum: ["upload", "mail", "ordner", "api"] },
     eingegangenAm: { type: "string", format: "date-time" },
+    ...ordnungsFelder,
   },
 } as const;
 
@@ -44,7 +46,7 @@ export const openapi = {
   },
   components: {
     securitySchemes: { token: { type: "http", scheme: "bearer" } },
-    schemas: { Dokument: dokument },
+    schemas: { Dokument: dokument, Feldwert: feldwert },
   },
   security: [{ token: [] }],
   paths: {
@@ -70,6 +72,7 @@ export const openapi = {
             },
           },
           { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 200, default: 50 } },
+          ...listenParameter,
         ],
         responses: {
           "200": {
@@ -126,7 +129,7 @@ export const openapi = {
     },
     "/api/dokumente/{id}": {
       get: {
-        summary: "Ein Dokument mit Einordnung und Löschung",
+        summary: "Ein Dokument mit Einordnung, Löschung, Tags, Dokumenttyp und Feldwerten (felder)",
         parameters: [idParam],
         responses: { "200": { description: "Dokument" }, "404": fehler },
       },
@@ -212,7 +215,7 @@ export const openapi = {
     },
     "/api/dokumente/{id}/verlauf": {
       get: {
-        summary: "Einträge des Audit-Logs und Siegel",
+        summary: "Einträge des Audit-Logs (auch Tags, Dokumenttyp, Feldwerte mit detail) und Siegel",
         parameters: [idParam],
         responses: { "200": { description: "Verlauf" }, "404": fehler },
       },
@@ -243,5 +246,6 @@ export const openapi = {
         },
       },
     },
+    ...ordnungPfade,
   },
 } as const;

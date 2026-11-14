@@ -28,10 +28,12 @@ Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prü
 | Datei | Inhalt |
 | --- | --- |
 | `dokumente/<ID>/<Dateiname>` | die Originale, Byte für Byte |
-| `dokumente.csv` | je Dokument Typ, Größe, SHA-256, Eingang, Quelle, Einordnung, Frist und Pfad im ZIP |
+| `dokumente.csv` | je Dokument Typ, Größe, SHA-256, Eingang, Quelle, Einordnung, Frist, Pfad im ZIP, Archivnummer, Dokumenttyp und Tags |
 | `mails.csv` | Kopf der Mails (Message-ID, Antwort auf, Von, An, Betreff, Gesendet) |
+| `tags.csv` | je Dokument und Tag eine Zeile ([Ordnung](ordnung.md)) |
+| `felder.csv` | je Dokument und eigenem Feld eine Zeile; Betrag in Euro mit zwei Nachkommastellen, Zahl, Datum, Text oder Ja/Nein in eigener Spalte |
 | `protokoll.csv` | Einträge des Audit-Logs im Zeitraum, je mit dem Hash des Vorgängers und dem eigenen |
-| `index.xml` | Beschreibung der drei Tabellen nach dem Beschreibungsstandard |
+| `index.xml` | Beschreibung der Tabellen nach dem Beschreibungsstandard, mit dem Typ jeder Spalte |
 | `pruefwert.txt` | Nummer und Hash des letzten Eintrags im Audit-Log beim Export |
 | `pruefsummen.sha256` | SHA-256 jeder Datei im ZIP, prüfbar mit `sha256sum -c pruefsummen.sha256` |
 
