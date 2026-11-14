@@ -44,7 +44,8 @@ gesperrt ist und was gelöscht werden dürfte.
 
 Ist die Frist abgelaufen und liegt keine Sperre über dem Dokument, beantragt der Inhaber auf der Seite des Dokuments
 die Löschung. Eine zweite Person (die Steuerberatung) bestätigt sie unter Fristen › Offene Löschungen; wer beantragt
-hat, kann nicht selbst bestätigen. Frei Abgelegtes löscht der Inhaber sofort.
+hat, kann nicht selbst bestätigen. Frei Abgelegtes löscht der Inhaber sofort, außer es war vorher anders
+eingeordnet.
 
 Ob gelöscht werden darf, prüft Postgres bei Antrag und Bestätigung selbst: Einordnung vorhanden, Frist abgelaufen
 (Tag in Deutschland) oder frei, keine offene Sperre, zwei Personen. Nach der Bestätigung ist die Datei entfernt, außer

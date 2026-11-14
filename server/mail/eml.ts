@@ -40,6 +40,9 @@ export interface Mail {
   anhaenge: Anhang[];
 }
 
+/** Postgres speichert U+0000 nicht in text; in Kopf und Text einer Mail trägt es nichts */
+const ohneNull = <T extends string | null | undefined>(wert: T): T => wert?.replaceAll("\u0000", "") as T;
+
 const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 type Adresse = { name: string; address?: string; group?: Adresse[] };
@@ -47,7 +50,11 @@ type Adresse = { name: string; address?: string; group?: Adresse[] };
 /** Gruppen („Team: a@x, b@y;“) aufgelöst, ohne Einträge ohne Adresse */
 function personen(liste: Adresse[] | undefined): Person[] {
   return (liste ?? []).flatMap((a) =>
-    a.group ? personen(a.group) : a.address ? [{ name: a.name, adresse: a.address.toLowerCase() }] : [],
+    a.group
+      ? personen(a.group)
+      : a.address
+        ? [{ name: ohneNull(a.name), adresse: ohneNull(a.address).toLowerCase() }]
+        : [],
   );
 }
 
@@ -59,7 +66,7 @@ function isoDatum(wert: string | undefined): string | null {
 
 /** Message-IDs aus einem Kopf wie References: „<a@x> <b@y>“ */
 function messageIds(wert: string | undefined): string[] {
-  return wert?.match(/<[^<>\s]+>/g) ?? [];
+  return ohneNull(wert)?.match(/<[^<>\s]+>/g) ?? [];
 }
 
 // Benannte Zeichen von HTML 4 für U+00A0 bis U+00FF, in dieser Reihenfolge (HTML 4.01, Abschnitt 24.2)
@@ -118,18 +125,18 @@ export async function emlLesen(roh: Uint8Array): Promise<Mail> {
     von,
     an: personen(mail.to as Adresse[] | undefined),
     kopie: personen(mail.cc as Adresse[] | undefined),
-    betreff: mail.subject?.trim() ?? "",
+    betreff: ohneNull(mail.subject)?.trim() ?? "",
     datum: isoDatum(mail.date),
     messageId: messageIds(mail.messageId)[0] ?? null,
     antwortAuf: messageIds(mail.inReplyTo)[0] ?? null,
     verweise: messageIds(mail.references),
-    text: klartext(mail.text, mail.html),
+    text: klartext(ohneNull(mail.text), ohneNull(mail.html)),
     anhaenge: mail.attachments.map((a) => {
       const bytes = typeof a.content === "string" ? new TextEncoder().encode(a.content) : new Uint8Array(a.content);
       return {
-        dateiname: a.filename,
+        dateiname: ohneNull(a.filename),
         bytes,
-        mimeType: a.mimeType,
+        mimeType: ohneNull(a.mimeType),
         groesse: bytes.byteLength,
         sha256: sha256(bytes),
         eingebettet: a.disposition === "inline" && Boolean(a.contentId),

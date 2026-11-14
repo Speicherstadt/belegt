@@ -2,8 +2,7 @@ import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { dokumente, loeschungen } from "../db/schema.ts";
-import { aktuelle } from "../einordnung/einordnung.ts";
+import { dokumente, einordnungen, loeschungen } from "../db/schema.ts";
 
 export type Loeschung = typeof loeschungen.$inferSelect;
 
@@ -14,14 +13,21 @@ export function regelVerletzt(err: unknown): string | null {
   return quelle?.code === "23514" ? (quelle.message ?? "Nicht erlaubt") : null;
 }
 
-/** Beantragt die Löschung; frei Abgelegtes löscht dieselbe Person sofort (keine Pflicht, keine zweite Person nötig) */
+/**
+ * Beantragt die Löschung; frei Abgelegtes löscht dieselbe Person sofort (keine Pflicht, keine zweite Person nötig).
+ * War das Dokument je anders eingeordnet, bestätigt eine zweite Person, wie es der Trigger verlangt.
+ */
 export async function beantragen(
   db: Datenbank,
   speicher: Dateispeicher,
   dokumentId: string,
   akteur: string,
 ): Promise<Loeschung> {
-  const frei = (await aktuelle(db, dokumentId))?.art === "frei";
+  const arten = await db
+    .select({ art: einordnungen.art })
+    .from(einordnungen)
+    .where(eq(einordnungen.dokumentId, dokumentId));
+  const frei = arten.length > 0 && arten.every((e) => e.art === "frei");
   const [neu] = await mitAkteur(db, akteur, (tx) =>
     tx
       .insert(loeschungen)

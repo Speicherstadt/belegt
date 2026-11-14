@@ -64,6 +64,13 @@
       "when": 1794669303690,
       "tag": "0008_volltext",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794669524119,
+      "tag": "0009_loeschung_regeln",
+      "breakpoints": true
     }
   ]
 }

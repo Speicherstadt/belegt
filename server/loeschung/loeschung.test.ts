@@ -138,12 +138,10 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
             values (${d.id}, 'nutzer:a', 'nutzer:b', now())`,
     ).rejects.toThrow(/zweite Person/);
     const { id } = await (await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).json();
-    await expect(t.sql`update loeschungen set beantragt_von = 'nutzer:b' where id = ${id}`).rejects.toThrow(
-      /Antrag/,
-    );
-    await expect(t.sql`update loeschungen set beantragt_am = now() - interval '1 day' where id = ${id}`).rejects.toThrow(
-      /Antrag/,
-    );
+    await expect(t.sql`update loeschungen set beantragt_von = 'nutzer:b' where id = ${id}`).rejects.toThrow(/Antrag/);
+    await expect(
+      t.sql`update loeschungen set beantragt_am = now() - interval '1 day' where id = ${id}`,
+    ).rejects.toThrow(/Antrag/);
   });
 
   it("hat nach allem eine intakte Kette", async () => {
