@@ -21,6 +21,14 @@ Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Parag
 Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests gegen Postgres brauchen
 `TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer.
 
+```sh
+TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
+```
+
+Daneben legt der Lauf `<name>_vorlage` an (einmal migriert) und je Vitest-Worker `<name>_<Nummer>` als Kopie davon
+(`server/test-db.ts`). Der Benutzer braucht `CREATEDB`; Tests, die eine Manipulation an den Triggern vorbei
+nachstellen, brauchen einen Superuser.
+
 `TEST_DATABASE_URL` nie auf einen Server mit echten Daten zeigen lassen: Die Tests legen Datenbanken daneben an und
 löschen sie wieder.
 
