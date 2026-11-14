@@ -7,6 +7,7 @@ import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
 import { listen as zugaengeListen } from "../zugang/einladungen.ts";
+import { listen as tokensListen } from "../zugang/tokens.ts";
 
 /**
  * Verfahrensdokumentation (GoBD Rz. 151 ff.): allgemeine Beschreibung, Anwender-, System- und Betriebsdokumentation.
@@ -61,9 +62,10 @@ export async function verfahrensdoku(
   db: Datenbank,
   { abrufMinuten, version, jetzt = new Date() }: { abrufMinuten: number; version: string; jetzt?: Date },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, quellen, regeln, sperren, z, befunde] = await Promise.all([
+  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde] = await Promise.all([
     einstellungenLaden(db),
     zugaengeListen(db),
+    tokensListen(db),
     quellenListen(db),
     regelnListen(db),
     sperrenListen(db),
@@ -147,12 +149,21 @@ export async function verfahrensdoku(
     {
       titel: "6. Zugriff",
       absaetze: [
-        "Zugänge entstehen nur über Einladung durch den Inhaber. Nur der Inhaber schreibt; die Steuerberatung liest und kann Löschungen als zweite Person bestätigen; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
+        "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest und kann Löschungen als zweite Person bestätigen; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
+        "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
       ],
-      liste: zugaenge.zugaenge.map(
-        (u) =>
-          `${u.email}: ${ROLLE[u.rolle] ?? u.rolle}${u.zeitraumVon && u.zeitraumBis ? `, Zeitraum ${u.zeitraumVon} bis ${u.zeitraumBis}` : ""}, seit ${tag(new Date(u.erstelltAm))}`,
-      ),
+      liste: [
+        ...zugaenge.zugaenge.map(
+          (u) =>
+            `${u.email}: ${ROLLE[u.rolle] ?? u.rolle}${u.zeitraumVon && u.zeitraumBis ? `, Zeitraum ${u.zeitraumVon} bis ${u.zeitraumBis}` : ""}, seit ${tag(new Date(u.erstelltAm))}`,
+        ),
+        ...tokens
+          .filter((t) => !t.widerrufenAm)
+          .map(
+            (t) =>
+              `API-Token „${t.name}“: ${t.recht === "schreiben" ? "liest, nimmt auf und ordnet ein" : "liest"}, seit ${tag(new Date(t.erstelltAm))}`,
+          ),
+      ],
     },
     {
       titel: "7. Betrieb und Datensicherung",
