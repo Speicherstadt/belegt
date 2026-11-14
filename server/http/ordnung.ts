@@ -21,7 +21,7 @@ import {
   tagLoeschen,
   tagsListen,
 } from "../ordnung/ordnung.ts";
-import { Aenderung, gibtEs, ordnungZu, sammeln } from "../ordnung/zuordnung.ts";
+import { Aenderung, gibtEs, ordnungZu, Sammlung, sammeln } from "../ordnung/zuordnung.ts";
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
 type Ctx = Context<{ Variables: { nutzer: import("../auth.ts").Angemeldet } }>;
@@ -116,6 +116,19 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
       if (!r.ok)
         return c.json({ fehler: r.ergebnisse[0]?.ok === false ? r.ergebnisse[0].fehler : "Nicht möglich" }, 409);
       return c.json(await ordnungZu(db, id.data));
+    } catch (err) {
+      return konfliktAntwort(c, err);
+    }
+  });
+
+  /** Sammelbearbeitung: eine Änderung für viele Dokumente, alles oder nichts, Ergebnis je Dokument */
+  app.post("/api/dokumente/sammeln", async (c) => {
+    const e = await eingabe(c, Sammlung);
+    if (!e) return c.json({ fehler: "Ungültige Sammelbearbeitung" }, 400);
+    const { ids, ...aenderung } = e;
+    try {
+      const r = await sammeln(db, ids, aenderung, akteur(c.get("nutzer")));
+      return c.json(r, r.ok ? 200 : 409);
     } catch (err) {
       return konfliktAntwort(c, err);
     }

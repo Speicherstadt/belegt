@@ -401,5 +401,22 @@
   "order_field_invalid_amount": "Not an amount. Please enter something like 1.234,56.",
   "order_field_delete_confirm": "Delete {name} and all values",
   "order_failed": "Not saved: {meldung}",
-  "suggest_doctype": "Document type “{typ}” suggests: {art}"
+  "suggest_doctype": "Document type “{typ}” suggests: {art}",
+  "bulk_title": "{anzahl} selected",
+  "bulk_action": "Action",
+  "bulk_tags_add": "Add tag",
+  "bulk_tags_remove": "Remove tag",
+  "bulk_doctype": "Set document type",
+  "bulk_field": "Set field value",
+  "bulk_classify": "Classify",
+  "bulk_value": "Value (empty removes it)",
+  "bulk_created_received": "Created on the day of receipt",
+  "bulk_reclassify": "Also reclassify documents already classified",
+  "bulk_classify_hint": "Without the checkbox Belegt only classifies documents in the inbox and skips the others. A new classification is added as a version; deleted documents cannot be classified.",
+  "bulk_apply": "Apply to {anzahl}",
+  "bulk_done": "{anzahl} documents changed, {eingeordnet} of them classified.",
+  "bulk_rolled_back": "Nothing changed: at least one document could not be changed.",
+  "bulk_failed_item": "{name}: {fehler}",
+  "bulk_select_page": "Select all on this page",
+  "bulk_select": "Select {name}"
 }

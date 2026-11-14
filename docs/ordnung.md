@@ -48,6 +48,17 @@ Im Archiv filterst du nach Tags (das Dokument hat alle gewählten), nach Dokumen
 einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und Datum von–bis. Die Liste zeigt Tags und Dokumenttyp unter
 dem Namen. Die Suche findet die Namen von Tags und Dokumenttyp und die Werte der Felder vom Typ Text, Auswahl und Link.
 
+## Mehrfachauswahl
+
+Im Eingang und im Archiv wählst du Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der
+Seite. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Dokumenttyp setzen, Feldwert setzen oder
+einordnen. Einordnen geht wie bei einem einzelnen Dokument: Art, Tag der Entstehung (auf Wunsch der Tag des Eingangs
+jedes Dokuments), Titel und Korrespondent. Ohne „Auch schon eingeordnete neu einordnen“ ordnet Belegt nur Dokumente im
+Eingang ein und überspringt die übrigen; mit dem Häkchen kommt bei jedem eine neue Einordnung als Version dazu.
+
+Eine Sammelbearbeitung ist eine Transaktion: Geht es bei einem Dokument nicht, etwa weil es gelöscht ist, ändert sich
+bei keinem etwas, und Belegt nennt das Dokument und den Grund.
+
 ## Nach der Löschung
 
 Tags, Dokumenttyp und Feldwerte eines gelöschten Dokuments bleiben als Teil des Löschnachweises, neue lehnt Postgres

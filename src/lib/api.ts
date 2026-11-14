@@ -7,6 +7,8 @@ export class ApiFehler extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** Antwort der Sammelbearbeitung bei 409: das Ergebnis je Dokument */
+    readonly ergebnis?: { ok: boolean; ergebnisse: SammelErgebnis[] },
   ) {
     super(message);
   }
@@ -17,11 +19,18 @@ async function aufruf<T>(pfad: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     const text = await res.text();
     let meldung = text;
+    let ergebnis: ApiFehler["ergebnis"];
     try {
-      const json = JSON.parse(text) as { fehler?: string; message?: string };
+      const json = JSON.parse(text) as {
+        fehler?: string;
+        message?: string;
+        ok?: boolean;
+        ergebnisse?: SammelErgebnis[];
+      };
       meldung = json.fehler ?? json.message ?? text;
+      if (json.ergebnisse) ergebnis = { ok: false, ergebnisse: json.ergebnisse };
     } catch {}
-    throw new ApiFehler(res.status, meldung);
+    throw new ApiFehler(res.status, meldung, ergebnis);
   }
   return res.json() as Promise<T>;
 }
@@ -101,6 +110,18 @@ export interface OrdnungAenderung {
   dokumenttyp?: string | null;
   felder?: { feldId: string; wert: Feldwert | null }[];
 }
+
+/** Einordnung in der Sammelbearbeitung; entstanden „eingang“ nimmt den Tag des Eingangs jedes Dokuments */
+export interface SammelEinordnung {
+  art: Art;
+  entstanden: string;
+  freiwilligBis?: string;
+  titel?: string;
+  korrespondent?: string;
+  nurOffene: boolean;
+}
+
+export type SammelErgebnis = { id: string; ok: true; eingeordnet: boolean } | { id: string; ok: false; fehler: string };
 
 /** Filter der Archivliste nach Tags, Dokumenttyp und einem Feld (server/ordnung/filter.ts) */
 export interface ListenFilter {
@@ -361,6 +382,18 @@ export const api = {
       `/api/dokumente/${id}`,
     ),
   ordnen: (id: string, aenderung: OrdnungAenderung) => aufruf<Ordnung>(`/api/dokumente/${id}/ordnung`, json(aenderung)),
+  /** Sammelbearbeitung: alles oder nichts; 409 kommt mit dem Ergebnis je Dokument zurück, nicht als Fehler */
+  sammeln: async (ids: string[], aenderung: OrdnungAenderung & { einordnung?: SammelEinordnung }) => {
+    try {
+      return await aufruf<{ ok: boolean; ergebnisse: SammelErgebnis[] }>(
+        "/api/dokumente/sammeln",
+        json({ ids, ...aenderung }),
+      );
+    } catch (err) {
+      if (err instanceof ApiFehler && err.status === 409 && err.ergebnis) return err.ergebnis;
+      throw err;
+    }
+  },
   tags: () => aufruf<Tag[]>("/api/tags"),
   tagAnlegen: (t: { name: string; farbe: Farbe }) => aufruf<Tag>("/api/tags", json(t)),
   tagAendern: (id: string, t: { name?: string; farbe?: Farbe }) =>

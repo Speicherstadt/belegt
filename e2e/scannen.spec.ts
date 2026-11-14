@@ -30,7 +30,8 @@ test("jedes Dokument hat eine Archivnummer, sichtbar in Liste und Dokument und a
 
   await page.goto("/archiv");
   const zeile = page.getByRole("row", { name: new RegExp(name) });
-  await expect(zeile.getByRole("cell").first()).toHaveText(asn!);
+  // Eine eigene Zelle mit genau der Nummer (vor ihr steht für den Inhaber das Kästchen der Mehrfachauswahl)
+  await expect(zeile.getByRole("cell", { name: asn!, exact: true })).toBeVisible();
   await page.getByLabel(SUCHE).fill(`ASN ${asn}`);
   await expect(page.getByRole("row")).toHaveCount(2);
   await expect(link).toBeVisible();

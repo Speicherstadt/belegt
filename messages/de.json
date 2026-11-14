@@ -401,5 +401,22 @@
   "order_field_invalid_amount": "Kein Betrag. Bitte etwa 1.234,56 eingeben.",
   "order_field_delete_confirm": "{name} und alle Werte löschen",
   "order_failed": "Nicht gespeichert: {meldung}",
-  "suggest_doctype": "Dokumenttyp „{typ}“ schlägt vor: {art}"
+  "suggest_doctype": "Dokumenttyp „{typ}“ schlägt vor: {art}",
+  "bulk_title": "{anzahl} gewählt",
+  "bulk_action": "Aktion",
+  "bulk_tags_add": "Tag hinzufügen",
+  "bulk_tags_remove": "Tag entfernen",
+  "bulk_doctype": "Dokumenttyp setzen",
+  "bulk_field": "Feldwert setzen",
+  "bulk_classify": "Einordnen",
+  "bulk_value": "Wert (leer entfernt ihn)",
+  "bulk_created_received": "Entstanden am Tag des Eingangs",
+  "bulk_reclassify": "Auch schon eingeordnete neu einordnen",
+  "bulk_classify_hint": "Ohne Häkchen ordnet Belegt nur Dokumente im Eingang ein und überspringt die übrigen. Eine neue Einordnung kommt als Version dazu; gelöschte lassen sich nicht einordnen.",
+  "bulk_apply": "Auf {anzahl} anwenden",
+  "bulk_done": "{anzahl} Dokumente geändert, davon {eingeordnet} eingeordnet.",
+  "bulk_rolled_back": "Nichts geändert: Bei mindestens einem Dokument ging es nicht.",
+  "bulk_failed_item": "{name}: {fehler}",
+  "bulk_select_page": "Alle auf dieser Seite auswählen",
+  "bulk_select": "{name} auswählen"
 }

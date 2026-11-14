@@ -91,3 +91,33 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   await page.getByRole("textbox", { name: "Von", exact: true }).fill("2.000,00");
   await expect(page.getByRole("link", { name })).toHaveCount(0);
 });
+
+test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag hinzufügen", async ({ page }, info) => {
+  const tag = `Stapel ${info.project.name}`;
+  const praefix = `Stapel-${info.project.name}`;
+  await hochladen(page, `${praefix}-1.pdf`);
+  await hochladen(page, `${praefix}-2.pdf`);
+  await page.goto("/ordnung");
+  const tags = page.locator("section", { has: page.getByRole("heading", { name: "Tags", exact: true }) });
+  await tags.getByLabel("Neuer Tag").fill(tag);
+  await tags.getByRole("button", { name: "Tag anlegen" }).click();
+  await expect(tags.getByRole("listitem").filter({ hasText: tag })).toBeVisible();
+
+  await page.goto("/archiv");
+  await page.getByRole("searchbox").fill(praefix);
+  await expect(page.getByRole("link", { name: `${praefix}-1.pdf` })).toBeVisible();
+  await expect(page.getByRole("link", { name: `${praefix}-2.pdf` })).toBeVisible();
+  await page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" }).check();
+  const sammel = page.locator("section", { has: page.getByRole("heading", { name: "2 gewählt" }) });
+  await sammel.getByRole("combobox", { name: "Aktion" }).selectOption("tagsHinzu");
+  await sammel.getByRole("combobox", { name: "Tag" }).selectOption({ label: tag });
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    expect((await axe(page)).violations, colorScheme).toEqual([]);
+  }
+  await sammel.getByRole("button", { name: "Auf 2 anwenden" }).click();
+  await expect(page.getByRole("status")).toContainText("2 Dokumente geändert");
+  await expect(page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" })).not.toBeChecked();
+  for (const n of [1, 2])
+    await expect(page.getByRole("row", { name: new RegExp(`${praefix}-${n}`) })).toContainText(tag);
+});

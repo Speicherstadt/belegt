@@ -7,6 +7,7 @@ import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
+import { BulkEdit } from "./BulkEdit.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { TagChip } from "./TagChip.tsx";
@@ -50,6 +51,20 @@ export function DocumentList({
     queryKey: ["dokumente", suche, gruppe, parameter],
     queryFn: () => api.dokumente(suche, gruppe, parameter),
   });
+  const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
+  const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
+  const schreiben = darfSchreiben(ich.data?.role);
+  // Gewählt ist nur, was die Liste gerade zeigt; ein anderer Filter nimmt nichts Unsichtbares mit
+  const ausgewaehlt = (liste.data ?? []).filter((d) => auswahl.has(d.id)).map((d) => d.id);
+  const alleGewaehlt = !!liste.data?.length && ausgewaehlt.length === liste.data.length;
+  const umschalten = (id: string) => {
+    setSammelMeldung(null);
+    setAuswahl((vorher) => {
+      const neu = new Set(vorher);
+      if (!neu.delete(id)) neu.add(id);
+      return neu;
+    });
+  };
   const eingabe = useRef<HTMLInputElement>(null);
   const mailEingabe = useRef<HTMLInputElement>(null);
   const mailImport = useMutation({
@@ -87,7 +102,7 @@ export function DocumentList({
             />
           </label>
         )}
-        {darfSchreiben(ich.data?.role) && (
+        {schreiben && (
           <>
             <input
               ref={eingabe}
@@ -174,6 +189,21 @@ export function DocumentList({
           {m.upload_failed({ meldung: hochladen.error.message })}
         </p>
       )}
+      {schreiben && ausgewaehlt.length > 0 && liste.data && (
+        <BulkEdit
+          gewaehlt={ausgewaehlt}
+          eintraege={liste.data}
+          fertig={(meldung) => {
+            setAuswahl(new Set());
+            setSammelMeldung(meldung);
+          }}
+        />
+      )}
+      {sammelMeldung && (
+        <p role="status" className="m-0 text-sm">
+          {sammelMeldung}
+        </p>
+      )}
       {liste.data?.length === 0 && <EmptyState title={leer.title} text={leer.text} />}
       {!!liste.data?.length && (
         // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
@@ -181,6 +211,20 @@ export function DocumentList({
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-border border-b text-left text-muted">
+                {schreiben && (
+                  <th className="w-10 px-3 py-2.5">
+                    <input
+                      type="checkbox"
+                      checked={alleGewaehlt}
+                      onChange={() => {
+                        setSammelMeldung(null);
+                        setAuswahl(alleGewaehlt ? new Set() : new Set(liste.data!.map((d) => d.id)));
+                      }}
+                      aria-label={m.bulk_select_page()}
+                      className="size-4"
+                    />
+                  </th>
+                )}
                 <th className="px-3 py-2.5 text-right font-medium">{m.col_asn()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
@@ -192,6 +236,17 @@ export function DocumentList({
             <tbody>
               {liste.data.map((d) => (
                 <tr key={d.id} className="border-border border-b last:border-b-0 hover:bg-subtle">
+                  {schreiben && (
+                    <td className="px-3 py-3">
+                      <input
+                        type="checkbox"
+                        checked={auswahl.has(d.id)}
+                        onChange={() => umschalten(d.id)}
+                        aria-label={m.bulk_select({ name: d.titel ?? d.dateiname ?? m.unnamed() })}
+                        className="size-4"
+                      />
+                    </td>
+                  )}
                   <td className="px-3 py-3 text-right text-muted tabular-nums">{d.asn}</td>
                   <td className="px-3 py-3 font-medium">
                     <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">

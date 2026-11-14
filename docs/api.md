@@ -43,6 +43,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/dokumenttypen`, `POST /api/dokumenttypen` (`name`, `vorgabeArt` oder `null`), `PATCH …/:id`, `DELETE …/:id` | Dokumenttypen |
 | `GET /api/felder`, `POST /api/felder` (`name`, `typ`: `text`, `zahl`, `betrag`, `datum`, `ja_nein`, `auswahl`, `link`, bei `auswahl` `optionen`), `PATCH …/:id` (`name`, `optionen`), `DELETE …/:id` | Eigene Felder; der Typ ist fest |
 | `POST /api/dokumente/:id/ordnung` (`tagsHinzu`, `tagsWeg`, `dokumenttyp` (ID oder `null`), `felder`: `[{feldId, wert}]`) | Tags, Dokumenttyp und Feldwerte setzen; `wert` `null` entfernt, ein Betrag in Cent oder als `1.234,56`; Antwort der neue Stand; `400` bei ungültigem Wert, `409` nach der Löschung |
+| `POST /api/dokumente/sammeln` (`ids`: 1 bis 500, dazu wie bei `ordnung` und optional `einordnung`: wie beim Einordnen, `entstanden` auch `eingang`, `nurOffene` (Vorgabe `true`)) | Sammelbearbeitung in einer Transaktion; Antwort `ok` und `ergebnisse` je Dokument (`ok`, `eingeordnet` oder `fehler`); scheitert eines, `409` und nichts ist geändert |
 | `GET /api/dokumente/:id/datei` | das Original; `409`, wenn die Datei fehlt oder ihr Hash nicht mehr stimmt |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
