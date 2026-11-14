@@ -75,7 +75,7 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 | 📘 [Verfahrensdokumentation](https://firsttris.github.io/belegt/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
 | 🔌 [Schnittstellen](https://firsttris.github.io/belegt/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
 | 🔐 [Anmeldung](https://firsttris.github.io/belegt/einbetten.html) | Konten nur per Einladung, Rollen Inhaber, Steuerberatung und Prüfer, OpenID Connect, Einbetten in ein Portal |
-| 🌍 Sprachen | Oberfläche auf Deutsch und Englisch, hell und dunkel, per Tastatur bedienbar und gegen WCAG 2.2 AA geprüft |
+| 🌍 Sprachen | Oberfläche auf Deutsch und Englisch, hell, dunkel oder nach dem Gerät, per Tastatur bedienbar und gegen WCAG 2.2 AA geprüft |
 
 ## Screenshots
 

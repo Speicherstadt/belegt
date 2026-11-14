@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { eingerichtet } from "./db/status.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
-import type { App, AppUmgebung } from "./http/gemeinsam.ts";
+import { type App, type AppUmgebung, VERSION } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
 import { oauthRouten } from "./http/oauth.ts";
 import { openapi } from "./http/openapi.ts";
@@ -31,12 +31,13 @@ export function createApp(umgebung?: AppUmgebung) {
     /** Öffentlich: Beschreibung der Schnittstelle für Programme */
     app.get("/api/openapi.json", (c) => c.json(openapi));
 
-    /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
+    /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten), dazu die Version */
     app.get("/api/status", async (c) =>
       c.json({
         eingerichtet: await eingerichtet(umgebung.db),
         oidc: umgebung.oidcName ? { name: umgebung.oidcName } : null,
         embedOrigin: umgebung.embedOrigin ?? null,
+        version: VERSION,
       }),
     );
 

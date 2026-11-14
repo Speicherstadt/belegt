@@ -47,7 +47,7 @@ schickt sie nur dorthin, mit `source: "belegt"`.
 | Belegt | `route` | Die gezeigte Seite (`path`) |
 | Belegt | `title` | Der Titel der gezeigten Seite (`title`) |
 | Belegt | `signed-out` | Antwort auf `logout` |
-| Seite | `theme` | `theme`: `light` oder `dark` |
+| Seite | `theme` | `theme`: `light` oder `dark`; gilt vor der Wahl unter „Darstellung“, die im Frame fehlt |
 | Seite | `navigate` | Eine Seite von Belegt öffnen (`path`; nur Pfade von Belegt, nie eine andere Seite) |
 | Seite | `logout` | Belegt meldet ab und antwortet mit `signed-out` |
 

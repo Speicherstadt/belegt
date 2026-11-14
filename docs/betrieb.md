@@ -69,7 +69,8 @@ docker compose up -d
 ```
 
 Mit `BELEGT_VERSION` in `.env` bleibt Belegt auf einer Version (etwa `0.1.0`), sonst folgt es `latest`. Aus dem
-Quellcode gebaut (das `compose.yml` im Repository): `git pull` und `docker compose up -d --build`.
+Quellcode gebaut (das `compose.yml` im Repository): `git pull` und `docker compose up -d --build`. Welche Version läuft,
+steht unten in der Navigation und in `/api/status`.
 
 Die Migrationen laufen beim Start des Servers; der Worker startet erst, wenn der Server bereit ist.
 

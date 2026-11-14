@@ -31,7 +31,7 @@ export function Shell({ children }: { children: ReactNode }) {
       >
         {m.skip_link()}
       </a>
-      <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} />
+      <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} version={status.data?.version} />
       <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
         {children}
       </main>

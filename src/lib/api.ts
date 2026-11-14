@@ -246,7 +246,9 @@ export const api = {
   einstellungenSpeichern: (e: Einstellungen) => aufruf<Einstellungen>("/api/einstellungen", json(e)),
   verfahrensdoku: () => aufruf<Verfahrensdoku>("/api/verfahrensdoku"),
   status: () =>
-    aufruf<{ eingerichtet: boolean; oidc: { name: string } | null; embedOrigin: string | null }>("/api/status"),
+    aufruf<{ eingerichtet: boolean; oidc: { name: string } | null; embedOrigin: string | null; version: string }>(
+      "/api/status",
+    ),
   /** Anmelden über den OIDC-Anbieter; stumm: prompt=none, ohne Rückfrage beim Anbieter (im Frame) */
   anmeldenMitAnbieter: async (ziel: string, stumm = false) => {
     const { url } = await aufruf<{ url: string }>(

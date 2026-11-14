@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { api, type Ich } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
+import { Darstellung } from "./Darstellung.tsx";
 
 const ITEMS = [
   { to: "/", label: () => m.nav_inbox() },
@@ -19,11 +20,13 @@ export function Sidebar({
   ich,
   eingebettet = false,
   oidc = null,
+  version,
 }: {
   ich: Ich;
   /** Im Frame einer anderen Seite: ohne Namen und Konto, die zeigt die einbettende Seite */
   eingebettet?: boolean;
   oidc?: { name: string } | null;
+  version?: string;
 }) {
   const konten = useQuery({ queryKey: ["konten"], queryFn: api.konten, enabled: !!oidc && !eingebettet });
   const verbunden = konten.data?.some((k) => k.providerId === "oidc");
@@ -59,6 +62,7 @@ export function Sidebar({
       </nav>
       {!eingebettet && (
         <div className="mt-auto flex flex-col gap-2 px-2 text-sm">
+          <Darstellung />
           <span className="truncate text-muted">{ich.email}</span>
           {oidc && konten.data && !verbunden && (
             <button
@@ -76,6 +80,7 @@ export function Sidebar({
           >
             {m.logout()}
           </button>
+          {version && <span className="text-muted text-xs">{m.version({ version })}</span>}
         </div>
       )}
     </aside>

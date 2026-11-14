@@ -306,5 +306,10 @@
   "report_timestamp_value": "{zeit} over entry {nr} ({dienst})",
   "report_timestamp_download": "Download token",
   "report_timestamp_none": "none (TSA_URL not set or no run yet)",
-  "suggest_ki": "Suggestion of the language model ({modell}): {art}."
+  "suggest_ki": "Suggestion of the language model ({modell}): {art}.",
+  "theme_label": "Appearance",
+  "theme_system": "System",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "version": "Version {version}"
 }

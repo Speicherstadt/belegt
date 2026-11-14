@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { VERSION } from "./http/gemeinsam.ts";
 import { testApp } from "./test-app.ts";
 import { testDatenbankUrl } from "./test-db.ts";
 
@@ -19,6 +20,7 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       eingerichtet: false,
       oidc: null,
       embedOrigin: null,
+      version: VERSION,
     });
   });
 
@@ -48,6 +50,7 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       eingerichtet: true,
       oidc: null,
       embedOrigin: null,
+      version: VERSION,
     });
     const zweites = await t.registrieren("mallory@example.org");
     expect(zweites.res.status).toBe(403);
