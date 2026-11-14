@@ -87,6 +87,25 @@ describe.skipIf(!testDatenbankUrl)("SMTP-Journal gegen Postgres", () => {
     expect(anzahl).toBe(1);
   });
 
+  it("archiviert eine Mail, deren Datum Postgres nicht speichern kann, statt sie ewig mit 451 abzuweisen", async () => {
+    const transport = nodemailer.createTransport({
+      host: "127.0.0.1",
+      port,
+      secure: false,
+      ignoreTLS: true,
+      auth: { user: "journal", pass: schreiben.klartext },
+    });
+    const raw = roh("Datum im Jahr 10000").replace("Mon, 2 Nov 2026", "Mon, 2 Nov 10000");
+    const info = await transport.sendMail({
+      envelope: { from: "rechnung@lieferant.example", to: ["archiv@belegt.example"] },
+      raw,
+    });
+    expect(info.response).toMatch(/Archiviert/);
+    const id = info.response.split(" ").pop()!;
+    const mail = await (await t.anfrage(`/api/dokumente/${id}/mail`, {}, inhaber)).json();
+    expect(mail).toMatchObject({ betreff: "Datum im Jahr 10000", gesendetAm: null });
+  });
+
   it("nimmt nach dem Widerruf des Tokens nichts mehr an", async () => {
     await t.anfrage(`/api/tokens/${schreiben.id}/widerrufen`, { method: "POST" }, inhaber);
     await expect(senden(schreiben.klartext, "nach Widerruf")).rejects.toMatchObject({ responseCode: 535 });
