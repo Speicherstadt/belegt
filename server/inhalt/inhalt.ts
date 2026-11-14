@@ -1,9 +1,10 @@
+import { fileURLToPath } from "node:url";
 import { eq, sql } from "drizzle-orm";
 import { extractText, getDocumentProxy } from "unpdf";
 import { inhalte } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { type ERechnung, eRechnungLesen, speicherbar } from "./erechnung.ts";
-import { bildText, ocrVerfuegbar, pdfScanText } from "./ocr.ts";
+import { ausfuehren, bildText, ocrVerfuegbar, pdfScanText } from "./ocr.ts";
 
 /** So viel Text wird höchstens gespeichert; für die Suche reicht das, das Original bleibt vollständig */
 const MAX_TEXT = 1_000_000;
@@ -61,6 +62,21 @@ export async function lesen(bytes: Uint8Array, mimeType: string, { ocr = false }
   return { text: "", erechnung: null };
 }
 
+const KIND = fileURLToPath(new URL("./lesen-kind.ts", import.meta.url));
+
+/**
+ * lesen in einem eigenen Bun-Prozess mit Zeitlimit: pdf.js liest im selben Thread, ein bösartiges oder kaputtes PDF
+ * hielte sonst den ganzen Worker an, mit Mailabruf und Webhooks. Nach dem Zeitlimit wird der Prozess beendet.
+ */
+export async function lesenImKind(
+  bytes: Uint8Array,
+  mimeType: string,
+  { ocr = false, zeitlimit = 10 * 60_000 }: { ocr?: boolean; zeitlimit?: number } = {},
+): Promise<Gelesen> {
+  const aus = await ausfuehren("bun", [KIND, mimeType, ocr ? "ocr" : ""], bytes, zeitlimit);
+  return JSON.parse(aus) as Gelesen;
+}
+
 /**
  * Liest die Inhalte der Dokumente, die noch keine haben (PDF und XML, mit Texterkennung auch Bilder; nicht gelöscht).
  * Kommt die Texterkennung später dazu, liest es Scans und Bilder ohne Text noch einmal. Läuft im Worker, damit der
@@ -69,7 +85,7 @@ export async function lesen(bytes: Uint8Array, mimeType: string, { ocr = false }
  */
 export async function inhalteErzeugen(
   { db, speicher }: Umgebung,
-  { stapel = 20, ocr = ocrVerfuegbar() }: { stapel?: number; ocr?: boolean } = {},
+  { stapel = 20, ocr = ocrVerfuegbar(), zeitlimit }: { stapel?: number; ocr?: boolean; zeitlimit?: number } = {},
 ) {
   const bilder = sql`array[${sql.join(
     BILDER.map((b) => sql`${b}`),
@@ -89,7 +105,7 @@ export async function inhalteErzeugen(
   for (const d of offen) {
     try {
       const bytes = await speicher.laden(d.sha256);
-      const g = await lesen(new Uint8Array(bytes), d.mime_type, { ocr });
+      const g = await lesenImKind(new Uint8Array(bytes), d.mime_type, { ocr, zeitlimit });
       const werte = { text: g.text, erechnung: g.erechnung, ocr: g.ocr ?? false, fehler: null, erzeugtAm: new Date() };
       await db
         .insert(inhalte)

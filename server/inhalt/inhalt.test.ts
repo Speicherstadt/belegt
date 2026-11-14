@@ -3,7 +3,7 @@ import { PDFDocument, PDFName, StandardFonts } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
-import { inhalteErzeugen, lesen } from "./inhalt.ts";
+import { inhalteErzeugen, lesen, lesenImKind } from "./inhalt.ts";
 
 const beispiel = (name: string) => readFileSync(new URL(`./beispiele/${name}`, import.meta.url));
 
@@ -47,6 +47,18 @@ describe("Inhalt lesen", () => {
   it("liest eine XRechnung als XML und lässt Bilder leer", async () => {
     expect((await lesen(beispiel("ubl.xml"), "application/xml")).erechnung).toMatchObject({ nummer: "2026/77" });
     expect(await lesen(new Uint8Array([0xff, 0xd8, 0xff]), "image/jpeg")).toEqual({ text: "", erechnung: null });
+  });
+});
+
+describe("Lesen im eigenen Prozess", () => {
+  it("liefert dasselbe wie lesen", async () => {
+    const bytes = await pdf("Rechnung RE-2026-0042", { name: "factur-x.xml", xml: beispiel("cii.xml") });
+    expect(await lesenImKind(bytes, "application/pdf")).toEqual(await lesen(bytes, "application/pdf"));
+  });
+
+  it("beendet den Prozess nach dem Zeitlimit, statt den Worker aufzuhalten", async () => {
+    const bytes = await pdf("langsam");
+    await expect(lesenImKind(bytes, "application/pdf", { zeitlimit: 1 })).rejects.toThrow(/abgebrochen/);
   });
 });
 

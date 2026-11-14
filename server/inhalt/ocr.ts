@@ -21,11 +21,17 @@ let verfuegbar: boolean | undefined;
 /** Ob Tesseract und pdftoppm installiert sind; einmal geprüft (pdftoppm kennt nur -v, nicht --version) */
 export const ocrVerfuegbar = () => (verfuegbar ??= vorhanden("tesseract", "--version") && vorhanden("pdftoppm", "-v"));
 
-function ausfuehren(programm: string, argumente: string[], eingabe?: Uint8Array): Promise<string> {
+/** Startet ein Programm mit Eingabe auf stdin und gibt stdout zurück; nach dem Zeitlimit wird es beendet */
+export function ausfuehren(
+  programm: string,
+  argumente: string[],
+  eingabe?: Uint8Array,
+  zeitlimit = ZEITLIMIT,
+): Promise<string> {
   return new Promise((ok, fehler) => {
     const p = spawn(programm, argumente, {
       stdio: ["pipe", "pipe", "pipe"],
-      timeout: ZEITLIMIT,
+      timeout: zeitlimit,
       killSignal: "SIGKILL",
     });
     const aus: Buffer[] = [];
