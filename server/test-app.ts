@@ -9,14 +9,21 @@ import { createAuth } from "./auth.ts";
 import { testDatenbank } from "./test-db.ts";
 
 const BASIS = "http://localhost:3000";
+export const EINRICHTUNGSCODE = "test-einrichtungscode";
 
 /** App mit echter Anmeldung, eigener Testdatenbank und eigenem Speicher; für Tests gegen Postgres */
-export async function testApp() {
+export async function testApp({ begrenzen = false }: { begrenzen?: boolean } = {}) {
   const sql: postgres.Sql = await testDatenbank();
   const verzeichnis = await mkdtemp(join(tmpdir(), "belegt-test-"));
   const db = drizzle(sql);
   const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
-  const auth = createAuth({ db, secret: "x".repeat(32), baseURL: BASIS });
+  const auth = createAuth({
+    db,
+    secret: "x".repeat(32),
+    baseURL: BASIS,
+    einrichtungscode: EINRICHTUNGSCODE,
+    begrenzen,
+  });
   const app = createApp({ db, speicher, auth });
 
   /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */
@@ -30,11 +37,15 @@ export async function testApp() {
       },
     });
 
-  /** Registriert ein Konto und gibt das Cookie der Sitzung zurück */
-  async function registrieren(email: string, passwort = "ein-langes-passwort") {
+  /** Registriert ein Konto (mit Einrichtungscode oder Einladung) und gibt das Cookie der Sitzung zurück */
+  async function registrieren(
+    email: string,
+    passwort = "ein-langes-passwort",
+    kopf: Record<string, string> = { "x-belegt-einrichtungscode": EINRICHTUNGSCODE },
+  ) {
     const res = await anfrage("/api/auth/sign-up/email", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...kopf },
       body: JSON.stringify({ email, password: passwort, name: email }),
     });
     const cookie = res.headers

@@ -26,7 +26,7 @@ export function LoginPage() {
     setFehler(null);
     setLaeuft(true);
     try {
-      await (einrichten ? api.einrichten(email, passwort) : api.anmelden(email, passwort));
+      await (einrichten ? api.einrichten(email, passwort, String(form.get("code"))) : api.anmelden(email, passwort));
       await queryClient.invalidateQueries();
       await navigate({ to: "/" });
     } catch (err) {
@@ -45,6 +45,21 @@ export function LoginPage() {
           <h1 className="m-0 font-semibold text-2xl tracking-tight">{titel}</h1>
           {einrichten && <p className="m-0 text-muted text-sm">{m.login_setup_intro()}</p>}
         </div>
+        {einrichten && (
+          <label className="flex flex-col gap-1.5 font-medium text-sm">
+            {m.login_setup_code()}
+            <input
+              name="code"
+              required
+              autoComplete="off"
+              aria-describedby="code-hinweis"
+              className="h-9 rounded-md border border-border bg-bg px-3 font-normal"
+            />
+            <span id="code-hinweis" className="font-normal text-muted text-xs">
+              {m.login_setup_code_hint()}
+            </span>
+          </label>
+        )}
         <label className="flex flex-col gap-1.5 font-medium text-sm">
           {m.login_email()}
           <input

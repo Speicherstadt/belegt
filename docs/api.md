@@ -11,6 +11,8 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 | `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` | Einrichten, Anmelden, Abmelden (Better Auth) |
 | `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; ohne Sitzung |
 | `GET /api/ich` | der angemeldete Zugang mit Rolle |
+| `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung` oder `pruefer`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
+| `GET /api/einladung/:token` | öffentlich: ob ein Link noch gilt und für welche Rolle |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; die Suche trifft vorerst den Dateinamen |
 | `GET /api/dokumente/:id` | ein Dokument |

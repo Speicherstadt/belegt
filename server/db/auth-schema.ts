@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, check, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { ROLLEN } from "../../shared/rollen.ts";
 
 /* Tabellen für Better Auth (Kern), wie in Haben, mit der Rolle am Zugang */
@@ -71,3 +71,23 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Einladung für einen weiteren Zugang (Steuerberatung, Prüfer). Der Link enthält ein zufälliges Token, gespeichert ist
+ * nur sein SHA-256; einmal einlösbar, nur bis gueltig_bis, zurückziehbar.
+ */
+export const einladungen = pgTable(
+  "einladungen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    rolle: text("rolle", { enum: ROLLEN }).notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
+    eingeloestAm: timestamp("eingeloest_am", { withTimezone: true }),
+    eingeloestVon: text("eingeloest_von"),
+    zurueckgezogenAm: timestamp("zurueckgezogen_am", { withTimezone: true }),
+  },
+  // Einladen lässt sich nur in Rollen ohne Schreibrecht; Inhaber gibt es genau einen
+  (t) => [check("einladungen_rolle", sql`${t.rolle} in ('steuerberatung', 'pruefer')`)],
+);

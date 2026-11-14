@@ -29,6 +29,13 @@
       "when": 1794667386510,
       "tag": "0003_einordnung",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794667717727,
+      "tag": "0004_einladungen",
+      "breakpoints": true
     }
   ]
 }

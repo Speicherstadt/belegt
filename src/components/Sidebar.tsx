@@ -27,7 +27,10 @@ export function Sidebar({ ich }: { ich: Ich }) {
         <span className="text-muted text-xs">{m.app_claim()}</span>
       </div>
       <nav aria-label={m.nav_label()} className="flex flex-col gap-0.5">
-        {ITEMS.map((item) => (
+        {[
+          ...ITEMS,
+          ...(ich.role === "inhaber" ? ([{ to: "/zugaenge", label: () => m.nav_access() }] as const) : []),
+        ].map((item) => (
           <Link
             key={item.to}
             to={item.to}

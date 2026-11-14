@@ -83,6 +83,19 @@ export interface Uebersicht {
   loeschbar: number;
 }
 
+export interface Zugaenge {
+  zugaenge: { id: string; email: string; rolle: Rolle; erstelltAm: string }[];
+  einladungen: {
+    id: string;
+    rolle: Rolle;
+    erstelltAm: string;
+    gueltigBis: string;
+    eingeloestAm: string | null;
+    eingeloestVon: string | null;
+    zurueckgezogenAm: string | null;
+  }[];
+}
+
 export interface Ereignis {
   seq: number;
   at: string;
@@ -102,8 +115,21 @@ export interface Befund {
 export const api = {
   status: () => aufruf<{ eingerichtet: boolean }>("/api/status"),
   ich: () => aufruf<Ich>("/api/ich"),
-  einrichten: (email: string, passwort: string) =>
-    aufruf<unknown>("/api/auth/sign-up/email", json({ email, password: passwort, name: email })),
+  einrichten: (email: string, passwort: string, code: string) =>
+    aufruf<unknown>("/api/auth/sign-up/email", {
+      ...json({ email, password: passwort, name: email }),
+      headers: { "content-type": "application/json", "x-belegt-einrichtungscode": code },
+    }),
+  einladung: (token: string) => aufruf<{ rolle: Rolle }>(`/api/einladung/${encodeURIComponent(token)}`),
+  einladungAnnehmen: (token: string, email: string, passwort: string) =>
+    aufruf<unknown>("/api/auth/sign-up/email", {
+      ...json({ email, password: passwort, name: email }),
+      headers: { "content-type": "application/json", "x-belegt-einladung": token },
+    }),
+  zugaenge: () => aufruf<Zugaenge>("/api/zugaenge"),
+  einladen: (rolle: "steuerberatung" | "pruefer") =>
+    aufruf<{ id: string; pfad: string }>("/api/einladungen", json({ rolle })),
+  zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),
   abmelden: () => aufruf<unknown>("/api/auth/sign-out", json({})),

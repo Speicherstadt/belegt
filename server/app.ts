@@ -16,6 +16,7 @@ import {
   sperrenListen,
   uebersicht,
 } from "./einordnung/einordnung.ts";
+import { einladen, offen as einladungOffen, listen as zugaengeListen, zurueckziehen } from "./zugang/einladungen.ts";
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
 const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
@@ -66,8 +67,19 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
     /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
     app.get("/api/status", async (c) => c.json({ eingerichtet: await eingerichtet(umgebung.db) }));
 
+    /** Öffentlich: ob ein Einladungslink noch gilt und für welche Rolle (Seite /einladung/…) */
+    app.get("/api/einladung/:token", async (c) => {
+      const e = await einladungOffen(umgebung.db, c.req.param("token"));
+      return e ? c.json(e) : c.json({ fehler: "Die Einladung ist ungültig, abgelaufen oder schon eingelöst." }, 404);
+    });
+
     app.use("/api/*", async (c, next) => {
-      if (c.req.path.startsWith("/api/auth/") || c.req.path === "/api/status") return next();
+      if (
+        c.req.path.startsWith("/api/auth/") ||
+        c.req.path === "/api/status" ||
+        c.req.path.startsWith("/api/einladung/")
+      )
+        return next();
       const sitzung = await auth.api.getSession({ headers: c.req.raw.headers });
       if (!sitzung) return c.json({ fehler: "Nicht angemeldet" }, 401);
       const nutzer = {
@@ -85,6 +97,26 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
     });
 
     app.get("/api/ich", (c) => c.json(c.get("nutzer")));
+
+    // Zugänge verwaltet nur der Inhaber; die Liste zeigt keine Tokens
+    app.get("/api/zugaenge", async (c) => {
+      if (c.get("nutzer").role !== "inhaber") return c.json({ fehler: "Nur für den Inhaber" }, 403);
+      return c.json(await zugaengeListen(umgebung.db));
+    });
+
+    app.post("/api/einladungen", async (c) => {
+      const rolle = z.enum(["steuerberatung", "pruefer"]).safeParse((await c.req.json().catch(() => null))?.rolle);
+      if (!rolle.success) return c.json({ fehler: "Rolle steuerberatung oder pruefer" }, 400);
+      const { einladung, token } = await einladen(umgebung.db, rolle.data, akteur(c.get("nutzer")));
+      // Das Token steht nur in dieser Antwort; gespeichert ist nur sein Hash
+      return c.json({ ...einladung, pfad: `/einladung/${token}` }, 201);
+    });
+
+    app.post("/api/einladungen/:id/zurueckziehen", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const ok = id.success && (await zurueckziehen(umgebung.db, id.data, akteur(c.get("nutzer"))));
+      return ok ? c.json({ ok: true }) : c.json({ fehler: "Keine offene Einladung mit dieser ID" }, 404);
+    });
 
     app.post(
       "/api/dokumente",
@@ -105,7 +137,7 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
     );
 
     app.get("/api/dokumente", async (c) => {
-      const limit = Math.min(Number(c.req.query("limit") ?? 50) || 50, 200);
+      const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
       const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
       return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit, gruppe }));
     });
@@ -158,7 +190,7 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       return c.body(new Uint8Array(bytes), 200, {
         "Content-Type": dokument.mimeType,
         // ?ansicht=1 zeigt PDFs und Bilder im Browser an, alles andere wird immer heruntergeladen
-        "Content-Disposition": `${c.req.query("ansicht") && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
+        "Content-Disposition": `${c.req.query("ansicht") === "1" && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
         "X-Content-Type-Options": "nosniff",
       });
     });

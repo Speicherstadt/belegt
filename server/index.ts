@@ -1,8 +1,10 @@
+import { randomBytes } from "node:crypto";
 import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { createApp } from "./app.ts";
 import { createAuth } from "./auth.ts";
 import { verbinden } from "./db/client.ts";
 import { migrieren } from "./db/migrieren.ts";
+import { eingerichtet } from "./db/status.ts";
 import { readEnv } from "./env.ts";
 
 const env = readEnv();
@@ -12,7 +14,10 @@ if (!env.BETTER_AUTH_SECRET) throw new Error("BETTER_AUTH_SECRET fehlt (mindeste
 await migrieren(env.DATABASE_URL);
 const { db } = verbinden(env.DATABASE_URL);
 const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
-const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTER_AUTH_URL });
+// Einrichtungscode für das erste Konto: bei jedem Start neu, nur im Log
+const einrichtungscode = randomBytes(9).toString("base64url");
+if (!(await eingerichtet(db))) console.log(`Belegt ist noch nicht eingerichtet. Einrichtungscode: ${einrichtungscode}`);
+const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTER_AUTH_URL, einrichtungscode });
 const app = createApp({ db, speicher, auth });
 
 Bun.serve({ port: env.PORT, fetch: app.fetch, maxRequestBodySize: 110 * 1024 * 1024 });

@@ -10,7 +10,13 @@ setup("Belegt über die Oberfläche einrichten, das erste Konto ist der Inhaber"
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(axe.violations).toEqual([]);
 
+  await page.getByLabel("Einrichtungscode").fill("falsch");
   await page.getByLabel("E-Mail-Adresse").fill(INHABER_EMAIL);
+  await page.getByLabel("Passwort").fill(INHABER_PASSWORT);
+  await page.getByRole("button", { name: "Einrichten" }).click();
+  await expect(page.getByRole("alert")).toContainText("Einrichtungscode stimmt nicht");
+
+  await page.getByLabel("Einrichtungscode").fill("e2e-einrichtungscode");
   await page.getByLabel("Passwort").fill(INHABER_PASSWORT);
   await page.getByRole("button", { name: "Einrichten" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();

@@ -125,6 +125,11 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     expect(treffer.map((d: { dateiname: string }) => d.dateiname)).toEqual(["Vertrag_100%.txt"]);
   });
 
+  it("begrenzt limit auf 1 bis 200, auch bei negativen und kaputten Werten", async () => {
+    for (const limit of ["-5", "0", "abc", "1e9", "2.5"])
+      expect((await app.request(`/api/dokumente?limit=${limit}`)).status, limit).toBe(200);
+  });
+
   it("antwortet bei fehlender Datei, unbekannter und ungültiger ID passend", async () => {
     expect((await app.request("/api/dokumente", { method: "POST", body: new FormData() })).status).toBe(400);
     expect((await app.request("/api/dokumente/00000000-0000-4000-8000-000000000000")).status).toBe(404);

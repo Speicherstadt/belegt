@@ -28,6 +28,11 @@ await migrieren(basis);
 const { db } = verbinden(basis);
 const verzeichnis = mkdtempSync(join(tmpdir(), "belegt-e2e-"));
 const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
-const auth = createAuth({ db, secret: "e2e-".repeat(8), baseURL: process.env.E2E_APP_URL ?? "http://localhost:5185" });
+const auth = createAuth({
+  db,
+  secret: "e2e-".repeat(8),
+  baseURL: process.env.E2E_APP_URL ?? "http://localhost:5185",
+  einrichtungscode: "e2e-einrichtungscode",
+});
 Bun.serve({ port, fetch: createApp({ db, speicher, auth }).fetch, maxRequestBodySize: 110 * 1024 * 1024 });
 console.log(`E2E-Server auf Port ${port}`);
