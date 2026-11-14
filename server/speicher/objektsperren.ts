@@ -34,6 +34,8 @@ export async function sperrenAbgleichen(db: Datenbank, speicher: SperrbarerSpeic
                      order by x.erstellt_am desc, x.id desc limit 1) e on true
       left join objektsperren o on o.sha256 = d.sha256
      where e.frist_bis is not null
+       -- Eine abgelaufene Frist braucht keine Sperre; S3 lehnt eine Sperre bis in die Vergangenheit ohnehin ab
+       and e.frist_bis >= (now() at time zone 'Europe/Berlin')::date
        and not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
      group by d.sha256, o.bis
     having o.bis is null or max(e.frist_bis) > o.bis
