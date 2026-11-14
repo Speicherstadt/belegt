@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
@@ -16,6 +16,7 @@ export function Mailboxes() {
   const anlegen = useMutation({ mutationFn: api.quelleAnlegen, onSuccess: neu });
   const abrufen = useMutation({ mutationFn: api.quelleAbrufen, onSettled: neu });
   const schreiben = darfSchreiben(ich.data?.role);
+  const [art, setArt] = useState<"imap" | "jmap">("imap");
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,6 +31,7 @@ export function Mailboxes() {
         benutzer: String(f.get("benutzer")),
         passwort: String(f.get("passwort")),
         ordner: String(f.get("ordner")),
+        art,
       },
       { onSuccess: () => form.reset() },
     );
@@ -50,7 +52,7 @@ export function Mailboxes() {
           >
             <span className="flex flex-col">
               <span className="font-medium">
-                {q.name} · {q.benutzer}@{q.host}:{q.port}/{q.ordner}
+                {q.name} · {q.art === "jmap" ? "JMAP" : "IMAP"} · {q.benutzer}@{q.host}:{q.port}/{q.ordner}
               </span>
               <span className="text-muted">
                 {q.letzterAbruf ? m.mailboxes_last({ wann: zeitpunkt(q.letzterAbruf) }) : m.mailboxes_never()}
@@ -89,12 +91,28 @@ export function Mailboxes() {
             <input name="name" required className={feld} />
           </label>
           <label className="flex flex-col gap-1.5 font-medium text-sm">
+            {m.mailboxes_kind()}
+            <select value={art} onChange={(e) => setArt(e.target.value as typeof art)} className={feld}>
+              <option value="imap">IMAP</option>
+              <option value="jmap">JMAP</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.mailboxes_host()}
             <input name="host" required className={feld} />
           </label>
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.mailboxes_port()}
-            <input name="port" type="number" required min={1} max={65535} defaultValue={993} className={feld} />
+            <input
+              key={art}
+              name="port"
+              type="number"
+              required
+              min={1}
+              max={65535}
+              defaultValue={art === "jmap" ? 443 : 993}
+              className={feld}
+            />
           </label>
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.mailboxes_user()}

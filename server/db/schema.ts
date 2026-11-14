@@ -200,8 +200,17 @@ export const quellen = pgTable(
     letzterFehler: text("letzter_fehler"),
     aktiv: boolean("aktiv").notNull().default(true),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    /** imap oder jmap */
+    art: text("art", { enum: ["imap", "jmap"] })
+      .notNull()
+      .default("imap"),
+    /** JMAP: Stand (state) nach dem letzten vollständigen Abruf */
+    jmapStand: text("jmap_stand"),
   },
-  (t) => [check("quellen_port", sql`${t.port} between 1 and 65535`)],
+  (t) => [
+    check("quellen_port", sql`${t.port} between 1 and 65535`),
+    check("quellen_art", sql`${t.art} in ('imap', 'jmap')`),
+  ],
 );
 
 /**

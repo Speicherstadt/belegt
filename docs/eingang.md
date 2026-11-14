@@ -24,6 +24,11 @@ als gelesen und löscht nichts. Er merkt sich je Postfach die letzte UID; nummer
 Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
 `BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
 
+Mit der Art **JMAP** (etwa bei Stalwart) holt Belegt die Sitzung unter `https://<Server>:<Port>/.well-known/jmap` und
+meldet sich mit Benutzer und Passwort an. Der Ordner ist sein Name oder seine Rolle (`INBOX` für den Posteingang).
+Beim ersten Abruf kommt der ganze Ordner, danach nur, was seit dem letzten Abruf neu hineinkam oder hineinverschoben
+wurde (`Email/changes`). Kennt der Server den alten Stand nicht mehr, holt Belegt den Ordner neu.
+
 ## Regeln
 
 Regeln (Seite Quellen) schlagen eine Art vor, etwa „Mails von `telekom.de` mit PDF sind Belege“. Für einen Anhang

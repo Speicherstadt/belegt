@@ -107,6 +107,7 @@ export interface Quelle {
   tls: boolean;
   benutzer: string;
   ordner: string;
+  art: "imap" | "jmap";
   letzteUid: number;
   letzterAbruf: string | null;
   letzterFehler: string | null;
@@ -310,6 +311,7 @@ export const api = {
     benutzer: string;
     passwort: string;
     ordner: string;
+    art: "imap" | "jmap";
   }) => aufruf<Quelle>("/api/quellen", json(q)),
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),

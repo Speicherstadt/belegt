@@ -202,7 +202,7 @@
   "rules_disable": "Ausschalten",
   "rules_failed": "Regel fehlgeschlagen: {meldung}",
   "mailboxes_title": "Postfächer",
-  "mailboxes_intro": "Belegt holt neue Mails per IMAP nur lesend ab, alle paar Minuten im Hintergrund. Das Passwort liegt verschlüsselt in der Datenbank.",
+  "mailboxes_intro": "Belegt holt neue Mails per IMAP oder JMAP nur lesend ab, alle paar Minuten im Hintergrund. Das Passwort liegt verschlüsselt in der Datenbank.",
   "mailboxes_none": "Noch keine Postfächer.",
   "mailboxes_name": "Name",
   "mailboxes_host": "Server",
@@ -292,5 +292,6 @@
   "report_checked": "Geprüft",
   "report_counts": "{dokumente} Dokumente (davon {geloescht} gelöscht), {siegel} Siegel, {protokoll} Einträge im Protokoll.",
   "report_value": "Prüfwert",
-  "report_hint": "Der Prüfwert ist der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu diesem Eintrag nichts verändert wurde."
+  "report_hint": "Der Prüfwert ist der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu diesem Eintrag nichts verändert wurde.",
+  "mailboxes_kind": "Art"
 }

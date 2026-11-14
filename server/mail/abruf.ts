@@ -6,6 +6,7 @@ import type { Datenbank } from "../db/client.ts";
 import { quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { mailAufnehmen } from "./import.ts";
+import { type Abfragen, jmapHolen } from "./jmap.ts";
 
 /** Ein geöffnetes Postfach; die Umsetzung mit imapflow steht in imapflow.ts, Tests nehmen eine eigene */
 export interface Postfach {
@@ -34,6 +35,8 @@ export const QuelleEingabe = z.object({
   benutzer: z.string().trim().min(1).max(320),
   passwort: z.string().min(1).max(1000),
   ordner: z.string().trim().min(1).max(200).default("INBOX"),
+  /** imap, oder jmap (Sitzung unter https://host:port/.well-known/jmap) */
+  art: z.enum(["imap", "jmap"]).default("imap"),
 });
 
 /** Quelle ohne Chiffrat, für Antworten an die Oberfläche */
@@ -82,14 +85,31 @@ export async function abrufen(
   schluessel: Buffer,
   quelleId: string,
   oeffnen: Oeffnen,
+  abfragen?: Abfragen,
 ): Promise<AbrufErgebnis> {
   const { db } = umgebung;
   const [q] = await db.select().from(quellen).where(eq(quellen.id, quelleId));
   if (!q) throw new Error("Quelle nicht gefunden");
-  const akteur = `system:imap:${q.name}`;
+  const akteur = `system:${q.art}:${q.name}`;
   const ergebnis: AbrufErgebnis = { neu: 0, doppelt: 0, fehler: null };
   let postfach: Postfach | null = null;
   try {
+    if (q.art === "jmap") {
+      const zugang = { host: q.host, port: q.port, tls: q.tls, benutzer: q.benutzer, ordner: q.ordner };
+      const passwort = entschluesseln(schluessel, q.ciphertext).toString();
+      const stand = await jmapHolen(
+        { ...zugang, passwort },
+        q.jmapStand,
+        async (roh) => {
+          const { neu } = await mailAufnehmen(umgebung, roh, "mail", akteur);
+          if (neu) ergebnis.neu++;
+          else ergebnis.doppelt++;
+        },
+        abfragen,
+      );
+      await mitAkteur(db, akteur, (tx) => tx.update(quellen).set({ jmapStand: stand }).where(eq(quellen.id, q.id)));
+      return ergebnis;
+    }
     postfach = await oeffnen({
       host: q.host,
       port: q.port,
@@ -124,9 +144,9 @@ export async function abrufen(
 }
 
 /** Ruft alle aktiven Quellen nacheinander ab */
-export async function alleAbrufen(umgebung: Umgebung, schluessel: Buffer, oeffnen: Oeffnen) {
+export async function alleAbrufen(umgebung: Umgebung, schluessel: Buffer, oeffnen: Oeffnen, abfragen?: Abfragen) {
   const aktive = (await listen(umgebung.db)).filter((q) => q.aktiv);
   const ergebnisse: Record<string, AbrufErgebnis> = {};
-  for (const q of aktive) ergebnisse[q.name] = await abrufen(umgebung, schluessel, q.id, oeffnen);
+  for (const q of aktive) ergebnisse[q.name] = await abrufen(umgebung, schluessel, q.id, oeffnen, abfragen);
   return ergebnisse;
 }

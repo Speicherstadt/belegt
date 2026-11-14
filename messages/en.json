@@ -202,7 +202,7 @@
   "rules_disable": "Turn off",
   "rules_failed": "Rule failed: {meldung}",
   "mailboxes_title": "Mailboxes",
-  "mailboxes_intro": "Belegt fetches new mails read-only via IMAP every few minutes in the background. The password is stored encrypted in the database.",
+  "mailboxes_intro": "Belegt fetches new mails read-only via IMAP or JMAP every few minutes in the background. The password is stored encrypted in the database.",
   "mailboxes_none": "No mailboxes yet.",
   "mailboxes_name": "Name",
   "mailboxes_host": "Server",
@@ -292,5 +292,6 @@
   "report_checked": "Checked",
   "report_counts": "{dokumente} documents ({geloescht} deleted), {siegel} seals, {protokoll} log entries.",
   "report_value": "Check value",
-  "report_hint": "The check value is the head of the hash chain. Whoever notes it can later show that nothing was changed up to that entry."
+  "report_hint": "The check value is the head of the hash chain. Whoever notes it can later show that nothing was changed up to that entry.",
+  "mailboxes_kind": "Type"
 }
