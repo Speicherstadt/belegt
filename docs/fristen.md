@@ -26,3 +26,16 @@ abgelaufen war; ein Beleg von 2017 darf deshalb seit dem 1. Januar 2026 gelösch
 
 Quellen: [§ 147 AO](https://www.gesetze-im-internet.de/ao_1977/__147.html),
 [Art. 97 § 19a EGAO](https://www.gesetze-im-internet.de/aoeg_1977/art_97__19a.html).
+
+## Einordnen
+
+Ein neues Dokument liegt im Eingang, bis es eingeordnet ist. Auf seiner Seite wählst du die Art und den Tag, an dem es
+entstanden, empfangen oder abgesandt wurde; Belegt rechnet daraus die Frist und speichert sie mit. Jede Einordnung
+ist versiegelt. Eine Änderung kommt als neue Version dazu, die alte bleibt im Verlauf; es gilt die neueste.
+
+## Sperren
+
+Eine Sperre hält alle Dokumente, die in ihrem Zeitraum entstanden sind, auch nach Fristende fest, etwa während einer
+Betriebsprüfung oder eines Rechtsstreits. Grund und Zeitraum lassen sich nicht ändern; eine Sperre wird einmal
+aufgehoben und bleibt mit dem Zeitpunkt im Verlauf. Die Seite Fristen zählt, was im Archiv und im Eingang liegt, was
+gesperrt ist und was gelöscht werden dürfte.

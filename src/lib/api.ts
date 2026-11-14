@@ -47,6 +47,42 @@ export interface Dokument {
   eingegangenAm: string;
 }
 
+export type Art = "buecher" | "zoll" | "beleg" | "geschaeftsbrief" | "sonstige" | "freiwillig" | "frei";
+export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei";
+
+export interface Eintrag extends Dokument {
+  art: Art | null;
+  fristBis: string | null;
+  titel: string | null;
+}
+
+export interface Einordnung {
+  id: string;
+  art: Art;
+  entstanden: string;
+  fristBis: string | null;
+  titel: string | null;
+  korrespondent: string | null;
+  erstelltAm: string;
+}
+
+export interface Sperre {
+  id: string;
+  grund: string;
+  von: string;
+  bis: string;
+  angelegtAm: string;
+  aufgehobenAm: string | null;
+}
+
+export interface Uebersicht {
+  gesamt: number;
+  offen: number;
+  jeArt: Record<string, number>;
+  gesperrt: number;
+  loeschbar: number;
+}
+
 export interface Ereignis {
   seq: number;
   at: string;
@@ -71,8 +107,18 @@ export const api = {
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),
   abmelden: () => aufruf<unknown>("/api/auth/sign-out", json({})),
-  dokumente: (suche: string) => aufruf<Dokument[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}`),
-  dokument: (id: string) => aufruf<Dokument>(`/api/dokumente/${id}`),
+  dokumente: (suche: string, gruppe: Gruppe = "alle") =>
+    aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}`),
+  dokument: (id: string) => aufruf<Dokument & { einordnung: Einordnung | null }>(`/api/dokumente/${id}`),
+  einordnen: (
+    id: string,
+    eingabe: { art: Art; entstanden: string; freiwilligBis?: string; titel?: string; korrespondent?: string },
+  ) => aufruf<Einordnung>(`/api/dokumente/${id}/einordnung`, json(eingabe)),
+  sperren: () => aufruf<Sperre[]>("/api/sperren"),
+  sperreAnlegen: (eingabe: { grund: string; von: string; bis: string }) =>
+    aufruf<Sperre>("/api/sperren", json(eingabe)),
+  sperreAufheben: (id: string) => aufruf<Sperre>(`/api/sperren/${id}/aufheben`, { method: "POST" }),
+  uebersicht: () => aufruf<Uebersicht>("/api/fristen/uebersicht"),
   verlauf: (id: string) => aufruf<{ ereignisse: Ereignis[]; siegel: string | null }>(`/api/dokumente/${id}/verlauf`),
   hochladen: (datei: File) => {
     const form = new FormData();

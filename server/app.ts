@@ -5,6 +5,17 @@ import { darfSchreiben, type Rolle } from "../shared/rollen.ts";
 import type { Angemeldet, Auth } from "./auth.ts";
 import { eingerichtet } from "./db/status.ts";
 import { aufnehmen, laden, listen, pruefen, type Umgebung, verlauf } from "./dokumente/dokumente.ts";
+import {
+  aktuelle,
+  EinordnungEingabe,
+  einordnen,
+  Gruppe,
+  SperreEingabe,
+  sperreAnlegen,
+  sperreAufheben,
+  sperrenListen,
+  uebersicht,
+} from "./einordnung/einordnung.ts";
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
 const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
@@ -13,6 +24,9 @@ const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/we
 export const MAX_UPLOAD = 100 * 1024 * 1024;
 
 const Id = z.uuid();
+
+/** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
+const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
 
 /** Akteur im Audit-Log: wer angemeldet ist, mit Adresse, damit das Protokoll ohne die Tabelle user lesbar bleibt */
 const akteur = (n: Angemeldet) => `nutzer:${n.email}`;
@@ -73,14 +87,47 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
 
     app.get("/api/dokumente", async (c) => {
       const limit = Math.min(Number(c.req.query("limit") ?? 50) || 50, 200);
-      return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit }));
+      const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
+      return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit, gruppe }));
     });
 
     app.get("/api/dokumente/:id", async (c) => {
       const id = Id.safeParse(c.req.param("id"));
       const dokument = id.success ? await laden(umgebung.db, id.data) : null;
-      return dokument ? c.json(dokument) : c.json({ fehler: "Nicht gefunden" }, 404);
+      if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+      return c.json({ ...dokument, einordnung: await aktuelle(umgebung.db, dokument.id) });
     });
+
+    app.post("/api/dokumente/:id/einordnung", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+      if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+      const eingabe = EinordnungEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!eingabe.success) return c.json({ fehler: "Ungültige Einordnung", details: eingabe.error.issues }, 400);
+      try {
+        return c.json(await einordnen(umgebung.db, dokument.id, eingabe.data, akteur(c.get("nutzer"))), 201);
+      } catch (err) {
+        // fristende lehnt etwa einen Tag ab, den es nicht gibt, oder freiwillig ohne Datum
+        if (err instanceof Error && !("code" in err)) return c.json({ fehler: err.message }, 400);
+        throw err;
+      }
+    });
+
+    app.get("/api/sperren", async (c) => c.json(await sperrenListen(umgebung.db)));
+
+    app.post("/api/sperren", async (c) => {
+      const eingabe = SperreEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!eingabe.success) return c.json({ fehler: "Ungültige Sperre", details: eingabe.error.issues }, 400);
+      return c.json(await sperreAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+    });
+
+    app.post("/api/sperren/:id/aufheben", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const sperre = id.success ? await sperreAufheben(umgebung.db, id.data, akteur(c.get("nutzer"))) : null;
+      return sperre ? c.json(sperre) : c.json({ fehler: "Keine offene Sperre mit dieser ID" }, 404);
+    });
+
+    app.get("/api/fristen/uebersicht", async (c) => c.json(await uebersicht(umgebung.db, heute())));
 
     app.get("/api/dokumente/:id/datei", async (c) => {
       const id = Id.safeParse(c.req.param("id"));

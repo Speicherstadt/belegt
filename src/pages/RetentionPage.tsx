@@ -1,4 +1,6 @@
 import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts";
+import { Holds } from "../components/Holds.tsx";
+import { Overview } from "../components/Overview.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { m } from "../paraglide/messages.js";
 
@@ -22,6 +24,7 @@ export function RetentionPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title={m.retention_title()} intro={m.retention_intro()} />
+      <Overview />
       {/* Auf schmalen Bildschirmen scrollt die Tabelle seitlich: per Tastatur erreichbar und benannt (WCAG 2.1.1) */}
       <section
         aria-label={m.retention_title()}
@@ -50,6 +53,7 @@ export function RetentionPage() {
       </section>
       <p className="m-0 text-muted text-sm">{m.retention_start()}</p>
       <p className="m-0 rounded-md border border-border bg-subtle px-3 py-2.5 text-sm">{m.retention_hold()}</p>
+      <Holds />
     </div>
   );
 }

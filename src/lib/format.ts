@@ -12,3 +12,11 @@ export function groesse(bytes: number): string {
 export function zeitpunkt(iso: string): string {
   return new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
+
+/** Tag (JJJJ-MM-TT) nach der Sprache der Oberfläche, ohne Zeitzonenverschiebung */
+export function tag(iso: string): string {
+  const [j, mo, t] = iso.slice(0, 10).split("-").map(Number);
+  return new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeZone: "UTC" }).format(
+    new Date(Date.UTC(j!, mo! - 1, t!)),
+  );
+}

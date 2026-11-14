@@ -1,9 +1,10 @@
 import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { sniff } from "@firsttris/gobd-kern/dateityp";
-import { desc, eq, ilike, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumente } from "../db/schema.ts";
+import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
 export interface Umgebung {
@@ -41,18 +42,50 @@ export async function aufnehmen(
   return neu!;
 }
 
-/** Neueste zuerst; die Suche trifft vorerst den Dateinamen (Volltext folgt mit der Texterkennung) */
-export function listen(
+export interface Eintrag extends Dokument {
+  /** Neueste Einordnung, NULL solange das Dokument im Eingang liegt */
+  art: string | null;
+  fristBis: string | null;
+  titel: string | null;
+}
+
+/** Neueste zuerst; die Suche trifft vorerst Dateiname und Titel (Volltext folgt mit der Texterkennung) */
+export async function listen(
   db: Datenbank,
-  { suche, limit = 50 }: { suche?: string; limit?: number } = {},
-): Promise<Dokument[]> {
+  { suche, limit = 50, gruppe = "alle" }: { suche?: string; limit?: number; gruppe?: Gruppe } = {},
+): Promise<Eintrag[]> {
   const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
-  return db
-    .select()
-    .from(dokumente)
-    .where(muster ? ilike(dokumente.dateiname, muster) : undefined)
-    .orderBy(desc(dokumente.eingegangenAm), desc(dokumente.id))
-    .limit(limit);
+  const zeilen = await db.execute<{
+    id: string;
+    sha256: string;
+    groesse: string;
+    mime_type: string;
+    dateiname: string | null;
+    quelle: string;
+    eingegangen_am: Date;
+    art: string | null;
+    frist_bis: string | null;
+    titel: string | null;
+  }>(sql`
+    select d.*, e.art, e.frist_bis::text as frist_bis, e.titel
+      from dokumente d
+      left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
+     where ${gruppenBedingung(gruppe)}
+       and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster})
+     order by d.eingegangen_am desc, d.id desc
+     limit ${limit}`);
+  return [...zeilen].map((z) => ({
+    id: z.id,
+    sha256: z.sha256,
+    groesse: Number(z.groesse),
+    mimeType: z.mime_type,
+    dateiname: z.dateiname,
+    quelle: z.quelle,
+    eingegangenAm: new Date(z.eingegangen_am),
+    art: z.art,
+    fristBis: z.frist_bis,
+    titel: z.titel,
+  }));
 }
 
 export async function laden(db: Datenbank, id: string): Promise<Dokument | null> {
@@ -100,7 +133,9 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
     select a.seq, a.at, a.actor, a.action, a.table_name
       from audit_log a
      where (a.table_name = 'dokumente' and a.row_id = ${id})
-        or (a.table_name = 'seals' and a.new_value ->> 'row_id' = ${id})
+        or (a.table_name = 'einordnungen' and a.new_value ->> 'dokument_id' = ${id})
+        or (a.table_name = 'seals' and a.new_value ->> 'row_id' in (
+              select ${id} union all select x.id::text from einordnungen x where x.dokument_id = ${id}::uuid))
      order by a.seq`);
   const [siegel] = await db.execute<{ digest: string }>(
     sql`select digest from seals where table_name = 'dokumente' and row_id = ${id}`,

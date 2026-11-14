@@ -13,6 +13,10 @@ als Akteur `nutzer:<E-Mail>`.
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; die Suche trifft vorerst den Dateinamen |
 | `GET /api/dokumente/:id` | ein Dokument |
 | `GET /api/dokumente/:id/datei` | das Original; `409`, wenn die Datei fehlt oder ihr Hash nicht mehr stimmt |
+| `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
+| `GET /api/dokumente?gruppe=offen\|pflicht\|freiwillig\|frei` | nur der Eingang oder eine Art der Aufbewahrung |
+| `GET /api/sperren`, `POST /api/sperren` (`grund`, `von`, `bis`), `POST /api/sperren/:id/aufheben` | Sperren |
+| `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
 | `GET /api/pruefung` | Befunde zu Hash-Kette, Kopf und Siegeln, `ok: true`, wenn es keine gibt |
 
 Ein Original liegt unter seinem SHA-256 im Speicher (`DOCUMENTS_DIR`); den Typ erkennt Belegt am Inhalt, nicht an der

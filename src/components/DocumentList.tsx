@@ -2,17 +2,43 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { api } from "../lib/api.ts";
-import { groesse, zeitpunkt } from "../lib/format.ts";
+import { api, type Eintrag, type Gruppe } from "../lib/api.ts";
+import { artLabel } from "../lib/arten.ts";
+import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { EmptyState } from "./PageHeader.tsx";
 
-/** Liste der Dokumente mit Suche und, für den Inhaber, Upload */
-export function DocumentList({ suchbar, leer }: { suchbar: boolean; leer: { title: string; text: string } }) {
+const FILTER: { gruppe: Gruppe; label: () => string }[] = [
+  { gruppe: "alle", label: () => m.filter_all() },
+  { gruppe: "pflicht", label: () => m.filter_required() },
+  { gruppe: "freiwillig", label: () => m.filter_voluntary() },
+  { gruppe: "frei", label: () => m.filter_free() },
+  { gruppe: "offen", label: () => m.filter_open() },
+];
+
+function aufbewahrung(d: Eintrag): string {
+  if (!d.art) return m.retention_open();
+  if (!d.fristBis) return artLabel(d.art);
+  return `${artLabel(d.art)}, ${m.retention_until({ datum: tag(d.fristBis) })}`;
+}
+
+/** Liste der Dokumente mit Suche, Filter nach Aufbewahrung und, für den Inhaber, Upload */
+export function DocumentList({
+  suchbar,
+  leer,
+  feste,
+}: {
+  suchbar: boolean;
+  leer: { title: string; text: string };
+  /** Feste Gruppe ohne Filter, etwa „offen“ für den Eingang */
+  feste?: Gruppe;
+}) {
   const [suche, setSuche] = useState("");
+  const [gewaehlt, setGewaehlt] = useState<Gruppe>("alle");
+  const gruppe = feste ?? gewaehlt;
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
-  const liste = useQuery({ queryKey: ["dokumente", suche], queryFn: () => api.dokumente(suche) });
+  const liste = useQuery({ queryKey: ["dokumente", suche, gruppe], queryFn: () => api.dokumente(suche, gruppe) });
   const eingabe = useRef<HTMLInputElement>(null);
   const hochladen = useMutation({
     mutationFn: async (dateien: File[]) => {
@@ -62,6 +88,22 @@ export function DocumentList({ suchbar, leer }: { suchbar: boolean; leer: { titl
           </>
         )}
       </div>
+      {!feste && (
+        <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0">
+          <legend className="sr-only">{m.archive_filter_label()}</legend>
+          {FILTER.map((f) => (
+            <button
+              key={f.gruppe}
+              type="button"
+              aria-pressed={gruppe === f.gruppe}
+              onClick={() => setGewaehlt(f.gruppe)}
+              className="h-8 rounded-full border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
+            >
+              {f.label()}
+            </button>
+          ))}
+        </fieldset>
+      )}
       {hochladen.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {m.upload_failed({ meldung: hochladen.error.message })}
@@ -71,10 +113,11 @@ export function DocumentList({ suchbar, leer }: { suchbar: boolean; leer: { titl
       {!!liste.data?.length && (
         // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
         <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full min-w-[560px] border-collapse text-sm">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-border border-b text-left text-muted">
                 <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
+                <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_type()}</th>
                 <th className="px-3 py-2.5 text-right font-medium">{m.col_size()}</th>
                 <th className="px-3 py-2.5 text-right font-medium">{m.col_received()}</th>
@@ -85,9 +128,10 @@ export function DocumentList({ suchbar, leer }: { suchbar: boolean; leer: { titl
                 <tr key={d.id} className="border-border border-b last:border-b-0 hover:bg-subtle">
                   <td className="px-3 py-3 font-medium">
                     <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">
-                      {d.dateiname ?? m.unnamed()}
+                      {d.titel ?? d.dateiname ?? m.unnamed()}
                     </Link>
                   </td>
+                  <td className="px-3 py-3">{aufbewahrung(d)}</td>
                   <td className="px-3 py-3 text-muted">{d.mimeType}</td>
                   <td className="px-3 py-3 text-right tabular-nums">{groesse(d.groesse)}</td>
                   <td className="px-3 py-3 text-right tabular-nums">{zeitpunkt(d.eingegangenAm)}</td>

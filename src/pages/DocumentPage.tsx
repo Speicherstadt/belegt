@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
+import { Classification } from "../components/Classification.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
@@ -14,6 +15,7 @@ const QUELLE: Record<string, () => string> = {
 
 function ereignis(e: Ereignis): string {
   if (e.tabelle === "seals") return m.event_seal();
+  if (e.tabelle === "einordnungen") return m.event_classified();
   if (e.aktion === "INSERT") return m.event_insert();
   return m.event_other({ aktion: e.aktion });
 }
@@ -38,7 +40,7 @@ export function DocumentPage() {
       <Link to="/archiv" className="self-start text-muted text-sm underline-offset-2 hover:underline">
         {m.doc_back()}
       </Link>
-      <PageHeader title={d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
+      <PageHeader title={d.einordnung?.titel ?? d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
       <a
         href={dateiUrl(d.id)}
         className="h-9 self-start rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
@@ -59,6 +61,12 @@ export function DocumentPage() {
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
+          <Classification
+            key={d.einordnung?.id ?? "neu"}
+            dokumentId={d.id}
+            einordnung={d.einordnung}
+            eingang={d.eingegangenAm}
+          />
           <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
             <h2 id="angaben" className="m-0 font-semibold text-base">
               {m.doc_details()}

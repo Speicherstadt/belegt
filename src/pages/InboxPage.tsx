@@ -6,7 +6,7 @@ export function InboxPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title={m.inbox_title()} intro={m.inbox_intro()} />
-      <DocumentList suchbar={false} leer={{ title: m.inbox_empty_title(), text: m.inbox_empty_text() }} />
+      <DocumentList suchbar={false} feste="offen" leer={{ title: m.inbox_empty_title(), text: m.inbox_empty_text() }} />
     </div>
   );
 }
