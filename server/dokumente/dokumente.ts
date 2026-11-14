@@ -49,7 +49,10 @@ export interface Eintrag extends Dokument {
   titel: string | null;
 }
 
-/** Neueste zuerst; die Suche trifft vorerst Dateiname und Titel (Volltext folgt mit der Texterkennung) */
+/**
+ * Neueste zuerst. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus Dateiname,
+ * Einordnung und Mail, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter).
+ */
 export async function listen(
   db: Datenbank,
   { suche, limit = 50, gruppe = "alle", heute }: { suche?: string; limit?: number; gruppe?: Gruppe; heute: string },
@@ -70,8 +73,10 @@ export async function listen(
     select d.*, e.art, e.frist_bis::text as frist_bis, e.titel
       from dokumente d
       left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
+      left join suchtexte st on st.dokument_id = d.id
      where ${gruppenBedingung(gruppe, heute)}
-       and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster})
+       and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
+            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""}))
      order by d.eingegangen_am desc, d.id desc
      limit ${limit}`);
   return [...zeilen].map((z) => ({

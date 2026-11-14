@@ -32,3 +32,10 @@ Domain (auch Subdomains), einen Teil des Betreffs und den Typ eines Anhangs prü
 zutreffen, die erste passende Regel gewinnt. Eine Regel ohne Bedingung trifft nichts.
 
 Ein Vorschlag setzt noch keine Frist. Erst wenn du ihn übernimmst, wird das Dokument eingeordnet und gesperrt.
+
+## Suche
+
+Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
+Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail. Sie versteht deutsche Wortformen („Rechnungen“
+findet „Rechnung“), Wortgruppen in Anführungszeichen und Ausschlüsse mit Minus. Text aus PDFs und Scans kommt mit der
+Texterkennung dazu.
