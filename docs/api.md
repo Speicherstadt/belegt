@@ -17,7 +17,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | Aufruf | Wirkung |
 | --- | --- |
 | `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` | Einrichten, Anmelden, Abmelden (Better Auth) |
-| `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; ohne Sitzung |
+| `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; `oidc` (Name des Anbieters oder `null`) und `embedOrigin`; ohne Sitzung |
 | `GET /api/ich` | der angemeldete Zugang mit Rolle |
 | `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung`, oder `pruefer` mit `zeitraum`: `{von, bis}`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
 | `GET /api/tokens`, `POST /api/tokens` (`name`, `recht`: `lesen` oder `schreiben`), `POST /api/tokens/:id/widerrufen` | API-Tokens, nur für den Inhaber mit Sitzung; die Antwort beim Anlegen enthält den Klartext einmal (`klartext`) |

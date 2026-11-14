@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
+import { genericOAuth } from "better-auth/plugins";
 import type { Rolle } from "../shared/rollen.ts";
 import type { Datenbank } from "./db/client.ts";
 import * as schema from "./db/schema.ts";
@@ -22,12 +23,23 @@ function gleich(a: string | null | undefined, b: string): boolean {
  * Einrichtungscode aus dem Server-Log, damit auf einer frischen Installation nicht der Erste, der die Seite findet,
  * Inhaber wird. Jedes weitere Konto entsteht nur mit einer Einladung und bekommt deren Rolle.
  */
+/** Anmeldung über einen OpenID-Connect-Anbieter (Firmenkonto); der Callback ist /api/auth/callback/oidc */
+export interface OidcKonfig {
+  issuer: string;
+  clientId: string;
+  clientSecret: string;
+  /** Name auf dem Knopf „Anmelden mit …“ */
+  name: string;
+}
+export const OIDC_ANBIETER = "oidc";
+
 export function createAuth({
   db,
   secret,
   baseURL,
   einrichtungscode,
   begrenzen = true,
+  oidc,
 }: {
   db: Datenbank;
   secret: string;
@@ -35,6 +47,7 @@ export function createAuth({
   einrichtungscode: string;
   /** Anmeldeversuche begrenzen; nur Tests schalten das ab, die viele Konten in kurzer Zeit anlegen */
   begrenzen?: boolean;
+  oidc?: OidcKonfig;
 }) {
   return betterAuth({
     baseURL,
@@ -42,6 +55,30 @@ export function createAuth({
     basePath: "/api/auth",
     database: drizzleAdapter(db, { provider: "pg", schema }),
     emailAndPassword: { enabled: true, minPasswordLength: 12 },
+    // Mit dem Anbieter verbindet nur, wer angemeldet ist (link-social): Belegt bestätigt keine Adressen, und wer einen
+    // Einladungslink öffnet, wählt seine Adresse selbst; eine Verknüpfung über die Adresse wäre daher unsicher. Danach
+    // meldet der Anbieter über sein sub an. Neue Konten entstehen weiter nur mit Einladung (Hook unten).
+    account: { accountLinking: { enabled: true, disableImplicitLinking: true, allowDifferentEmails: true } },
+    plugins: oidc
+      ? [
+          genericOAuth({
+            config: [
+              {
+                providerId: OIDC_ANBIETER,
+                discoveryUrl: `${oidc.issuer.replace(/\/$/, "")}/.well-known/openid-configuration`,
+                clientId: oidc.clientId,
+                clientSecret: oidc.clientSecret,
+                scopes: ["openid", "profile", "email"],
+                pkce: true,
+                authentication: "basic",
+                requireIdTokenVerification: true,
+                disableImplicitSignUp: true,
+                mapProfileToUser: (profile) => ({ emailVerified: profile.email_verified === true }),
+              },
+            ],
+          }),
+        ]
+      : [],
     rateLimit: { enabled: begrenzen, storage: "memory", window: 60, max: 20 },
     user: {
       additionalFields: {

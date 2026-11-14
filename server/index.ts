@@ -21,7 +21,16 @@ const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
 // Einrichtungscode für das erste Konto: bei jedem Start neu, nur im Log
 const einrichtungscode = randomBytes(9).toString("base64url");
 if (!(await eingerichtet(db))) console.log(`Belegt ist noch nicht eingerichtet. Einrichtungscode: ${einrichtungscode}`);
-const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTER_AUTH_URL, einrichtungscode });
+const oidc =
+  env.OIDC_ISSUER && env.OIDC_CLIENT_ID && env.OIDC_CLIENT_SECRET
+    ? {
+        issuer: env.OIDC_ISSUER,
+        clientId: env.OIDC_CLIENT_ID,
+        clientSecret: env.OIDC_CLIENT_SECRET,
+        name: env.OIDC_NAME,
+      }
+    : undefined;
+const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTER_AUTH_URL, einrichtungscode, oidc });
 const schluessel = env.BELEGT_SCHLUESSEL ? schluesselAus(env.BELEGT_SCHLUESSEL) : undefined;
 // Die gebaute Oberfläche liefert der Server selbst aus, wenn es sie gibt (bun run build); sonst Vite in der Entwicklung
 const oberflaeche = existsSync("dist/index.html") ? "dist" : undefined;
@@ -33,6 +42,8 @@ const app = createApp({
   oeffnen: imapOeffnen,
   abrufMinuten: env.ABRUF_MINUTEN,
   oauth: oauthAusEnv(env),
+  oidcName: oidc?.name,
+  embedOrigin: env.BELEGT_EMBED_ORIGIN,
   oberflaeche,
 });
 

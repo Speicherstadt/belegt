@@ -20,11 +20,13 @@ const TYPEN: Record<string, string> = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-const KOPF = {
+/** Einbetten in einen Frame nur durch Belegt selbst und, wenn gesetzt, die eine Seite aus BELEGT_EMBED_ORIGIN */
+const kopf = (embedOrigin?: string) => ({
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "same-origin",
-  "X-Frame-Options": "DENY",
-};
+  "Content-Security-Policy": `frame-ancestors 'self'${embedOrigin ? ` ${embedOrigin}` : ""}`,
+  ...(embedOrigin ? {} : { "X-Frame-Options": "SAMEORIGIN" }),
+});
 
 async function datei(pfad: string): Promise<Uint8Array | null> {
   try {
@@ -34,8 +36,9 @@ async function datei(pfad: string): Promise<Uint8Array | null> {
   }
 }
 
-export function statischRouten(app: App, verzeichnis: string) {
+export function statischRouten(app: App, verzeichnis: string, embedOrigin?: string) {
   const wurzel = normalize(verzeichnis) + sep;
+  const KOPF = kopf(embedOrigin);
   app.get("*", async (c, next) => {
     const pfad = c.req.path;
     if (pfad.startsWith("/api/") || pfad === "/healthz") return next();

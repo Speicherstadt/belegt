@@ -296,5 +296,10 @@
   "mailboxes_kind": "Art",
   "oauth_connect": "Mit {anbieter} verbinden",
   "oauth_connected": "Postfach verbunden. Der erste Abruf folgt mit dem nächsten Lauf oder mit „Jetzt abrufen“.",
-  "oauth_failed": "Das Postfach wurde nicht verbunden. Bitte erneut versuchen."
+  "oauth_failed": "Das Postfach wurde nicht verbunden. Bitte erneut versuchen.",
+  "oidc_sign_in": "Anmelden mit {name}",
+  "oidc_or": "oder mit E-Mail und Passwort",
+  "oidc_link": "Mit {name} verbinden",
+  "oidc_not_linked": "Dieses Konto ist noch nicht mit Belegt verbunden. Melde dich einmal mit E-Mail und Passwort an und verbinde es dann unten links.",
+  "oidc_failed": "Die Anmeldung über den Anbieter hat nicht geklappt."
 }

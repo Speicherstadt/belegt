@@ -32,7 +32,13 @@ export function createApp(umgebung?: AppUmgebung) {
     app.get("/api/openapi.json", (c) => c.json(openapi));
 
     /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
-    app.get("/api/status", async (c) => c.json({ eingerichtet: await eingerichtet(umgebung.db) }));
+    app.get("/api/status", async (c) =>
+      c.json({
+        eingerichtet: await eingerichtet(umgebung.db),
+        oidc: umgebung.oidcName ? { name: umgebung.oidcName } : null,
+        embedOrigin: umgebung.embedOrigin ?? null,
+      }),
+    );
 
     /** Öffentlich: ob ein Einladungslink noch gilt und für welche Rolle (Seite /einladung/…) */
     app.get("/api/einladung/:token", async (c) => {
@@ -47,7 +53,7 @@ export function createApp(umgebung?: AppUmgebung) {
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);
     oauthRouten(app, umgebung);
-    if (umgebung.oberflaeche) statischRouten(app, umgebung.oberflaeche);
+    if (umgebung.oberflaeche) statischRouten(app, umgebung.oberflaeche, umgebung.embedOrigin);
   }
 
   app.notFound((c) => c.json({ fehler: "Nicht gefunden" }, 404));

@@ -1,13 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { ApiFehler, api } from "../lib/api.ts";
+import { eingebettet, stillAnmeldenErlaubt } from "../lib/einbetten.ts";
 import { m } from "../paraglide/messages.js";
 import { Sidebar } from "./Sidebar.tsx";
 
 export function Shell({ children }: { children: ReactNode }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
-  if (ich.error instanceof ApiFehler && ich.error.status === 401) return <Navigate to="/anmelden" />;
+  const status = useQuery({ queryKey: ["status"], queryFn: api.status });
+  const embedOrigin = status.data?.embedOrigin ?? null;
+  const imFrame = !!embedOrigin && eingebettet(embedOrigin);
+  const abgemeldet = ich.error instanceof ApiFehler && ich.error.status === 401;
+  // Im Frame einmal still über den Anbieter anmelden; hat die Person dort eine Sitzung, kommt sie direkt zurück.
+  // Einmal entschieden (null: noch nicht), denn stillAnmeldenErlaubt merkt sich den Versuch
+  const [still, setStill] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!abgemeldet || !status.data || still !== null) return;
+    const versuchen = imFrame && !!status.data.oidc && stillAnmeldenErlaubt();
+    setStill(versuchen);
+    if (versuchen) void api.anmeldenMitAnbieter(window.location.pathname, true).catch(() => setStill(false));
+  }, [abgemeldet, status.data, still, imFrame]);
+  if (abgemeldet && still === false) return <Navigate to="/anmelden" />;
   if (!ich.data) return <p className="p-8 text-muted text-sm">{m.loading()}</p>;
   return (
     <div className="flex min-h-screen flex-wrap bg-bg text-fg">
@@ -17,7 +31,7 @@ export function Shell({ children }: { children: ReactNode }) {
       >
         {m.skip_link()}
       </a>
-      <Sidebar ich={ich.data} />
+      <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} />
       <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
         {children}
       </main>

@@ -6,7 +6,7 @@ import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { drizzle } from "drizzle-orm/postgres-js";
 import type postgres from "postgres";
 import { createApp } from "./app.ts";
-import { createAuth } from "./auth.ts";
+import { createAuth, type OidcKonfig } from "./auth.ts";
 import type { AppUmgebung } from "./http/gemeinsam.ts";
 import { testDatenbank } from "./test-db.ts";
 
@@ -19,7 +19,12 @@ export async function testApp({
   oeffnen,
   oauth,
   abfragen,
-}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen"> & { begrenzen?: boolean } = {}) {
+  oidc,
+  embedOrigin,
+}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen" | "embedOrigin"> & {
+  begrenzen?: boolean;
+  oidc?: OidcKonfig;
+} = {}) {
   const sql: postgres.Sql = await testDatenbank();
   const verzeichnis = await mkdtemp(join(tmpdir(), "belegt-test-"));
   const db = drizzle(sql);
@@ -30,9 +35,20 @@ export async function testApp({
     baseURL: BASIS,
     einrichtungscode: EINRICHTUNGSCODE,
     begrenzen,
+    oidc,
   });
   const schluessel = randomBytes(32);
-  const app = createApp({ db, speicher, auth, schluessel, oeffnen, oauth, abfragen });
+  const app = createApp({
+    db,
+    speicher,
+    auth,
+    schluessel,
+    oeffnen,
+    oauth,
+    abfragen,
+    oidcName: oidc?.name,
+    embedOrigin,
+  });
 
   /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */
   const anfrage = (pfad: string, init: RequestInit = {}, cookie?: string) =>

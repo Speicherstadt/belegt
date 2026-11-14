@@ -1,4 +1,5 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
+import { EmbedBridge } from "./components/EmbedBridge.tsx";
 import { Shell } from "./components/Shell.tsx";
 import { AccessPage } from "./pages/AccessPage.tsx";
 import { ArchivePage } from "./pages/ArchivePage.tsx";
@@ -11,7 +12,15 @@ import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
 
-const root = createRootRoute({ component: Outlet });
+// Die Brücke zur einbettenden Seite läuft auf jeder Seite, auch beim Anmelden
+const root = createRootRoute({
+  component: () => (
+    <>
+      <EmbedBridge />
+      <Outlet />
+    </>
+  ),
+});
 
 const anmelden = createRoute({ getParentRoute: () => root, path: "/anmelden", component: LoginPage });
 const einladung = createRoute({ getParentRoute: () => root, path: "/einladung/$token", component: InvitePage });

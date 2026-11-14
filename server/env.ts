@@ -26,6 +26,17 @@ const Schema = z.object({
   MICROSOFT_TENANT: z.string().min(1).optional(),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  /** Anmeldung über einen OpenID-Connect-Anbieter (docs/einbetten.md) */
+  OIDC_ISSUER: z.string().url().optional(),
+  OIDC_CLIENT_ID: z.string().min(1).optional(),
+  OIDC_CLIENT_SECRET: z.string().min(1).optional(),
+  OIDC_NAME: z.string().min(1).default("Firmenkonto"),
+  /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
+  BELEGT_EMBED_ORIGIN: z
+    .string()
+    .url()
+    .transform((u) => new URL(u).origin)
+    .optional(),
 });
 
 export type Env = z.infer<typeof Schema>;

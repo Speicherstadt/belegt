@@ -244,7 +244,30 @@ export const api = {
   einstellungen: () => aufruf<Einstellungen>("/api/einstellungen"),
   einstellungenSpeichern: (e: Einstellungen) => aufruf<Einstellungen>("/api/einstellungen", json(e)),
   verfahrensdoku: () => aufruf<Verfahrensdoku>("/api/verfahrensdoku"),
-  status: () => aufruf<{ eingerichtet: boolean }>("/api/status"),
+  status: () =>
+    aufruf<{ eingerichtet: boolean; oidc: { name: string } | null; embedOrigin: string | null }>("/api/status"),
+  /** Anmelden über den OIDC-Anbieter; stumm: prompt=none, ohne Rückfrage beim Anbieter (im Frame) */
+  anmeldenMitAnbieter: async (ziel: string, stumm = false) => {
+    const { url } = await aufruf<{ url: string }>(
+      "/api/auth/sign-in/social",
+      json({
+        provider: "oidc",
+        callbackURL: ziel,
+        errorCallbackURL: "/anmelden",
+        ...(stumm ? { additionalParams: { prompt: "none" } } : {}),
+      }),
+    );
+    window.location.assign(url);
+  },
+  /** Das angemeldete Konto mit dem OIDC-Anbieter verbinden */
+  verbindenMitAnbieter: async () => {
+    const { url } = await aufruf<{ url: string }>(
+      "/api/auth/link-social",
+      json({ provider: "oidc", callbackURL: window.location.pathname, errorCallbackURL: window.location.pathname }),
+    );
+    window.location.assign(url);
+  },
+  konten: () => aufruf<{ providerId: string }[]>("/api/auth/list-accounts"),
   ich: () => aufruf<Ich>("/api/ich"),
   einrichten: (email: string, passwort: string, code: string) =>
     aufruf<unknown>("/api/auth/sign-up/email", {

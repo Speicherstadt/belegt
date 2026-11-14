@@ -16,6 +16,10 @@ export type AppUmgebung = Umgebung & {
   oauth?: OAuthKonfig;
   /** HTTP nach außen (OAuth); Tests geben eigenes */
   abfragen?: (url: string, init: RequestInit) => Promise<Response>;
+  /** Name des OIDC-Anbieters, wenn die Anmeldung darüber eingerichtet ist */
+  oidcName?: string;
+  /** Origin, der Belegt in einem Frame zeigen darf */
+  embedOrigin?: string;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
 };

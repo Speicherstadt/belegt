@@ -27,6 +27,22 @@ describe("Oberfläche ausliefern", () => {
     expect(res.headers.get("content-type")).toContain("text/javascript");
     expect(res.headers.get("cache-control")).toContain("immutable");
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    // Ohne BELEGT_EMBED_ORIGIN darf nur Belegt selbst sich in einen Frame laden
+    expect(res.headers.get("content-security-policy")).toBe("frame-ancestors 'self'");
+    expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
+  });
+
+  it("erlaubt mit BELEGT_EMBED_ORIGIN genau diese eine Seite als Rahmen", async () => {
+    const eingebettet = createApp({
+      db: {} as never,
+      speicher: {} as never,
+      auth: { options: { baseURL: "http://x" }, api: { getSession: async () => null } } as never,
+      oberflaeche: dist,
+      embedOrigin: "https://portal.example",
+    });
+    const res = await eingebettet.request("/archiv");
+    expect(res.headers.get("content-security-policy")).toBe("frame-ancestors 'self' https://portal.example");
+    expect(res.headers.get("x-frame-options")).toBeNull();
   });
 
   it("öffnet für Adressen der App die index.html, auch beim Neuladen", async () => {

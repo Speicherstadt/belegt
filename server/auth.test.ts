@@ -15,7 +15,11 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
   });
 
   it("meldet öffentlich, ob schon eingerichtet ist", async () => {
-    expect(await (await t.anfrage("/api/status")).json()).toEqual({ eingerichtet: false });
+    expect(await (await t.anfrage("/api/status")).json()).toEqual({
+      eingerichtet: false,
+      oidc: null,
+      embedOrigin: null,
+    });
   });
 
   it("verlangt für das erste Konto den Einrichtungscode", async () => {
@@ -40,7 +44,11 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       role: "inhaber",
     });
 
-    expect(await (await t.anfrage("/api/status")).json()).toEqual({ eingerichtet: true });
+    expect(await (await t.anfrage("/api/status")).json()).toEqual({
+      eingerichtet: true,
+      oidc: null,
+      embedOrigin: null,
+    });
     const zweites = await t.registrieren("mallory@example.org");
     expect(zweites.res.status).toBe(403);
     expect(await t.sql`select 1 from "user" where email = 'mallory@example.org'`).toHaveLength(0);

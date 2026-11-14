@@ -14,8 +14,32 @@
   color-scheme: light;
 }
 
+/* Dunkel nach dem Gerät, außer eine einbettende Seite setzt data-theme (src/lib/einbetten.ts) */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #09090b;
+  --side: #0c0c0e;
+  --fg: #fafafa;
+  --muted: #a1a1aa;
+  --subtle: #18181b;
+  --border: #27272a;
+  --primary: #fafafa;
+  --onprimary: #18181b;
+  color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #09090b;
     --side: #0c0c0e;
     --fg: #fafafa;

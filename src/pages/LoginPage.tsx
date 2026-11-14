@@ -13,6 +13,8 @@ export function LoginPage() {
   const [laeuft, setLaeuft] = useState(false);
   const einrichten = status.data?.eingerichtet === false;
   const titel = einrichten ? m.login_setup_title() : m.login_title();
+  // Rückkehr vom OIDC-Anbieter mit Fehler: kein verbundenes Konto, abgelehnt, oder (still) keine Sitzung dort
+  const anbieterFehler = new URLSearchParams(window.location.search).get("error");
 
   useEffect(() => {
     document.title = `${titel} · ${m.app_name()}`;
@@ -60,6 +62,22 @@ export function LoginPage() {
             </span>
           </label>
         )}
+        {!einrichten && status.data.oidc && (
+          <>
+            <button
+              type="button"
+              onClick={() => void api.anmeldenMitAnbieter("/")}
+              className="h-9 rounded-md border border-border font-medium text-sm hover:bg-subtle"
+            >
+              {m.oidc_sign_in({ name: status.data.oidc.name })}
+            </button>
+            <p className="m-0 flex items-center gap-3 text-muted text-xs">
+              <span className="h-px flex-1 bg-border" />
+              {m.oidc_or()}
+              <span className="h-px flex-1 bg-border" />
+            </p>
+          </>
+        )}
         <label className="flex flex-col gap-1.5 font-medium text-sm">
           {m.login_email()}
           <input
@@ -87,9 +105,9 @@ export function LoginPage() {
             </span>
           )}
         </label>
-        {fehler && (
+        {(fehler || (anbieterFehler && anbieterFehler !== "login_required")) && (
           <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
-            {fehler}
+            {fehler ?? (anbieterFehler === "account_not_linked" ? m.oidc_not_linked() : m.oidc_failed())}
           </p>
         )}
         <button

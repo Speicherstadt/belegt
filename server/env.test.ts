@@ -9,6 +9,7 @@ describe("readEnv", () => {
       BETTER_AUTH_URL: "http://localhost:3000",
       ABRUF_MINUTEN: 5,
       SMTP_PORT: 2525,
+      OIDC_NAME: "Firmenkonto",
     });
   });
 

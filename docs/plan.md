@@ -68,10 +68,10 @@ Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst ([firsttris/
 
 Stand im November 2026:
 
-- **Fertig:** Phasen 1 und 2; Phase 3 (SMTP-Journal, IMAP, JMAP, Microsoft 365 und Google per OAuth, MBOX, EML); aus Phase 4 XRechnung, ZUGFeRD, REST-API mit OpenAPI,
-  Webhooks, Tokens und MCP; Phase 5 (Prüferzugang, Z3-Export, Prüfbericht, Verfahrensdokumentation). Dazu Texterkennung,
-  Container und Compose.
-- **Offen:** Einbetten mit OIDC (Phase 4); Phase 6.
+- **Fertig:** Phasen 1 bis 5: SMTP-Journal, IMAP, JMAP, Microsoft 365 und Google per OAuth, MBOX und EML;
+  XRechnung und ZUGFeRD, REST-API mit OpenAPI, Webhooks, Tokens, Einbetten mit OIDC und MCP; Prüferzugang, Z3-Export,
+  Prüfbericht und Verfahrensdokumentation. Dazu Texterkennung, Container und Compose.
+- **Offen:** Phase 6.
 
 ## Anbindung der Produkte
 
