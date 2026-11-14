@@ -60,16 +60,52 @@ function messageIds(wert: string | undefined): string[] {
   return wert?.match(/<[^<>\s]+>/g) ?? [];
 }
 
+// Benannte Zeichen von HTML 4 für U+00A0 bis U+00FF, in dieser Reihenfolge (HTML 4.01, Abschnitt 24.2)
+const LATIN1 =
+  "nbsp iexcl cent pound curren yen brvbar sect uml copy ordf laquo not shy reg macr deg plusmn sup2 sup3 acute " +
+  "micro para middot cedil sup1 ordm raquo frac14 frac12 frac34 iquest Agrave Aacute Acirc Atilde Auml Aring AElig " +
+  "Ccedil Egrave Eacute Ecirc Euml Igrave Iacute Icirc Iuml ETH Ntilde Ograve Oacute Ocirc Otilde Ouml times Oslash " +
+  "Ugrave Uacute Ucirc Uuml Yacute THORN szlig agrave aacute acirc atilde auml aring aelig ccedil egrave eacute " +
+  "ecirc euml igrave iacute icirc iuml eth ntilde ograve oacute ocirc otilde ouml divide oslash ugrave uacute ucirc " +
+  "uuml yacute thorn yuml";
+
+const ZEICHEN: Record<string, string> = {
+  ...Object.fromEntries(LATIN1.split(" ").map((n, i) => [n, String.fromCodePoint(0xa0 + i)])),
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  euro: "€",
+  ndash: "–",
+  mdash: "—",
+  lsquo: "‘",
+  rsquo: "’",
+  sbquo: "‚",
+  ldquo: "“",
+  rdquo: "”",
+  bdquo: "„",
+  hellip: "…",
+  bull: "•",
+  trade: "™",
+};
+
+/** Zeichenreferenzen in einem Durchgang, damit „&amp;uuml;“ zu „&uuml;“ wird; Unbekanntes bleibt stehen */
+function zeichenAufloesen(html: string): string {
+  return html.replace(/&(?:#(\d{1,7})|#[xX]([0-9a-fA-F]{1,6})|([A-Za-z][A-Za-z0-9]*));/g, (roh, dez, hex, name) => {
+    if (name) return ZEICHEN[name] ?? roh;
+    const code = dez ? Number(dez) : Number.parseInt(hex, 16);
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : roh;
+  });
+}
+
 /** Text der Mail; ohne Textteil aus dem HTML, ohne Tags und Skripte */
 function klartext(text: string | undefined, html: string | undefined): string {
   if (text?.trim()) return text.trim();
   if (!html) return "";
-  return html
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  const ohneTags = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ");
+  // erst nach den Tags, sonst würde „&lt;b&gt;“ als Tag entfernt; &nbsp; wird zu U+00A0 und fällt unter \s
+  return zeichenAufloesen(ohneTags).replace(/\s+/g, " ").trim();
 }
 
 export async function emlLesen(roh: Uint8Array): Promise<Mail> {
