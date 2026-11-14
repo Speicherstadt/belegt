@@ -7,6 +7,16 @@ import { unzipSync } from "fflate";
  */
 
 const MAX_ENTPACKT = 50 * 1024 * 1024;
+/** Die Zahl der Einträge steht im Verzeichnisende und lässt sich frei behaupten (ZIP64: bis 2^32 - 1) */
+const MAX_EINTRAEGE = 10_000;
+
+/** Bricht ab, sobald ein ZIP mehr Einträge hat, als ein Office-Dokument braucht */
+function gezaehlt() {
+  let n = 0;
+  return () => {
+    if (++n > MAX_EINTRAEGE) throw new Error("Office-Datei: zu viele Einträge");
+  };
+}
 
 export const OFFICE_TYPEN = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -22,9 +32,11 @@ const istZip = (b: Uint8Array) => b.length > 4 && b[0] === 0x50 && b[1] === 0x4b
 /** Namen der Einträge eines ZIP, ohne zu entpacken (Verzeichnis am Ende) */
 function eintraege(bytes: Uint8Array): string[] {
   const namen: string[] = [];
+  const zaehlen = gezaehlt();
   try {
     unzipSync(bytes, {
       filter: (f) => {
+        zaehlen();
         namen.push(f.name);
         return false;
       },
@@ -93,8 +105,10 @@ const zahl = (n: string) => Number(/(\d+)\.xml$/.exec(n)?.[1] ?? 0);
 export function officeText(bytes: Uint8Array, typ: string): string {
   const passt = textTeile(typ);
   let summe = 0;
+  const zaehlen = gezaehlt();
   const teile = unzipSync(bytes, {
     filter: (f) => {
+      zaehlen();
       if (!passt(f.name)) return false;
       summe += f.originalSize;
       if (summe > MAX_ENTPACKT) throw new Error("Office-Datei: entpackt zu groß");

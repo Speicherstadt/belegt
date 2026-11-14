@@ -81,6 +81,23 @@ describe("Text aus Office-Dateien", () => {
     expect(() => officeText(bombe, OFFICE_TYPEN.docx)).toThrow("entpackt zu groß");
   });
 
+  it("hängt nicht an einem ZIP, das Milliarden Einträge behauptet", () => {
+    // 102 Bytes: ZIP64-Verzeichnisende (APPNOTE 4.3.14) mit 2^32 - 1 Einträgen, aber keinem einzigen
+    const b = new Uint8Array(4 + 56 + 20 + 22);
+    const v = new DataView(b.buffer);
+    v.setUint32(0, 0x04034b50, true);
+    v.setUint32(4, 0x06064b50, true);
+    v.setUint32(4 + 32, 0xffffffff, true);
+    v.setUint32(60, 0x07064b50, true);
+    v.setUint32(60 + 8, 4, true);
+    v.setUint32(80, 0x06054b50, true);
+    v.setUint16(80 + 8, 0xffff, true);
+    const start = performance.now();
+    expect(officeTyp(b)).toBeNull();
+    expect(() => officeText(b, OFFICE_TYPEN.docx)).toThrow("zu viele Einträge");
+    expect(performance.now() - start).toBeLessThan(1000);
+  });
+
   it("erkennt Text und liest auch ältere Dokumente, die als unbekannte Datei gespeichert sind", async () => {
     expect(dateityp(strToU8("Name;Betrag\nMiete;1250,50\n"))).toBe("text/plain");
     expect(dateityp(new Uint8Array([0x00, 0x01, 0xff, 0xfe]))).toBe("application/octet-stream");
