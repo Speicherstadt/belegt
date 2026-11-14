@@ -52,7 +52,7 @@ Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst ([firsttris/
 
 - **TypeScript** (Speicher unter SHA-256, `withActor`, Prüfung von Kette und Siegeln, `index.xml` nach dem Beschreibungsstandard) gibt es einmal; Belegt installiert das Paket mit fester Version.
 - **SQL** (Trigger, Kette, Siegel, Sperre gegen `TRUNCATE`) kommt als Vorlage aus dem Paket und wird einmal in die erste Migration von Belegt übernommen. Haben behält seine bestehenden Migrationen unverändert.
-- **E-Rechnung** kommt aus `packages/einvoice` von Haben.
+- **E-Rechnung:** Belegt liest die Kopfdaten selbst (EN 16931, CII und UBL, auch in ZUGFeRD); geprüft wird die Rechnung nicht.
 
 ## Phasen
 
@@ -65,6 +65,14 @@ Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst ([firsttris/
 | 4 · E-Rechnung und Schnittstellen | XRechnung, ZUGFeRD; REST-API mit OpenAPI, Webhooks, Tokens, Einbetten, MCP | eine fremde App liefert ohne Sondercode ein |
 | 5 · Prüfung | Prüferzugang (Z1), Datenträger-Export (Z3), Prüfbericht, Verfahrensdokumentation | Z3-Export entspricht dem Beschreibungsstandard |
 | 6 · Später | S3 mit Object Lock, RFC 3161, PST, Mandanten, KI-Regeln, Testat | nach Bedarf |
+
+Stand im November 2026:
+
+- **Fertig:** Phasen 1 und 2; aus Phase 3 IMAP, MBOX und EML; aus Phase 4 XRechnung, ZUGFeRD, REST-API mit OpenAPI,
+  Webhooks, Tokens und MCP; aus Phase 5 Prüferzugang, Z3-Export und Verfahrensdokumentation. Dazu Texterkennung,
+  Container und Compose.
+- **Offen:** SMTP-Journal, JMAP, Microsoft 365 und Google (Phase 3); Einbetten mit OIDC (Phase 4); ein Prüfbericht
+  als Dokument (Phase 5); Phase 6.
 
 ## Anbindung der Produkte
 
