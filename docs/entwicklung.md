@@ -5,10 +5,16 @@
 ```sh
 bun install
 bun run dev:server   # Server auf Port 3000 (PORT)
+bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest
+bun run e2e          # Playwright mit axe, Desktop und Handy, eigener Port 5185
+bun run build
 ```
+
+Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Paraglide); `bun install` und
+`bun run typecheck` übersetzen sie nach `src/paraglide/`. Die Sprache folgt dem Browser, sonst Deutsch.
 
 ## Tests
 

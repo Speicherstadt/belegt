@@ -41,3 +41,17 @@ jobs:
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run test
+      - run: bun run build
+
+  e2e:
+    name: E2E mit Playwright und axe
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run e2e

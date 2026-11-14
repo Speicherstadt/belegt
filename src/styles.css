@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+/* Farben wie Kontext (Zink, Geist); hell als Vorgabe, dunkel nach dem Gerät */
+:root {
+  --bg: #ffffff;
+  --side: #fafafa;
+  --fg: #09090b;
+  --muted: #68686f;
+  --subtle: #f4f4f5;
+  --border: #e4e4e7;
+  --primary: #18181b;
+  --onprimary: #fafafa;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #09090b;
+    --side: #0c0c0e;
+    --fg: #fafafa;
+    --muted: #a1a1aa;
+    --subtle: #18181b;
+    --border: #27272a;
+    --primary: #fafafa;
+    --onprimary: #18181b;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-side: var(--side);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-onprimary: var(--onprimary);
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}

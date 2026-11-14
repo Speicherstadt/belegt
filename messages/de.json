@@ -1,0 +1,17 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "app_name": "Belegt",
+  "app_claim": "Belegt ist, was du beweisen kannst.",
+  "skip_link": "Zum Inhalt springen",
+  "nav_label": "Hauptnavigation",
+  "nav_inbox": "Eingang",
+  "nav_archive": "Archiv",
+  "nav_retention": "Fristen",
+  "nav_audit": "Prüfung",
+  "nav_sources": "Quellen",
+  "nav_procedure": "Verfahrensdoku",
+  "inbox_title": "Eingang",
+  "inbox_intro": "Alles ist schon unverändert gesichert. Hier legst du fest, was es ist und wie lange es bleibt.",
+  "inbox_empty_title": "Eingang ist leer",
+  "inbox_empty_text": "Lade ein Dokument hoch oder verbinde eine Quelle."
+}

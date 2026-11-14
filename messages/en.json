@@ -1,0 +1,17 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "app_name": "Belegt",
+  "app_claim": "Belegt – German for 'on record'.",
+  "skip_link": "Skip to content",
+  "nav_label": "Main navigation",
+  "nav_inbox": "Inbox",
+  "nav_archive": "Archive",
+  "nav_retention": "Retention",
+  "nav_audit": "Audit",
+  "nav_sources": "Sources",
+  "nav_procedure": "Procedure docs",
+  "inbox_title": "Inbox",
+  "inbox_intro": "Everything is already stored unchanged. Here you decide what it is and how long it stays.",
+  "inbox_empty_title": "Inbox is empty",
+  "inbox_empty_text": "Upload a document or connect a source."
+}
