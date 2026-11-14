@@ -143,4 +143,27 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
     expect((await roh(lesen, { method: "POST", body: "{kaputt" })).status).toBe(400);
     expect((await t.app.request("/api/mcp", json({ jsonrpc: "2.0", id: 1, method: "ping" }))).status).toBe(401);
   });
+
+  it("antwortet auch bei einem unerwarteten Fehler mit JSON-RPC, ohne den Text der Datenbank", async () => {
+    const neu = await aufruf(schreiben, "dokument_aufnehmen", {
+      dateiname: "a\u0000b.pdf",
+      inhalt: Buffer.from("%PDF-1.7\n% Steuerzeichen\n").toString("base64"),
+    });
+    expect(neu.isError).toBe(true);
+    const [pdf] = await t.sql`select id from dokumente where dateiname = 'strom-oktober.pdf'`;
+    // Postgres rechnet substr in integer; ein größerer Anfang ist kein Grund für einen HTTP-Fehler
+    const weit = await aufruf(lesen, "dokument_text", { id: pdf!.id, von: 1e12 });
+    expect(weit.isError).toBe(true);
+    expect(JSON.stringify(weit)).not.toMatch(/integer|select/);
+  });
+
+  it("lehnt eine Anfrage mit id null ab (MCP: die ID ist nie null)", async () => {
+    const res = await roh(lesen, {
+      method: "POST",
+      body: JSON.stringify({ jsonrpc: "2.0", id: null, method: "ping" }),
+    });
+    expect(await res.json()).toMatchObject({ id: null, error: { code: -32600 } });
+    const obj = await roh(lesen, { method: "POST", body: JSON.stringify({ jsonrpc: "2.0", id: {}, method: "ping" }) });
+    expect(await obj.json()).toMatchObject({ id: null, error: { code: -32600 } });
+  });
 });
