@@ -2,12 +2,12 @@ import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts
 import { PageHeader } from "../components/PageHeader.tsx";
 import { m } from "../paraglide/messages.js";
 
-const ARTEN: { art: Aufbewahrungsart; label: () => string; grundlage: string | null }[] = [
-  { art: "buecher", label: () => m.kind_books(), grundlage: "§ 147 Abs. 1 Nr. 1 AO" },
-  { art: "zoll", label: () => m.kind_customs(), grundlage: "§ 147 Abs. 1 Nr. 4a AO" },
-  { art: "beleg", label: () => m.kind_receipt(), grundlage: "§ 147 Abs. 1 Nr. 4 AO" },
-  { art: "geschaeftsbrief", label: () => m.kind_letter(), grundlage: "§ 147 Abs. 1 Nr. 2, 3 AO" },
-  { art: "sonstige", label: () => m.kind_other(), grundlage: "§ 147 Abs. 1 Nr. 5 AO" },
+const ARTEN: { art: Aufbewahrungsart; label: () => string; grundlage: (() => string) | null }[] = [
+  { art: "buecher", label: () => m.kind_books(), grundlage: () => m.basis_books() },
+  { art: "zoll", label: () => m.kind_customs(), grundlage: () => m.basis_customs() },
+  { art: "beleg", label: () => m.kind_receipt(), grundlage: () => m.basis_receipt() },
+  { art: "geschaeftsbrief", label: () => m.kind_letter(), grundlage: () => m.basis_letter() },
+  { art: "sonstige", label: () => m.kind_other(), grundlage: () => m.basis_other() },
   { art: "freiwillig", label: () => m.kind_voluntary(), grundlage: null },
   { art: "frei", label: () => m.kind_free(), grundlage: null },
 ];
@@ -42,7 +42,7 @@ export function RetentionPage() {
               <tr key={a.art} className="border-border border-b last:border-b-0">
                 <td className="px-3 py-3 font-medium">{a.label()}</td>
                 <td className="px-3 py-3">{frist(a.art)}</td>
-                <td className="px-3 py-3 text-muted">{a.grundlage ?? m.basis_none()}</td>
+                <td className="px-3 py-3 text-muted">{a.grundlage?.() ?? m.basis_none()}</td>
               </tr>
             ))}
           </tbody>
