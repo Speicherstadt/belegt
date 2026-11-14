@@ -76,6 +76,23 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(doku.stand).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
+  it("nennt im Zugriff die API-Tokens, die schreiben oder lesen, ohne ihr Geheimnis", async () => {
+    const anlegen = async (name: string, recht: string) =>
+      (await (await als(inhaber)("/api/tokens", json({ name, recht }))).json()) as { id: string; klartext: string };
+    const kasse = await anlegen("Kasse", "schreiben");
+    const bi = await anlegen("Auswertung", "lesen");
+    const alt = await anlegen("Altes Skript", "schreiben");
+    await als(inhaber)(`/api/tokens/${alt.id}/widerrufen`, { method: "POST" });
+    const doku = await (await als(kanzlei)("/api/verfahrensdoku")).json();
+    const zugriff = doku.abschnitte.find((a: { titel: string }) => a.titel === "6. Zugriff");
+    const text = JSON.stringify(zugriff);
+    expect(text).toContain("API-Token „Kasse“: liest, nimmt auf und ordnet ein");
+    expect(text).toContain("API-Token „Auswertung“: liest");
+    expect(text).not.toContain("Altes Skript");
+    expect(text).not.toMatch(/Nur der Inhaber schreibt;/);
+    for (const t of [kasse, bi]) expect(JSON.stringify(doku)).not.toContain(t.klartext);
+  });
+
   it("rechnet für ein Institut unter Aufsicht zehn Jahre für Buchungsbelege", async () => {
     await als(inhaber)("/api/einstellungen", json({ ...angaben, aufsicht: true }));
     const form = new FormData();
