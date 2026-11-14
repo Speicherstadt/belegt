@@ -18,7 +18,12 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
   const eigeneHerkunft = new URL(auth.options.baseURL as string).origin;
 
   app.use("/api/*", async (c, next) => {
-    if (c.req.path.startsWith("/api/auth/") || c.req.path === "/api/status" || c.req.path.startsWith("/api/einladung/"))
+    if (
+      c.req.path.startsWith("/api/auth/") ||
+      c.req.path === "/api/status" ||
+      c.req.path === "/api/openapi.json" ||
+      c.req.path.startsWith("/api/einladung/")
+    )
       return next();
     // Programme melden sich mit einem API-Token an, nicht mit dem Cookie; deshalb gilt für sie keine CSRF-Prüfung
     const kopf = c.req.header("authorization");

@@ -255,5 +255,19 @@
   "tokens_revoke": "Widerrufen",
   "tokens_revoked": "widerrufen {datum}",
   "tokens_created": "angelegt {datum}",
-  "tokens_none": "Noch keine Tokens."
+  "tokens_none": "Noch keine Tokens.",
+  "webhooks_title": "Webhooks",
+  "webhooks_intro": "Belegt meldet einer Adresse per POST, wenn ein Dokument aufgenommen, eingeordnet oder gelöscht wird; nur mit Dokument-ID, signiert mit dem Geheimnis (X-Belegt-Signatur).",
+  "webhooks_url": "Adresse (https://…)",
+  "webhooks_events": "Ereignisse",
+  "event_dokument_aufgenommen": "aufgenommen",
+  "event_dokument_eingeordnet": "eingeordnet",
+  "event_dokument_geloescht": "gelöscht",
+  "webhooks_create": "Webhook anlegen",
+  "webhooks_secret": "Das Geheimnis zum Prüfen der Signatur erscheint nur jetzt:",
+  "webhooks_error": "Letzter Fehler: {fehler}",
+  "webhooks_last": "zuletzt zugestellt {datum}",
+  "webhooks_on": "Aktivieren",
+  "webhooks_off": "Deaktivieren",
+  "webhooks_inactive": "deaktiviert"
 }

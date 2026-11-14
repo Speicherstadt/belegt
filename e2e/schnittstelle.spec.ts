@@ -31,3 +31,20 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
     await programm.close();
   }
 });
+
+test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abschalten", async ({ page }, info) => {
+  const name = `Buchhaltung ${info.project.name}`;
+  await page.goto("/quellen");
+  const bereich = page.getByRole("region", { name: "Webhooks" });
+  await bereich.getByLabel("Name").fill(name);
+  await bereich.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/belegt");
+  await bereich.getByLabel("eingeordnet").check();
+  await bereich.getByRole("button", { name: "Webhook anlegen" }).click();
+  await expect(bereich.getByRole("status").locator("code")).toHaveText(/^whsec_/);
+
+  const eintrag = bereich.getByRole("listitem").filter({ hasText: name });
+  await expect(eintrag).toContainText("aufgenommen, eingeordnet");
+  await eintrag.getByRole("button", { name: "Deaktivieren" }).click();
+  await expect(eintrag).toContainText("deaktiviert");
+  await expect(eintrag.getByRole("button", { name: "Aktivieren" })).toBeVisible();
+});

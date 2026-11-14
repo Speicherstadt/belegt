@@ -6,7 +6,7 @@
 bun install
 bun run dev:server   # Server auf Port 3000 (PORT), braucht DATABASE_URL; wendet beim Start die Migrationen an
 bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
-bun server/worker.ts # Worker: ruft die Postfächer ab
+bun server/worker.ts # Worker: ruft die Postfächer ab und stellt Webhooks zu
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest
@@ -46,7 +46,7 @@ löschen sie wieder.
 | `DOCUMENTS_DIR` | Wurzel des Dateispeichers | `data/dokumente` |
 | `BETTER_AUTH_SECRET` | Schlüssel für Sitzungen, mindestens 32 Zeichen; Pflicht für den Server | – |
 | `BETTER_AUTH_URL` | Adresse, unter der Belegt erreichbar ist | `http://localhost:3000` |
-| `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
+| `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern und Geheimnisse von Webhooks, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 
 ## Migrationen

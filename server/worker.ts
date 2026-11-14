@@ -4,9 +4,10 @@ import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
+import { zustellen } from "./webhooks/webhooks.ts";
 
 /*
- * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab. Getrennt vom Server, damit ein hängender
+ * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab und stellt alle 15 Sekunden Webhooks zu. Getrennt vom Server, damit ein hängender
  * Abruf keine Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
@@ -23,7 +24,27 @@ async function runde() {
   }
 }
 
-for (;;) {
-  await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${err instanceof Error ? err.message : err}`));
-  await Bun.sleep(env.ABRUF_MINUTEN * 60_000);
+const meldung = (err: unknown) => (err instanceof Error ? err.message : String(err));
+
+async function webhooks() {
+  for (;;) {
+    const ergebnisse = await zustellen(db, schluessel).catch((err) => {
+      console.error(`Webhooks fehlgeschlagen: ${meldung(err)}`);
+      return {};
+    });
+    for (const [name, e] of Object.entries(ergebnisse)) {
+      if (e.zugestellt || e.fehler)
+        console.log(`Webhook ${name}: ${e.zugestellt} zugestellt${e.fehler ? `, Fehler: ${e.fehler}` : ""}`);
+    }
+    await Bun.sleep(15_000);
+  }
 }
+
+async function postfaecher() {
+  for (;;) {
+    await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
+    await Bun.sleep(env.ABRUF_MINUTEN * 60_000);
+  }
+}
+
+await Promise.all([postfaecher(), webhooks()]);

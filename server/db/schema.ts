@@ -9,6 +9,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -244,4 +245,47 @@ export const apiTokens = pgTable(
     check("api_tokens_recht", sql`${t.recht} in ('lesen', 'schreiben')`),
     check("api_tokens_name", sql`length(trim(${t.name})) > 0`),
   ],
+);
+
+/** Ereignisse für Webhooks; Trigger auf dokumente, einordnungen und loeschungen schreiben sie, nur anhängen */
+export const webhookEreignisse = pgTable("webhook_ereignisse", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  art: text("art").notNull(),
+  dokumentId: uuid("dokument_id").notNull(),
+  zeitpunkt: timestamp("zeitpunkt", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Empfänger für Webhooks: Belegt meldet Ereignisse per POST, signiert mit HMAC-SHA256. Das Geheimnis liegt
+ * verschlüsselt in ciphertext. Zugestellt wird jedes Ereignis ab dem Anlegen; was angekommen ist, steht in
+ * webhook_zustellungen (eine Nummer als Zeiger reichte nicht: Sequenzen vergeben Nummern nicht in Commit-Reihenfolge).
+ */
+export const webhooks = pgTable(
+  "webhooks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    url: text("url").notNull(),
+    arten: text("arten").array().notNull(),
+    ciphertext: bytea("ciphertext").notNull(),
+    letzteZustellung: timestamp("letzte_zustellung", { withTimezone: true }),
+    letzterFehler: text("letzter_fehler"),
+    aktiv: boolean("aktiv").notNull().default(true),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("webhooks_url", sql`${t.url} ~ '^https?://'`)],
+);
+
+export const webhookZustellungen = pgTable(
+  "webhook_zustellungen",
+  {
+    webhookId: uuid("webhook_id")
+      .notNull()
+      .references(() => webhooks.id),
+    ereignisId: bigint("ereignis_id", { mode: "number" })
+      .notNull()
+      .references(() => webhookEreignisse.id),
+    zugestelltAm: timestamp("zugestellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.webhookId, t.ereignisId] })],
 );

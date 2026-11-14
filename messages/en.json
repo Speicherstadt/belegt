@@ -255,5 +255,19 @@
   "tokens_revoke": "Revoke",
   "tokens_revoked": "revoked {datum}",
   "tokens_created": "created {datum}",
-  "tokens_none": "No tokens yet."
+  "tokens_none": "No tokens yet.",
+  "webhooks_title": "Webhooks",
+  "webhooks_intro": "Belegt notifies an address by POST when a document is added, classified or deleted; only with the document ID, signed with the secret (X-Belegt-Signatur).",
+  "webhooks_url": "Address (https://…)",
+  "webhooks_events": "Events",
+  "event_dokument_aufgenommen": "added",
+  "event_dokument_eingeordnet": "classified",
+  "event_dokument_geloescht": "deleted",
+  "webhooks_create": "Create webhook",
+  "webhooks_secret": "The secret for checking the signature is only shown now:",
+  "webhooks_error": "Last error: {fehler}",
+  "webhooks_last": "last delivered {datum}",
+  "webhooks_on": "Activate",
+  "webhooks_off": "Deactivate",
+  "webhooks_inactive": "deactivated"
 }

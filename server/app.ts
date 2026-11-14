@@ -3,7 +3,9 @@ import { eingerichtet } from "./db/status.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import type { App, AppUmgebung } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
+import { openapi } from "./http/openapi.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
+import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { zugangRouten } from "./http/zugang.ts";
 import { offen as einladungOffen } from "./zugang/einladungen.ts";
 
@@ -24,6 +26,9 @@ export function createApp(umgebung?: AppUmgebung) {
     const { auth } = umgebung;
     app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
+    /** Öffentlich: Beschreibung der Schnittstelle für Programme */
+    app.get("/api/openapi.json", (c) => c.json(openapi));
+
     /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
     app.get("/api/status", async (c) => c.json({ eingerichtet: await eingerichtet(umgebung.db) }));
 
@@ -38,6 +43,7 @@ export function createApp(umgebung?: AppUmgebung) {
     dokumenteRouten(app, umgebung);
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
+    schnittstelleRouten(app, umgebung);
   }
 
   app.notFound((c) => c.json({ fehler: "Nicht gefunden" }, 404));

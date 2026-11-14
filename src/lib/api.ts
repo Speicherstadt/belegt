@@ -192,7 +192,25 @@ export interface ApiToken {
   widerrufenAm: string | null;
 }
 
+export const EREIGNISSE = ["dokument.aufgenommen", "dokument.eingeordnet", "dokument.geloescht"] as const;
+export type Ereignisart = (typeof EREIGNISSE)[number];
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  arten: Ereignisart[];
+  aktiv: boolean;
+  letzteZustellung: string | null;
+  letzterFehler: string | null;
+}
+
 export const api = {
+  webhooks: () => aufruf<Webhook[]>("/api/webhooks"),
+  webhookAnlegen: (w: { name: string; url: string; arten: Ereignisart[] }) =>
+    aufruf<Webhook & { geheimnis: string }>("/api/webhooks", json(w)),
+  webhookSchalten: (id: string, aktiv: boolean) =>
+    aufruf<Webhook>(`/api/webhooks/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),
   tokens: () => aufruf<ApiToken[]>("/api/tokens"),
   tokenAnlegen: (name: string, recht: ApiToken["recht"]) =>
     aufruf<ApiToken & { klartext: string }>("/api/tokens", json({ name, recht })),
