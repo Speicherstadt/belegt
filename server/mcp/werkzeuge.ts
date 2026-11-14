@@ -36,6 +36,9 @@ async function dokumentOderFehler(umgebung: Umgebung, id: string) {
   return d;
 }
 
+/** substr in Postgres rechnet in integer */
+const MAX_VON = 2_000_000_000;
+
 const lesend = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 
 export const WERKZEUGE: Werkzeug[] = [
@@ -113,7 +116,7 @@ export const WERKZEUGE: Werkzeug[] = [
       required: ["id"],
       properties: {
         id: { type: "string", format: "uuid" },
-        von: { type: "integer", minimum: 0, default: 0 },
+        von: { type: "integer", minimum: 0, maximum: MAX_VON, default: 0 },
         laenge: { type: "integer", minimum: 1, maximum: 50000, default: 20000 },
       },
     },
@@ -121,7 +124,7 @@ export const WERKZEUGE: Werkzeug[] = [
     schreibt: false,
     eingabe: z.object({
       id: Id,
-      von: z.number().int().min(0).default(0),
+      von: z.number().int().min(0).max(MAX_VON).default(0),
       laenge: z.number().int().min(1).max(50_000).default(20_000),
     }),
     ausfuehren: async (umgebung, _n, e: { id: string; von: number; laenge: number }) => {

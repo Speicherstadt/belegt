@@ -41,8 +41,12 @@ const erlaubt = (nutzer: Angemeldet) =>
 export async function beantworten(umgebung: Umgebung, nutzer: Angemeldet, nachricht: unknown): Promise<Antwort | null> {
   if (Array.isArray(nachricht)) return fehler(null, -32600, "Stapel werden nicht unterstützt");
   const a = nachricht as Partial<Anfrage> | null;
-  if (a?.jsonrpc !== "2.0" || typeof a.method !== "string") return fehler(a?.id, -32600, "Ungültige Anfrage");
+  // MCP schließt null als ID aus, JSON-RPC erlaubt nur Text und Zahl
+  const gueltig = typeof a?.id === "string" || typeof a?.id === "number";
+  if (a?.jsonrpc !== "2.0" || typeof a.method !== "string")
+    return fehler(gueltig ? a.id : null, -32600, "Ungültige Anfrage");
   if (a.id === undefined) return null;
+  if (!gueltig) return fehler(null, -32600, "Ungültige ID");
   const id = a.id;
 
   switch (a.method) {
@@ -96,9 +100,10 @@ export async function beantworten(umgebung: Umgebung, nutzer: Angemeldet, nachri
           },
         };
       } catch (err) {
-        if (istWerkzeugFehler(err))
-          return { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: err.message }], isError: true } };
-        throw err;
+        // Unerwartete Fehler (etwa der Datenbank) nur ins Log; der Assistent bekommt eine Antwort ohne ihren Text
+        if (!istWerkzeugFehler(err)) console.error(`MCP ${werkzeug.name}:`, err);
+        const text = istWerkzeugFehler(err) ? err.message : "Interner Fehler; Einzelheiten stehen im Log des Servers";
+        return { jsonrpc: "2.0", id, result: { content: [{ type: "text", text }], isError: true } };
       }
     }
     default:
