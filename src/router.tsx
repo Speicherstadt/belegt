@@ -7,10 +7,9 @@ import { DocumentPage } from "./pages/DocumentPage.tsx";
 import { InboxPage } from "./pages/InboxPage.tsx";
 import { InvitePage } from "./pages/InvitePage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
-import { PlannedPage } from "./pages/PlannedPage.tsx";
+import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
-import { m } from "./paraglide/messages.js";
 
 const root = createRootRoute({ component: Outlet });
 
@@ -39,7 +38,7 @@ const seiten = [
   createRoute({
     getParentRoute: () => app,
     path: "/verfahrensdoku",
-    component: () => <PlannedPage title={m.procedure_title()} intro={m.procedure_intro()} />,
+    component: ProcedurePage,
   }),
 ];
 

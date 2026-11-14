@@ -168,7 +168,26 @@ export interface Befund {
   befund: string;
 }
 
+export interface Einstellungen {
+  firma: string;
+  anschrift: string;
+  verantwortlich: string;
+  aufsicht: boolean;
+  datensicherung: string;
+  scannen: string;
+  ergaenzungen: string;
+}
+
+export interface Verfahrensdoku {
+  stand: string;
+  vollstaendig: boolean;
+  abschnitte: { titel: string; absaetze: string[]; liste?: string[]; luecken?: string[] }[];
+}
+
 export const api = {
+  einstellungen: () => aufruf<Einstellungen>("/api/einstellungen"),
+  einstellungenSpeichern: (e: Einstellungen) => aufruf<Einstellungen>("/api/einstellungen", json(e)),
+  verfahrensdoku: () => aufruf<Verfahrensdoku>("/api/verfahrensdoku"),
   status: () => aufruf<{ eingerichtet: boolean }>("/api/status"),
   ich: () => aufruf<Ich>("/api/ich"),
   einrichten: (email: string, passwort: string, code: string) =>

@@ -78,6 +78,13 @@
       "when": 1794670006448,
       "tag": "0010_prueferzeitraum",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794670517683,
+      "tag": "0011_einstellungen",
+      "breakpoints": true
     }
   ]
 }

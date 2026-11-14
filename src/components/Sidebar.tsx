@@ -24,7 +24,7 @@ export function Sidebar({ ich }: { ich: Ich }) {
     await navigate({ to: "/anmelden" });
   }
   return (
-    <aside className="flex flex-[1_1_240px] flex-col gap-5 border-border border-b bg-side px-3 py-4 sm:max-w-64 sm:border-r sm:border-b-0">
+    <aside className="flex flex-[1_1_240px] print:hidden flex-col gap-5 border-border border-b bg-side px-3 py-4 sm:max-w-64 sm:border-r sm:border-b-0">
       <div className="flex flex-col px-2">
         <span className="font-semibold text-[15px]">{m.app_name()}</span>
         <span className="text-muted text-xs">{m.app_claim()}</span>

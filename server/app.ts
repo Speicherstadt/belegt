@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
+import paket from "../package.json" with { type: "json" };
 import { darfSchreiben, type Rolle } from "../shared/rollen.ts";
 import type { Angemeldet, Auth } from "./auth.ts";
 import { eingerichtet } from "./db/status.ts";
@@ -16,6 +17,11 @@ import {
   sperrenListen,
   uebersicht,
 } from "./einordnung/einordnung.ts";
+import {
+  EinstellungenEingabe,
+  laden as einstellungenLaden,
+  speichern as einstellungenSpeichern,
+} from "./einstellungen/einstellungen.ts";
 import { z3Export } from "./export/z3.ts";
 import {
   beantragen,
@@ -41,6 +47,7 @@ import {
   listen as regelnListen,
   vorschlag,
 } from "./mail/regeln.ts";
+import { verfahrensdoku } from "./verfahrensdoku/verfahrensdoku.ts";
 import { einladen, offen as einladungOffen, listen as zugaengeListen, zurueckziehen } from "./zugang/einladungen.ts";
 import { dokumentImPfad, imZeitraum, prueferDarf, prueferZeitraum, schnitt } from "./zugang/pruefer.ts";
 
@@ -53,6 +60,7 @@ export const MAX_UPLOAD = 100 * 1024 * 1024;
 const Id = z.uuid();
 
 /** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
+const VERSION = paket.version;
 const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
 const ZugangEingabe = z.discriminatedUnion("rolle", [
   z.object({ rolle: z.literal("steuerberatung") }),
@@ -85,7 +93,9 @@ const akteur = (n: Angemeldet) => `nutzer:${n.email}`;
  * Speicher, Anmeldung) antworten nur /healthz und 404. Alles unter /api außer /api/auth verlangt eine Sitzung;
  * schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen.
  */
-export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffer; oeffnen?: Oeffnen }) {
+export function createApp(
+  umgebung?: Umgebung & { auth: Auth; schluessel?: Buffer; oeffnen?: Oeffnen; abrufMinuten?: number },
+) {
   const app = new Hono<{ Variables: { nutzer: Angemeldet } }>();
 
   /** Für Container und Überwachung: antwortet, sobald der Server läuft */
@@ -394,6 +404,19 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
       const dokument = id.success ? await laden(umgebung.db, id.data) : null;
       return dokument ? c.json(await verlauf(umgebung.db, dokument.id)) : c.json({ fehler: "Nicht gefunden" }, 404);
     });
+
+    // Angaben zum Betrieb: lesen dürfen Inhaber und Steuerberatung, ändern nur der Inhaber
+    app.get("/api/einstellungen", async (c) => c.json(await einstellungenLaden(umgebung.db)));
+
+    app.post("/api/einstellungen", async (c) => {
+      const eingabe = EinstellungenEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!eingabe.success) return c.json({ fehler: "Ungültige Angaben", details: eingabe.error.issues }, 400);
+      return c.json(await einstellungenSpeichern(umgebung.db, eingabe.data, akteur(c.get("nutzer"))));
+    });
+
+    app.get("/api/verfahrensdoku", async (c) =>
+      c.json(await verfahrensdoku(umgebung.db, { abrufMinuten: umgebung.abrufMinuten ?? 5, version: VERSION })),
+    );
 
     app.get("/api/export", async (c) => {
       const zeitraum = Zeitraum.safeParse({ von: c.req.query("von"), bis: c.req.query("bis") });

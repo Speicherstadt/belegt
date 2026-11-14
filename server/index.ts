@@ -21,7 +21,7 @@ const einrichtungscode = randomBytes(9).toString("base64url");
 if (!(await eingerichtet(db))) console.log(`Belegt ist noch nicht eingerichtet. Einrichtungscode: ${einrichtungscode}`);
 const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTER_AUTH_URL, einrichtungscode });
 const schluessel = env.BELEGT_SCHLUESSEL ? schluesselAus(env.BELEGT_SCHLUESSEL) : undefined;
-const app = createApp({ db, speicher, auth, schluessel, oeffnen: imapOeffnen });
+const app = createApp({ db, speicher, auth, schluessel, oeffnen: imapOeffnen, abrufMinuten: env.ABRUF_MINUTEN });
 
 Bun.serve({ port: env.PORT, fetch: app.fetch, maxRequestBodySize: 110 * 1024 * 1024 });
 console.log(`Belegt läuft auf Port ${env.PORT}`);

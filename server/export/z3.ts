@@ -3,6 +3,7 @@ import { formatPruefwert } from "@firsttris/gobd-kern/pruefwert";
 import { makeZip } from "client-zip";
 import { sql } from "drizzle-orm";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 
 /**
  * Datenträgerüberlassung (Z3, GoBD Rz. 167): ein ZIP mit den Originalen und je einer CSV für Dokumente, Mails und
@@ -219,6 +220,7 @@ export async function z3Export(
   { nurFreigabe = false }: { nurFreigabe?: boolean } = {},
 ): Promise<ReadableStream<Uint8Array>> {
   const dokumente = await dokumenteImZeitraum(umgebung, zeitraum);
+  const betrieb = await einstellungenLaden(umgebung.db);
   const pfade = new Map(
     dokumente.map((d) => [d.id, `dokumente/${d.id}/${sichererName(d.dateiname, d.sha256)}`] as const),
   );
@@ -255,7 +257,11 @@ export async function z3Export(
     {
       name: "index.xml",
       inhalt: beschreibungXml({
-        lieferant: { name: "Belegt", ort: "", kommentar: `Zeitraum ${zeitraum.von} bis ${zeitraum.bis}` },
+        lieferant: {
+          name: betrieb.firma || "Belegt",
+          ort: betrieb.anschrift,
+          kommentar: `Zeitraum ${zeitraum.von} bis ${zeitraum.bis}`,
+        },
         medium: `Belegt ${zeitraum.von} bis ${zeitraum.bis}`,
         tabellen: [DOKUMENTE, MAILS, PROTOKOLL],
       }),

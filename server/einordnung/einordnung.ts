@@ -39,7 +39,12 @@ export async function einordnen(
   eingabe: EinordnungEingabe,
   akteur: string,
 ): Promise<Einordnung> {
-  const frist = fristende(eingabe.art, eingabe.entstanden, { freiwilligBis: eingabe.freiwilligBis });
+  // Institute unter Aufsicht bewahren Buchungsbelege zehn Jahre auf (Art. 97 § 19a Abs. 3 EGAO)
+  const [betrieb] = await db.execute<{ aufsicht: boolean }>(sql`select aufsicht from einstellungen where id = 1`);
+  const frist = fristende(eingabe.art, eingabe.entstanden, {
+    freiwilligBis: eingabe.freiwilligBis,
+    aufsicht: betrieb?.aufsicht ?? false,
+  });
   const [neu] = await mitAkteur(db, akteur, (tx) =>
     tx
       .insert(einordnungen)

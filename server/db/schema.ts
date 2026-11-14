@@ -9,6 +9,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  smallint,
   text,
   timestamp,
   uuid,
@@ -200,4 +201,27 @@ export const quellen = pgTable(
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check("quellen_port", sql`${t.port} between 1 and 65535`)],
+);
+
+/**
+ * Angaben zum Betrieb für Verfahrensdokumentation, Z3-Export und Fristen; genau eine Zeile, protokolliert.
+ * Was die Software selbst tut, schreibt Belegt in die Verfahrensdokumentation; hier steht nur, was sie nicht wissen kann.
+ */
+export const einstellungen = pgTable(
+  "einstellungen",
+  {
+    id: smallint("id").primaryKey().default(1),
+    firma: text("firma").notNull().default(""),
+    anschrift: text("anschrift").notNull().default(""),
+    verantwortlich: text("verantwortlich").notNull().default(""),
+    /** Kredit-, Wertpapierinstitut oder unter Versicherungsaufsicht: Buchungsbelege 10 statt 8 Jahre (Art. 97 § 19a EGAO) */
+    aufsicht: boolean("aufsicht").notNull().default(false),
+    /** Wie, wohin und wie oft gesichert wird, und wer die Wiederherstellung prüft */
+    datensicherung: text("datensicherung").notNull().default(""),
+    /** Papier nach dem Scannen: aufbewahrt oder vernichtet, wer scannt, wer prüft */
+    scannen: text("scannen").notNull().default(""),
+    ergaenzungen: text("ergaenzungen").notNull().default(""),
+    geaendertAm: timestamp("geaendert_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("einstellungen_eine_zeile", sql`${t.id} = 1`)],
 );
