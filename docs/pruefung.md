@@ -7,7 +7,8 @@ Original und vergleicht es mit seinem Hash.
 
 Unter **Zugänge** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
 Der Prüfer liest nur: Eingang, Archiv und Prüfung, und von den Dokumenten nur die, deren Tag (Entstanden, sonst
-Eingang) im Zeitraum liegt. Seinen Z3-Export schneidet Belegt auf diesen Zeitraum zu. Fristen, Sperren, Löschungen,
+Eingang) im Zeitraum liegt; die Mail zu einem Anhang nur, wenn auch sie darin liegt. Seinen Z3-Export schneidet
+Belegt auf diesen Zeitraum zu, im Protokoll stehen nur die Einträge zu diesen Dokumenten. Fristen, Sperren, Löschungen,
 Regeln und Postfächer sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein.
 
 ## Datenträger für die Betriebsprüfung (Z3)

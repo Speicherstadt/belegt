@@ -147,7 +147,20 @@ async function mailsCsv({ db }: Umgebung, ids: string[]): Promise<string> {
   );
 }
 
-async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum): Promise<string> {
+/**
+ * Die Zeilen, deren Einträge im Audit-Log zu Dokumenten des Zeitraums gehören: die Dokumente selbst (auch gelöschte,
+ * damit ihr Löschnachweis bleibt), ihre Einordnungen, Löschungen, Mails und Anhänge zwischen zwei solchen Dokumenten.
+ */
+const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
+    with dok as (select d.id from dokumente d where belegt_dokument_tag(d.id) between ${von}::date and ${bis}::date)
+    select id::text from dok
+    union all select x.id::text from einordnungen x where x.dokument_id in (select id from dok)
+    union all select x.id::text from loeschungen x where x.dokument_id in (select id from dok)
+    union all select x.id::text from mails x where x.dokument_id in (select id from dok)
+    union all select x.id::text from mail_anhaenge x
+               where x.mail_dokument_id in (select id from dok) and x.anhang_dokument_id in (select id from dok)`;
+
+async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigabe: boolean): Promise<string> {
   const zeilen = await db.execute<{
     seq: string;
     at: Date;
@@ -163,6 +176,13 @@ async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum): Promise<s
            encode(prev_hash, 'hex') as prev_hash, encode(row_hash, 'hex') as row_hash
       from audit_log
      where (at at time zone 'Europe/Berlin')::date between ${von}::date and ${bis}::date
+       ${
+         nurFreigabe
+           ? sql`and ((table_name in ('dokumente', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
+                       and row_id in (${zeilenDerFreigabe({ von, bis })}))
+                   or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })})))`
+           : sql``
+       }
      order by seq`);
   return csv(
     PROTOKOLL.spalten.map((s) => s.name),
@@ -192,7 +212,12 @@ async function pruefwert({ db }: Umgebung): Promise<string> {
  * geprüft (der Speicher lehnt eine veränderte Datei ab). Fehlt eine Datei oder passt sie nicht, bricht der Export ab,
  * statt ein unvollständiges Archiv als vollständig auszugeben.
  */
-export async function z3Export(umgebung: Umgebung, zeitraum: Zeitraum): Promise<ReadableStream<Uint8Array>> {
+export async function z3Export(
+  umgebung: Umgebung,
+  zeitraum: Zeitraum,
+  /** Prüferzugang: im Protokoll nur Einträge zu Dokumenten des Zeitraums, keine Sperren, Regeln oder Zugänge */
+  { nurFreigabe = false }: { nurFreigabe?: boolean } = {},
+): Promise<ReadableStream<Uint8Array>> {
   const dokumente = await dokumenteImZeitraum(umgebung, zeitraum);
   const pfade = new Map(
     dokumente.map((d) => [d.id, `dokumente/${d.id}/${sichererName(d.dateiname, d.sha256)}`] as const),
@@ -226,7 +251,7 @@ export async function z3Export(umgebung: Umgebung, zeitraum: Zeitraum): Promise<
         dokumente.map((d) => d.id),
       ),
     },
-    { name: PROTOKOLL.path, inhalt: await protokollCsv(umgebung, zeitraum) },
+    { name: PROTOKOLL.path, inhalt: await protokollCsv(umgebung, zeitraum, nurFreigabe) },
     {
       name: "index.xml",
       inhalt: beschreibungXml({

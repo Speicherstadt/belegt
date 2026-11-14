@@ -293,11 +293,12 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
         [...mail.unterhaltung.map((u) => u.dokumentId), ...mail.anhaenge.map((a) => a.dokumentId), mail.ausMail ?? ""],
         zeitraum,
       );
+      // Kopf und Text gehören der Mail: Liegt sie zu einem Anhang außerhalb des Zeitraums, gibt es für ihn keine Mail
+      if (mail.ausMail && !sichtbar.has(mail.ausMail)) return c.json({ fehler: "Keine Mail" }, 404);
       return c.json({
         ...mail,
         unterhaltung: mail.unterhaltung.filter((u) => sichtbar.has(u.dokumentId)),
         anhaenge: mail.anhaenge.filter((a) => sichtbar.has(a.dokumentId)),
-        ausMail: mail.ausMail && sichtbar.has(mail.ausMail) ? mail.ausMail : null,
       });
     });
 
@@ -402,7 +403,8 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
       const freigabe = c.get("nutzer").zeitraum;
       const teil = freigabe ? schnitt(zeitraum.data, freigabe) : zeitraum.data;
       if (!teil) return c.json({ fehler: "Der Zeitraum liegt außerhalb der Freigabe" }, 403);
-      const stream = await z3Export(umgebung, teil);
+      // Für den Prüfer nur die Einträge des Audit-Logs zu Dokumenten seiner Freigabe
+      const stream = await z3Export(umgebung, teil, { nurFreigabe: !!freigabe });
       return c.body(stream, 200, {
         "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="belegt-z3-${teil.von}-${teil.bis}.zip"`,
