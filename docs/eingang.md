@@ -40,6 +40,19 @@ Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der T
 einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
 und Ausschlüsse mit Minus.
 
+## SMTP-Journal
+
+Statt Postfächer abzurufen, kann der Mailserver jede Mail zusätzlich per SMTP an Belegt schicken (Journal, etwa per
+Kopie an eine eigene Adresse mit Weiterleitung zu Belegt). Belegt archiviert sie unverändert, so wie sie ankommt. Der
+Dienst läuft als eigener Prozess (`bun server/smtp.ts`, in Compose mit `--profile journal`) auf `SMTP_PORT` (2525).
+
+Der Mailserver meldet sich mit AUTH an: Benutzername beliebig, Passwort ein API-Token mit dem Recht schreiben. Im
+Protokoll steht dann `token:<Name>`, und ein widerrufenes Token wird abgelehnt. `SMTP_EMPFAENGER` beschränkt die
+angenommenen Empfänger (mit Komma getrennt). Mit `SMTP_TLS_KEY` und `SMTP_TLS_CERT` bietet Belegt STARTTLS an; ohne
+geht die Anmeldung im Klartext, das nur in einem eigenen, geschützten Netz. Eine Mail, die schon im Archiv liegt, nimmt
+Belegt an, legt sie aber nicht doppelt ab. Klappt die Aufnahme nicht, antwortet es mit 451, und der Mailserver versucht
+es später noch einmal.
+
 ## Text und E-Rechnungen
 
 Kurz nach dem Eingang liest der Worker jedes PDF und XML: den Text eines PDFs für die Suche und die Kopfdaten einer

@@ -15,6 +15,11 @@ const Schema = z.object({
   BELEGT_SCHLUESSEL: z.string().min(40).optional(),
   /** Abstand zwischen zwei Abrufen der Postfächer im Worker, in Minuten */
   ABRUF_MINUTEN: z.coerce.number().int().min(1).max(1440).default(5),
+  /** SMTP-Journal (bun server/smtp.ts): Port, erlaubte Empfänger (mit Komma getrennt, leer: alle), TLS-Schlüssel und -Zertifikat */
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(2525),
+  SMTP_EMPFAENGER: z.string().optional(),
+  SMTP_TLS_KEY: z.string().min(1).optional(),
+  SMTP_TLS_CERT: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof Schema>;

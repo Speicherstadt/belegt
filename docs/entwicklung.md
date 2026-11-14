@@ -6,6 +6,7 @@
 bun install
 bun run dev:server   # Server auf Port 3000 (PORT), braucht DATABASE_URL; wendet beim Start die Migrationen an
 bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
+bun server/smtp.ts   # SMTP-Journal (docs/eingang.md)
 bun server/worker.ts # Worker: ruft die Postfächer ab, stellt Webhooks zu und liest Text und E-Rechnungen
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
@@ -50,6 +51,7 @@ löschen sie wieder.
 | `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern und Geheimnisse von Webhooks, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
+| `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |
 
 ## Migrationen
 

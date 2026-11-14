@@ -52,6 +52,25 @@ services:
     healthcheck:
       disable: true
 
+  # SMTP-Journal, nur mit: docker compose --profile journal up -d (docs/eingang.md)
+  smtp:
+    image: belegt:lokal
+    profiles: [journal]
+    restart: unless-stopped
+    command: ["bun", "server/smtp.ts"]
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      <<: *umgebung
+      SMTP_EMPFAENGER: ${SMTP_EMPFAENGER:-}
+    ports:
+      - "${SMTP_PORT:-2525}:2525"
+    volumes:
+      - dokumente:/var/lib/belegt
+    healthcheck:
+      disable: true
+
 volumes:
   postgres:
   dokumente:

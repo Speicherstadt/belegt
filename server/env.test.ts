@@ -8,6 +8,7 @@ describe("readEnv", () => {
       DOCUMENTS_DIR: "data/dokumente",
       BETTER_AUTH_URL: "http://localhost:3000",
       ABRUF_MINUTEN: 5,
+      SMTP_PORT: 2525,
     });
   });
 
