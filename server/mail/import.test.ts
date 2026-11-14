@@ -109,6 +109,35 @@ describe.skipIf(!testDatenbankUrl)("Mail-Import gegen Postgres", () => {
     expect(zweit).toEqual({ neu: [], doppelt: erst.neu });
   });
 
+  it("nimmt eine Mail mit Nullzeichen in Text, Betreff und Dateiname des Anhangs auf (Postgres speichert sie nicht)", async () => {
+    const roh = crlf([
+      "From: a@example.org",
+      "To: anna@example.org",
+      "Subject: =?utf-8?Q?Null=00zeichen?=",
+      "Message-ID: <null@x>",
+      'Content-Type: multipart/mixed; boundary="g"',
+      "",
+      "--g",
+      "Content-Type: text/plain; charset=utf-8",
+      "",
+      "Hallo\u0000Welt",
+      "--g",
+      'Content-Type: application/pdf; name="=?utf-8?Q?a=00b.pdf?="',
+      'Content-Disposition: attachment; filename="=?utf-8?Q?a=00b.pdf?="',
+      "",
+      "PDF",
+      "--g--",
+      "",
+    ]);
+    const res = await importieren(roh);
+    expect(res.status).toBe(201);
+    const { neu } = await res.json();
+    const m = await (await anfrage(`/api/dokumente/${neu[0]}/mail`)).json();
+    expect(m).toMatchObject({ betreff: "Nullzeichen", text: "HalloWelt" });
+    expect(m.anhaenge).toEqual([expect.objectContaining({ dateiname: "ab.pdf" })]);
+    expect(Buffer.from(await (await anfrage(`/api/dokumente/${neu[0]}/datei`)).arrayBuffer()).toString()).toBe(roh);
+  });
+
   it("teilt ein MBOX-Archiv und hält eine Unterhaltung über die Message-IDs zusammen", async () => {
     const a = mail({ id: "<frage@kunde.de>", von: "kunde@kunde.de", betreff: "Angebot?" });
     const b = mail({

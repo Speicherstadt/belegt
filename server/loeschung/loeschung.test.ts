@@ -117,6 +117,35 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
     expect((await als(inhaber)(`/api/loeschungen/${id}`, { method: "DELETE" })).status).toBe(404);
   });
 
+  it("verlangt die zweite Person auch, wenn ein Pflichtdokument nachträglich als frei eingeordnet wird", async () => {
+    const d = await dokument("beleg-umgeordnet", "beleg", "2026-03-01");
+    await als(inhaber)(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-03-01" }));
+    const antrag = await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" });
+    expect(antrag.status).toBe(201);
+    const { id, bestaetigtAm } = await antrag.json();
+    expect(bestaetigtAm).toBeNull();
+    expect(existsSync(t.speicher.pfad(d.sha256))).toBe(true);
+    const selbst = await als(inhaber)(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" });
+    expect(selbst.status).toBe(409);
+    expect((await selbst.json()).fehler).toMatch(/zweite Person/);
+    expect((await als(kanzlei)(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" })).status).toBe(200);
+  });
+
+  it("lehnt in der Datenbank einen Antrag ab, der schon bestätigt eingefügt wird oder den Antragsteller wechselt", async () => {
+    const d = await dokument("beleg-2014", "beleg", "2014-03-01");
+    await expect(
+      t.sql`insert into loeschungen (dokument_id, beantragt_von, bestaetigt_von, bestaetigt_am)
+            values (${d.id}, 'nutzer:a', 'nutzer:b', now())`,
+    ).rejects.toThrow(/zweite Person/);
+    const { id } = await (await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).json();
+    await expect(t.sql`update loeschungen set beantragt_von = 'nutzer:b' where id = ${id}`).rejects.toThrow(
+      /Antrag/,
+    );
+    await expect(t.sql`update loeschungen set beantragt_am = now() - interval '1 day' where id = ${id}`).rejects.toThrow(
+      /Antrag/,
+    );
+  });
+
   it("hat nach allem eine intakte Kette", async () => {
     expect(await (await als(inhaber)("/api/pruefung")).json()).toEqual({ ok: true, befunde: [] });
   });
