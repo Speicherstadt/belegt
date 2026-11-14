@@ -33,6 +33,9 @@ export interface OidcKonfig {
 }
 export const OIDC_ANBIETER = "oidc";
 
+/** Kennung eines Kontos beim Anbieter in account.account_id: Issuer und sub zusammen */
+export const oidcKennung = (issuer: string, sub: string) => JSON.stringify([issuer, sub]);
+
 /** Ein Konto ohne Access-, Refresh- und ID-Token, beim Anlegen und bei jeder Aktualisierung */
 function ohneTokens<T extends object>(account: T): T {
   return { ...account, accessToken: null, refreshToken: null, idToken: null };
@@ -88,6 +91,12 @@ export function createAuth({
                 requireIdTokenVerification: true,
                 disableImplicitSignUp: true,
                 mapProfileToUser: (profile) => ({ emailVerified: profile.email_verified === true }),
+                // Ein sub gilt nur beim Anbieter, der es vergibt: nach einem Wechsel von OIDC_ISSUER passt kein altes Konto
+                // Ohne sub gibt es keine Kennung ("" lehnt Better Auth ab), sonst teilten sich alle ohne sub ein Konto
+                accountSubject: ({ profile }) =>
+                  typeof profile.sub === "string" && profile.sub
+                    ? oidcKennung(oidc.issuer.replace(/\/$/, ""), profile.sub)
+                    : "",
               },
             ],
           }),

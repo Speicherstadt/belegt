@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "./app.ts";
-import { createAuth } from "./auth.ts";
+import { createAuth, oidcKennung } from "./auth.ts";
 import { EINRICHTUNGSCODE, testApp } from "./test-app.ts";
 import { testDatenbankUrl } from "./test-db.ts";
 
@@ -126,7 +126,9 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung über OpenID Connect", () => {
     });
     const verbunden = await zumAnbieter(anna, { verbinden: cookies(passwort) });
     expect(verbunden.ort).toMatch(/\/$/);
-    expect(await t.sql`select account_id from account where provider_id = 'oidc'`).toEqual([{ account_id: "u-anna" }]);
+    expect(await t.sql`select account_id from account where provider_id = 'oidc'`).toEqual([
+      { account_id: oidcKennung(a.zustand.issuer, "u-anna") },
+    ]);
 
     const { ort, sitzung } = await zumAnbieter(anna);
     expect(ort).toMatch(/\/$/);

@@ -13,7 +13,8 @@ Authorization Code und PKCE an und prüft das ID-Token gegen die Schlüssel des 
 
 Zugänge entstehen weiter nur mit Einladung. Wer schon ein Konto hat, verbindet es einmal: mit E-Mail und Passwort
 anmelden, unten links „Mit … verbinden“. Danach meldet „Anmelden mit …“ auf der Anmeldeseite direkt an; Belegt erkennt
-die Person an ihrer festen Kennung beim Anbieter (`sub`), nicht an der Adresse. Eine Verknüpfung allein über die
+die Person an ihrer festen Kennung beim Anbieter (`sub`), nicht an der Adresse; nach einem Wechsel von `OIDC_ISSUER`
+verbindet jede Person ihr Konto neu. Eine Verknüpfung allein über die
 Adresse gibt es nicht: Belegt bestätigt keine Adressen, und wer einen Einladungslink öffnet, wählt seine Adresse selbst.
 Ob der Anbieter die Adresse als bestätigt meldet, spielt deshalb keine Rolle. Tokens des Anbieters speichert Belegt nicht.
 
