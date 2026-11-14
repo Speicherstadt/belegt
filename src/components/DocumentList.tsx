@@ -14,6 +14,8 @@ const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "freiwillig", label: () => m.filter_voluntary() },
   { gruppe: "frei", label: () => m.filter_free() },
   { gruppe: "offen", label: () => m.filter_open() },
+  { gruppe: "loeschbar", label: () => m.filter_deletable() },
+  { gruppe: "geloescht", label: () => m.filter_deleted() },
 ];
 
 function aufbewahrung(d: Eintrag): string {

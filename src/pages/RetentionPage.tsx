@@ -1,5 +1,6 @@
 import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts";
 import { Holds } from "../components/Holds.tsx";
+import { OpenDeletions } from "../components/OpenDeletions.tsx";
 import { Overview } from "../components/Overview.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { m } from "../paraglide/messages.js";
@@ -25,6 +26,7 @@ export function RetentionPage() {
     <div className="flex flex-col gap-4">
       <PageHeader title={m.retention_title()} intro={m.retention_intro()} />
       <Overview />
+      <OpenDeletions />
       {/* Auf schmalen Bildschirmen scrollt die Tabelle seitlich: per Tastatur erreichbar und benannt (WCAG 2.1.1) */}
       <section
         aria-label={m.retention_title()}

@@ -16,6 +16,14 @@ import {
   sperrenListen,
   uebersicht,
 } from "./einordnung/einordnung.ts";
+import {
+  beantragen,
+  bestaetigen,
+  fuerDokument,
+  listen as loeschungenListen,
+  zurueckziehen as loeschungZurueckziehen,
+  regelVerletzt,
+} from "./loeschung/loeschung.ts";
 import { einladen, offen as einladungOffen, listen as zugaengeListen, zurueckziehen } from "./zugang/einladungen.ts";
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
@@ -88,7 +96,13 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
         role: (sitzung.user as { role?: Rolle }).role ?? "pruefer",
       };
       const schreibt = c.req.method !== "GET" && c.req.method !== "HEAD";
-      if (schreibt && !darfSchreiben(nutzer.role)) return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
+      // Einzige Ausnahme: Die Steuerberatung bestätigt als zweite Person eine Löschung, die der Inhaber beantragt hat
+      const zweitePerson =
+        nutzer.role === "steuerberatung" &&
+        c.req.method === "POST" &&
+        /^\/api\/loeschungen\/[^/]+\/bestaetigen$/.test(c.req.path);
+      if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson)
+        return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
       if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {
         return c.json({ fehler: "Anfrage von einer fremden Seite" }, 403);
       }
@@ -139,14 +153,18 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
     app.get("/api/dokumente", async (c) => {
       const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
       const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
-      return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit, gruppe }));
+      return c.json(await listen(umgebung.db, { suche: c.req.query("suche"), limit, gruppe, heute: heute() }));
     });
 
     app.get("/api/dokumente/:id", async (c) => {
       const id = Id.safeParse(c.req.param("id"));
       const dokument = id.success ? await laden(umgebung.db, id.data) : null;
       if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
-      return c.json({ ...dokument, einordnung: await aktuelle(umgebung.db, dokument.id) });
+      return c.json({
+        ...dokument,
+        einordnung: await aktuelle(umgebung.db, dokument.id),
+        loeschung: await fuerDokument(umgebung.db, dokument.id),
+      });
     });
 
     app.post("/api/dokumente/:id/einordnung", async (c) => {
@@ -158,10 +176,51 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       try {
         return c.json(await einordnen(umgebung.db, dokument.id, eingabe.data, akteur(c.get("nutzer"))), 201);
       } catch (err) {
-        // fristende lehnt etwa einen Tag ab, den es nicht gibt, oder freiwillig ohne Datum
-        if (err instanceof Error && !("code" in err)) return c.json({ fehler: err.message }, 400);
+        // Ein Trigger lehnt ab (etwa: schon gelöscht); seine Meldung ist für Menschen geschrieben
+        const meldung = regelVerletzt(err);
+        if (meldung) return c.json({ fehler: meldung }, 409);
+        // fristende lehnt etwa einen Tag ab, den es nicht gibt, oder freiwillig ohne Datum; Datenbankfehler (mit cause
+        // oder code) gehen nie mit ihrem Text an den Aufrufer, sie könnten SQL enthalten
+        if (err instanceof Error && !("code" in err) && !("cause" in err && err.cause))
+          return c.json({ fehler: err.message }, 400);
         throw err;
       }
+    });
+
+    app.post("/api/dokumente/:id/loeschung", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+      if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+      if (await fuerDokument(umgebung.db, dokument.id))
+        return c.json({ fehler: "Für dieses Dokument gibt es schon eine Löschung" }, 409);
+      try {
+        return c.json(await beantragen(umgebung.db, umgebung.speicher, dokument.id, akteur(c.get("nutzer"))), 201);
+      } catch (err) {
+        const meldung = regelVerletzt(err);
+        if (meldung) return c.json({ fehler: meldung }, 409);
+        throw err;
+      }
+    });
+
+    app.get("/api/loeschungen", async (c) => c.json(await loeschungenListen(umgebung.db)));
+
+    app.post("/api/loeschungen/:id/bestaetigen", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+      try {
+        const l = await bestaetigen(umgebung.db, umgebung.speicher, id.data, akteur(c.get("nutzer")));
+        return l ? c.json(l) : c.json({ fehler: "Kein offener Antrag mit dieser ID" }, 404);
+      } catch (err) {
+        const meldung = regelVerletzt(err);
+        if (meldung) return c.json({ fehler: meldung }, 409);
+        throw err;
+      }
+    });
+
+    app.delete("/api/loeschungen/:id", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const ok = id.success && (await loeschungZurueckziehen(umgebung.db, id.data, akteur(c.get("nutzer"))));
+      return ok ? c.json({ ok: true }) : c.json({ fehler: "Kein offener Antrag mit dieser ID" }, 404);
     });
 
     app.get("/api/sperren", async (c) => c.json(await sperrenListen(umgebung.db)));
@@ -184,6 +243,8 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       const id = Id.safeParse(c.req.param("id"));
       const dokument = id.success ? await laden(umgebung.db, id.data) : null;
       if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+      if ((await fuerDokument(umgebung.db, dokument.id))?.bestaetigtAm)
+        return c.json({ fehler: "Das Dokument ist gelöscht" }, 410);
       const bytes = await umgebung.speicher.laden(dokument.sha256).catch(() => null);
       // Fehlt die Datei oder passt ihr Hash nicht mehr, wird nichts ausgeliefert, was als Original gelten könnte
       if (!bytes) return c.json({ fehler: "Die Datei fehlt oder wurde verändert" }, 409);

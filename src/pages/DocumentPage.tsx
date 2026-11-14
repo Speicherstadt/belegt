@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { Classification } from "../components/Classification.tsx";
+import { Deletion } from "../components/Deletion.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
@@ -28,8 +29,10 @@ export function DocumentPage() {
   if (dok.error) return <EmptyState title={m.doc_not_found()} text="" />;
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
   const d = dok.data;
-  const vorschau =
-    d.mimeType === "application/pdf"
+  const geloescht = !!d.loeschung?.bestaetigtAm;
+  const vorschau = geloescht
+    ? null
+    : d.mimeType === "application/pdf"
       ? "pdf"
       : d.mimeType.startsWith("image/") && d.mimeType !== "image/heic"
         ? "bild"
@@ -41,12 +44,14 @@ export function DocumentPage() {
         {m.doc_back()}
       </Link>
       <PageHeader title={d.einordnung?.titel ?? d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
-      <a
-        href={dateiUrl(d.id)}
-        className="h-9 self-start rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
-      >
-        {m.doc_download()}
-      </a>
+      {!geloescht && (
+        <a
+          href={dateiUrl(d.id)}
+          className="h-9 self-start rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
+        >
+          {m.doc_download()}
+        </a>
+      )}
       <div className="flex flex-wrap items-start gap-6">
         <section
           aria-label={m.doc_preview()}
@@ -61,12 +66,15 @@ export function DocumentPage() {
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
-          <Classification
-            key={d.einordnung?.id ?? "neu"}
-            dokumentId={d.id}
-            einordnung={d.einordnung}
-            eingang={d.eingegangenAm}
-          />
+          <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
+          {!geloescht && (
+            <Classification
+              key={d.einordnung?.id ?? "neu"}
+              dokumentId={d.id}
+              einordnung={d.einordnung}
+              eingang={d.eingegangenAm}
+            />
+          )}
           <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
             <h2 id="angaben" className="m-0 font-semibold text-base">
               {m.doc_details()}

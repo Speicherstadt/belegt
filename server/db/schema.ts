@@ -79,3 +79,24 @@ export const sperren = pgTable(
     check("sperren_grund", sql`length(trim(${t.grund})) > 0`),
   ],
 );
+
+/**
+ * Löschung eines Dokuments: beantragt, dann von einer zweiten Person bestätigt (frei Abgelegtes darf dieselbe Person
+ * sofort löschen). Ab der Bestätigung versiegelt; die Zeile in dokumente bleibt als Löschnachweis mit Hash, die Datei
+ * ist weg. Ob gelöscht werden darf, prüft ein Trigger in Postgres (Frist, Sperren, zwei Personen).
+ */
+export const loeschungen = pgTable(
+  "loeschungen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dokumentId: uuid("dokument_id")
+      .notNull()
+      .unique()
+      .references(() => dokumente.id),
+    beantragtVon: text("beantragt_von").notNull(),
+    beantragtAm: timestamp("beantragt_am", { withTimezone: true }).notNull().defaultNow(),
+    bestaetigtVon: text("bestaetigt_von"),
+    bestaetigtAm: timestamp("bestaetigt_am", { withTimezone: true }),
+  },
+  (t) => [check("loeschungen_bestaetigung", sql`(${t.bestaetigtVon} is null) = (${t.bestaetigtAm} is null)`)],
+);

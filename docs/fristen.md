@@ -39,3 +39,15 @@ Eine Sperre hält alle Dokumente, die in ihrem Zeitraum entstanden sind, auch na
 Betriebsprüfung oder eines Rechtsstreits. Grund und Zeitraum lassen sich nicht ändern; eine Sperre wird einmal
 aufgehoben und bleibt mit dem Zeitpunkt im Verlauf. Die Seite Fristen zählt, was im Archiv und im Eingang liegt, was
 gesperrt ist und was gelöscht werden dürfte.
+
+## Löschen
+
+Ist die Frist abgelaufen und liegt keine Sperre über dem Dokument, beantragt der Inhaber auf der Seite des Dokuments
+die Löschung. Eine zweite Person (die Steuerberatung) bestätigt sie unter Fristen › Offene Löschungen; wer beantragt
+hat, kann nicht selbst bestätigen. Frei Abgelegtes löscht der Inhaber sofort.
+
+Ob gelöscht werden darf, prüft Postgres bei Antrag und Bestätigung selbst: Einordnung vorhanden, Frist abgelaufen
+(Tag in Deutschland) oder frei, keine offene Sperre, zwei Personen. Nach der Bestätigung ist die Datei entfernt, außer
+ein anderes Dokument hat denselben Inhalt. Die Zeile mit Hash, Angaben und Verlauf bleibt als Löschnachweis,
+versiegelt; das Dokument lässt sich danach nicht mehr einordnen. Im Archiv zeigt der Filter „Gelöscht“ diese
+Nachweise.

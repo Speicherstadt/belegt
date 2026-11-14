@@ -159,5 +159,18 @@
   "access_state_open": "open until {datum}",
   "access_state_used": "used by {email}",
   "access_state_revoked": "revoked",
-  "access_state_expired": "expired"
+  "access_state_expired": "expired",
+  "filter_deletable": "May be deleted",
+  "filter_deleted": "Deleted",
+  "delete_title": "Deletion",
+  "delete_request": "Request deletion",
+  "delete_confirm": "Confirm deletion",
+  "delete_withdraw": "Withdraw request",
+  "delete_requested": "Requested by {wer} on {wann}. A second person confirms.",
+  "delete_done": "Deleted on {wann}, requested by {antrag}, confirmed by {bestaetigt}. The file is removed; hash, details and history remain as proof.",
+  "delete_hint": "The retention period has ended. Check with your tax advisor first whether an assessment period is still open (§ 147 (3) sentence 5 AO).",
+  "delete_hint_free": "Stored freely: you can delete it right away.",
+  "delete_failed": "Deletion failed: {meldung}",
+  "delete_open_title": "Open deletions",
+  "delete_open_none": "No open requests."
 }

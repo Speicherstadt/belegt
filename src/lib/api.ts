@@ -48,7 +48,7 @@ export interface Dokument {
 }
 
 export type Art = "buecher" | "zoll" | "beleg" | "geschaeftsbrief" | "sonstige" | "freiwillig" | "frei";
-export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei";
+export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei" | "loeschbar" | "geloescht";
 
 export interface Eintrag extends Dokument {
   art: Art | null;
@@ -64,6 +64,16 @@ export interface Einordnung {
   titel: string | null;
   korrespondent: string | null;
   erstelltAm: string;
+}
+
+export interface Loeschung {
+  id: string;
+  dokumentId: string;
+  beantragtVon: string;
+  beantragtAm: string;
+  bestaetigtVon: string | null;
+  bestaetigtAm: string | null;
+  dateiname?: string | null;
 }
 
 export interface Sperre {
@@ -135,7 +145,12 @@ export const api = {
   abmelden: () => aufruf<unknown>("/api/auth/sign-out", json({})),
   dokumente: (suche: string, gruppe: Gruppe = "alle") =>
     aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}`),
-  dokument: (id: string) => aufruf<Dokument & { einordnung: Einordnung | null }>(`/api/dokumente/${id}`),
+  dokument: (id: string) =>
+    aufruf<Dokument & { einordnung: Einordnung | null; loeschung: Loeschung | null }>(`/api/dokumente/${id}`),
+  loeschungBeantragen: (id: string) => aufruf<Loeschung>(`/api/dokumente/${id}/loeschung`, { method: "POST" }),
+  loeschungen: () => aufruf<Loeschung[]>("/api/loeschungen"),
+  loeschungBestaetigen: (id: string) => aufruf<Loeschung>(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" }),
+  loeschungZurueckziehen: (id: string) => aufruf<unknown>(`/api/loeschungen/${id}`, { method: "DELETE" }),
   einordnen: (
     id: string,
     eingabe: { art: Art; entstanden: string; freiwilligBis?: string; titel?: string; korrespondent?: string },

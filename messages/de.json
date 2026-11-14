@@ -159,5 +159,18 @@
   "access_state_open": "offen bis {datum}",
   "access_state_used": "eingelöst von {email}",
   "access_state_revoked": "zurückgezogen",
-  "access_state_expired": "abgelaufen"
+  "access_state_expired": "abgelaufen",
+  "filter_deletable": "Darf gelöscht werden",
+  "filter_deleted": "Gelöscht",
+  "delete_title": "Löschung",
+  "delete_request": "Löschung beantragen",
+  "delete_confirm": "Löschung bestätigen",
+  "delete_withdraw": "Antrag zurückziehen",
+  "delete_requested": "Beantragt von {wer} am {wann}. Eine zweite Person bestätigt.",
+  "delete_done": "Gelöscht am {wann}, beantragt von {antrag}, bestätigt von {bestaetigt}. Die Datei ist entfernt; Hash, Angaben und Verlauf bleiben als Nachweis.",
+  "delete_hint": "Die Frist ist abgelaufen. Prüfe vorher mit deiner Steuerberatung, ob eine Festsetzungsfrist noch offen ist (§ 147 Abs. 3 Satz 5 AO).",
+  "delete_hint_free": "Frei abgelegt: Du kannst es sofort löschen.",
+  "delete_failed": "Löschung fehlgeschlagen: {meldung}",
+  "delete_open_title": "Offene Löschungen",
+  "delete_open_none": "Keine offenen Anträge."
 }
