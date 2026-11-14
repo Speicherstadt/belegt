@@ -43,6 +43,13 @@
       "when": 1794668081064,
       "tag": "0005_loeschungen",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794668555290,
+      "tag": "0006_mail",
+      "breakpoints": true
     }
   ]
 }

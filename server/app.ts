@@ -24,6 +24,14 @@ import {
   zurueckziehen as loeschungZurueckziehen,
   regelVerletzt,
 } from "./loeschung/loeschung.ts";
+import { importieren, mailZuDokument } from "./mail/import.ts";
+import {
+  aktivSetzen,
+  RegelEingabe,
+  anlegen as regelAnlegen,
+  listen as regelnListen,
+  vorschlag,
+} from "./mail/regeln.ts";
 import { einladen, offen as einladungOffen, listen as zugaengeListen, zurueckziehen } from "./zugang/einladungen.ts";
 
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
@@ -221,6 +229,48 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       const id = Id.safeParse(c.req.param("id"));
       const ok = id.success && (await loeschungZurueckziehen(umgebung.db, id.data, akteur(c.get("nutzer"))));
       return ok ? c.json({ ok: true }) : c.json({ fehler: "Kein offener Antrag mit dieser ID" }, 404);
+    });
+
+    app.post(
+      "/api/mails",
+      bodyLimit({ maxSize: MAX_UPLOAD, onError: (c) => c.json({ fehler: "Datei zu groß" }, 413) }),
+      async (c) => {
+        const datei = (await c.req.formData()).get("datei");
+        if (!(datei instanceof File)) return c.json({ fehler: "Feld „datei“ fehlt (.eml oder MBOX)" }, 400);
+        const ergebnis = await importieren(
+          umgebung,
+          new Uint8Array(await datei.arrayBuffer()),
+          akteur(c.get("nutzer")),
+        );
+        return c.json(ergebnis, 201);
+      },
+    );
+
+    app.get("/api/dokumente/:id/mail", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const mail = id.success ? await mailZuDokument(umgebung.db, id.data) : null;
+      return mail ? c.json(mail) : c.json({ fehler: "Keine Mail" }, 404);
+    });
+
+    app.get("/api/dokumente/:id/vorschlag", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      return c.json({ vorschlag: id.success ? await vorschlag(umgebung.db, id.data) : null });
+    });
+
+    app.get("/api/regeln", async (c) => c.json(await regelnListen(umgebung.db)));
+
+    app.post("/api/regeln", async (c) => {
+      const eingabe = RegelEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!eingabe.success) return c.json({ fehler: "Ungültige Regel", details: eingabe.error.issues }, 400);
+      return c.json(await regelAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+    });
+
+    app.post("/api/regeln/:id/:schalter{aktivieren|deaktivieren}", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const r = id.success
+        ? await aktivSetzen(umgebung.db, id.data, c.req.param("schalter") === "aktivieren", akteur(c.get("nutzer")))
+        : null;
+      return r ? c.json(r) : c.json({ fehler: "Nicht gefunden" }, 404);
     });
 
     app.get("/api/sperren", async (c) => c.json(await sperrenListen(umgebung.db)));

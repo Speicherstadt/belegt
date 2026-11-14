@@ -76,6 +76,27 @@ export interface Loeschung {
   dateiname?: string | null;
 }
 
+export interface MailAnsicht {
+  messageId: string | null;
+  von: string | null;
+  an: string[];
+  betreff: string;
+  gesendetAm: string | null;
+  text: string;
+  anhaenge: { dokumentId: string; dateiname: string | null; mimeType: string; eingebettet: boolean }[];
+  unterhaltung: { dokumentId: string; betreff: string; von: string | null; gesendetAm: string | null }[];
+  ausMail: string | null;
+}
+
+export interface Regel {
+  id: string;
+  name: string;
+  reihenfolge: number;
+  bedingung: { absender?: string; domain?: string; betreffEnthaelt?: string; anhangTyp?: string };
+  art: Art;
+  aktiv: boolean;
+}
+
 export interface Sperre {
   id: string;
   grund: string;
@@ -155,6 +176,25 @@ export const api = {
     id: string,
     eingabe: { art: Art; entstanden: string; freiwilligBis?: string; titel?: string; korrespondent?: string },
   ) => aufruf<Einordnung>(`/api/dokumente/${id}/einordnung`, json(eingabe)),
+  mailsImportieren: (datei: File) => {
+    const form = new FormData();
+    form.append("datei", datei);
+    return aufruf<{ neu: string[]; doppelt: string[] }>("/api/mails", { method: "POST", body: form });
+  },
+  mail: async (id: string): Promise<MailAnsicht | null> => {
+    try {
+      return await aufruf<MailAnsicht>(`/api/dokumente/${id}/mail`);
+    } catch (err) {
+      if (err instanceof ApiFehler && err.status === 404) return null;
+      throw err;
+    }
+  },
+  vorschlag: (id: string) =>
+    aufruf<{ vorschlag: { art: Art; regel: { id: string; name: string } } | null }>(`/api/dokumente/${id}/vorschlag`),
+  regeln: () => aufruf<Regel[]>("/api/regeln"),
+  regelAnlegen: (r: { name: string; wenn: Regel["bedingung"]; dann: Art }) => aufruf<Regel>("/api/regeln", json(r)),
+  regelSchalten: (id: string, aktiv: boolean) =>
+    aufruf<Regel>(`/api/regeln/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),
   sperren: () => aufruf<Sperre[]>("/api/sperren"),
   sperreAnlegen: (eingabe: { grund: string; von: string; bis: string }) =>
     aufruf<Sperre>("/api/sperren", json(eingabe)),

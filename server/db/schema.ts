@@ -1,5 +1,17 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, date, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  boolean,
+  check,
+  date,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export * from "./auth-schema.ts";
 
@@ -99,4 +111,64 @@ export const loeschungen = pgTable(
     bestaetigtAm: timestamp("bestaetigt_am", { withTimezone: true }),
   },
   (t) => [check("loeschungen_bestaetigung", sql`(${t.bestaetigtVon} is null) = (${t.bestaetigtAm} is null)`)],
+);
+
+/**
+ * Eine Mail: das Original ist ein Dokument (message/rfc822), hier stehen die daraus gelesenen Angaben für Suche,
+ * Anzeige und Unterhaltungen. Versiegelt ab dem Einfügen, wie das Original; neu erzeugbar aus der .eml.
+ */
+export const mails = pgTable(
+  "mails",
+  {
+    dokumentId: uuid("dokument_id")
+      .primaryKey()
+      .references(() => dokumente.id),
+    id: uuid("id").notNull().unique().defaultRandom(),
+    messageId: text("message_id"),
+    antwortAuf: text("antwort_auf"),
+    verweise: text("verweise").array().notNull(),
+    von: text("von"),
+    an: text("an").array().notNull(),
+    betreff: text("betreff").notNull(),
+    gesendetAm: timestamp("gesendet_am", { withTimezone: true }),
+    text: text("text").notNull(),
+  },
+  (t) => [index("mails_message_id").on(t.messageId), index("mails_von").on(t.von)],
+);
+
+/** Anhang einer Mail: selbst ein Dokument, mit Verweis auf die Mail; versiegelt ab dem Einfügen */
+export const mailAnhaenge = pgTable(
+  "mail_anhaenge",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    mailDokumentId: uuid("mail_dokument_id")
+      .notNull()
+      .references(() => dokumente.id),
+    anhangDokumentId: uuid("anhang_dokument_id")
+      .notNull()
+      .unique()
+      .references(() => dokumente.id),
+    eingebettet: boolean("eingebettet").notNull(),
+  },
+  (t) => [index("mail_anhaenge_mail").on(t.mailDokumentId)],
+);
+
+/** Regeln für Vorschläge beim Einordnen (shared/regeln.ts); Änderungen stehen im Audit-Log */
+export const regeln = pgTable(
+  "regeln",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    reihenfolge: integer("reihenfolge").notNull().default(0),
+    bedingung: jsonb("bedingung").notNull(),
+    art: text("art").notNull(),
+    aktiv: boolean("aktiv").notNull().default(true),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check(
+      "regeln_art",
+      sql`${t.art} in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')`,
+    ),
+  ],
 );

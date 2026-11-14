@@ -9,12 +9,16 @@ Eine Mail wird als Original (`.eml`) aufbewahrt. Daraus liest Belegt Absender, E
 und die Anhänge; Anhänge bekommen ihren eigenen SHA-256. Antworten hängen über `In-Reply-To` und `References` an
 ihrer Unterhaltung.
 
-Alte Postfächer kommen als MBOX (Export aus Thunderbird oder Google Takeout): Belegt teilt die Datei in einzelne
-Mails und behandelt jede wie eine neue.
+Mails importierst du im Eingang oder Archiv mit „Mails importieren“, als `.eml` oder als MBOX (Export aus
+Thunderbird oder Google Takeout); Belegt teilt ein Archiv in einzelne Mails. Jede Mail wird ein Dokument
+(`message/rfc822`), jeder Anhang ein eigenes Dokument mit Verweis auf seine Mail; beides ist versiegelt. Eine Mail mit
+denselben Rohdaten nimmt Belegt nicht zweimal auf, ein wiederholter Import desselben Archivs ist also harmlos. Auf der
+Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 
 ## Regeln
 
-Regeln schlagen eine Art vor, etwa „Mails von `telekom.de` mit PDF sind Belege“. Eine Regel kann auf Absender,
+Regeln (Seite Quellen) schlagen eine Art vor, etwa „Mails von `telekom.de` mit PDF sind Belege“. Für einen Anhang
+gelten die Merkmale seiner Mail. Eine Regel kann auf Absender,
 Domain (auch Subdomains), einen Teil des Betreffs und den Typ eines Anhangs prüfen; alle Bedingungen müssen
 zutreffen, die erste passende Regel gewinnt. Eine Regel ohne Bedingung trifft nichts.
 

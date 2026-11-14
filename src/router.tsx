@@ -9,6 +9,7 @@ import { InvitePage } from "./pages/InvitePage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { PlannedPage } from "./pages/PlannedPage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
+import { SourcesPage } from "./pages/SourcesPage.tsx";
 import { m } from "./paraglide/messages.js";
 
 const root = createRootRoute({ component: Outlet });
@@ -34,11 +35,7 @@ const seiten = [
   createRoute({ getParentRoute: () => app, path: "/fristen", component: RetentionPage }),
   createRoute({ getParentRoute: () => app, path: "/pruefung", component: AuditPage }),
   createRoute({ getParentRoute: () => app, path: "/zugaenge", component: AccessPage }),
-  createRoute({
-    getParentRoute: () => app,
-    path: "/quellen",
-    component: () => <PlannedPage title={m.sources_title()} intro={m.sources_intro()} />,
-  }),
+  createRoute({ getParentRoute: () => app, path: "/quellen", component: SourcesPage }),
   createRoute({
     getParentRoute: () => app,
     path: "/verfahrensdoku",

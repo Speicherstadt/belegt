@@ -8,7 +8,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   const name = `Beleg-2017-${info.project.name}.pdf`;
   await page.goto("/");
   await page
-    .locator('input[type="file"]')
+    .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
   await page.getByRole("link", { name }).click();
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });

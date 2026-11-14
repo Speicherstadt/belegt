@@ -22,6 +22,11 @@ export function Classification({
   const queryClient = useQueryClient();
   const [offen, setOffen] = useState(!einordnung);
   const [art, setArt] = useState<Art>(einordnung?.art ?? "beleg");
+  const vorschlag = useQuery({
+    queryKey: ["vorschlag", dokumentId],
+    queryFn: () => api.vorschlag(dokumentId),
+    enabled: !einordnung,
+  });
   const speichern = useMutation({
     mutationFn: (eingabe: Parameters<typeof api.einordnen>[1]) => api.einordnen(dokumentId, eingabe),
     onSuccess: async () => {
@@ -70,6 +75,18 @@ export function Classification({
         >
           {m.classify_change()}
         </button>
+      )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.vorschlag && (
+        <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
+          {m.suggest_label({ art: artLabel(vorschlag.data.vorschlag.art), regel: vorschlag.data.vorschlag.regel.name })}
+          <button
+            type="button"
+            onClick={() => setArt(vorschlag.data!.vorschlag!.art)}
+            className="h-8 rounded-md border border-border bg-bg px-3 font-medium"
+          >
+            {m.suggest_apply()}
+          </button>
+        </p>
       )}
       {darfSchreiben(ich.data?.role) && offen && (
         <form onSubmit={absenden} className="flex flex-col gap-3">

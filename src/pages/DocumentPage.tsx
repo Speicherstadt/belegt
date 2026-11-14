@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
+import { MailSection } from "../components/MailSection.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
@@ -66,6 +67,7 @@ export function DocumentPage() {
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
+          <MailSection dokumentId={d.id} />
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && (
             <Classification

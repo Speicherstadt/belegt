@@ -42,6 +42,20 @@ export function DocumentList({
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const liste = useQuery({ queryKey: ["dokumente", suche, gruppe], queryFn: () => api.dokumente(suche, gruppe) });
   const eingabe = useRef<HTMLInputElement>(null);
+  const mailEingabe = useRef<HTMLInputElement>(null);
+  const mailImport = useMutation({
+    mutationFn: async (dateien: File[]) => {
+      let neu = 0;
+      let doppelt = 0;
+      for (const datei of dateien) {
+        const r = await api.mailsImportieren(datei);
+        neu += r.neu.length;
+        doppelt += r.doppelt.length;
+      }
+      return { neu, doppelt };
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["dokumente"] }),
+  });
   const hochladen = useMutation({
     mutationFn: async (dateien: File[]) => {
       for (const datei of dateien) await api.hochladen(datei);
@@ -69,6 +83,7 @@ export function DocumentList({
             <input
               ref={eingabe}
               type="file"
+              data-testid="upload"
               multiple
               className="sr-only"
               tabIndex={-1}
@@ -86,6 +101,29 @@ export function DocumentList({
               className="h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
             >
               {hochladen.isPending ? m.upload_busy() : m.upload()}
+            </button>
+            <input
+              ref={mailEingabe}
+              type="file"
+              multiple
+              accept=".eml,.mbox,message/rfc822,application/mbox"
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+              data-testid="mail-import"
+              onChange={(e) => {
+                const dateien = [...(e.target.files ?? [])];
+                e.target.value = "";
+                if (dateien.length) mailImport.mutate(dateien);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => mailEingabe.current?.click()}
+              disabled={mailImport.isPending}
+              className="h-10 rounded-md border border-border px-4 font-medium text-sm hover:bg-subtle disabled:opacity-60"
+            >
+              {mailImport.isPending ? m.import_mails_busy() : m.import_mails()}
             </button>
           </>
         )}
@@ -105,6 +143,16 @@ export function DocumentList({
             </button>
           ))}
         </fieldset>
+      )}
+      {mailImport.data && (
+        <p role="status" className="m-0 text-sm">
+          {m.import_result({ neu: String(mailImport.data.neu), doppelt: String(mailImport.data.doppelt) })}
+        </p>
+      )}
+      {mailImport.error && (
+        <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+          {m.upload_failed({ meldung: mailImport.error.message })}
+        </p>
       )}
       {hochladen.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">

@@ -14,6 +14,8 @@ export interface Person {
 
 export interface Anhang {
   dateiname: string | null;
+  /** Inhalt des Anhangs, für die Aufnahme als eigenes Dokument */
+  bytes: Uint8Array;
   mimeType: string;
   groesse: number;
   sha256: string;
@@ -126,6 +128,7 @@ export async function emlLesen(roh: Uint8Array): Promise<Mail> {
       const bytes = typeof a.content === "string" ? new TextEncoder().encode(a.content) : new Uint8Array(a.content);
       return {
         dateiname: a.filename,
+        bytes,
         mimeType: a.mimeType,
         groesse: bytes.byteLength,
         sha256: sha256(bytes),

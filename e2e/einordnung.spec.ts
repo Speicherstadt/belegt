@@ -11,7 +11,7 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
   const titel = `Telefon März (${info.project.name})`;
   await page.goto("/");
   await page
-    .locator('input[type="file"]')
+    .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
   await page.getByRole("link", { name }).click();
 

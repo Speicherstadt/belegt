@@ -8,7 +8,7 @@ test("ein hochgeladenes Original erscheint im Archiv, mit Verlauf, Nachweis und 
 }, info) => {
   const name = `Rechnung-${info.project.name}.pdf`;
   await page.goto("/archiv");
-  await page.locator('input[type="file"]').setInputFiles({ name, mimeType: "application/pdf", buffer: PDF });
+  await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: PDF });
   const link = page.getByRole("link", { name });
   await expect(link).toBeVisible();
 

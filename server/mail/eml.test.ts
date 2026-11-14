@@ -46,7 +46,8 @@ describe("emlLesen", () => {
     expect(mail.antwortAuf).toBe("<frage-1@example.org>");
     expect(mail.verweise).toEqual(["<start-0@example.org>", "<frage-1@example.org>"]);
     expect(mail.text).toBe("Guten Tag, anbei die Rechnung über 49,95 €.");
-    expect(mail.anhaenge).toEqual([
+    expect(new TextDecoder().decode(mail.anhaenge[0]!.bytes)).toBe(PDF);
+    expect(mail.anhaenge.map(({ bytes: _, ...a }) => a)).toEqual([
       {
         dateiname: "Rechnung-2026-11.pdf",
         mimeType: "application/pdf",
