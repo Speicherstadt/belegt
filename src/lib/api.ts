@@ -232,7 +232,8 @@ export const api = {
     form.append("datei", datei);
     return aufruf<Dokument>("/api/dokumente", { method: "POST", body: form });
   },
-  pruefung: () => aufruf<{ ok: boolean; befunde: Befund[] }>("/api/pruefung"),
+  pruefung: (dateien = false) =>
+    aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number }>(`/api/pruefung${dateien ? "?dateien=1" : ""}`),
 };
 
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

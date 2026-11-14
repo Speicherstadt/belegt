@@ -48,4 +48,6 @@ test("ein hochgeladenes Original erscheint im Archiv, mit Verlauf, Nachweis und 
 test("die Prüfung meldet eine intakte Kette", async ({ page }) => {
   await page.goto("/pruefung");
   await expect(page.getByRole("status")).toHaveText("Kette intakt, alle Siegel stimmen.");
+  await page.getByRole("button", { name: "Auch alle Dateien prüfen" }).click();
+  await expect(page.getByRole("status")).toContainText("Dateien gegen ihren Hash geprüft.");
 });

@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 
 export function AuditPage() {
-  const pruefung = useQuery({ queryKey: ["pruefung"], queryFn: api.pruefung });
+  const [dateien, setDateien] = useState(false);
+  const pruefung = useQuery({ queryKey: ["pruefung", dateien], queryFn: () => api.pruefung(dateien) });
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title={m.audit_title()} intro={m.audit_intro()} />
@@ -17,9 +19,19 @@ export function AuditPage() {
         >
           {pruefung.isFetching ? m.loading() : m.audit_check()}
         </button>
+        <button
+          type="button"
+          onClick={() => (dateien ? pruefung.refetch() : setDateien(true))}
+          disabled={pruefung.isFetching}
+          className="h-9 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle disabled:opacity-60"
+        >
+          {m.audit_check_files()}
+        </button>
         {pruefung.data && (
           <p role="status" className="m-0 font-medium text-sm">
             {pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) })}
+            {pruefung.data.dateienGeprueft !== undefined &&
+              ` ${m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })}`}
           </p>
         )}
       </div>

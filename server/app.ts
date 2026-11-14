@@ -4,7 +4,7 @@ import { z } from "zod";
 import { darfSchreiben, type Rolle } from "../shared/rollen.ts";
 import type { Angemeldet, Auth } from "./auth.ts";
 import { eingerichtet } from "./db/status.ts";
-import { aufnehmen, laden, listen, pruefen, type Umgebung, verlauf } from "./dokumente/dokumente.ts";
+import { aufnehmen, dateienPruefen, laden, listen, pruefen, type Umgebung, verlauf } from "./dokumente/dokumente.ts";
 import {
   aktuelle,
   EinordnungEingabe,
@@ -355,6 +355,12 @@ export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffe
 
     app.get("/api/pruefung", async (c) => {
       const befunde = await pruefen(umgebung.db);
+      // ?dateien=1 liest zusätzlich jede Datei und vergleicht sie mit ihrem Hash
+      if (c.req.query("dateien") === "1") {
+        const dateien = await dateienPruefen(umgebung);
+        const alle = [...befunde, ...dateien.befunde];
+        return c.json({ ok: alle.length === 0, befunde: alle, dateienGeprueft: dateien.geprueft });
+      }
       return c.json({ ok: befunde.length === 0, befunde });
     });
   }

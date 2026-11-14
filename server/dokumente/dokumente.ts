@@ -156,3 +156,34 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
     siegel: siegel?.digest ?? null,
   };
 }
+
+/**
+ * Prüft jede Datei im Speicher gegen ihren Hash: fehlt sie oder passt sie nicht mehr, ist das ein Befund. Gelöschte
+ * Dokumente haben keine Datei mehr und zählen nicht. Liest jede Datei einmal; bei vielen Dokumenten dauert das.
+ */
+export async function dateienPruefen(
+  { db, speicher }: Umgebung,
+  maxBefunde = 100,
+): Promise<{ geprueft: number; befunde: Befund[] }> {
+  const zeilen = await db.execute<{ id: string; sha256: string }>(sql`
+    select d.id, d.sha256 from dokumente d
+     where not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
+     order by d.eingegangen_am, d.id`);
+  const befunde: Befund[] = [];
+  const schonGeprueft = new Map<string, string | null>();
+  for (const z of zeilen) {
+    if (!schonGeprueft.has(z.sha256)) {
+      schonGeprueft.set(
+        z.sha256,
+        await speicher.laden(z.sha256).then(
+          () => null,
+          (err: { code?: string }) => (err?.code === "ENOENT" ? "Datei fehlt" : "Datei passt nicht zu ihrem Hash"),
+        ),
+      );
+    }
+    const befund = schonGeprueft.get(z.sha256);
+    if (befund && befunde.length < maxBefunde)
+      befunde.push({ art: "datei", tabelle: "dokumente", zeile: z.id, seq: null, befund });
+  }
+  return { geprueft: zeilen.length, befunde };
+}

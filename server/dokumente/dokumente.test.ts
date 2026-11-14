@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { writeFile } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
@@ -144,6 +144,26 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     } finally {
       await t.sql`update "user" set role = 'inhaber' where email = 'anna@example.org'`;
     }
+  });
+
+  it("prüft auf Wunsch jede Datei gegen ihren Hash und meldet fehlende und veränderte", async () => {
+    const ok = await (await app.request("/api/pruefung?dateien=1")).json();
+    const vorher = ok.befunde.filter((b: { art: string }) => b.art === "datei").length;
+    expect(ok.dateienGeprueft).toBeGreaterThan(0);
+    const weg = await (await hochladen(new TextEncoder().encode("wird gelöscht"), "weg.pdf")).json();
+    const anders = await (await hochladen(new TextEncoder().encode("wird verändert"), "anders.pdf")).json();
+    await rm(t.speicher.pfad(weg.sha256));
+    await writeFile(t.speicher.pfad(anders.sha256), "verändert");
+    const ergebnis = await (await app.request("/api/pruefung?dateien=1")).json();
+    const datei = ergebnis.befunde.filter((b: { art: string }) => b.art === "datei");
+    expect(datei).toHaveLength(vorher + 2);
+    expect(datei).toContainEqual(expect.objectContaining({ zeile: weg.id, befund: "Datei fehlt" }));
+    expect(datei).toContainEqual(
+      expect.objectContaining({ zeile: anders.id, befund: "Datei passt nicht zu ihrem Hash" }),
+    );
+    expect(
+      (await (await app.request("/api/pruefung")).json()).befunde.filter((b: { art: string }) => b.art === "datei"),
+    ).toEqual([]);
   });
 
   it("meldet eine gültige Kette und findet eine an den Triggern vorbei geänderte Zeile", async () => {

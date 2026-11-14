@@ -218,5 +218,7 @@
   "mailboxes_never": "Noch nicht abgerufen",
   "mailboxes_error": "Fehler: {meldung}",
   "mailboxes_result": "{neu} neu, {doppelt} schon vorhanden",
-  "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}"
+  "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}",
+  "audit_check_files": "Auch alle Dateien prüfen",
+  "audit_files_checked": "{anzahl} Dateien gegen ihren Hash geprüft."
 }
