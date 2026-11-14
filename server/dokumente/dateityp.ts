@@ -1,5 +1,6 @@
 import { sniff } from "@firsttris/gobd-kern/dateityp";
 import { officeTyp } from "../inhalt/office.ts";
+import { cfbWurzelNamen } from "./cfb.ts";
 
 /** Ältere Office-Formate: Word, Excel und PowerPoint bis 2003 (Compound File) und RTF */
 export const ALTE_OFFICE_TYPEN = {
@@ -12,17 +13,14 @@ export const ALTE_OFFICE_TYPEN = {
 /** Kopf einer Compound File (MS-CFB 2.2) */
 const CFB = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1];
 
-/** Name eines Streams im Verzeichnis der Compound File, UTF-16LE */
-const strom = (name: string) => Buffer.from(name, "utf16le");
-
-/** Welche Anwendung die Compound File schrieb, an ihrem Hauptstream ([MS-DOC], [MS-XLS], [MS-PPT]) */
+/** Welche Anwendung die Compound File schrieb, an ihrem Hauptstream unter der Wurzel ([MS-DOC], [MS-XLS], [MS-PPT]) */
 function alterOfficeTyp(bytes: Uint8Array): string | null {
   if (bytes.length >= 5 && new TextDecoder().decode(bytes.subarray(0, 5)) === "{\\rtf") return ALTE_OFFICE_TYPEN.rtf;
   if (bytes.length < 512 || CFB.some((b, i) => bytes[i] !== b)) return null;
-  const hat = (name: string) => Buffer.from(bytes.buffer, bytes.byteOffset, bytes.length).includes(strom(name));
-  if (hat("WordDocument")) return ALTE_OFFICE_TYPEN.doc;
-  if (hat("Workbook") || hat("Book\u0000")) return ALTE_OFFICE_TYPEN.xls;
-  if (hat("PowerPoint Document")) return ALTE_OFFICE_TYPEN.ppt;
+  const namen = cfbWurzelNamen(bytes) ?? [];
+  if (namen.includes("WordDocument")) return ALTE_OFFICE_TYPEN.doc;
+  if (namen.includes("Workbook") || namen.includes("Book")) return ALTE_OFFICE_TYPEN.xls;
+  if (namen.includes("PowerPoint Document")) return ALTE_OFFICE_TYPEN.ppt;
   return null;
 }
 

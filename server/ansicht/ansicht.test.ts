@@ -4,17 +4,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ALTE_OFFICE_TYPEN, dateityp } from "../dokumente/dateityp.ts";
 import { OFFICE_TYPEN } from "../inhalt/office.ts";
 import { testApp } from "../test-app.ts";
+import { cfbDatei } from "../test-cfb.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { type Abfragen, ansichtenErzeugen, MAX_ANSICHT, zuPdf } from "./ansicht.ts";
 
-/** Kopf einer Compound File und ein Verzeichniseintrag mit dem Namen des Hauptstreams (UTF-16LE) */
-const cfb = (strom: string) => {
-  const b = new Uint8Array(2048);
-  b.set([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
-  b.set(Buffer.from(`Root Entry\0`, "utf16le"), 1024);
-  b.set(Buffer.from(`${strom}\0`, "utf16le"), 1152);
-  return b;
-};
+/** Eine alte Office-Datei mit ihrem Hauptstream unter der Wurzel */
+const cfb = (strom: string) => cfbDatei([{ name: strom, typ: 2 }]);
 
 const docx = () =>
   zipSync({
