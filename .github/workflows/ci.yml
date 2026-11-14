@@ -40,6 +40,8 @@ jobs:
       # Texterkennung: ohne Tesseract und pdftoppm würden die Tests dazu übersprungen
       - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils
       - run: bun install --frozen-lockfile
+      # Bekannte Sicherheitslücken in Abhängigkeiten
+      - run: bun audit
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run test
