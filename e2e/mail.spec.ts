@@ -93,3 +93,26 @@ test("ein Postfach hinzufügen; ein Abruf gegen einen nicht erreichbaren Server 
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations,
   ).toEqual([]);
 });
+
+test("ein Gmail-Postfach über OAuth verbinden", async ({ page }) => {
+  // Playwright fängt Weiterleitungen nicht ab: Den Start holt der Test selbst, nimmt Cookie und state aus der Antwort
+  // von Belegt und schickt den Browser statt zur Anmeldeseite von Google gleich mit einem Code zurück
+  await page.route("**/api/oauth/google/start**", async (route) => {
+    const antwort = await route.fetch({ maxRedirects: 0 });
+    const ziel = new URL(antwort.headers().location!);
+    expect(ziel.origin).toBe("https://accounts.google.com");
+    expect(ziel.searchParams.get("code_challenge_method")).toBe("S256");
+    await route.fulfill({
+      status: 302,
+      headers: {
+        location: `/api/oauth/rueckkehr?code=e2e&state=${ziel.searchParams.get("state")}`,
+        "set-cookie": antwort.headers()["set-cookie"]!,
+      },
+    });
+  });
+  await page.goto("/quellen");
+  await page.getByRole("link", { name: "Mit Google verbinden" }).click();
+  await expect(page).toHaveURL(/\/quellen\?oauth=verbunden$/);
+  await expect(page.getByRole("status").filter({ hasText: "Postfach verbunden." })).toBeVisible();
+  await expect(page.getByText(/IMAP \(Google\) · anna@gmail\.example@\s*imap\.gmail\.com/).first()).toBeVisible();
+});

@@ -20,12 +20,20 @@ const Schema = z.object({
   SMTP_EMPFAENGER: z.string().optional(),
   SMTP_TLS_KEY: z.string().min(1).optional(),
   SMTP_TLS_CERT: z.string().min(1).optional(),
+  /** IMAP mit OAuth: beim Anbieter registrierte App (docs/eingang.md) */
+  MICROSOFT_CLIENT_ID: z.string().min(1).optional(),
+  MICROSOFT_CLIENT_SECRET: z.string().min(1).optional(),
+  MICROSOFT_TENANT: z.string().min(1).optional(),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof Schema>;
 
 export function readEnv(source: Record<string, string | undefined> = process.env): Env {
-  const parsed = Schema.safeParse(source);
+  // Compose übergibt eine fehlende Variable als leeren Text; sie gilt als nicht gesetzt
+  const gesetzt = Object.fromEntries(Object.entries(source).filter(([, wert]) => wert !== ""));
+  const parsed = Schema.safeParse(gesetzt);
   if (!parsed.success) {
     const fehler = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
     throw new Error(`Ungültige Einstellungen: ${fehler}`);

@@ -293,5 +293,8 @@
   "report_counts": "{dokumente} documents ({geloescht} deleted), {siegel} seals, {protokoll} log entries.",
   "report_value": "Check value",
   "report_hint": "The check value is the head of the hash chain. Whoever notes it can later show that nothing was changed up to that entry.",
-  "mailboxes_kind": "Type"
+  "mailboxes_kind": "Type",
+  "oauth_connect": "Connect with {anbieter}",
+  "oauth_connected": "Mailbox connected. The first fetch follows with the next run or with “Fetch now”.",
+  "oauth_failed": "The mailbox was not connected. Please try again."
 }

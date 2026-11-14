@@ -293,5 +293,8 @@
   "report_counts": "{dokumente} Dokumente (davon {geloescht} gelöscht), {siegel} Siegel, {protokoll} Einträge im Protokoll.",
   "report_value": "Prüfwert",
   "report_hint": "Der Prüfwert ist der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu diesem Eintrag nichts verändert wurde.",
-  "mailboxes_kind": "Art"
+  "mailboxes_kind": "Art",
+  "oauth_connect": "Mit {anbieter} verbinden",
+  "oauth_connected": "Postfach verbunden. Der erste Abruf folgt mit dem nächsten Lauf oder mit „Jetzt abrufen“.",
+  "oauth_failed": "Das Postfach wurde nicht verbunden. Bitte erneut versuchen."
 }

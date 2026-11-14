@@ -9,6 +9,7 @@ import { migrieren } from "./db/migrieren.ts";
 import { eingerichtet } from "./db/status.ts";
 import { readEnv } from "./env.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
+import { oauthAusEnv } from "./mail/oauth.ts";
 
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -31,6 +32,7 @@ const app = createApp({
   schluessel,
   oeffnen: imapOeffnen,
   abrufMinuten: env.ABRUF_MINUTEN,
+  oauth: oauthAusEnv(env),
   oberflaeche,
 });
 

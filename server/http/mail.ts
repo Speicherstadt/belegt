@@ -98,7 +98,12 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
     if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
     if (!umgebung.schluessel || !umgebung.oeffnen)
       return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
-    return c.json(await abrufen(umgebung, umgebung.schluessel, id.data, umgebung.oeffnen));
+    return c.json(
+      await abrufen(umgebung, umgebung.schluessel, id.data, umgebung.oeffnen, {
+        oauth: umgebung.oauth,
+        abfragen: umgebung.abfragen,
+      }),
+    );
   });
 
   app.post("/api/quellen/:id/:schalter{aktivieren|deaktivieren}", async (c) => {

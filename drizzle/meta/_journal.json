@@ -127,6 +127,13 @@
       "when": 1794674669229,
       "tag": "0017_jmap",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794674995828,
+      "tag": "0018_oauth",
+      "breakpoints": true
     }
   ]
 }

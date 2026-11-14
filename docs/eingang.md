@@ -29,6 +29,22 @@ meldet sich mit Benutzer und Passwort an. Der Ordner ist sein Name oder seine Ro
 Beim ersten Abruf kommt der ganze Ordner, danach nur, was seit dem letzten Abruf neu hineinkam oder hineinverschoben
 wurde (`Email/changes`). Kennt der Server den alten Stand nicht mehr, holt Belegt den Ordner neu.
 
+### Microsoft 365 und Google
+
+Bei Microsoft 365 und Google meldet sich Belegt per OAuth an statt mit einem Passwort. Dafür registrierst du einmal
+eine App beim Anbieter, mit `<BELEGT_URL>/api/oauth/rueckkehr` als Weiterleitungsadresse:
+
+- **Microsoft Entra ID:** App-Registrierung (Web), delegierte Berechtigungen `IMAP.AccessAsUser.All` (Office 365
+  Exchange Online) und `offline_access`, ein geheimer Clientschlüssel. In `.env`: `MICROSOFT_CLIENT_ID`,
+  `MICROSOFT_CLIENT_SECRET`, für ein einzelnes Unternehmen `MICROSOFT_TENANT` (sonst `common`).
+- **Google Cloud:** OAuth-Client vom Typ Webanwendung, Gmail-API aktiviert, Bereich `https://mail.google.com/`. In
+  `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Für Konten außerhalb deiner eigenen Workspace-Organisation
+  verlangt Google für diesen Bereich eine Prüfung der App.
+
+Unter Quellen erscheint dann „Mit Microsoft 365 verbinden“ oder „Mit Google verbinden“. Nach der Anmeldung beim
+Anbieter legt Belegt das Postfach mit der Adresse des Kontos an. Gespeichert ist nur das Refresh-Token, verschlüsselt
+wie ein Passwort; vor jedem Abruf holt Belegt damit ein Access-Token.
+
 ## Regeln
 
 Regeln (Seite Quellen) schlagen eine Art vor, etwa „Mails von `telekom.de` mit PDF sind Belege“. Für einen Anhang

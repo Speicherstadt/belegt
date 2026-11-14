@@ -108,6 +108,7 @@ export interface Quelle {
   benutzer: string;
   ordner: string;
   art: "imap" | "jmap";
+  oauth: "microsoft" | "google" | null;
   letzteUid: number;
   letzterAbruf: string | null;
   letzterFehler: string | null;
@@ -313,6 +314,7 @@ export const api = {
     ordner: string;
     art: "imap" | "jmap";
   }) => aufruf<Quelle>("/api/quellen", json(q)),
+  oauthAnbieter: () => aufruf<{ anbieter: ("microsoft" | "google")[] }>("/api/oauth"),
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
   sperren: () => aufruf<Sperre[]>("/api/sperren"),

@@ -52,6 +52,7 @@ löschen sie wieder.
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
 | `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |
+| `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Apps für IMAP mit OAuth (docs/eingang.md) | – (Mandant `common`) |
 
 ## Migrationen
 

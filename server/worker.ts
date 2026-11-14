@@ -5,6 +5,7 @@ import { readEnv } from "./env.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
+import { oauthAusEnv } from "./mail/oauth.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
 
 /*
@@ -20,7 +21,7 @@ const { db } = verbinden(env.DATABASE_URL);
 const speicher = dateispeicher({ verzeichnis: () => env.DOCUMENTS_DIR });
 
 async function runde() {
-  const ergebnisse = await alleAbrufen({ db, speicher }, schluessel, imapOeffnen);
+  const ergebnisse = await alleAbrufen({ db, speicher }, schluessel, imapOeffnen, { oauth: oauthAusEnv(env) });
   for (const [name, e] of Object.entries(ergebnisse)) {
     console.log(`Abruf ${name}: ${e.neu} neu, ${e.doppelt} doppelt${e.fehler ? `, Fehler: ${e.fehler}` : ""}`);
   }

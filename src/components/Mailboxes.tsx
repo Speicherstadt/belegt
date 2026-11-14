@@ -8,6 +8,8 @@ import { m } from "../paraglide/messages.js";
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
 /** Postfächer für den IMAP-Abruf: Liste mit Stand, hinzufügen, jetzt abrufen */
+const OAUTH = { microsoft: "Microsoft 365", google: "Google" } as const;
+
 export function Mailboxes() {
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
@@ -17,6 +19,9 @@ export function Mailboxes() {
   const abrufen = useMutation({ mutationFn: api.quelleAbrufen, onSettled: neu });
   const schreiben = darfSchreiben(ich.data?.role);
   const [art, setArt] = useState<"imap" | "jmap">("imap");
+  const anbieter = useQuery({ queryKey: ["oauth"], queryFn: api.oauthAnbieter, enabled: ich.data?.role === "inhaber" });
+  // Rückkehr vom Anbieter: /quellen?oauth=verbunden|abgelehnt|abgelaufen|fehler
+  const oauthErgebnis = new URLSearchParams(window.location.search).get("oauth");
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -52,7 +57,8 @@ export function Mailboxes() {
           >
             <span className="flex flex-col">
               <span className="font-medium">
-                {q.name} · {q.art === "jmap" ? "JMAP" : "IMAP"} · {q.benutzer}@{q.host}:{q.port}/{q.ordner}
+                {q.name} · {q.art === "jmap" ? "JMAP" : q.oauth ? `IMAP (${OAUTH[q.oauth]})` : "IMAP"} · {q.benutzer}@
+                {q.host}:{q.port}/{q.ordner}
               </span>
               <span className="text-muted">
                 {q.letzterAbruf ? m.mailboxes_last({ wann: zeitpunkt(q.letzterAbruf) }) : m.mailboxes_never()}
@@ -80,6 +86,24 @@ export function Mailboxes() {
         <p role="status" className="m-0 text-sm">
           {m.mailboxes_result({ neu: String(abrufen.data.neu), doppelt: String(abrufen.data.doppelt) })}
         </p>
+      )}
+      {oauthErgebnis && (
+        <p role="status" className="m-0 rounded-md border border-border bg-subtle p-3 text-sm">
+          {oauthErgebnis === "verbunden" ? m.oauth_connected() : m.oauth_failed()}
+        </p>
+      )}
+      {schreiben && !!anbieter.data?.anbieter.length && (
+        <div className="flex flex-wrap gap-2">
+          {anbieter.data.anbieter.map((a) => (
+            <a
+              key={a}
+              href={`/api/oauth/${a}/start?name=${encodeURIComponent(OAUTH[a])}`}
+              className="h-9 rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
+            >
+              {m.oauth_connect({ anbieter: OAUTH[a] })}
+            </a>
+          ))}
+        </div>
       )}
       {schreiben && (
         <form

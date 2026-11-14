@@ -117,7 +117,7 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
   const keinImap = async () => {
     throw new Error("kein IMAP");
   };
-  const holen = () => abrufen(t, t.schluessel, quelle, keinImap, s.abfragen);
+  const holen = () => abrufen(t, t.schluessel, quelle, keinImap, { abfragen: s.abfragen });
 
   beforeAll(async () => {
     t = await testApp();

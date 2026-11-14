@@ -7,7 +7,9 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
     host: zugang.host,
     port: zugang.port,
     secure: zugang.tls,
-    auth: { user: zugang.benutzer, pass: zugang.passwort },
+    auth: zugang.accessToken
+      ? { user: zugang.benutzer, accessToken: zugang.accessToken }
+      : { user: zugang.benutzer, pass: zugang.passwort },
     logger: false,
   });
   await client.connect();

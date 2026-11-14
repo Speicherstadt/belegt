@@ -39,7 +39,21 @@ const auth = createAuth({
 });
 Bun.serve({
   port,
-  fetch: createApp({ db, speicher, auth, schluessel: randomBytes(32), oeffnen: imapOeffnen }).fetch,
+  fetch: createApp({
+    db,
+    speicher,
+    auth,
+    schluessel: randomBytes(32),
+    oeffnen: imapOeffnen,
+    // Google mit nachgebautem Token-Endpunkt; die Anmeldeseite des Anbieters fängt der Test im Browser ab
+    oauth: { google: { clientId: "e2e-client", clientSecret: "e2e-geheim" } },
+    abfragen: async () =>
+      Response.json({
+        access_token: "e2e-access",
+        refresh_token: "e2e-refresh",
+        id_token: `kopf.${Buffer.from(JSON.stringify({ email: "anna@gmail.example" })).toString("base64url")}.sig`,
+      }),
+  }).fetch,
   maxRequestBodySize: 110 * 1024 * 1024,
 });
 // Statt des Workers: liest die Inhalte neuer Dokumente jede Sekunde

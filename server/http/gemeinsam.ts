@@ -4,6 +4,7 @@ import paket from "../../package.json" with { type: "json" };
 import type { Angemeldet, Auth } from "../auth.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import type { Oeffnen } from "../mail/abruf.ts";
+import type { OAuthKonfig } from "../mail/oauth.ts";
 
 /** Was die HTTP-Schnittstelle von außen bekommt */
 export type AppUmgebung = Umgebung & {
@@ -11,6 +12,10 @@ export type AppUmgebung = Umgebung & {
   schluessel?: Buffer;
   oeffnen?: Oeffnen;
   abrufMinuten?: number;
+  /** Bei Microsoft und Google registrierte Apps für IMAP mit OAuth */
+  oauth?: OAuthKonfig;
+  /** HTTP nach außen (OAuth); Tests geben eigenes */
+  abfragen?: (url: string, init: RequestInit) => Promise<Response>;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
 };

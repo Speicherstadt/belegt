@@ -37,6 +37,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/dokumente/:id/inhalt` | Was der Worker gelesen hat: `erechnung` (Beträge in Cent), `textLaenge`, `fehler`; `null`, solange nichts gelesen ist |
 | `GET /api/regeln`, `POST /api/regeln` (`name`, `wenn`, `dann`), `POST /api/regeln/:id/aktivieren`, `…/deaktivieren` | Regeln |
 | `GET /api/quellen`, `POST /api/quellen` (`name`, `host`, `port`, `tls`, `benutzer`, `passwort`, `ordner`, `art`: `imap` oder `jmap`), `POST /api/quellen/:id/abrufen`, `…/aktivieren`, `…/deaktivieren` | Postfächer; das Passwort geht nur hinein; `503` ohne `BELEGT_SCHLUESSEL` |
+| `GET /api/oauth`, `GET /api/oauth/:anbieter/start?name=&ordner=`, `GET /api/oauth/rueckkehr` | Postfächer bei `microsoft` oder `google` per OAuth verbinden, nur der Inhaber; leitet zum Anbieter und zurück nach `/quellen?oauth=…` |
 | `GET /api/sperren`, `POST /api/sperren` (`grund`, `von`, `bis`), `POST /api/sperren/:id/aufheben` | Sperren |
 | `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (frei Abgelegtes: sofort gelöscht); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |

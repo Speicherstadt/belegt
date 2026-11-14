@@ -3,6 +3,7 @@ import { eingerichtet } from "./db/status.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import type { App, AppUmgebung } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
+import { oauthRouten } from "./http/oauth.ts";
 import { openapi } from "./http/openapi.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
@@ -45,6 +46,7 @@ export function createApp(umgebung?: AppUmgebung) {
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);
+    oauthRouten(app, umgebung);
     if (umgebung.oberflaeche) statischRouten(app, umgebung.oberflaeche);
   }
 

@@ -206,10 +206,13 @@ export const quellen = pgTable(
       .default("imap"),
     /** JMAP: Stand (state) nach dem letzten vollständigen Abruf */
     jmapStand: text("jmap_stand"),
+    /** IMAP mit OAuth: microsoft oder google; ciphertext hält dann das Refresh-Token statt eines Passworts */
+    oauth: text("oauth", { enum: ["microsoft", "google"] }),
   },
   (t) => [
     check("quellen_port", sql`${t.port} between 1 and 65535`),
     check("quellen_art", sql`${t.art} in ('imap', 'jmap')`),
+    check("quellen_oauth", sql`${t.oauth} is null or (${t.oauth} in ('microsoft', 'google') and ${t.art} = 'imap')`),
   ],
 );
 

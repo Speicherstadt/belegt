@@ -1,0 +1,2 @@
+ALTER TABLE "quellen" ADD COLUMN "oauth" text;--> statement-breakpoint
+ALTER TABLE "quellen" ADD CONSTRAINT "quellen_oauth" CHECK ("quellen"."oauth" is null or ("quellen"."oauth" in ('microsoft', 'google') and "quellen"."art" = 'imap'));
