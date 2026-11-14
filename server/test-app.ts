@@ -1,0 +1,53 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
+import { drizzle } from "drizzle-orm/postgres-js";
+import type postgres from "postgres";
+import { createApp } from "./app.ts";
+import { createAuth } from "./auth.ts";
+import { testDatenbank } from "./test-db.ts";
+
+const BASIS = "http://localhost:3000";
+
+/** App mit echter Anmeldung, eigener Testdatenbank und eigenem Speicher; für Tests gegen Postgres */
+export async function testApp() {
+  const sql: postgres.Sql = await testDatenbank();
+  const verzeichnis = await mkdtemp(join(tmpdir(), "belegt-test-"));
+  const db = drizzle(sql);
+  const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
+  const auth = createAuth({ db, secret: "x".repeat(32), baseURL: BASIS });
+  const app = createApp({ db, speicher, auth });
+
+  /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */
+  const anfrage = (pfad: string, init: RequestInit = {}, cookie?: string) =>
+    app.request(`${BASIS}${pfad}`, {
+      ...init,
+      headers: {
+        origin: BASIS,
+        ...(cookie ? { cookie } : {}),
+        ...(init.headers as Record<string, string> | undefined),
+      },
+    });
+
+  /** Registriert ein Konto und gibt das Cookie der Sitzung zurück */
+  async function registrieren(email: string, passwort = "ein-langes-passwort") {
+    const res = await anfrage("/api/auth/sign-up/email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, password: passwort, name: email }),
+    });
+    const cookie = res.headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
+    return { res, cookie };
+  }
+
+  async function aufraeumen() {
+    await sql.end();
+    await rm(verzeichnis, { recursive: true, force: true });
+  }
+
+  return { sql, db, speicher, app, anfrage, registrieren, aufraeumen };
+}

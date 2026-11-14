@@ -1,11 +1,14 @@
 # Schnittstelle
 
-> [!WARNING]
-> Noch ohne Anmeldung: Jeder, der den Server erreicht, kann lesen und hochladen. Belegt gehört bis dahin nicht ins
-> Internet. Das Audit-Log schreibt als Akteur „unangemeldet“.
+Alles unter `/api` außer `/api/auth` verlangt eine Sitzung (Cookie von Better Auth). Das erste Konto
+(`POST /api/auth/sign-up/email`) ist der Inhaber; jede weitere Registrierung lehnt Belegt ab, weitere Zugänge kommen
+per Einladung. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Das Audit-Log nennt
+als Akteur `nutzer:<E-Mail>`.
 
 | Aufruf | Wirkung |
 | --- | --- |
+| `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` | Einrichten, Anmelden, Abmelden (Better Auth) |
+| `GET /api/ich` | der angemeldete Zugang mit Rolle |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; die Suche trifft vorerst den Dateinamen |
 | `GET /api/dokumente/:id` | ein Dokument |

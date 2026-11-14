@@ -1,31 +1,19 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
-import { drizzle } from "drizzle-orm/postgres-js";
-import type postgres from "postgres";
+import { writeFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createApp } from "../app.ts";
-import { testDatenbank, testDatenbankUrl } from "../test-db.ts";
+import { testApp } from "../test-app.ts";
+import { testDatenbankUrl } from "../test-db.ts";
 
 describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
-  let sql: postgres.Sql;
-  let verzeichnis: string;
-  let app: ReturnType<typeof createApp>;
-  let speicher: ReturnType<typeof dateispeicher>;
+  let t: Awaited<ReturnType<typeof testApp>>;
+  let cookie: string;
+  const app = { request: (pfad: string, init: RequestInit = {}) => t.anfrage(pfad, init, cookie) };
 
   beforeAll(async () => {
-    sql = await testDatenbank();
-    verzeichnis = await mkdtemp(join(tmpdir(), "belegt-dokumente-"));
-    speicher = dateispeicher({ verzeichnis: () => verzeichnis });
-    app = createApp({ db: drizzle(sql), speicher });
+    t = await testApp();
+    cookie = (await t.registrieren("anna@example.org")).cookie;
   });
-
-  afterAll(async () => {
-    await sql?.end();
-    await rm(verzeichnis, { recursive: true, force: true });
-  });
+  afterAll(() => t?.aufraeumen());
 
   const pdf = new TextEncoder().encode("%PDF-1.7\n% erfundene Rechnung über 119,00 €\n");
 
@@ -53,23 +41,23 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     expect(new Uint8Array(await datei.arrayBuffer())).toEqual(pdf);
 
     const [eintrag] =
-      await sql`select actor, action from audit_log where table_name = 'dokumente' and row_id = ${dok.id}`;
-    expect(eintrag).toEqual({ actor: "unangemeldet", action: "INSERT" });
-    expect(await sql`select 1 from seals where row_id = ${dok.id}`).toHaveLength(1);
+      await t.sql`select actor, action from audit_log where table_name = 'dokumente' and row_id = ${dok.id}`;
+    expect(eintrag).toEqual({ actor: "nutzer:anna@example.org", action: "INSERT" });
+    expect(await t.sql`select 1 from seals where row_id = ${dok.id}`).toHaveLength(1);
   });
 
   it("lehnt Ändern und Löschen eines Originals in der Datenbank ab", async () => {
     const dok = await (await hochladen(pdf, "fest.pdf")).json();
-    await expect(sql`update dokumente set dateiname = 'anders.pdf' where id = ${dok.id}`).rejects.toThrow(
+    await expect(t.sql`update dokumente set dateiname = 'anders.pdf' where id = ${dok.id}`).rejects.toThrow(
       /darf nur ergänzt werden/,
     );
-    await expect(sql`delete from dokumente where id = ${dok.id}`).rejects.toThrow(/darf nur ergänzt werden/);
+    await expect(t.sql`delete from dokumente where id = ${dok.id}`).rejects.toThrow(/darf nur ergänzt werden/);
   });
 
   it("liefert eine veränderte Datei nicht aus", async () => {
     const bytes = new TextEncoder().encode("%PDF-1.7\n% wird gleich verändert\n");
     const dok = await (await hochladen(bytes, "verändert.pdf")).json();
-    await writeFile(speicher.pfad(dok.sha256), "manipuliert");
+    await writeFile(t.speicher.pfad(dok.sha256), "manipuliert");
     const res = await app.request(`/api/dokumente/${dok.id}/datei`);
     expect(res.status).toBe(409);
   });
@@ -89,10 +77,20 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     expect((await app.request("/api/dokumente/keine-id")).status).toBe(404);
   });
 
+  it("lässt Steuerberatung und Prüfer lesen, aber nicht hochladen", async () => {
+    await t.sql`update "user" set role = 'steuerberatung' where email = 'anna@example.org'`;
+    try {
+      expect((await app.request("/api/dokumente")).status).toBe(200);
+      expect((await hochladen(pdf, "verboten.pdf")).status).toBe(403);
+    } finally {
+      await t.sql`update "user" set role = 'inhaber' where email = 'anna@example.org'`;
+    }
+  });
+
   it("meldet eine gültige Kette und findet eine an den Triggern vorbei geänderte Zeile", async () => {
     expect(await (await app.request("/api/pruefung")).json()).toEqual({ ok: true, befunde: [] });
     const dok = await (await hochladen(pdf, "später-geändert.pdf")).json();
-    await sql.begin(async (tx) => {
+    await t.sql.begin(async (tx) => {
       await tx`set local session_replication_role = replica`;
       await tx`update dokumente set dateiname = 'gefälscht.pdf' where id = ${dok.id}`;
     });

@@ -39,6 +39,8 @@ löschen sie wieder.
 | `PORT` | Port des Servers | `3000` |
 | `DATABASE_URL` | Postgres; Pflicht für den Server | – |
 | `DOCUMENTS_DIR` | Wurzel des Dateispeichers | `data/dokumente` |
+| `BETTER_AUTH_SECRET` | Schlüssel für Sitzungen, mindestens 32 Zeichen; Pflicht für den Server | – |
+| `BETTER_AUTH_URL` | Adresse, unter der Belegt erreichbar ist | `http://localhost:3000` |
 
 ## Migrationen
 

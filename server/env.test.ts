@@ -3,7 +3,11 @@ import { readEnv } from "./env.ts";
 
 describe("readEnv", () => {
   it("nimmt Vorgaben, wenn nichts gesetzt ist", () => {
-    expect(readEnv({})).toEqual({ PORT: 3000, DOCUMENTS_DIR: "data/dokumente" });
+    expect(readEnv({})).toEqual({
+      PORT: 3000,
+      DOCUMENTS_DIR: "data/dokumente",
+      BETTER_AUTH_URL: "http://localhost:3000",
+    });
   });
 
   it("liest Port und Datenbank", () => {
@@ -15,5 +19,6 @@ describe("readEnv", () => {
   it("nennt ungültige Werte beim Namen", () => {
     expect(() => readEnv({ PORT: "abc" })).toThrow(/PORT/);
     expect(() => readEnv({ DATABASE_URL: "keine-adresse" })).toThrow(/DATABASE_URL/);
+    expect(() => readEnv({ BETTER_AUTH_SECRET: "zu-kurz" })).toThrow(/BETTER_AUTH_SECRET/);
   });
 });

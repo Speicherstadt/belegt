@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+export * from "./auth-schema.ts";
+
 /*
  * Tabellen von Belegt. Audit-Log, Kopf der Kette, Siegel und sealed_tables legt die erste Migration aus der Vorlage
  * von @firsttris/gobd-kern an; sie stehen bewusst nicht hier, sonst legte drizzle-kit sie ein zweites Mal an.

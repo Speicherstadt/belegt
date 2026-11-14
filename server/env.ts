@@ -7,6 +7,10 @@ const Schema = z.object({
   DATABASE_URL: z.string().url().optional(),
   /** Wurzel des Dateispeichers (Dateien unter ihrem SHA-256) */
   DOCUMENTS_DIR: z.string().min(1).default("data/dokumente"),
+  /** Schlüssel für Sitzungen; mindestens 32 Zeichen, etwa aus openssl rand -hex 32 */
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  /** Adresse, unter der Belegt erreichbar ist, etwa https://belegt.firma.de */
+  BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
 });
 
 export type Env = z.infer<typeof Schema>;
