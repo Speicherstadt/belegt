@@ -1,3 +1,9 @@
+---
+title: "Anmelden über einen Anbieter und Einbetten"
+description: >-
+  Belegt mit OpenID Connect anmelden und als Seite im Frame einer anderen Seite zeigen, mit Nachrichten per postMessage.
+---
+
 # Anmelden über einen Anbieter und Einbetten
 
 Belegt kann sich über einen OpenID-Connect-Anbieter anmelden lassen (das Firmenkonto: ein Portal, Microsoft Entra,

@@ -1,3 +1,9 @@
+---
+title: "Prüfung, Z1 und Z3"
+description: >-
+  Prüfung von Hash-Kette, Siegeln und Dateien, Prüfbericht, Prüferzugang mit Zeitraum, Datenträger nach dem Beschreibungsstandard und Zeitstempel.
+---
+
 # Prüfung
 
 Unter **Prüfung** prüft Belegt Hash-Kette, Kopf und Siegel; „Auch alle Dateien prüfen“ liest zusätzlich jedes

@@ -1,3 +1,9 @@
+---
+title: "Plan"
+description: >-
+  Plan, Phasen und Stand von Belegt.
+---
+
 # Plan für die Umsetzung
 
 Belegt ist eine selbst gehostete Ablage für alle Dokumente, wie paperless, mit einem GoBD-Modus für das, was aufbewahrt werden muss. Mails und E-Rechnungen sind vollwertige Dokumente, nicht nur Anhänge.

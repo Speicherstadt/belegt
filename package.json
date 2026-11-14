@@ -14,6 +14,7 @@
     "dev:app": "vite",
     "build": "vite build",
     "e2e": "playwright test",
+    "screenshots": "LANG=de_DE.UTF-8 LANGUAGE=de DOKU_SCREENSHOTS=1 playwright test --project screenshots",
     "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy preferredLanguage baseLocale"
   },
   "dependencies": {

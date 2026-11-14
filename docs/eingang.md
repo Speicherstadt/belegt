@@ -1,3 +1,9 @@
+---
+title: "Eingang, Mails und Suche"
+description: >-
+  Dokumente und Mails nach Belegt bringen: Hochladen, IMAP, JMAP, Microsoft 365, Google, SMTP-Journal, PST, Volltext, E-Rechnungen und Vorschläge.
+---
+
 # Eingang
 
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art

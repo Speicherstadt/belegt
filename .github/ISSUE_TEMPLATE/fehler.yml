@@ -1,0 +1,43 @@
+name: Fehler melden
+description: Etwas funktioniert nicht, wird falsch archiviert oder falsch berechnet.
+labels: ["fehler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für die Meldung. Bitte **keine echten Dokumente, Mails, Adressen oder Zugangsdaten** ins Issue. Ersetze sie durch Platzhalter und schwärze Screenshots. Sicherheitslücken bitte privat melden, siehe SECURITY.md.
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert?
+    validations:
+      required: true
+  - type: textarea
+    id: schritte
+    attributes:
+      label: Schritte zum Nachstellen
+      placeholder: |
+        Beispiel: Eingang › Hochladen › PDF auswählen › Einordnen als Buchungsbeleg
+  - type: textarea
+    id: erwartet
+    attributes:
+      label: Was hast du erwartet, was ist stattdessen passiert?
+      description: Meldungen bitte im genauen Wortlaut.
+  - type: dropdown
+    id: bereich
+    attributes:
+      label: Bereich
+      options:
+        - Eingang, Hochladen, Suche
+        - Mails (Import, Postfächer, SMTP-Journal)
+        - Einordnung, Fristen, Löschung
+        - Prüfung, Z1, Z3, Verfahrensdokumentation
+        - Schnittstellen (API, Webhooks, MCP)
+        - Anmeldung, Zugänge
+        - Installation und Betrieb
+        - Etwas anderes
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Tag des Images, etwa 0.1.0

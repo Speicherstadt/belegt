@@ -1,0 +1,16 @@
+// Renovate (GitHub-App, https://github.com/apps/renovate): ein Pull Request je neuem Release dessen, worauf Belegt
+// aufbaut, dazu das Issue „Dependency Dashboard“. Die gemeinsamen Einstellungen aus firsttris/workflows: Minor- und
+// Patch-Updates einmal im Monat in einem Pull Request, der sich bei grüner CI selbst merged; Majors auf Anfrage.
+// Die CI prüft die Pakete außerdem mit `bun audit`.
+// Prüfen mit `bunx --package renovate renovate-config-validator .github/renovate.json5`.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>firsttris/workflows//renovate/default.json5"],
+  packageRules: [
+    {
+      // Better Auth steht fest auf einer Version (Anmeldung, Hooks, Verknüpfung); jedes Update einzeln prüfen
+      matchPackageNames: ["better-auth"],
+      automerge: false,
+    },
+  ],
+}

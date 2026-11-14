@@ -1,0 +1,24 @@
+name: Bump version
+
+# Der Knopf für eine neue Version (Actions → Bump version → Run workflow auf main): erhöht die Version in
+# package.json, committet „Release vX.Y.Z“, taggt und startet release.yml auf dem Tag. Release Candidates: preminor
+# (oder prepatch, premajor) taggt vX.Y.Z-rc.1, prerelease den nächsten, patch danach die fertige Version.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        type: choice
+        options: [patch, minor, major, preminor, prepatch, premajor, prerelease]
+        default: patch
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    uses: firsttris/workflows/.github/workflows/bump-version.yml@v1
+    with:
+      bump: ${{ inputs.bump }}
+    permissions:
+      contents: write
+      actions: write

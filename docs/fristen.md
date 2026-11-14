@@ -1,3 +1,9 @@
+---
+title: "Fristen und Löschen"
+description: >-
+  Aufbewahrungsfristen nach § 147 AO in Belegt, Sperren und das Löschen nach Fristende mit einer zweiten Person.
+---
+
 # Fristen
 
 Jedes Dokument bekommt beim Einordnen eine Art. Die Art bestimmt, wie lange es gesperrt bleibt.

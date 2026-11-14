@@ -37,6 +37,24 @@ export default defineConfig({
       dependencies: ["einrichten"],
       use: { ...devices["Pixel 7"], launchOptions, storageState: INHABER },
     },
+    // Bilder für README und Doku (e2e/screenshots.ts), nur mit DOKU_SCREENSHOTS=1: bun run screenshots
+    ...(process.env.DOKU_SCREENSHOTS
+      ? [
+          {
+            name: "screenshots",
+            testMatch: /screenshots\.ts/,
+            dependencies: ["einrichten"],
+            use: {
+              ...devices["Desktop Chrome"],
+              launchOptions,
+              storageState: INHABER,
+              viewport: { width: 1280, height: 800 },
+              deviceScaleFactor: 2,
+              locale: "de-DE",
+            },
+          },
+        ]
+      : []),
   ],
   webServer: [
     {

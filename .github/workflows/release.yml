@@ -1,0 +1,45 @@
+name: Release
+
+# Ein Tag vX.Y.Z (Button in bump.yml) veröffentlicht diese Version: erst die CI (übersprungen, wenn sie auf main
+# denselben Code schon geprüft hat), dann der gemeinsame Docker-Release aus firsttris/workflows. Der prüft den Tag
+# gegen package.json, pusht :x.y.z, :x.y und :latest nach Docker Hub (tristanteu/belegt) und GHCR, für amd64 und
+# arm64, setzt die Beschreibung auf Docker Hub aus dem README und legt das GitHub-Release an. Ein Release Candidate
+# vX.Y.Z-rc.N pusht :x.y.z-rc.N und :next. Von Hand auf main gestartet: dieselben Prüfungen, dann das Image als :edge.
+# Braucht das Secret DOCKER_PAT (Zugangstoken von Docker Hub für tristanteu, Recht Read & Write).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tested:
+    uses: firsttris/workflows/.github/workflows/tested-on-main.yml@v1
+    permissions:
+      actions: read
+      contents: read
+
+  checks:
+    needs: tested
+    if: needs.tested.outputs.tested != 'true'
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  docker:
+    needs: [tested, checks]
+    # Die Prüfungen liefen durch oder waren nicht nötig
+    if: ${{ !cancelled() && needs.tested.result == 'success' && needs.checks.result != 'failure' }}
+    uses: firsttris/workflows/.github/workflows/docker-release.yml@v1
+    with:
+      image: tristanteu/belegt
+      # Docker Hub erlaubt höchstens 100 Zeichen
+      description: "Selbst gehostetes Dokumentenarchiv mit GoBD-Modus: Mails, E-Rechnungen, Scans, Fristen"
+      dockerfile: Containerfile
+      ghcr: true
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write

@@ -1,3 +1,9 @@
+---
+title: "Unterlagen für ein Testat"
+description: >-
+  Anforderungen der GoBD mit Umsetzung und Tests als Nachweis, für eine Prüfung nach IDW PS 880.
+---
+
 # Unterlagen für ein Testat
 
 Ein Testat zu Belegt erteilt ein Wirtschaftsprüfer, etwa nach IDW PS 880 (Prüfung von Softwareprodukten). Belegt hat

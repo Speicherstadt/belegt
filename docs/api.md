@@ -1,3 +1,9 @@
+---
+title: "REST-API"
+description: >-
+  Alle Aufrufe der HTTP-Schnittstelle von Belegt mit Rechten und Antworten.
+---
+
 # Schnittstelle
 
 Alles unter `/api` außer `/api/auth`, `/api/status` und `/api/einladung/:token` verlangt eine Sitzung (Cookie von

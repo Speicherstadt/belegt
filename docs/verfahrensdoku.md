@@ -1,3 +1,9 @@
+---
+title: "Verfahrensdokumentation"
+description: >-
+  Die Verfahrensdokumentation nach GoBD erzeugt Belegt aus dem tatsächlichen Stand und deinen Angaben zum Betrieb.
+---
+
 # Verfahrensdokumentation
 
 Unter **Verfahrensdoku** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:

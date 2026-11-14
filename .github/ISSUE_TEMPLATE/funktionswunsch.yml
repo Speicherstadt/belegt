@@ -1,0 +1,16 @@
+name: Funktionswunsch
+description: Etwas fehlt in Belegt.
+labels: ["funktionswunsch"]
+body:
+  - type: textarea
+    id: anlass
+    attributes:
+      label: Worum geht es?
+      description: Was willst du erreichen, und was hindert dich heute daran?
+    validations:
+      required: true
+  - type: textarea
+    id: vorschlag
+    attributes:
+      label: Vorschlag
+      description: Wie könnte es aussehen? Bei GoBD und Fristen gern mit der Quelle (Gesetz, BMF-Schreiben).

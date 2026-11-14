@@ -1,0 +1,102 @@
+# Dokumentation als Website: https://firsttris.github.io/belegt/
+# Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml), dem Nachfolger von MkDocs Material.
+# Lokal: pip install -r requirements-docs.txt && zensical serve
+site_name: Belegt
+site_description: >-
+  Belegt, das selbst gehostete Dokumentenarchiv mit GoBD-Modus: Mails, E-Rechnungen, Scans und beliebige Dokumente,
+  unveränderbar bis Fristende, durchsuchbar, mit Prüferzugang und Datenträger für die Betriebsprüfung.
+site_url: https://firsttris.github.io/belegt/
+repo_url: https://github.com/firsttris/belegt
+repo_name: firsttris/belegt
+edit_uri: edit/main/docs/
+copyright: Lizenz AGPL-3.0 · Keine Steuer- oder Rechtsberatung.
+
+docs_dir: docs
+# Seiten als betrieb.html statt betrieb/: so stimmen relative Bildpfade auch auf GitHub
+use_directory_urls: false
+
+nav:
+  - Start: index.md
+  - Betrieb:
+      - Installation und Betrieb: betrieb.md
+      - Anmelden über einen Anbieter, Einbetten: einbetten.md
+  - Arbeiten mit Belegt:
+      - Eingang, Mails und Suche: eingang.md
+      - Fristen und Löschen: fristen.md
+      - Prüfung, Z1 und Z3: pruefung.md
+      - Verfahrensdokumentation: verfahrensdoku.md
+  - Schnittstellen:
+      - Programme, Webhooks, MCP: schnittstelle.md
+      - REST-API: api.md
+  - Hintergrund:
+      - Unterlagen für ein Testat: testat.md
+      - Entwicklung: entwicklung.md
+      - Plan: plan.md
+
+theme:
+  name: material
+  language: de
+  logo: assets/icon.svg
+  favicon: assets/icon.svg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: green
+      toggle:
+        icon: material/weather-night
+        name: Dunkles Design
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: green
+      toggle:
+        icon: material/weather-sunny
+        name: Helles Design
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.quotes:
+      callouts: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Link zu diesem Abschnitt
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/firsttris/belegt
+      name: Quellcode auf GitHub
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/tristanteu/belegt
+      name: Image auf Docker Hub

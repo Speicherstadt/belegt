@@ -1,3 +1,9 @@
+---
+title: "Schnittstellen für Programme"
+description: >-
+  API-Tokens, Webhooks mit Signatur und MCP für KI-Assistenten: wie andere Programme Belegt nutzen.
+---
+
 # Schnittstelle für andere Programme
 
 Andere Programme nutzen Belegt über offene Schnittstellen. Die Beschreibung als OpenAPI 3.1 liegt ohne Anmeldung

@@ -1,4 +1,4 @@
-# Belegt mit Postgres: docker compose up -d (oder podman compose). Geheimnisse in .env, siehe docs/betrieb.md.
+# Belegt aus dem Quellcode gebaut (Entwicklung, CI). Zum Betreiben: deploy/compose.yml mit dem fertigen Image.
 name: belegt
 
 services:

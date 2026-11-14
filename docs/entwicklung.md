@@ -1,3 +1,9 @@
+---
+title: "Entwicklung"
+description: >-
+  Belegt lokal starten, testen und ändern: Befehle, Tests gegen PostgreSQL, Umgebungsvariablen und Migrationen.
+---
+
 # Entwicklung
 
 ## Befehle
@@ -68,3 +74,21 @@ sie danach mit `SELECT belegt_seal_table('…')` oder `SELECT belegt_audit_table
 auf `main` ist, wird nie mehr geändert.
 
 Der Kern kommt als Datei vom Release in Haben (`package.json`); eine neue Version trägt man dort mit der neuen URL ein.
+
+## Veröffentlichen
+
+Eine neue Version startet der Knopf **Actions → Bump version → Run workflow** auf `main` (`patch`, `minor`, `major`;
+`preminor` für einen Release Candidate). Er erhöht die Version in `package.json`, taggt `vX.Y.Z` und startet
+`release.yml`: CI (übersprungen, wenn `main` denselben Code schon geprüft hat), dann das Image für amd64 und arm64 nach
+Docker Hub (`tristanteu/belegt`, Tags `x.y.z`, `x.y`, `latest`) und GHCR, die Beschreibung auf Docker Hub aus dem
+README und das GitHub-Release. Ein Release Candidate bekommt `x.y.z-rc.N` und `next`, ein Start von Hand auf `main`
+das Tag `edge`. Die Workflows kommen aus [firsttris/workflows](https://github.com/firsttris/workflows).
+
+Einmalig im Repository einzurichten:
+
+- Secret `DOCKER_PAT`: Zugangstoken von Docker Hub für `tristanteu` (Account Settings → Personal access tokens, Recht
+  Read & Write).
+- Settings → Pages → Source „GitHub Actions“ für die Doku (`docs.yml` baut sie bei jeder Änderung an `docs/`).
+- Die GitHub-App [Renovate](https://github.com/apps/renovate) für dieses Repository (`.github/renovate.json5`).
+
+Die Bilder in README und Doku erzeugt `bun run screenshots` (erfundene Daten, hell und dunkel, nach `docs/assets/`).

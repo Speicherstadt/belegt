@@ -1,3 +1,9 @@
+---
+title: "Installation und Betrieb"
+description: >-
+  Belegt mit Docker Compose betreiben: Start, S3 mit Object Lock, Sicherung, Aktualisieren und Texterkennung.
+---
+
 # Betrieb
 
 Belegt läuft als ein Image für Server und Worker neben PostgreSQL. Der Server wendet beim Start die Migrationen an
@@ -6,8 +12,14 @@ und liefert die Oberfläche aus; der Worker ruft Postfächer ab, stellt Webhooks
 
 ## Starten
 
+Das Image `tristanteu/belegt` gibt es auf Docker Hub und als `ghcr.io/firsttris/belegt`, für amd64 und arm64. Ohne den
+Quellcode reichen zwei Dateien:
+
 ```bash
-cp .env.beispiel .env
+mkdir belegt && cd belegt
+curl -O https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.yml
+curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.env.example
+chmod 600 .env
 ```
 
 In `.env` drei Geheimnisse eintragen, etwa mit `openssl rand -hex 32` und `openssl rand -base64 32`:
@@ -52,9 +64,12 @@ Beschreibe die Sicherung unter „Verfahrensdoku“; sie gehört in die Verfahre
 ## Aktualisieren
 
 ```bash
-git pull
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
+
+Mit `BELEGT_VERSION` in `.env` bleibt Belegt auf einer Version (etwa `0.1.0`), sonst folgt es `latest`. Aus dem
+Quellcode gebaut (das `compose.yml` im Repository): `git pull` und `docker compose up -d --build`.
 
 Die Migrationen laufen beim Start des Servers; der Worker startet erst, wenn der Server bereit ist.
 
