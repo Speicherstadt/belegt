@@ -8,6 +8,7 @@ import { createApp } from "../server/app.ts";
 import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrieren } from "../server/db/migrieren.ts";
+import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
 
 /*
@@ -41,4 +42,6 @@ Bun.serve({
   fetch: createApp({ db, speicher, auth, schluessel: randomBytes(32), oeffnen: imapOeffnen }).fetch,
   maxRequestBodySize: 110 * 1024 * 1024,
 });
+// Statt des Workers: liest die Inhalte neuer Dokumente jede Sekunde
+setInterval(() => void inhalteErzeugen({ db, speicher }).catch(() => {}), 1000);
 console.log(`E2E-Server auf Port ${port}`);

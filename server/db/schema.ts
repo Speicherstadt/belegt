@@ -289,3 +289,17 @@ export const webhookZustellungen = pgTable(
   },
   (t) => [primaryKey({ columns: [t.webhookId, t.ereignisId] })],
 );
+
+/**
+ * Was Belegt aus einer Datei liest: Text aus PDFs, Kopfdaten einer E-Rechnung (XML oder in einem PDF eingebettet).
+ * Abgeleitet und neu erzeugbar, deshalb weder versiegelt noch im Audit-Log; das Original bleibt maßgeblich.
+ */
+export const inhalte = pgTable("inhalte", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  text: text("text").notNull().default(""),
+  erechnung: jsonb("erechnung"),
+  fehler: text("fehler"),
+  erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
+});

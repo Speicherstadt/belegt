@@ -36,6 +36,15 @@ Ein Vorschlag setzt noch keine Frist. Erst wenn du ihn übernimmst, wird das Dok
 ## Suche
 
 Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
-Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail. Sie versteht deutsche Wortformen („Rechnungen“
-findet „Rechnung“), Wortgruppen in Anführungszeichen und Ausschlüsse mit Minus. Text aus PDFs und Scans kommt mit der
-Texterkennung dazu.
+Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs und Nummer und Verkäufer
+einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
+und Ausschlüsse mit Minus.
+
+## Text und E-Rechnungen
+
+Kurz nach dem Eingang liest der Worker jedes PDF und XML: den Text eines PDFs für die Suche und die Kopfdaten einer
+E-Rechnung nach EN 16931, als XRechnung (UBL oder CII) oder eingebettet in ein PDF (ZUGFeRD, Factur-X). Auf der Seite
+des Dokuments stehen dann Nummer, Datum, Verkäufer, Käufer und Gesamtbetrag (BT-1, BT-2, BT-27, BT-44, BT-112). Beim
+Einordnen übernimmt „Übernehmen“ Datum, „Rechnung <Nummer>“ als Titel und den Verkäufer; die Art kommt aus einer
+passenden Regel, sonst „Buchungsbeleg“. Geprüft wird die Rechnung dabei nicht, und maßgeblich bleibt das Original.
+Gescannte Bilder haben noch keinen Text (Texterkennung folgt).

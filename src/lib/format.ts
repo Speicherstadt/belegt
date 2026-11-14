@@ -20,3 +20,18 @@ export function tag(iso: string): string {
     new Date(Date.UTC(j!, mo! - 1, t!)),
   );
 }
+
+/**
+ * Betrag aus ganzen Cent nach der Sprache der Oberfläche. Intl.NumberFormat bekommt die Zahl als Text, damit nie eine
+ * Fließkommazahl entsteht.
+ */
+export function betrag(cent: number, waehrung: string | null): string {
+  const abs = Math.abs(cent);
+  const text = `${cent < 0 ? "-" : ""}${Math.trunc(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
+  const format = new Intl.NumberFormat(getLocale(), {
+    ...(waehrung && /^[A-Z]{3}$/.test(waehrung)
+      ? { style: "currency", currency: waehrung }
+      : { minimumFractionDigits: 2 }),
+  });
+  return format.format(text as unknown as number);
+}

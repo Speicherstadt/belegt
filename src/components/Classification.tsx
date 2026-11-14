@@ -22,6 +22,8 @@ export function Classification({
   const queryClient = useQueryClient();
   const [offen, setOffen] = useState(!einordnung);
   const [art, setArt] = useState<Art>(einordnung?.art ?? "beleg");
+  // Angaben aus einer erkannten E-Rechnung; das Formular übernimmt sie beim Klick auf „Übernehmen“
+  const [vorgabe, setVorgabe] = useState<{ entstanden?: string; titel?: string; korrespondent?: string } | null>(null);
   const vorschlag = useQuery({
     queryKey: ["vorschlag", dokumentId],
     queryFn: () => api.vorschlag(dokumentId),
@@ -89,8 +91,31 @@ export function Classification({
           </button>
         </p>
       )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.erechnung && !vorgabe && (
+        <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
+          {m.suggest_einvoice({
+            nummer: vorschlag.data.erechnung.nummer ?? "–",
+            verkaeufer: vorschlag.data.erechnung.verkaeufer ?? "–",
+          })}
+          <button
+            type="button"
+            onClick={() => {
+              const r = vorschlag.data!.erechnung!;
+              setArt(vorschlag.data!.vorschlag?.art ?? "beleg");
+              setVorgabe({
+                entstanden: r.datum ?? undefined,
+                titel: r.nummer ? m.suggest_einvoice_title({ nummer: r.nummer }) : undefined,
+                korrespondent: r.verkaeufer ?? undefined,
+              });
+            }}
+            className="h-8 rounded-md border border-border bg-bg px-3 font-medium"
+          >
+            {m.suggest_apply()}
+          </button>
+        </p>
+      )}
       {darfSchreiben(ich.data?.role) && offen && (
-        <form onSubmit={absenden} className="flex flex-col gap-3">
+        <form key={JSON.stringify(vorgabe)} onSubmit={absenden} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_kind()}
             <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feld}>
@@ -107,7 +132,7 @@ export function Classification({
               name="entstanden"
               type="date"
               required
-              defaultValue={einordnung?.entstanden ?? eingang.slice(0, 10)}
+              defaultValue={vorgabe?.entstanden ?? einordnung?.entstanden ?? eingang.slice(0, 10)}
               className={feld}
             />
           </label>
@@ -125,11 +150,15 @@ export function Classification({
           )}
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_label()}
-            <input name="titel" defaultValue={einordnung?.titel ?? ""} className={feld} />
+            <input name="titel" defaultValue={vorgabe?.titel ?? einordnung?.titel ?? ""} className={feld} />
           </label>
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_party()}
-            <input name="korrespondent" defaultValue={einordnung?.korrespondent ?? ""} className={feld} />
+            <input
+              name="korrespondent"
+              defaultValue={vorgabe?.korrespondent ?? einordnung?.korrespondent ?? ""}
+              className={feld}
+            />
           </label>
           {einordnung && <p className="m-0 text-muted text-xs">{m.classify_hint()}</p>}
           {speichern.error && (

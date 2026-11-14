@@ -269,5 +269,15 @@
   "webhooks_last": "last delivered {datum}",
   "webhooks_on": "Activate",
   "webhooks_off": "Deactivate",
-  "webhooks_inactive": "deactivated"
+  "webhooks_inactive": "deactivated",
+  "suggest_einvoice": "E-invoice found: {nummer} from {verkaeufer}.",
+  "suggest_einvoice_title": "Invoice {nummer}",
+  "einvoice_title": "E-invoice",
+  "einvoice_number": "Number",
+  "einvoice_date": "Date",
+  "einvoice_seller": "Seller",
+  "einvoice_buyer": "Buyer",
+  "einvoice_total": "Total amount",
+  "einvoice_credit": "Credit note",
+  "einvoice_hint": "Read from the invoice XML; the original remains authoritative."
 }

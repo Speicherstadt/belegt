@@ -205,7 +205,22 @@ export interface Webhook {
   letzterFehler: string | null;
 }
 
+export interface ERechnung {
+  syntax: "cii" | "ubl";
+  nummer: string | null;
+  datum: string | null;
+  typ: string | null;
+  verkaeufer: string | null;
+  kaeufer: string | null;
+  bruttoCent: number | null;
+  waehrung: string | null;
+}
+
 export const api = {
+  inhalt: (id: string) =>
+    aufruf<{ erechnung: ERechnung | null; fehler: string | null; textLaenge: number } | null>(
+      `/api/dokumente/${id}/inhalt`,
+    ),
   webhooks: () => aufruf<Webhook[]>("/api/webhooks"),
   webhookAnlegen: (w: { name: string; url: string; arten: Ereignisart[] }) =>
     aufruf<Webhook & { geheimnis: string }>("/api/webhooks", json(w)),
@@ -270,7 +285,9 @@ export const api = {
     }
   },
   vorschlag: (id: string) =>
-    aufruf<{ vorschlag: { art: Art; regel: { id: string; name: string } } | null }>(`/api/dokumente/${id}/vorschlag`),
+    aufruf<{ vorschlag: { art: Art; regel: { id: string; name: string } } | null; erechnung: ERechnung | null }>(
+      `/api/dokumente/${id}/vorschlag`,
+    ),
   regeln: () => aufruf<Regel[]>("/api/regeln"),
   regelAnlegen: (r: { name: string; wenn: Regel["bedingung"]; dann: Art }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>

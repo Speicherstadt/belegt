@@ -11,6 +11,7 @@ import {
   sperrenListen,
   uebersicht,
 } from "../einordnung/einordnung.ts";
+import { inhaltZu } from "../inhalt/inhalt.ts";
 import {
   beantragen,
   bestaetigen,
@@ -153,6 +154,14 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       "Content-Disposition": `${c.req.query("ansicht") === "1" && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
       "X-Content-Type-Options": "nosniff",
     });
+  });
+
+  app.get("/api/dokumente/:id/inhalt", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    // null, solange der Worker die Datei noch nicht gelesen hat oder es nichts zu lesen gibt (Bilder)
+    return c.json(await inhaltZu(umgebung.db, dokument.id));
   });
 
   app.get("/api/dokumente/:id/verlauf", async (c) => {

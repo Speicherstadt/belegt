@@ -6,7 +6,7 @@
 bun install
 bun run dev:server   # Server auf Port 3000 (PORT), braucht DATABASE_URL; wendet beim Start die Migrationen an
 bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
-bun server/worker.ts # Worker: ruft die Postfächer ab und stellt Webhooks zu
+bun server/worker.ts # Worker: ruft die Postfächer ab, stellt Webhooks zu und liest Text und E-Rechnungen
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest

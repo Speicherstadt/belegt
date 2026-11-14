@@ -2,13 +2,15 @@ import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
+import { inhalteErzeugen } from "./inhalt/inhalt.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
 
 /*
- * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab und stellt alle 15 Sekunden Webhooks zu. Getrennt vom Server, damit ein hängender
- * Abruf keine Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
+ * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu und liest
+ * Text und E-Rechnungen neuer Dokumente. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine
+ * Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -40,6 +42,18 @@ async function webhooks() {
   }
 }
 
+/** Liest Text und E-Rechnungen neuer Dokumente; bei vollem Stapel gleich weiter */
+async function inhalte() {
+  for (;;) {
+    const r = await inhalteErzeugen({ db, speicher }).catch((err) => {
+      console.error(`Inhalte fehlgeschlagen: ${meldung(err)}`);
+      return { gelesen: 0, fehler: 0 };
+    });
+    if (r.gelesen || r.fehler) console.log(`Inhalte: ${r.gelesen} gelesen, ${r.fehler} nicht lesbar`);
+    if (r.gelesen + r.fehler < 20) await Bun.sleep(15_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -47,4 +61,4 @@ async function postfaecher() {
   }
 }
 
-await Promise.all([postfaecher(), webhooks()]);
+await Promise.all([postfaecher(), webhooks(), inhalte()]);

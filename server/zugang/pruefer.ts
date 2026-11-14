@@ -10,7 +10,7 @@ import type { Zeitraum } from "./einladungen.ts";
 const ERLAUBT = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
-  /^\/api\/dokumente\/[^/]+(\/(datei|mail|verlauf))?$/,
+  /^\/api\/dokumente\/[^/]+(\/(datei|inhalt|mail|verlauf))?$/,
   /^\/api\/export$/,
   /^\/api\/pruefung$/,
 ];

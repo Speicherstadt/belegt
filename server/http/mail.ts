@@ -1,4 +1,5 @@
 import { bodyLimit } from "hono/body-limit";
+import { inhaltZu } from "../inhalt/inhalt.ts";
 import {
   abrufen,
   QuelleEingabe,
@@ -53,7 +54,10 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
 
   app.get("/api/dokumente/:id/vorschlag", async (c) => {
     const id = Id.safeParse(c.req.param("id"));
-    return c.json({ vorschlag: id.success ? await vorschlag(umgebung.db, id.data) : null });
+    if (!id.success) return c.json({ vorschlag: null, erechnung: null });
+    // Dazu die Kopfdaten einer erkannten E-Rechnung: Datum, Nummer und Verkäufer für die Einordnung
+    const [regel, inhalt] = await Promise.all([vorschlag(umgebung.db, id.data), inhaltZu(umgebung.db, id.data)]);
+    return c.json({ vorschlag: regel, erechnung: inhalt?.erechnung ?? null });
   });
 
   app.get("/api/regeln", async (c) => c.json(await regelnListen(umgebung.db)));

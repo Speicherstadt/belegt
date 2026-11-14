@@ -56,7 +56,7 @@ export async function listen(db: Datenbank): Promise<Token[]> {
   return (await db.select().from(apiTokens).orderBy(desc(apiTokens.erstelltAm))).map(ohneHash);
 }
 
-const LESEN = [/^\/api\/ich$/, /^\/api\/dokumente$/, /^\/api\/dokumente\/[^/]+(\/(datei|mail|verlauf))?$/];
+const LESEN = [/^\/api\/ich$/, /^\/api\/dokumente$/, /^\/api\/dokumente\/[^/]+(\/(datei|inhalt|mail|verlauf))?$/];
 const SCHREIBEN = [/^\/api\/dokumente$/, /^\/api\/mails$/, /^\/api\/dokumente\/[^/]+\/einordnung$/];
 
 /** Was ein Token darf: lesen nur GET auf Dokumente, schreiben zusätzlich Aufnehmen und Einordnen */

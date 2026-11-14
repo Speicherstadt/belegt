@@ -138,6 +138,14 @@ export const openapi = {
         responses: { "200": { description: "Mail" }, "404": fehler },
       },
     },
+    "/api/dokumente/{id}/inhalt": {
+      get: {
+        summary:
+          "Gelesener Inhalt: Kopfdaten einer E-Rechnung (Beträge in Cent) und Länge des Texts; null, solange nicht gelesen",
+        parameters: [idParam],
+        responses: { "200": { description: "Inhalt oder null" }, "404": fehler },
+      },
+    },
     "/api/dokumente/{id}/verlauf": {
       get: {
         summary: "Einträge des Audit-Logs und Siegel",

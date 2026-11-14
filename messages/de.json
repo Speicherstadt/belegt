@@ -269,5 +269,15 @@
   "webhooks_last": "zuletzt zugestellt {datum}",
   "webhooks_on": "Aktivieren",
   "webhooks_off": "Deaktivieren",
-  "webhooks_inactive": "deaktiviert"
+  "webhooks_inactive": "deaktiviert",
+  "suggest_einvoice": "E-Rechnung erkannt: {nummer} von {verkaeufer}.",
+  "suggest_einvoice_title": "Rechnung {nummer}",
+  "einvoice_title": "E-Rechnung",
+  "einvoice_number": "Nummer",
+  "einvoice_date": "Datum",
+  "einvoice_seller": "Verkäufer",
+  "einvoice_buyer": "Käufer",
+  "einvoice_total": "Gesamtbetrag",
+  "einvoice_credit": "Gutschrift",
+  "einvoice_hint": "Gelesen aus dem XML der Rechnung; maßgeblich bleibt das Original."
 }
