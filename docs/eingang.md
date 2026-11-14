@@ -25,7 +25,8 @@ Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (A
 `BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
 
 Mit der Art **JMAP** (etwa bei Stalwart) holt Belegt die Sitzung unter `https://<Server>:<Port>/.well-known/jmap` und
-meldet sich mit Benutzer und Passwort an. Der Ordner ist sein Name oder seine Rolle (`INBOX` für den Posteingang).
+meldet sich mit Benutzer und Passwort an. Zeigt die Sitzung für API oder Download auf einen anderen Host oder Port,
+bricht der Abruf ab, damit die Zugangsdaten nur an diesen Server gehen. Der Ordner ist sein Name oder seine Rolle (`INBOX` für den Posteingang).
 Beim ersten Abruf kommt der ganze Ordner, danach nur, was seit dem letzten Abruf neu hineinkam oder hineinverschoben
 wurde (`Email/changes`). Kennt der Server den alten Stand nicht mehr, holt Belegt den Ordner neu.
 

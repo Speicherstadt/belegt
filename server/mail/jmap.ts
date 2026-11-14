@@ -30,16 +30,23 @@ export async function jmapHolen(
   const kopf = {
     authorization: `Basic ${Buffer.from(`${zugang.benutzer}:${zugang.passwort}`).toString("base64")}`,
   };
-  const holen = async (url: string, init: RequestInit = {}) => {
-    const res = await abfragen(url, { ...init, headers: { ...kopf, ...(init.headers ?? {}) }, redirect: "error" });
+  const herkunft = new URL(basis).origin;
+  // Zugangsdaten gehen nur an den eingetragenen Server: Eine Sitzung, die auf einen anderen Host zeigt, wird abgelehnt
+  const holen = async (adresse: string, init: RequestInit = {}) => {
+    const url = new URL(adresse, basis);
+    if (url.origin !== herkunft) throw new Error(`JMAP: Adresse auf fremdem Host ${url.host} abgelehnt`);
+    const res = await abfragen(url.toString(), {
+      ...init,
+      headers: { ...kopf, ...(init.headers ?? {}) },
+      redirect: "error",
+    });
     if (!res.ok) throw new Error(`JMAP: Antwort ${res.status}`);
     return res;
   };
   const sitzung = (await (await holen(`${basis}/.well-known/jmap`)).json()) as Sitzung;
   const konto = sitzung.primaryAccounts?.[MAIL];
   if (!konto) throw new Error("JMAP: kein Konto für Mail");
-  // Relative Adressen der Sitzung gelten gegenüber dem Server, nicht gegenüber einem fremden
-  const api = new URL(sitzung.apiUrl, basis).toString();
+  const api = sitzung.apiUrl;
 
   async function aufrufen(aufrufe: Aufruf[]): Promise<Record<string, Record<string, unknown>>> {
     const res = await holen(api, {
@@ -49,7 +56,12 @@ export async function jmapHolen(
     });
     const { methodResponses } = (await res.json()) as { methodResponses: [string, Record<string, unknown>, string][] };
     const antworten: Record<string, Record<string, unknown>> = {};
-    for (const [name, inhalt, id] of methodResponses) antworten[id] = name === "error" ? { fehler: inhalt } : inhalt;
+    for (const [name, inhalt, id] of methodResponses) {
+      // Ein Methodenfehler bricht ab, damit der Stand nicht über Mails hinweg vorrückt, die nie geholt wurden
+      if (name === "error")
+        throw Object.assign(new Error(`JMAP: ${String(inhalt.type ?? "Fehler")}`), { typ: inhalt.type });
+      antworten[id] = inhalt;
+    }
     return antworten;
   }
 
@@ -72,7 +84,7 @@ export async function jmapHolen(
         .replace("{blobId}", encodeURIComponent(e.blobId))
         .replace("{type}", encodeURIComponent("message/rfc822"))
         .replace("{name}", "mail.eml");
-      await aufnehmen(new Uint8Array(await (await holen(new URL(url, basis).toString())).arrayBuffer()));
+      await aufnehmen(new Uint8Array(await (await holen(url)).arrayBuffer()));
     }
   }
 
@@ -80,7 +92,7 @@ export async function jmapHolen(
     // Den Stand zuerst: Was während des Abrufs dazukommt, liefert der nächste Abruf über Email/changes
     const { s } = await aufrufen([["Email/get", { accountId: konto, ids: [] }, "s"]]);
     const neuerStand = String(s?.state ?? "");
-    for (let position = 0; ; position += SEITE) {
+    for (let position = 0; ; ) {
       const { q } = await aufrufen([
         [
           "Email/query",
@@ -96,18 +108,23 @@ export async function jmapHolen(
       ]);
       const ids = (q?.ids as string[] | undefined) ?? [];
       await laden(ids);
-      if (ids.length < SEITE) return neuerStand;
+      // Der Server darf kürzere Seiten liefern als erbeten (RFC 8620, 5.5); fertig erst ohne weitere Ids
+      position += ids.length;
+      if (!ids.length || (typeof q?.total === "number" && position >= q.total)) return neuerStand;
     }
   }
 
   if (!stand) return alles();
   let jetzt = stand;
   for (;;) {
-    const { c } = await aufrufen([["Email/changes", { accountId: konto, sinceState: jetzt, maxChanges: 256 }, "c"]]);
-    if (c?.fehler) {
-      if ((c.fehler as { type?: string }).type === "cannotCalculateChanges") return alles();
-      throw new Error(`JMAP: ${(c.fehler as { type?: string }).type ?? "Fehler"}`);
-    }
+    // Höchstens eine Seite Änderungen, damit das folgende Email/get unter maxObjectsInGet des Servers bleibt
+    const { c } = await aufrufen([
+      ["Email/changes", { accountId: konto, sinceState: jetzt, maxChanges: SEITE }, "c"],
+    ]).catch((err: Error & { typ?: string }) => {
+      if (err.typ === "cannotCalculateChanges") return { c: null };
+      throw err;
+    });
+    if (!c) return alles();
     // Neu angelegt oder in den Ordner verschoben
     await laden([...((c?.created as string[]) ?? []), ...((c?.updated as string[]) ?? [])]);
     jetzt = String(c?.newState ?? jetzt);
