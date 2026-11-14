@@ -79,3 +79,40 @@ export async function pruefen(db: Datenbank): Promise<Befund[]> {
   }>(sql`select art, tabelle, zeile, seq, befund from belegt_integrity_problems(100)`);
   return [...zeilen].map((z) => ({ ...z, seq: z.seq === null ? null : Number(z.seq) }));
 }
+
+export interface Ereignis {
+  seq: number;
+  at: string;
+  akteur: string | null;
+  aktion: string;
+  tabelle: string;
+}
+
+/** Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile und sein Siegel, in der Reihenfolge der Kette */
+export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
+  const ereignisse = await db.execute<{
+    seq: string;
+    at: Date;
+    actor: string | null;
+    action: string;
+    table_name: string;
+  }>(sql`
+    select a.seq, a.at, a.actor, a.action, a.table_name
+      from audit_log a
+     where (a.table_name = 'dokumente' and a.row_id = ${id})
+        or (a.table_name = 'seals' and a.new_value ->> 'row_id' = ${id})
+     order by a.seq`);
+  const [siegel] = await db.execute<{ digest: string }>(
+    sql`select digest from seals where table_name = 'dokumente' and row_id = ${id}`,
+  );
+  return {
+    ereignisse: [...ereignisse].map((e) => ({
+      seq: Number(e.seq),
+      at: new Date(e.at).toISOString(),
+      akteur: e.actor,
+      aktion: e.action,
+      tabelle: e.table_name,
+    })),
+    siegel: siegel?.digest ?? null,
+  };
+}

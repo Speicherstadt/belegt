@@ -14,6 +14,10 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
     expect((await t.anfrage("/api/pruefung")).status).toBe(401);
   });
 
+  it("meldet öffentlich, ob schon eingerichtet ist", async () => {
+    expect(await (await t.anfrage("/api/status")).json()).toEqual({ eingerichtet: false });
+  });
+
   it("macht das erste Konto zum Inhaber und lehnt jedes weitere ab", async () => {
     const { res, cookie } = await t.registrieren("anna@example.org");
     expect(res.status).toBe(200);
@@ -22,6 +26,7 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       role: "inhaber",
     });
 
+    expect(await (await t.anfrage("/api/status")).json()).toEqual({ eingerichtet: true });
     const zweites = await t.registrieren("mallory@example.org");
     expect(zweites.res.status).toBe(403);
     expect(await t.sql`select 1 from "user" where email = 'mallory@example.org'`).toHaveLength(0);

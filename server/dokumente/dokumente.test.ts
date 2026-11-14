@@ -44,6 +44,31 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
       await t.sql`select actor, action from audit_log where table_name = 'dokumente' and row_id = ${dok.id}`;
     expect(eintrag).toEqual({ actor: "nutzer:anna@example.org", action: "INSERT" });
     expect(await t.sql`select 1 from seals where row_id = ${dok.id}`).toHaveLength(1);
+
+    const { ereignisse, siegel } = await (await app.request(`/api/dokumente/${dok.id}/verlauf`)).json();
+    expect(
+      ereignisse.map((e: { tabelle: string; aktion: string; akteur: string }) => [e.tabelle, e.aktion, e.akteur]),
+    ).toEqual([
+      ["dokumente", "INSERT", "nutzer:anna@example.org"],
+      ["seals", "INSERT", "nutzer:anna@example.org"],
+    ]);
+    expect(siegel).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("zeigt PDFs mit ?ansicht=1 im Browser an, anderes wird immer heruntergeladen", async () => {
+    const pdfDok = await (await hochladen(pdf, "ansicht.pdf")).json();
+    expect(
+      (await app.request(`/api/dokumente/${pdfDok.id}/datei?ansicht=1`)).headers.get("content-disposition"),
+    ).toMatch(/^inline;/);
+    expect((await app.request(`/api/dokumente/${pdfDok.id}/datei`)).headers.get("content-disposition")).toMatch(
+      /^attachment;/,
+    );
+    const html = await (
+      await hochladen(new TextEncoder().encode("<html><script>alert(1)</script></html>"), "x.html")
+    ).json();
+    const res = await app.request(`/api/dokumente/${html.id}/datei?ansicht=1`);
+    expect(res.headers.get("content-disposition")).toMatch(/^attachment;/);
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
   });
 
   it("lehnt Ändern und Löschen eines Originals in der Datenbank ab", async () => {

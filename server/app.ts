@@ -3,7 +3,11 @@ import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
 import { darfSchreiben, type Rolle } from "../shared/rollen.ts";
 import type { Angemeldet, Auth } from "./auth.ts";
-import { aufnehmen, laden, listen, pruefen, type Umgebung } from "./dokumente/dokumente.ts";
+import { eingerichtet } from "./db/status.ts";
+import { aufnehmen, laden, listen, pruefen, type Umgebung, verlauf } from "./dokumente/dokumente.ts";
+
+/** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
+const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
 
 /** Größte Datei je Upload */
 export const MAX_UPLOAD = 100 * 1024 * 1024;
@@ -28,8 +32,11 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
     const { auth } = umgebung;
     app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
+    /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
+    app.get("/api/status", async (c) => c.json({ eingerichtet: await eingerichtet(umgebung.db) }));
+
     app.use("/api/*", async (c, next) => {
-      if (c.req.path.startsWith("/api/auth/")) return next();
+      if (c.req.path.startsWith("/api/auth/") || c.req.path === "/api/status") return next();
       const sitzung = await auth.api.getSession({ headers: c.req.raw.headers });
       if (!sitzung) return c.json({ fehler: "Nicht angemeldet" }, 401);
       const nutzer = {
@@ -84,9 +91,16 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       if (!bytes) return c.json({ fehler: "Die Datei fehlt oder wurde verändert" }, 409);
       return c.body(new Uint8Array(bytes), 200, {
         "Content-Type": dokument.mimeType,
-        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(dokument.dateiname ?? dokument.sha256)}`,
+        // ?ansicht=1 zeigt PDFs und Bilder im Browser an, alles andere wird immer heruntergeladen
+        "Content-Disposition": `${c.req.query("ansicht") && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(dokument.dateiname ?? dokument.sha256)}`,
         "X-Content-Type-Options": "nosniff",
       });
+    });
+
+    app.get("/api/dokumente/:id/verlauf", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+      return dokument ? c.json(await verlauf(umgebung.db, dokument.id)) : c.json({ fehler: "Nicht gefunden" }, 404);
     });
 
     app.get("/api/pruefung", async (c) => {

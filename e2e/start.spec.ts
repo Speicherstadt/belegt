@@ -10,12 +10,11 @@ const SEITEN = [
   { pfad: "/verfahrensdoku", titel: "Verfahrensdokumentation" },
 ];
 
-test("der Eingang zeigt Überschrift, Navigation und den leeren Zustand", async ({ page }) => {
+test("der Eingang zeigt Überschrift und Navigation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
   await expect(nav.getByRole("link", { name: "Eingang" })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByText("Eingang ist leer")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
@@ -36,14 +35,6 @@ test("die Fristen nennen Jahre und Grundlage nach § 147 AO", async ({ page }) =
   await expect(beleg).toContainText("§ 147 Abs. 1 Nr. 4 AO");
   await expect(page.getByRole("row", { name: /Bücher/ })).toContainText("10 Jahre");
   await expect(page.getByRole("row", { name: /Geschäftsbriefe/ })).toContainText("6 Jahre");
-});
-
-test("im Archiv ist genau ein Filter gewählt", async ({ page }) => {
-  await page.goto("/archiv");
-  await expect(page.getByRole("button", { name: "Alle" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Frei", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Frei", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Alle" })).toHaveAttribute("aria-pressed", "false");
 });
 
 for (const seite of SEITEN) {

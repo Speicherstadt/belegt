@@ -6,3 +6,4 @@ data/
 src/paraglide
 test-results/
 playwright-report/
+e2e/.auth/

@@ -9,7 +9,7 @@ bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest
-bun run e2e          # Playwright mit axe, Desktop und Handy, eigener Port 5185
+bun run e2e          # Playwright mit axe gegen echten Server (Port 3185) und Vite (5185), braucht E2E_DATABASE_URL
 bun run build
 ```
 
@@ -24,6 +24,10 @@ Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests ge
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
 ```
+
+Die E2E-Tests starten einen eigenen Server mit frischer Datenbank unter `E2E_DATABASE_URL` (Vorgabe
+`postgres://belegt:belegt@localhost:5432/belegt_e2e`; sie wird gelöscht und neu angelegt) und richten Belegt zuerst
+über die Oberfläche ein (`e2e/einrichten.setup.ts`).
 
 Daneben legt der Lauf `<name>_vorlage` an (einmal migriert) und je Vitest-Worker `<name>_<Nummer>` als Kopie davon
 (`server/test-db.ts`). Der Benutzer braucht `CREATEDB`; Tests, die eine Manipulation an den Triggern vorbei

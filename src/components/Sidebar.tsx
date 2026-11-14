@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { api, type Ich } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 
 const ITEMS = [
@@ -10,7 +12,14 @@ const ITEMS = [
   { to: "/verfahrensdoku", label: () => m.nav_procedure() },
 ] as const;
 
-export function Sidebar() {
+export function Sidebar({ ich }: { ich: Ich }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  async function abmelden() {
+    await api.abmelden();
+    queryClient.clear();
+    await navigate({ to: "/anmelden" });
+  }
   return (
     <aside className="flex flex-[1_1_240px] flex-col gap-5 border-border border-b bg-side px-3 py-4 sm:max-w-64 sm:border-r sm:border-b-0">
       <div className="flex flex-col px-2">
@@ -29,6 +38,16 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+      <div className="mt-auto flex flex-col gap-2 px-2 text-sm">
+        <span className="truncate text-muted">{ich.email}</span>
+        <button
+          type="button"
+          onClick={abmelden}
+          className="h-9 self-start rounded-md border border-border px-3 font-medium hover:bg-subtle"
+        >
+          {m.logout()}
+        </button>
+      </div>
     </aside>
   );
 }
