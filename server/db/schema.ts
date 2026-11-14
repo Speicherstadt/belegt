@@ -352,3 +352,17 @@ export const zeitstempel = pgTable("zeitstempel", {
   token: bytea("token").notNull(),
   erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Vorschläge eines Sprachmodells zur Einordnung (lokal, KI_URL); nur ein Vorschlag, eingeordnet wird erst, wenn ein
+ * Mensch ihn übernimmt. Abgeleitet und neu erzeugbar, deshalb ohne Siegel und Audit-Log.
+ */
+export const kiVorschlaege = pgTable("ki_vorschlaege", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  vorschlag: jsonb("vorschlag"),
+  modell: text("modell").notNull(),
+  fehler: text("fehler"),
+  erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
+});

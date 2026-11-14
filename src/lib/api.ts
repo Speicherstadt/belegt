@@ -320,9 +320,18 @@ export const api = {
     }
   },
   vorschlag: (id: string) =>
-    aufruf<{ vorschlag: { art: Art; regel: { id: string; name: string } } | null; erechnung: ERechnung | null }>(
-      `/api/dokumente/${id}/vorschlag`,
-    ),
+    aufruf<{
+      vorschlag: { art: Art; regel: { id: string; name: string } } | null;
+      erechnung: ERechnung | null;
+      ki: {
+        art: Art;
+        entstanden: string | null;
+        titel: string | null;
+        korrespondent: string | null;
+        begruendung: string;
+        modell: string;
+      } | null;
+    }>(`/api/dokumente/${id}/vorschlag`),
   regeln: () => aufruf<Regel[]>("/api/regeln"),
   regelAnlegen: (r: { name: string; wenn: Regel["bedingung"]; dann: Art }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>

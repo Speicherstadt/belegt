@@ -51,6 +51,8 @@ services:
       S3_PFAD_STIL: ${S3_PFAD_STIL:-}
       S3_SPERRE_TAGE: ${S3_SPERRE_TAGE:-}
       TSA_URL: ${TSA_URL:-}
+      KI_URL: ${KI_URL:-}
+      KI_MODELL: ${KI_MODELL:-}
     ports:
       - "${BELEGT_PORT:-3000}:3000"
     volumes:
@@ -89,6 +91,15 @@ services:
     healthcheck:
       disable: true
 
+  # Sprachmodell für Vorschläge, nur mit: docker compose --profile ki up -d; KI_URL=http://ollama:11434 in .env
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    profiles: [ki]
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+
 volumes:
+  ollama:
   postgres:
   dokumente:

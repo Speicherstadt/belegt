@@ -66,7 +66,14 @@ export async function verfahrensdoku(
     version,
     jetzt = new Date(),
     objektsperre = false,
-  }: { abrufMinuten: number; version: string; jetzt?: Date; objektsperre?: boolean },
+    kiModell,
+  }: {
+    abrufMinuten: number;
+    version: string;
+    jetzt?: Date;
+    objektsperre?: boolean;
+    kiModell?: { modell: string; host: string };
+  },
 ): Promise<Verfahrensdoku> {
   const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel] = await Promise.all([
     einstellungenLaden(db),
@@ -119,7 +126,7 @@ export async function verfahrensdoku(
     {
       titel: "3. Einordnung und Aufbewahrung",
       absaetze: [
-        "Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln machen nur Vorschläge. Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.",
+        `${kiModell ? `Ein Sprachmodell (${kiModell.modell} auf ${kiModell.host}) schlägt für Dokumente im Eingang eine Einordnung vor; es bekommt dafür Dateiname, Mailkopf und Text des Dokuments. ` : ""}Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln${kiModell ? " und das Sprachmodell" : ""} machen nur Vorschläge. Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.`,
         e.aufsicht
           ? "Der Betrieb ist Kredit- oder Wertpapierinstitut oder steht unter Versicherungsaufsicht; Buchungsbelege werden deshalb zehn Jahre aufbewahrt (Art. 97 § 19a Abs. 3 EGAO)."
           : "Buchungsbelege werden acht Jahre aufbewahrt (§ 147 Abs. 3 AO in der Fassung ab 2025, Art. 97 § 19a EGAO).",

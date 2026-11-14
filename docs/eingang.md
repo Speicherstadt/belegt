@@ -71,6 +71,16 @@ mit Text, HTML und Anhängen, und nimmt sie wie jede andere Mail auf. Termine, K
 nicht. Dieselbe Datei ein zweites Mal ergibt dieselben .eml, also keine doppelten Mails. Größer als 100 MB darf die
 Datei nicht sein; eine größere teilst du in Outlook auf.
 
+## Vorschläge eines Sprachmodells
+
+Mit `KI_URL` und `KI_MODELL` fragt der Worker ein Sprachmodell nach einer Einordnung für jedes Dokument im Eingang: Art,
+Tag der Entstehung, Titel, Korrespondent und eine kurze Begründung. Er schickt dafür Dateiname, Mailkopf und Text des
+Dokuments an das Modell; deshalb gehört es auf einen eigenen Server, etwa Ollama im selben Netz (in Compose mit
+`--profile ki`, dann einmal `docker compose exec ollama ollama pull <Modell>`). Ein Vorschlag ist nur ein Vorschlag: Auf
+der Seite des Dokuments übernimmt „Übernehmen“ die Felder ins Formular, eingeordnet wird erst mit „Einordnen“. Belegt
+prüft jede Antwort (nur die bekannten Arten, nur Tage, die es gibt); Anweisungen im Text eines Dokuments ändern daran
+nichts. Die Verfahrensdokumentation nennt Modell und Server.
+
 ## SMTP-Journal
 
 Statt Postfächer abzurufen, kann der Mailserver jede Mail zusätzlich per SMTP an Belegt schicken (Journal, etwa per

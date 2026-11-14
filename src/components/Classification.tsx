@@ -114,6 +114,29 @@ export function Classification({
           </button>
         </p>
       )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.ki && !vorgabe && (
+        <div className="flex flex-col gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
+          <p className="m-0">
+            {m.suggest_ki({ art: artLabel(vorschlag.data.ki.art), modell: vorschlag.data.ki.modell })}{" "}
+            <span className="text-muted">{vorschlag.data.ki.begruendung}</span>
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              const k = vorschlag.data!.ki!;
+              setArt(k.art);
+              setVorgabe({
+                entstanden: k.entstanden ?? undefined,
+                titel: k.titel ?? undefined,
+                korrespondent: k.korrespondent ?? undefined,
+              });
+            }}
+            className="h-8 self-start rounded-md border border-border bg-bg px-3 font-medium"
+          >
+            {m.suggest_apply()}
+          </button>
+        </div>
+      )}
       {darfSchreiben(ich.data?.role) && offen && (
         <form key={JSON.stringify(vorgabe)} onSubmit={absenden} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1.5 font-medium text-sm">

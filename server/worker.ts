@@ -2,6 +2,7 @@ import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
+import { kiVorschlaegeErzeugen } from "./ki/vorschlaege.ts";
 import { entfernenNachholen } from "./loeschung/loeschung.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
@@ -90,6 +91,19 @@ async function zeitstempel(dienst: string) {
   }
 }
 
+/** Mit KI_URL und KI_MODELL: Vorschläge zur Einordnung für den Eingang, alle 30 Sekunden */
+async function kiVorschlaege(konfig: { url: string; modell: string }) {
+  for (;;) {
+    const r = await kiVorschlaegeErzeugen(db, konfig).catch((err) => ({
+      erzeugt: 0,
+      fehler: 1,
+      meldung: meldung(err),
+    }));
+    if (r.erzeugt || r.fehler) console.log(`KI-Vorschläge: ${r.erzeugt} erzeugt, ${r.fehler} fehlgeschlagen`);
+    if (r.erzeugt + r.fehler < 5) await Bun.sleep(30_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -104,4 +118,5 @@ await Promise.all([
   entfernungen(),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
+  ...(env.KI_URL && env.KI_MODELL ? [kiVorschlaege({ url: env.KI_URL, modell: env.KI_MODELL })] : []),
 ]);

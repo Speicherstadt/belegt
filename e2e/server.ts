@@ -9,6 +9,7 @@ import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrieren } from "../server/db/migrieren.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
+import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
 
 /*
@@ -60,4 +61,25 @@ Bun.serve({
 });
 // Statt des Workers: liest die Inhalte neuer Dokumente jede Sekunde
 setInterval(() => void inhalteErzeugen({ db, speicher }).catch(() => {}), 1000);
+// Ein nachgebautes Sprachmodell: schlägt für Dateien mit „ki-“ im Namen einen Geschäftsbrief vor, sonst nichts Brauchbares
+const kiAbfragen = async (_url: string, init: RequestInit) => {
+  const nachricht = JSON.parse(String(init.body)).messages.at(-1).content as string;
+  const vorschlag = nachricht.includes("Dateiname: ki-")
+    ? {
+        art: "geschaeftsbrief",
+        entstanden: "2026-09-15",
+        titel: "Angebot Werkstatt",
+        korrespondent: "Werkstatt Beispiel",
+        begruendung: "Ein Angebot ist ein Geschäftsbrief.",
+      }
+    : "kein JSON";
+  return Response.json({ message: { content: typeof vorschlag === "string" ? vorschlag : JSON.stringify(vorschlag) } });
+};
+setInterval(
+  () =>
+    void kiVorschlaegeErzeugen(db, { url: "http://ki.invalid", modell: "e2e-modell" }, { abfragen: kiAbfragen }).catch(
+      () => {},
+    ),
+  1000,
+);
 console.log(`E2E-Server auf Port ${port}`);

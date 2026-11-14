@@ -55,3 +55,32 @@ test("Sperren anlegen und aufheben", async ({ page }, info) => {
   await eintrag.getByRole("button", { name: "Aufheben" }).click();
   await expect(eintrag).toContainText("aufgehoben am");
 });
+
+test("der Vorschlag des Sprachmodells füllt die Einordnung vor, eingeordnet wird erst beim Bestätigen", async ({
+  page,
+}, info) => {
+  const name = `ki-angebot-${info.project.name}.txt`;
+  await page.goto("/");
+  await page
+    .getByTestId("upload")
+    .setInputFiles({ name, mimeType: "text/plain", buffer: Buffer.from("Unser Angebot") });
+  const link = page.getByRole("link", { name });
+  await expect(link).toBeVisible();
+  const id = (await link.getAttribute("href"))!.split("/").pop()!;
+  await expect
+    .poll(async () => (await (await page.request.get(`/api/dokumente/${id}/vorschlag`)).json()).ki?.art)
+    .toBe("geschaeftsbrief");
+
+  await link.click();
+  const hinweis = page.getByText("Vorschlag des Sprachmodells (e2e-modell): Handels- und Geschäftsbriefe.", {
+    exact: false,
+  });
+  await expect(hinweis).toBeVisible();
+  await expect(page.getByText("Noch nicht eingeordnet", { exact: false }).first()).toBeVisible();
+  await hinweis.locator("..").getByRole("button", { name: "Übernehmen" }).click();
+  await expect(page.getByLabel("Entstanden, empfangen oder abgesandt am")).toHaveValue("2026-09-15");
+  await expect(page.getByLabel("Titel (optional)")).toHaveValue("Angebot Werkstatt");
+  await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue("Werkstatt Beispiel");
+  await page.getByRole("button", { name: "Einordnen" }).click();
+  await expect(page.getByText("31.12.2032").first()).toBeVisible();
+});

@@ -20,6 +20,8 @@ export type AppUmgebung = Umgebung & {
   oidcName?: string;
   /** Die Dateien liegen in einem S3-Bucket mit Object Lock (für die Verfahrensdokumentation) */
   objektsperre?: boolean;
+  /** Sprachmodell für Vorschläge, wenn eingerichtet (für die Verfahrensdokumentation) */
+  kiModell?: { modell: string; host: string };
   /** Origin, der Belegt in einem Frame zeigen darf */
   embedOrigin?: string;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */

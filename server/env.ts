@@ -44,6 +44,9 @@ const Schema = z.object({
   S3_SPERRE_TAGE: z.coerce.number().int().min(0).max(36500).default(0),
   /** Zeitstempeldienst nach RFC 3161, etwa https://freetsa.org/tsr; einmal am Tag ein Zeitstempel über die Kette */
   TSA_URL: z.string().url().optional(),
+  /** Sprachmodell für Vorschläge zur Einordnung, auf eigenem Server (Ollama), etwa http://ollama:11434 */
+  KI_URL: z.string().url().optional(),
+  KI_MODELL: z.string().min(1).optional(),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
   BELEGT_EMBED_ORIGIN: z
     .string()

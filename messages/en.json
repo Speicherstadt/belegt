@@ -305,5 +305,6 @@
   "report_timestamp": "Timestamp",
   "report_timestamp_value": "{zeit} over entry {nr} ({dienst})",
   "report_timestamp_download": "Download token",
-  "report_timestamp_none": "none (TSA_URL not set or no run yet)"
+  "report_timestamp_none": "none (TSA_URL not set or no run yet)",
+  "suggest_ki": "Suggestion of the language model ({modell}): {art}."
 }

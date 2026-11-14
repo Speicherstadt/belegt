@@ -2,6 +2,7 @@ import { unzipSync } from "fflate";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
+import { verfahrensdoku } from "./verfahrensdoku.ts";
 
 describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation gegen Postgres", () => {
   let t: Awaited<ReturnType<typeof testApp>>;
@@ -114,5 +115,15 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     const index = new TextDecoder().decode(unzipSync(new Uint8Array(await res.arrayBuffer()))["index.xml"]);
     expect(index).toContain("<Name>Muster &amp; Söhne GmbH</Name>");
     expect(index).toContain("<Location>Musterweg 1, 12345 Musterstadt</Location>");
+  });
+
+  it("nennt ein eingerichtetes Sprachmodell mit Server und was es bekommt", async () => {
+    const doku = await verfahrensdoku(t.db, {
+      abrufMinuten: 5,
+      version: "test",
+      kiModell: { modell: "qwen2.5:7b", host: "ollama:11434" },
+    });
+    expect(JSON.stringify(doku)).toContain("Ein Sprachmodell (qwen2.5:7b auf ollama:11434) schlägt");
+    expect(JSON.stringify(doku)).toContain("Regeln und das Sprachmodell machen nur Vorschläge");
   });
 });
