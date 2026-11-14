@@ -132,6 +132,39 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung über OpenID Connect", () => {
     });
   });
 
+  it("speichert keine Tokens des Anbieters: Belegt braucht sie nach der Anmeldung nicht", async () => {
+    // Läuft nach dem Verbinden und Anmelden von anna
+    expect(await t.sql`select access_token, refresh_token, id_token from account where provider_id = 'oidc'`).toEqual([
+      { access_token: null, refresh_token: null, id_token: null },
+    ]);
+  });
+
+  it("verbindet auch, wenn der Anbieter die Adresse nicht als bestätigt meldet (etwa Microsoft Entra)", async () => {
+    const anmelden = async (email: string) =>
+      t.anfrage("/api/auth/sign-in/email", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, password: "ein-langes-passwort" }),
+      });
+    const einladung = await t.anfrage(
+      "/api/einladungen",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ rolle: "steuerberatung" }),
+      },
+      cookies(await anmelden("anna@example.org")),
+    );
+    const token = ((await einladung.json()) as { pfad: string }).pfad.split("/").pop()!;
+    await t.registrieren("bert@example.org", "ein-langes-passwort", { "x-belegt-einladung": token });
+    const passwort = await anmelden("bert@example.org");
+    const bert = { sub: "u-bert", email: "bert@firma.example", email_verified: false };
+    const verbunden = await zumAnbieter(bert, { verbinden: cookies(passwort) });
+    expect(verbunden.ort).not.toMatch(/error=/);
+    const { sitzung } = await zumAnbieter(bert);
+    expect(await (await t.anfrage("/api/ich", {}, sitzung)).json()).toMatchObject({ email: "bert@example.org" });
+  });
+
   it("legt für eine unbekannte Person kein Konto an: Zugänge gibt es nur mit Einladung", async () => {
     const { ort, sitzung } = await zumAnbieter({ sub: "u-fremd", email: "fremd@example.org", email_verified: true });
     expect(ort).toMatch(/^\/anmelden\?error=/);
