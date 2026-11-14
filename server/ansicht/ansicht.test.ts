@@ -108,7 +108,9 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
   afterAll(() => t?.aufraeumen());
 
   it("wartet, wenn der Dienst nicht da ist, und erzeugt dann Ansichten; Text alter Formate kommt in die Suche", async () => {
-    const neu = await hoch(docx(), "angebot.docx");
+    // Einmal gebaut: fflate schreibt die Uhrzeit in das ZIP
+    const original = docx();
+    const neu = await hoch(original, "angebot.docx");
     const alt = await hoch(cfb("WordDocument"), "altvertrag.doc");
     expect(alt.mimeType).toBe(ALTE_OFFICE_TYPEN.doc);
     await hoch(await pdfMit("schon ein PDF"), "rechnung.pdf");
@@ -137,7 +139,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
     expect(res.headers.get("content-disposition")).toBe(`inline; filename*=UTF-8''angebot%20%28Ansicht%29.pdf`);
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(new Uint8Array(pdfs["dokument.docx"]!));
     // Die Datei selbst bleibt das Original
-    expect(new Uint8Array(await (await als(`/api/dokumente/${neu.id}/datei`)).arrayBuffer())).toEqual(docx());
+    expect(new Uint8Array(await (await als(`/api/dokumente/${neu.id}/datei`)).arrayBuffer())).toEqual(original);
 
     const suche = async (q: string) =>
       (await (await als(`/api/dokumente?suche=${encodeURIComponent(q)}`)).json()).map((d: { id: string }) => d.id);
