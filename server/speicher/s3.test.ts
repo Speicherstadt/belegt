@@ -77,6 +77,16 @@ async function s3Server() {
   return { objekte, anfragen, server, endpunkt: `http://127.0.0.1:${(server.address() as AddressInfo).port}` };
 }
 
+const konfig = (endpunkt: string): S3Konfig => ({
+  endpunkt,
+  bucket: "archiv",
+  region: "eu-central-1",
+  zugangId: "schluessel",
+  zugangGeheimnis: "geheim",
+  pfadStil: true,
+  sperreTage: 30,
+});
+
 const schluessel = (sha: string) => `${sha.slice(0, 2)}/${sha}`;
 
 describe("S3 mit Object Lock", () => {
@@ -136,42 +146,49 @@ describe("S3 mit Object Lock", () => {
     expect(nachFristende("2034-12-31").toISOString()).toBe("2034-12-31T23:00:00.000Z");
     expect(nachFristende("2030-07-15").toISOString()).toBe("2030-07-15T22:00:00.000Z");
   });
+});
 
-  describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", () => {
-    let t: Awaited<ReturnType<typeof testApp>>;
-    let cookie: string;
-    const json = (body: unknown): RequestInit => ({
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    beforeAll(async () => {
-      t = await testApp();
-      cookie = (await t.registrieren("anna@example.org")).cookie;
-    });
-    afterAll(() => t?.aufraeumen());
+describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", () => {
+  let s: Awaited<ReturnType<typeof s3Server>>;
+  let k: S3Konfig;
+  let t: Awaited<ReturnType<typeof testApp>>;
+  let cookie: string;
+  const json = (body: unknown): RequestInit => ({
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  beforeAll(async () => {
+    s = await s3Server();
+    k = konfig(s.endpunkt);
+    t = await testApp();
+    cookie = (await t.registrieren("anna@example.org")).cookie;
+  });
+  afterAll(async () => {
+    await t?.aufraeumen();
+    await new Promise<void>((ok) => s?.server.close(() => ok()));
+  });
 
-    it("sperrt bis zum Fristende, verlängert bei längerer Frist und nur dann", async () => {
-      const speicher = s3Speicher({ ...k, sperreTage: 0 });
-      const bytes = new TextEncoder().encode("%PDF-1.7\n% Beleg 2026\n");
-      await speicher.speichern(bytes);
-      const form = new FormData();
-      form.append("datei", new File([bytes], "beleg.pdf"));
-      const d = await (await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie)).json();
-      await t.anfrage(
-        `/api/dokumente/${d.id}/einordnung`,
-        json({ art: "geschaeftsbrief", entstanden: "2026-03-01" }),
-        cookie,
-      );
+  it("sperrt bis zum Fristende, verlängert bei längerer Frist und nur dann", async () => {
+    const speicher = s3Speicher({ ...k, sperreTage: 0 });
+    const bytes = new TextEncoder().encode("%PDF-1.7\n% Beleg 2026\n");
+    await speicher.speichern(bytes);
+    const form = new FormData();
+    form.append("datei", new File([bytes], "beleg.pdf"));
+    const d = await (await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie)).json();
+    await t.anfrage(
+      `/api/dokumente/${d.id}/einordnung`,
+      json({ art: "geschaeftsbrief", entstanden: "2026-03-01" }),
+      cookie,
+    );
 
-      expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
-      expect(s.objekte.get(schluessel(d.sha256))!.at(-1)!.sperre).toBe(Date.parse("2032-12-31T23:00:00Z"));
-      expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 0, fehler: null });
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
+    expect(s.objekte.get(schluessel(d.sha256))!.at(-1)!.sperre).toBe(Date.parse("2032-12-31T23:00:00Z"));
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 0, fehler: null });
 
-      await t.anfrage(`/api/dokumente/${d.id}/einordnung`, json({ art: "buecher", entstanden: "2026-03-01" }), cookie);
-      expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
-      expect(s.objekte.get(schluessel(d.sha256))!.at(-1)!.sperre).toBe(Date.parse("2036-12-31T23:00:00Z"));
-      expect(await t.sql`select bis::text from objektsperren`).toEqual([{ bis: "2036-12-31" }]);
-    });
+    await t.anfrage(`/api/dokumente/${d.id}/einordnung`, json({ art: "buecher", entstanden: "2026-03-01" }), cookie);
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
+    expect(s.objekte.get(schluessel(d.sha256))!.at(-1)!.sperre).toBe(Date.parse("2036-12-31T23:00:00Z"));
+    expect(await t.sql`select bis::text from objektsperren`).toEqual([{ bis: "2036-12-31" }]);
   });
 });
