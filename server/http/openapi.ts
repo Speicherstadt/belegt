@@ -19,9 +19,10 @@ const art = {
 
 const dokument = {
   type: "object",
-  required: ["id", "sha256", "groesse", "mimeType", "quelle", "eingegangenAm"],
+  required: ["id", "asn", "sha256", "groesse", "mimeType", "quelle", "eingegangenAm"],
   properties: {
     id: uuid,
+    asn: { type: "integer", description: "Archivnummer, fortlaufend in der Reihenfolge des Eingangs" },
     sha256: { type: "string", pattern: "^[0-9a-f]{64}$" },
     groesse: { type: "integer", description: "Bytes" },
     mimeType: { type: "string" },
@@ -54,7 +55,12 @@ export const openapi = {
       get: {
         summary: "Dokumente, neueste zuerst",
         parameters: [
-          { name: "suche", in: "query", schema: { type: "string" }, description: "Volltext (deutsch)" },
+          {
+            name: "suche",
+            in: "query",
+            schema: { type: "string" },
+            description: "Volltext (deutsch); „ASN 123“ oder eine bloße Zahl findet auch die Archivnummer",
+          },
           {
             name: "gruppe",
             in: "query",

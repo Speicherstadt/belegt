@@ -166,6 +166,7 @@ export function DocumentList({
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-border border-b text-left text-muted">
+                <th className="px-3 py-2.5 text-right font-medium">{m.col_asn()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
                 <th className="px-3 py-2.5 font-medium">{m.col_type()}</th>
@@ -176,6 +177,7 @@ export function DocumentList({
             <tbody>
               {liste.data.map((d) => (
                 <tr key={d.id} className="border-border border-b last:border-b-0 hover:bg-subtle">
+                  <td className="px-3 py-3 text-right text-muted tabular-nums">{d.asn}</td>
                   <td className="px-3 py-3 font-medium">
                     <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">
                       {d.titel ?? d.dateiname ?? m.unnamed()}

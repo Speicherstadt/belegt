@@ -41,6 +41,8 @@ export interface Ich {
 
 export interface Dokument {
   id: string;
+  /** Archivnummer, fortlaufend in der Reihenfolge des Eingangs */
+  asn: number;
   sha256: string;
   groesse: number;
   mimeType: string;

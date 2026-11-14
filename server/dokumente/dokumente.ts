@@ -2,7 +2,7 @@ import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { dokumente } from "../db/schema.ts";
+import { archivnummern, dokumente } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
 import { dateityp } from "./dateityp.ts";
 
@@ -12,7 +12,8 @@ export interface Umgebung {
   speicher: Dateispeicher;
 }
 
-export type Dokument = typeof dokumente.$inferSelect;
+/** Ein Dokument mit seiner Archivnummer (ASN), die ein Trigger beim Einfügen vergibt */
+export type Dokument = typeof dokumente.$inferSelect & { asn: number };
 
 export const QUELLEN = ["upload", "mail", "ordner", "api"] as const;
 export type Quelle = (typeof QUELLEN)[number];
@@ -27,8 +28,8 @@ export async function aufnehmen(
 ): Promise<Dokument> {
   const sha256 = await speicher.speichern(eingang.bytes);
   const mimeType = dateityp(eingang.bytes);
-  const [neu] = await mitAkteur(db, eingang.akteur, (tx) =>
-    tx
+  return mitAkteur(db, eingang.akteur, async (tx) => {
+    const [neu] = await tx
       .insert(dokumente)
       .values({
         sha256,
@@ -37,9 +38,13 @@ export async function aufnehmen(
         dateiname: eingang.dateiname,
         quelle: eingang.quelle,
       })
-      .returning(),
-  );
-  return neu!;
+      .returning();
+    const [a] = await tx
+      .select({ nummer: archivnummern.nummer })
+      .from(archivnummern)
+      .where(eq(archivnummern.dokumentId, neu!.id));
+    return { ...neu!, asn: a!.nummer };
+  });
 }
 
 export interface Eintrag extends Dokument {
@@ -49,9 +54,16 @@ export interface Eintrag extends Dokument {
   titel: string | null;
 }
 
+/** „ASN 123“, „asn123“ oder nur „123“: die gesuchte Archivnummer, sonst null */
+export function archivnummerAus(suche: string | undefined): number | null {
+  const treffer = suche?.trim().match(/^(?:asn\s*)?(\d{1,15})$/i);
+  return treffer ? Number(treffer[1]) : null;
+}
+
 /**
  * Neueste zuerst. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus Dateiname,
- * Einordnung und Mail, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter).
+ * Einordnung und Mail, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter) und über die
+ * Archivnummer („ASN 123“).
  */
 export async function listen(
   db: Datenbank,
@@ -72,19 +84,22 @@ export async function listen(
     dateiname: string | null;
     quelle: string;
     eingegangen_am: Date;
+    asn: string;
     art: string | null;
     frist_bis: string | null;
     titel: string | null;
   }>(sql`
-    select d.*, e.art, e.frist_bis::text as frist_bis, e.titel
+    select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel
       from dokumente d
+      join archivnummern a on a.dokument_id = d.id
       left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
       left join suchtexte st on st.dokument_id = d.id
      where ${gruppenBedingung(gruppe, heute)}
        and (${zeitraum?.von ?? null}::date is null
             or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
-            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""}))
+            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
+            or a.nummer = ${archivnummerAus(suche)})
      order by d.eingegangen_am desc, d.id desc
      limit ${limit}`);
   return [...zeilen].map((z) => ({
@@ -95,6 +110,7 @@ export async function listen(
     dateiname: z.dateiname,
     quelle: z.quelle,
     eingegangenAm: new Date(z.eingegangen_am),
+    asn: Number(z.asn),
     art: z.art,
     fristBis: z.frist_bis,
     titel: z.titel,
@@ -102,8 +118,12 @@ export async function listen(
 }
 
 export async function laden(db: Datenbank, id: string): Promise<Dokument | null> {
-  const [d] = await db.select().from(dokumente).where(eq(dokumente.id, id));
-  return d ?? null;
+  const [d] = await db
+    .select({ dokument: dokumente, asn: archivnummern.nummer })
+    .from(dokumente)
+    .innerJoin(archivnummern, eq(archivnummern.dokumentId, dokumente.id))
+    .where(eq(dokumente.id, id));
+  return d ? { ...d.dokument, asn: d.asn } : null;
 }
 
 export interface Befund {

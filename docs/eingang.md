@@ -9,6 +9,14 @@ description: >-
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art
 bestimmt die Frist ([Fristen](fristen.md)).
 
+## Archivnummer
+
+Jedes Dokument bekommt beim Eingang eine Archivnummer (ASN), fortlaufend in der Reihenfolge des Eingangs: 1, 2, 3 …
+Sie steht in der Liste und auf der Seite des Dokuments, damit du sie etwa auf das Papier schreiben kannst. Postgres
+vergibt sie in derselben Transaktion wie das Dokument und versiegelt sie; ändern, löschen oder ein zweites Mal vergeben
+lässt sie sich nicht. Scheitert eine Aufnahme, bleibt ihre Nummer unbenutzt, es kann also Lücken geben. Dokumente, die
+vor der Archivnummer eingegangen sind, haben ihre Nummer nach der Zeit ihres Eingangs bekommen.
+
 ## Mails
 
 Eine Mail wird als Original (`.eml`) aufbewahrt. Daraus liest Belegt Absender, Empfänger, Betreff, Datum, den Text
@@ -66,7 +74,7 @@ Ein Vorschlag setzt noch keine Frist. Erst wenn du ihn übernimmst, wird das Dok
 Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
 Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs, Office- und Textdateien
 und Nummer und Verkäufer einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
-und Ausschlüsse mit Minus.
+und Ausschlüsse mit Minus. `ASN 123` oder nur `123` findet das Dokument mit dieser Archivnummer.
 
 ## Outlook-Datendateien (PST, OST)
 

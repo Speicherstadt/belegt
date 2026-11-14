@@ -97,6 +97,10 @@ export function DocumentPage() {
               {m.doc_details()}
             </h2>
             <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
+              <dt className="text-muted">{m.doc_asn()}</dt>
+              <dd className="m-0 tabular-nums" data-testid="asn">
+                {d.asn}
+              </dd>
               <dt className="text-muted">{m.doc_source()}</dt>
               <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
               <dt className="text-muted">{m.doc_received()}</dt>

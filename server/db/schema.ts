@@ -48,6 +48,19 @@ export const dokumente = pgTable(
 );
 
 /**
+ * Archivnummer (ASN) eines Dokuments: fortlaufend in der Reihenfolge des Eingangs, nie wiederverwendet. Ein Trigger
+ * auf dokumente vergibt sie beim Einfügen; versiegelt wie das Dokument. dokumente selbst bleibt unberührt, denn eine
+ * neue Spalte dort ließe sich für den Altbestand nicht mehr füllen.
+ */
+export const archivnummern = pgTable("archivnummern", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  id: uuid("id").notNull().unique().defaultRandom(),
+  nummer: bigint("nummer", { mode: "number" }).notNull().unique().generatedAlwaysAsIdentity(),
+});
+
+/**
  * Einordnung eines Dokuments: Art, Entstehung und daraus die Frist. Jede Änderung ist eine neue Zeile, versiegelt ab dem
  * Einfügen; es gilt die neueste. So bleibt sichtbar, wer wann was festgelegt hat.
  */

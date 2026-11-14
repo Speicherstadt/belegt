@@ -106,7 +106,7 @@ export async function verfahrensdoku(
     {
       titel: "2. Erfassung",
       absaetze: [
-        "Jede Datei wird unverändert übernommen. Belegt berechnet beim Eingang den SHA-256 und speichert die Datei unter diesem Wert; den Dateityp erkennt es am Inhalt. Eine zweite Aufnahme derselben Datei legt ein weiteres Dokument an, schreibt die Datei aber nicht neu.",
+        "Jede Datei wird unverändert übernommen. Belegt berechnet beim Eingang den SHA-256 und speichert die Datei unter diesem Wert; den Dateityp erkennt es am Inhalt. Jedes Dokument bekommt dabei eine fortlaufende Archivnummer, die die Datenbank vergibt und versiegelt. Eine zweite Aufnahme derselben Datei legt ein weiteres Dokument an, schreibt die Datei aber nicht neu.",
         "E-Mails werden als Original (.eml) archiviert, jeder Anhang zusätzlich als eigenes Dokument mit Verweis auf seine Mail. Eine Mail, deren Inhalt schon archiviert ist, wird nicht doppelt aufgenommen.",
         quellen.length
           ? `Postfächer werden alle ${abrufMinuten} Minuten nur lesend abgerufen (IMAP); Belegt löscht und verschiebt dort nichts. Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
@@ -145,7 +145,7 @@ export async function verfahrensdoku(
     {
       titel: "4. Unveränderbarkeit und Nachvollziehbarkeit",
       absaetze: [
-        "Die Unveränderbarkeit liegt in der Datenbank (PostgreSQL), nicht nur in der Anwendung: Dokumente, Einordnungen, Mails und Löschnachweise sind ab dem Einfügen versiegelt, Ändern, Löschen und Leeren der Tabellen lehnt die Datenbank ab.",
+        "Die Unveränderbarkeit liegt in der Datenbank (PostgreSQL), nicht nur in der Anwendung: Dokumente, Archivnummern, Einordnungen, Mails und Löschnachweise sind ab dem Einfügen versiegelt, Ändern, Löschen und Leeren der Tabellen lehnt die Datenbank ab.",
         "Jede Änderung an protokollierten Tabellen schreibt die Datenbank in ein Protokoll, das nur anwächst. Jeder Eintrag enthält den SHA-256 seines Vorgängers (Hash-Kette); Akteur und Zeitpunkt stehen in jedem Eintrag.",
         objektsperre
           ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
