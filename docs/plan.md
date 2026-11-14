@@ -48,7 +48,7 @@ Was GoBD betrifft (Sperren, Kette, Löschlauf), wird immer gegen Postgres getest
 
 ## GoBD-Kern aus Haben
 
-Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst und auf npm veröffentlicht: [firsttris/haben#935](https://github.com/firsttris/haben/issues/935).
+Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst ([firsttris/haben#935](https://github.com/firsttris/haben/issues/935)). Er erscheint nicht auf npm, sondern als Datei an einem Release von Haben (Tag `gobd-kern-vX.Y.Z`); Belegt installiert ihn über deren URL, `bun.lock` hält den Hash fest.
 
 - **TypeScript** (Speicher unter SHA-256, `withActor`, Prüfung von Kette und Siegeln, `index.xml` nach dem Beschreibungsstandard) gibt es einmal; Belegt installiert das Paket mit fester Version.
 - **SQL** (Trigger, Kette, Siegel, Sperre gegen `TRUNCATE`) kommt als Vorlage aus dem Paket und wird einmal in die erste Migration von Belegt übernommen. Haben behält seine bestehenden Migrationen unverändert.
@@ -58,7 +58,7 @@ Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst und auf npm 
 
 | Phase | Inhalt | Fertig, wenn |
 | --- | --- | --- |
-| 0 · Kern in Haben herauslösen | `packages/gobd-kern`, Haben importiert vom Paket | alle Tests von Haben grün, Paket veröffentlicht |
+| 0 · Kern in Haben herauslösen | `packages/gobd-kern`, Haben importiert vom Paket | alle Tests von Haben grün, Paket als Datei am Release |
 | 1 · Grundgerüst | Repo, Stack, CI, Datenmodell, Upload mit OCR, Archivliste, Dokumentseite, Volltextsuche | ein Upload landet unverändert, Prüfung grün |
 | 2 · Eingang und Fristen | Einordnung in Pflicht, freiwillig, frei; Regeln; Sperren; Löschlauf mit zweiter Person | Kette nach einem Löschlauf weiter gültig |
 | 3 · E-Mail | Worker: SMTP-Journal, IMAP, JMAP, Import aus MBOX und EML; Microsoft 365, Google | jede Mail eines Testpostfachs im Archiv |
