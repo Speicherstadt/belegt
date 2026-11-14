@@ -1,4 +1,5 @@
 import { bodyLimit } from "hono/body-limit";
+import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
 import { aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
 import {
   aktuelle,
@@ -64,6 +65,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       ...dokument,
       einordnung: await aktuelle(umgebung.db, dokument.id),
       loeschung: await fuerDokument(umgebung.db, dokument.id),
+      ansicht: await hatAnsicht(umgebung.db, dokument.id),
     });
   });
 
@@ -152,6 +154,23 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       "Content-Type": dokument.mimeType,
       // ?ansicht=1 zeigt PDFs und Bilder im Browser an, alles andere wird immer heruntergeladen
       "Content-Disposition": `${c.req.query("ansicht") === "1" && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
+      "X-Content-Type-Options": "nosniff",
+    });
+  });
+
+  /** Die Ansicht als PDF für Office-Dateien; abgeleitet, maßgeblich bleibt die Datei */
+  app.get("/api/dokumente/:id/ansicht", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    if ((await fuerDokument(umgebung.db, dokument.id))?.bestaetigtAm)
+      return c.json({ fehler: "Das Dokument ist gelöscht" }, 410);
+    const pdf = await ansichtZu(umgebung.db, dokument.id);
+    if (!pdf) return c.json({ fehler: "Keine Ansicht" }, 404);
+    const name = `${(dokument.dateiname ?? dokument.sha256).replace(/\.[^.]*$/, "")} (Ansicht).pdf`;
+    return c.body(new Uint8Array(pdf), 200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename*=UTF-8''${dateinameKodiert(name)}`,
       "X-Content-Type-Options": "nosniff",
     });
   });

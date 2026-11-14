@@ -112,5 +112,14 @@ die Seite des Dokuments sagt dann „aus der Texterkennung“. HEIC liest sie ni
 
 Aus Word, Excel und PowerPoint (`.docx`, `.xlsx`, `.pptx`) und OpenDocument (`.odt`, `.ods`, `.odp`) kommt der Text
 von Absätzen, Kopf- und Fußzeilen, Zellen, Folien und Notizen, aus reinen Textdateien (`.txt`, `.csv`, `.md`, UTF-8)
-der ganze Inhalt. Den Typ erkennt Belegt am Inhalt, nicht an der Endung. Die alten Formate `.doc`, `.xls` und `.ppt`
-liest es nicht. Dokumente, die vorher als unbekannte Datei eingegangen sind, liest der Worker nach.
+der ganze Inhalt. Den Typ erkennt Belegt am Inhalt, nicht an der Endung. Dokumente, die vorher als unbekannte Datei
+eingegangen sind, liest der Worker nach. Den Text der alten Formate `.doc`, `.xls`, `.ppt` und `.rtf` gibt es nur mit
+der Ansicht.
+
+## Ansicht von Office-Dateien
+
+PDFs und Bilder zeigt der Browser selbst. Für Word, Excel, PowerPoint, OpenDocument und RTF erzeugt der Worker mit
+`VORSCHAU_URL` eine Ansicht als PDF ([`betrieb.md`](betrieb.md#ansicht-für-office-dateien)), die auf der Seite des
+Dokuments steht. Sie ist aus dem Original abgeleitet und als solche gekennzeichnet; maßgeblich bleibt das Original, das
+„Original herunterladen“ unverändert ausliefert. Mit der Löschung geht die Ansicht mit. Ohne Vorschau-Dienst lassen
+sich diese Dateien nur herunterladen.

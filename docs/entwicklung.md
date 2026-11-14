@@ -64,6 +64,7 @@ löschen sie wieder.
 | `S3_ENDPUNKT`, `S3_BUCKET`, `S3_REGION`, `S3_ZUGANG_ID`, `S3_ZUGANG_GEHEIMNIS`, `S3_PFAD_STIL`, `S3_SPERRE_TAGE` | Dateien in S3 mit Object Lock statt `DOCUMENTS_DIR` (docs/betrieb.md) | –, `us-east-1`, `true`, `0` |
 | `TSA_URL` | Zeitstempeldienst nach RFC 3161 für den täglichen Zeitstempel über die Kette (docs/pruefung.md) | – |
 | `KI_URL`, `KI_MODELL` | Sprachmodell (Ollama) für Vorschläge zur Einordnung, auf eigenem Server (docs/eingang.md) | – |
+| `VORSCHAU_URL` | Vorschau-Dienst mit der Schnittstelle von Gotenberg für die Ansicht von Office-Dateien (docs/betrieb.md) | – |
 
 ## Migrationen
 

@@ -366,3 +366,17 @@ export const kiVorschlaege = pgTable("ki_vorschlaege", {
   fehler: text("fehler"),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Ansicht als PDF für Office-Dateien, die der Browser nicht zeigt (Word, Excel, PowerPoint, OpenDocument, RTF);
+ * erzeugt der Worker über den Vorschau-Dienst (VORSCHAU_URL). Abgeleitet wie inhalte: weder versiegelt noch im
+ * Audit-Log, das Original bleibt maßgeblich; mit der bestätigten Löschung geht sie mit.
+ */
+export const ansichten = pgTable("ansichten", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  pdf: bytea("pdf"),
+  fehler: text("fehler"),
+  erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -104,7 +104,7 @@ describe.skipIf(!testDatenbankUrl)("Prüferzugang gegen Postgres", () => {
     const liste = await (await als(pruefer)("/api/dokumente")).json();
     expect(liste.map((d: { id: string }) => d.id)).toEqual([drin.id]);
     expect((await als(pruefer)(`/api/dokumente/${drin.id}/datei`)).status).toBe(200);
-    for (const pfad of ["", "/datei", "/verlauf", "/mail"])
+    for (const pfad of ["", "/datei", "/ansicht", "/verlauf", "/mail"])
       expect((await als(pruefer)(`/api/dokumente/${draussen.id}${pfad}`)).status).toBe(404);
     // Der Inhaber sieht weiter alles
     expect(await (await als(inhaber)("/api/dokumente")).json()).toHaveLength(2);

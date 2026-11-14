@@ -74,6 +74,17 @@ steht unten in der Navigation und in `/api/status`.
 
 Die Migrationen laufen beim Start des Servers; der Worker startet erst, wenn der Server bereit ist.
 
+## Ansicht für Office-Dateien
+
+```bash
+docker compose --profile vorschau up -d
+```
+
+Mit `VORSCHAU_URL=http://gotenberg:3000` in `.env` schickt der Worker Word, Excel, PowerPoint, OpenDocument und RTF an
+[Gotenberg](https://gotenberg.dev) und legt das PDF als Ansicht ab. LibreOffice läuft dort im eigenen Container und im
+Netz `vorschau` ohne Internet, weil es fremde Dateien öffnet. Ist der Dienst nicht erreichbar, versucht es der Worker
+später wieder; Dateien von vorher bekommen ihre Ansicht nachträglich.
+
 ## Texterkennung
 
 Das Image bringt Tesseract mit Deutsch und Englisch mit. Andere Sprachen: Paket `tesseract-ocr-<sprache>` im

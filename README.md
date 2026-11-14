@@ -66,7 +66,7 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 | Bereich | Was Belegt kann |
 |---|---|
 | 📥 [Eingang](https://firsttris.github.io/belegt/eingang.html) | Hochladen per Drag-and-drop, Mails per IMAP, JMAP, Microsoft 365 und Google (OAuth), SMTP-Journal, Import aus EML, MBOX und PST |
-| 🔎 [Suche](https://firsttris.github.io/belegt/eingang.html) | Volltext über Dateiname, Einordnung, Mail, Text aus PDFs, Word, Excel, PowerPoint, OpenDocument und Texterkennung (Tesseract) für Scans |
+| 🔎 [Suche](https://firsttris.github.io/belegt/eingang.html) | Volltext über Dateiname, Einordnung, Mail, Text aus PDFs, Word, Excel, PowerPoint, OpenDocument und Texterkennung (Tesseract) für Scans; Office-Dateien auf Wunsch mit Ansicht als PDF |
 | 🧾 [E-Rechnungen](https://firsttris.github.io/belegt/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, Nummer, Datum, Verkäufer und Betrag als Vorschlag |
 | 🗂️ [Einordnung](https://firsttris.github.io/belegt/fristen.html) | Pflicht, freiwillig mit Frist oder frei; Vorschläge aus Regeln, E-Rechnung und auf Wunsch einem lokalen Sprachmodell |
 | ⏳ [Fristen und Löschen](https://firsttris.github.io/belegt/fristen.html) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen nach Fristende mit zweiter Person |

@@ -1,3 +1,4 @@
+import { ansichtenErzeugen } from "./ansicht/ansicht.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
@@ -104,6 +105,20 @@ async function kiVorschlaege(konfig: { url: string; modell: string }) {
   }
 }
 
+/** Mit VORSCHAU_URL: Ansichten als PDF für Office-Dateien, alle 30 Sekunden */
+async function ansichten(url: string) {
+  for (;;) {
+    const r = await ansichtenErzeugen({ db, speicher }, url).catch((err) => ({
+      erzeugt: 0,
+      fehler: 0,
+      meldung: meldung(err),
+    }));
+    if (r.erzeugt || r.fehler) console.log(`Ansichten: ${r.erzeugt} erzeugt, ${r.fehler} nicht umwandelbar`);
+    if ("meldung" in r) console.error(`Ansichten: ${r.meldung}`);
+    if (r.erzeugt + r.fehler < 5) await Bun.sleep(30_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -118,5 +133,6 @@ await Promise.all([
   entfernungen(),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
+  ...(env.VORSCHAU_URL ? [ansichten(env.VORSCHAU_URL)] : []),
   ...(env.KI_URL && env.KI_MODELL ? [kiVorschlaege({ url: env.KI_URL, modell: env.KI_MODELL })] : []),
 ]);

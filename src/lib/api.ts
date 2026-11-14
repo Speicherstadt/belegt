@@ -299,7 +299,9 @@ export const api = {
   dokumente: (suche: string, gruppe: Gruppe = "alle") =>
     aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}`),
   dokument: (id: string) =>
-    aufruf<Dokument & { einordnung: Einordnung | null; loeschung: Loeschung | null }>(`/api/dokumente/${id}`),
+    aufruf<Dokument & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
+      `/api/dokumente/${id}`,
+    ),
   loeschungBeantragen: (id: string) => aufruf<Loeschung>(`/api/dokumente/${id}/loeschung`, { method: "POST" }),
   loeschungen: () => aufruf<Loeschung[]>("/api/loeschungen"),
   loeschungBestaetigen: (id: string) => aufruf<Loeschung>(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" }),
@@ -376,4 +378,5 @@ export const api = {
 export const exportUrl = (von: string, bis: string) =>
   `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
 
+export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

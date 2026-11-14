@@ -311,5 +311,6 @@
   "theme_system": "System",
   "theme_light": "Light",
   "theme_dark": "Dark",
-  "version": "Version {version}"
+  "version": "Version {version}",
+  "doc_derived_view": "PDF view generated from the original. The original, available for download, is authoritative."
 }

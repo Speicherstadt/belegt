@@ -311,5 +311,6 @@
   "theme_system": "System",
   "theme_light": "Hell",
   "theme_dark": "Dunkel",
-  "version": "Version {version}"
+  "version": "Version {version}",
+  "doc_derived_view": "Ansicht als PDF, aus dem Original erzeugt. Maßgeblich ist das Original zum Herunterladen."
 }

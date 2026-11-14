@@ -3,7 +3,9 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import postgres from "postgres";
+import { ansichtenErzeugen } from "../server/ansicht/ansicht.ts";
 import { createApp } from "../server/app.ts";
 import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
@@ -61,6 +63,20 @@ Bun.serve({
 });
 // Statt des Workers: liest die Inhalte neuer Dokumente jede Sekunde
 setInterval(() => void inhalteErzeugen({ db, speicher }).catch(() => {}), 1000);
+// Ein nachgebauter Vorschau-Dienst: macht aus jeder Office-Datei ein PDF mit ihrem Namen beim Dienst
+const vorschauAbfragen = async (_url: string, init: RequestInit) => {
+  const datei = (init.body as FormData).get("files") as File;
+  const pdf = await PDFDocument.create();
+  pdf
+    .addPage()
+    .drawText(`Ansicht von ${datei.name}`, { x: 50, y: 700, font: await pdf.embedFont(StandardFonts.Helvetica) });
+  return new Response(new Uint8Array(await pdf.save()));
+};
+setInterval(
+  () =>
+    void ansichtenErzeugen({ db, speicher }, "http://vorschau.invalid", { abfragen: vorschauAbfragen }).catch(() => {}),
+  1000,
+);
 // Ein nachgebautes Sprachmodell: schlägt für Dateien mit „ki-“ im Namen einen Geschäftsbrief vor, sonst nichts Brauchbares
 const kiAbfragen = async (_url: string, init: RequestInit) => {
   const nachricht = JSON.parse(String(init.body)).messages.at(-1).content as string;

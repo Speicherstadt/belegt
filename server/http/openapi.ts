@@ -110,6 +110,17 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/ansicht": {
+      get: {
+        summary: "Ansicht einer Office-Datei als PDF, aus dem Original abgeleitet (mit VORSCHAU_URL)",
+        parameters: [idParam],
+        responses: {
+          "200": { description: "PDF", content: { "application/pdf": {} } },
+          "404": fehler,
+          "410": fehler,
+        },
+      },
+    },
     "/api/dokumente/{id}/einordnung": {
       post: {
         summary: "Einordnen (Recht schreiben); die Frist rechnet Belegt nach § 147 AO",

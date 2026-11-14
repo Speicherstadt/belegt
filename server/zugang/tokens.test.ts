@@ -6,6 +6,7 @@ import { tokenDarf } from "./tokens.ts";
 describe("Rechte eines Tokens", () => {
   it("lässt lesen nur Dokumente lesen und schreiben zusätzlich aufnehmen und einordnen", () => {
     expect(tokenDarf("lesen", "GET", "/api/dokumente/abc/datei")).toBe(true);
+    expect(tokenDarf("lesen", "GET", "/api/dokumente/abc/ansicht")).toBe(true);
     expect(tokenDarf("lesen", "POST", "/api/dokumente")).toBe(false);
     expect(tokenDarf("schreiben", "POST", "/api/dokumente")).toBe(true);
     expect(tokenDarf("schreiben", "POST", "/api/dokumente/abc/einordnung")).toBe(true);

@@ -50,6 +50,7 @@ services:
       TSA_URL: ${TSA_URL:-}
       KI_URL: ${KI_URL:-}
       KI_MODELL: ${KI_MODELL:-}
+      VORSCHAU_URL: ${VORSCHAU_URL:-}
     ports:
       - "${BELEGT_PORT:-3000}:3000"
     volumes:
@@ -64,6 +65,7 @@ services:
       server:
         condition: service_healthy
     environment: *umgebung
+    networks: [default, vorschau]
     volumes:
       - dokumente:/var/lib/belegt
     healthcheck:
@@ -95,6 +97,20 @@ services:
     restart: unless-stopped
     volumes:
       - ollama:/root/.ollama
+
+  # Ansichten als PDF für Office-Dateien, nur mit: docker compose --profile vorschau up -d;
+  # VORSCHAU_URL=http://gotenberg:3000 in .env. Im eigenen Netz ohne Internet, denn LibreOffice öffnet fremde Dateien
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8
+    profiles: [vorschau]
+    restart: unless-stopped
+    command: ["gotenberg", "--chromium-disable-routes=true"]
+    networks: [vorschau]
+
+networks:
+  default:
+  vorschau:
+    internal: true
 
 volumes:
   ollama:

@@ -162,6 +162,13 @@
       "when": 1794679185767,
       "tag": "0022_ki_vorschlaege",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794683698203,
+      "tag": "0023_ansichten",
+      "breakpoints": true
     }
   ]
 }

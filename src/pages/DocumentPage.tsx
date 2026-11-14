@@ -5,7 +5,7 @@ import { Deletion } from "../components/Deletion.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
-import { api, dateiUrl, type Ereignis } from "../lib/api.ts";
+import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
@@ -39,7 +39,9 @@ export function DocumentPage() {
       ? "pdf"
       : d.mimeType.startsWith("image/") && d.mimeType !== "image/heic"
         ? "bild"
-        : null;
+        : d.ansicht
+          ? "ansicht"
+          : null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -65,6 +67,12 @@ export function DocumentPage() {
           )}
           {vorschau === "bild" && (
             <img src={dateiUrl(d.id, true)} alt={d.dateiname ?? m.unnamed()} className="mx-auto max-h-[70vh]" />
+          )}
+          {vorschau === "ansicht" && (
+            <>
+              <p className="m-0 mb-3 text-muted text-sm">{m.doc_derived_view()}</p>
+              <iframe title={m.doc_preview()} src={ansichtUrl(d.id)} className="h-[70vh] w-full rounded bg-white" />
+            </>
           )}
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
