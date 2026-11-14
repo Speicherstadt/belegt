@@ -16,7 +16,7 @@ export interface SmtpOptionen {
   tls?: { key: Buffer; cert: Buffer };
 }
 
-/** Fehler mit SMTP-Antwortcode; 4xx lässt den Absender es später noch einmal versuchen */
+/** Fehler mit SMTP-Antwortcode; 4xx lässt den Absender es später noch einmal versuchen. Text nur in ASCII (RFC 5321, 2.4) */
 const smtpFehler = (code: number, meldung: string) => Object.assign(new Error(meldung), { responseCode: code });
 
 export function smtpServer(umgebung: Umgebung, { empfaenger = [], tls }: SmtpOptionen = {}) {
@@ -37,13 +37,13 @@ export function smtpServer(umgebung: Umgebung, { empfaenger = [], tls }: SmtpOpt
         (token) =>
           token?.recht === "schreiben"
             ? fertig(null, { user: token.name })
-            : fertig(smtpFehler(535, "Anmeldung abgelehnt: API-Token mit dem Recht schreiben nötig")),
-        () => fertig(smtpFehler(454, "Anmeldung gerade nicht möglich")),
+            : fertig(smtpFehler(535, "Anmeldung abgelehnt: API-Token mit dem Recht schreiben noetig")),
+        () => fertig(smtpFehler(454, "Anmeldung gerade nicht moeglich")),
       );
     },
     onRcptTo(adresse, _sitzung, fertig) {
       if (erlaubt.size && !erlaubt.has(adresse.address.toLowerCase()))
-        return fertig(smtpFehler(550, "Empfänger hier nicht bekannt"));
+        return fertig(smtpFehler(550, "Empfaenger hier nicht bekannt"));
       fertig();
     },
     onData(strom, sitzung, fertig) {
@@ -51,7 +51,7 @@ export function smtpServer(umgebung: Umgebung, { empfaenger = [], tls }: SmtpOpt
       strom.on("data", (t: Buffer) => teile.push(t));
       strom.on("error", (err) => fertig(err));
       strom.on("end", () => {
-        if ((strom as { sizeExceeded?: boolean }).sizeExceeded) return fertig(smtpFehler(552, "Mail zu groß"));
+        if ((strom as { sizeExceeded?: boolean }).sizeExceeded) return fertig(smtpFehler(552, "Mail zu gross"));
         const roh = new Uint8Array(Buffer.concat(teile));
         mailAufnehmen(umgebung, roh, "mail", `token:${String(sitzung.user)}`).then(
           ({ id, neu }) => fertig(null, neu ? `Archiviert ${id}` : `Schon archiviert ${id}`),
@@ -60,7 +60,7 @@ export function smtpServer(umgebung: Umgebung, { empfaenger = [], tls }: SmtpOpt
             console.error(
               `SMTP-Journal: Aufnahme fehlgeschlagen: ${err instanceof Error ? err.message.split("\n")[0] : err}`,
             );
-            fertig(smtpFehler(451, "Aufnahme fehlgeschlagen, bitte später erneut"));
+            fertig(smtpFehler(451, "Aufnahme fehlgeschlagen, bitte spaeter erneut"));
           },
         );
       });
