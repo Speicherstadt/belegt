@@ -61,6 +61,8 @@ const SCHREIBEN = [/^\/api\/dokumente$/, /^\/api\/mails$/, /^\/api\/dokumente\/[
 
 /** Was ein Token darf: lesen nur GET auf Dokumente, schreiben zusätzlich Aufnehmen und Einordnen */
 export function tokenDarf(recht: Recht, methode: string, pfad: string): boolean {
+  // MCP: jedes Token; welche Werkzeuge es aufrufen darf, entscheidet server/mcp/protokoll.ts nach dem Recht
+  if (pfad === "/api/mcp") return true;
   if (methode === "GET" || methode === "HEAD") return LESEN.some((r) => r.test(pfad));
   return recht === "schreiben" && methode === "POST" && SCHREIBEN.some((r) => r.test(pfad));
 }

@@ -9,6 +9,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
   await bereich.getByRole("button", { name: "Token anlegen" }).click();
   const token = (await bereich.getByRole("status").locator("code").textContent())!;
   expect(token).toMatch(/^belegt_/);
+  await expect(bereich.getByText(/\/api\/mcp$/)).toBeVisible();
 
   const programm = await browser.newContext({ storageState: { cookies: [], origins: [] } });
   try {

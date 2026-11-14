@@ -279,5 +279,6 @@
   "einvoice_buyer": "Käufer",
   "einvoice_total": "Gesamtbetrag",
   "einvoice_credit": "Gutschrift",
-  "einvoice_hint": "Gelesen aus dem XML der Rechnung; maßgeblich bleibt das Original."
+  "einvoice_hint": "Gelesen aus dem XML der Rechnung; maßgeblich bleibt das Original.",
+  "tokens_mcp": "KI-Assistenten verbinden sich per MCP (Streamable HTTP) mit derselben Kopfzeile unter"
 }

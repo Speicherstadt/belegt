@@ -81,3 +81,15 @@ export async function inhaltZu(db: Umgebung["db"], dokumentId: string) {
     .where(eq(inhalte.dokumentId, dokumentId));
   return i ? { ...i, erechnung: i.erechnung as ERechnung | null, textLaenge: Number(i.textLaenge) } : null;
 }
+
+/** Ein Ausschnitt des gelesenen Texts, für Programme, die nicht alles auf einmal brauchen */
+export async function textZu(db: Umgebung["db"], dokumentId: string, von = 0, laenge = 20_000) {
+  const [i] = await db
+    .select({
+      text: sql<string>`substr(${inhalte.text}, ${von + 1}, ${laenge})`,
+      gesamt: sql<number>`length(${inhalte.text})`,
+    })
+    .from(inhalte)
+    .where(eq(inhalte.dokumentId, dokumentId));
+  return i ? { text: i.text, von, gesamt: Number(i.gesamt) } : null;
+}

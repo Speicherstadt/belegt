@@ -10,6 +10,17 @@ Unter **Quellen und Schnittstellen** legt der Inhaber ein Token an und kopiert e
 **Lesen, aufnehmen und einordnen** nimmt es zusätzlich Dateien und Mails auf und ordnet ein. Löschen, bestätigen und
 Einstellungen ändern kann kein Token. Im Protokoll steht `token:<Name>`.
 
+## KI-Assistenten (MCP)
+
+Unter `/api/mcp` spricht Belegt das Model Context Protocol (Streamable HTTP, ohne Sitzung), mit einem API-Token in
+derselben Kopfzeile. Ein Assistent kann damit suchen (`dokumente_suchen`), Angaben und Text lesen (`dokument_lesen`,
+`dokument_text`) und mit dem Recht **schreiben** Dateien aufnehmen und einordnen (`dokument_aufnehmen`,
+`dokument_einordnen`). Löschen kann er nicht. In Claude Code etwa:
+
+```bash
+claude mcp add --transport http belegt https://belegt.example/api/mcp --header "Authorization: Bearer belegt_…"
+```
+
 ## Webhooks
 
 Ein Webhook meldet einer Adresse per `POST`, wenn ein Dokument aufgenommen, eingeordnet oder gelöscht wurde, ab dem

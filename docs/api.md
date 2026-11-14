@@ -11,8 +11,8 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
 Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`), mit `schreiben` nimmt es zusätzlich
-Dokumente und Mails auf und ordnet ein. Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im
-Audit-Log steht `token:<Name>`.
+Dokumente und Mails auf und ordnet ein; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
+Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
 | Aufruf | Wirkung |
 | --- | --- |
@@ -21,6 +21,7 @@ Audit-Log steht `token:<Name>`.
 | `GET /api/ich` | der angemeldete Zugang mit Rolle |
 | `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung`, oder `pruefer` mit `zeitraum`: `{von, bis}`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
 | `GET /api/tokens`, `POST /api/tokens` (`name`, `recht`: `lesen` oder `schreiben`), `POST /api/tokens/:id/widerrufen` | API-Tokens, nur für den Inhaber mit Sitzung; die Antwort beim Anlegen enthält den Klartext einmal (`klartext`) |
+| `POST /api/mcp` | Model Context Protocol (JSON-RPC: `initialize`, `ping`, `tools/list`, `tools/call`) für KI-Assistenten, mit API-Token; `GET` antwortet `405` ([`schnittstelle.md`](schnittstelle.md)) |
 | `GET /api/openapi.json` | OpenAPI 3.1 für Programme; ohne Sitzung |
 | `GET /api/webhooks`, `POST /api/webhooks` (`name`, `url`, `arten`), `POST /api/webhooks/:id/aktivieren`, `…/deaktivieren` | Webhooks, nur für den Inhaber; das Geheimnis steht einmal in der Antwort (`geheimnis`); `503` ohne `BELEGT_SCHLUESSEL` ([`schnittstelle.md`](schnittstelle.md)) |
 | `GET /api/einladung/:token` | öffentlich: ob ein Link noch gilt und für welche Rolle |

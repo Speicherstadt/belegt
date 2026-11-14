@@ -33,6 +33,9 @@ export function ApiTokens() {
         {m.tokens_title()}
       </h2>
       <p className="m-0 text-muted text-sm">{m.tokens_intro()}</p>
+      <p className="m-0 text-muted text-sm">
+        {m.tokens_mcp()} <code className="break-all">{`${window.location.origin}/api/mcp`}</code>
+      </p>
       <form onSubmit={absenden} className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1.5 font-medium text-sm">
           {m.tokens_name()}

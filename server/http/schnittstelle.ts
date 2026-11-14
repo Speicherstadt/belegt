@@ -1,8 +1,30 @@
+import { bodyLimit } from "hono/body-limit";
+import { beantworten } from "../mcp/protokoll.ts";
 import { aktivSetzen, anlegen, listen, WebhookEingabe } from "../webhooks/webhooks.ts";
-import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
+import { type App, type AppUmgebung, akteur, Id, MAX_UPLOAD } from "./gemeinsam.ts";
 
 /** Webhooks verwaltet nur der Inhaber; das Geheimnis gibt es einmal beim Anlegen */
 export function schnittstelleRouten(app: App, umgebung: AppUmgebung) {
+  // MCP für KI-Assistenten, zustandslos: kein Datenstrom per GET, keine Sitzung zum Beenden
+  app.get("/api/mcp", (c) => c.body(null, 405, { Allow: "POST" }));
+  app.delete("/api/mcp", (c) => c.body(null, 405, { Allow: "POST" }));
+
+  app.post(
+    "/api/mcp",
+    // Base64 macht Dateien um ein Drittel größer
+    bodyLimit({
+      maxSize: Math.ceil((MAX_UPLOAD * 4) / 3) + 1024 * 1024,
+      onError: (c) => c.json({ fehler: "Zu groß" }, 413),
+    }),
+    async (c) => {
+      const nachricht = await c.req.json().catch(() => undefined);
+      if (nachricht === undefined)
+        return c.json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Kein gültiges JSON" } }, 400);
+      const antwort = await beantworten(umgebung, c.get("nutzer"), nachricht);
+      return antwort ? c.json(antwort) : c.body(null, 202);
+    },
+  );
+
   app.get("/api/webhooks", async (c) => {
     if (c.get("nutzer").role !== "inhaber" || c.get("nutzer").token)
       return c.json({ fehler: "Nur für den Inhaber" }, 403);
