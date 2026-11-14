@@ -70,6 +70,18 @@ describe("emlLesen", () => {
     expect(mail.text).toBe("Nur heute 30 %");
   });
 
+  it("löst Zeichenreferenzen im HTML auf, damit die Suche „für“ findet", async () => {
+    const mail = await emlLesen(
+      crlf([
+        "From: news@example.com",
+        "Content-Type: text/html; charset=us-ascii",
+        "",
+        "<p>Rechnung f&uuml;r M&amp;M: 49,95&nbsp;&euro; &#8364; &#x20AC; &lt;b&gt; &amp;uuml; &unbekannt;</p>",
+      ]),
+    );
+    expect(mail.text).toBe("Rechnung für M&M: 49,95 € € € <b> &uuml; &unbekannt;");
+  });
+
   it("kommt mit fehlenden und kaputten Köpfen zurecht", async () => {
     const mail = await emlLesen(crlf(["Date: irgendwann", "", "ohne alles"]));
     expect(mail).toMatchObject({
