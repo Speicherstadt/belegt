@@ -51,6 +51,7 @@ services:
       KI_URL: ${KI_URL:-}
       KI_MODELL: ${KI_MODELL:-}
       VORSCHAU_URL: ${VORSCHAU_URL:-}
+      EINGANG_ORDNER: ${EINGANG_ORDNER:-}
       OEFFNEN_MIT_NAME: ${OEFFNEN_MIT_NAME:-}
       OEFFNEN_MIT_URL: ${OEFFNEN_MIT_URL:-}
     ports:
@@ -70,6 +71,9 @@ services:
     networks: [default, vorschau]
     volumes:
       - dokumente:/var/lib/belegt
+      # Eingangsordner, etwa für einen Scanner (docs/eingang.md): mkdir eingang && sudo chown 1000 eingang,
+      # EINGANG_ORDNER=/var/lib/belegt/eingang in .env und diese Zeile einkommentieren
+      # - ./eingang:/var/lib/belegt/eingang
     healthcheck:
       disable: true
 

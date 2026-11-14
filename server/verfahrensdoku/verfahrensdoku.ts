@@ -67,12 +67,15 @@ export async function verfahrensdoku(
     jetzt = new Date(),
     objektsperre = false,
     kiModell,
+    eingangsordner = false,
   }: {
     abrufMinuten: number;
     version: string;
     jetzt?: Date;
     objektsperre?: boolean;
     kiModell?: { modell: string; host: string };
+    /** Der Worker überwacht einen Eingangsordner (EINGANG_ORDNER) */
+    eingangsordner?: boolean;
   },
 ): Promise<Verfahrensdoku> {
   const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel] = await Promise.all([
@@ -111,7 +114,10 @@ export async function verfahrensdoku(
         quellen.length
           ? `Postfächer werden alle ${abrufMinuten} Minuten nur lesend abgerufen (IMAP); Belegt löscht und verschiebt dort nichts. Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
           : "Es ist kein Postfach für den automatischen Abruf eingerichtet.",
-      ],
+        eingangsordner
+          ? "Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht. Belegt nimmt eine Datei erst auf, wenn sie sich zwischen zwei Blicken nicht mehr ändert, und entfernt sie aus dem Ordner erst, nachdem sie im Archiv liegt. Dateien, die sich nicht aufnehmen lassen (leer, größer als 100 MB), verschiebt es in den Unterordner „fehler“; dort bleiben sie zur Klärung liegen."
+          : "",
+      ].filter(Boolean),
       liste: [
         ...quellen.map(
           (q) =>

@@ -8,6 +8,7 @@ import { entfernenNachholen } from "./loeschung/loeschung.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
+import { ordnerEinlesen, type Zustand } from "./ordner/ordner.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
@@ -15,9 +16,9 @@ import { zustellen } from "./webhooks/webhooks.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
- * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu und liest
- * Text und E-Rechnungen neuer Dokumente. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine
- * Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
+ * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
+ * Text und E-Rechnungen neuer Dokumente und, wenn eingerichtet, den Eingangsordner. Getrennt vom Server, damit ein
+ * hängender Abruf oder eine schwere Datei keine Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -119,6 +120,28 @@ async function ansichten(url: string) {
   }
 }
 
+/** Mit EINGANG_ORDNER: alle 5 Sekunden ein Blick in den Ordner; aufgenommen wird, was zwei Blicke lang gleich bleibt */
+async function eingangsordner(ordner: string) {
+  let zustand: Zustand = new Map();
+  let letzterFehler = "";
+  for (;;) {
+    try {
+      const r = await ordnerEinlesen({ db, speicher }, { ordner, zustand });
+      zustand = r.zustand;
+      letzterFehler = "";
+      const { neu, doppelt, fehler, spaeter } = r.ergebnis;
+      if (neu || doppelt) console.log(`Eingangsordner: ${neu} aufgenommen, ${doppelt} schon im Archiv`);
+      for (const f of fehler) console.error(`Eingangsordner: ${f.datei} nach fehler/ verschoben: ${f.meldung}`);
+      for (const f of spaeter) console.error(`Eingangsordner: ${f.datei} später noch einmal: ${f.meldung}`);
+    } catch (err) {
+      // Fehlt der Ordner etwa, steht das einmal im Log, nicht alle 5 Sekunden
+      if (meldung(err) !== letzterFehler) console.error(`Eingangsordner: ${meldung(err)}`);
+      letzterFehler = meldung(err);
+    }
+    await Bun.sleep(5_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -132,6 +155,7 @@ await Promise.all([
   inhalte(),
   entfernungen(),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
+  ...(env.EINGANG_ORDNER ? [eingangsordner(env.EINGANG_ORDNER)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
   ...(env.VORSCHAU_URL ? [ansichten(env.VORSCHAU_URL)] : []),
   ...(env.KI_URL && env.KI_MODELL ? [kiVorschlaege({ url: env.KI_URL, modell: env.KI_MODELL })] : []),

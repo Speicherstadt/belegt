@@ -23,6 +23,8 @@ export type AppUmgebung = Umgebung & {
   objektsperre?: boolean;
   /** Sprachmodell für Vorschläge, wenn eingerichtet (für die Verfahrensdokumentation) */
   kiModell?: { modell: string; host: string };
+  /** Der Worker überwacht einen Eingangsordner (für die Verfahrensdokumentation) */
+  eingangsordner?: boolean;
   /** Origin, der Belegt in einem Frame zeigen darf */
   embedOrigin?: string;
   /** App für „Öffnen mit …“ (Name und Adresse mit {url}), wenn eingerichtet */

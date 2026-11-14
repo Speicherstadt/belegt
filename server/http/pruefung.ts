@@ -29,6 +29,7 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
         version: VERSION,
         objektsperre: umgebung.objektsperre ?? false,
         kiModell: umgebung.kiModell,
+        eingangsordner: umgebung.eingangsordner ?? false,
       }),
     ),
   );

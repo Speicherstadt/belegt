@@ -17,6 +17,19 @@ vergibt sie in derselben Transaktion wie das Dokument und versiegelt sie; änder
 lässt sie sich nicht. Scheitert eine Aufnahme, bleibt ihre Nummer unbenutzt, es kann also Lücken geben. Dokumente, die
 vor der Archivnummer eingegangen sind, haben ihre Nummer nach der Zeit ihres Eingangs bekommen.
 
+## Eingangsordner
+
+Mit `EINGANG_ORDNER` überwacht der Worker einen Ordner, etwa das Ziel eines Scanners oder eine Netzwerkfreigabe
+([Betrieb](betrieb.md#eingangsordner)). Alle 5 Sekunden schaut er hinein und nimmt jede Datei auf, die sich seit dem
+letzten Blick nicht verändert hat; was der Scanner noch schreibt, wartet bis zum nächsten Blick. Die Quelle des
+Dokuments ist dann „Ordner“. Erst wenn die Datei im Archiv liegt, entfernt Belegt sie aus dem Ordner; eine Datei, die
+schon im Archiv liegt, entfernt es nur.
+
+Unterordner liest der Worker mit, versteckte Dateien (mit Punkt am Anfang) und temporäre (`.tmp`, `.part`, `~$…`)
+lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht. Leere Dateien und solche über 100 MB verschiebt er nach
+`fehler/` im Ordner; dort bleiben sie liegen, bis du sie klärst. Ist die Datenbank oder der Speicher gerade nicht
+erreichbar, bleibt die Datei im Ordner, und der Worker versucht es wieder.
+
 ## Mails
 
 Eine Mail wird als Original (`.eml`) aufbewahrt. Daraus liest Belegt Absender, Empfänger, Betreff, Datum, den Text

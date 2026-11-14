@@ -7,8 +7,8 @@ description: >-
 # Betrieb
 
 Belegt läuft als ein Image für Server und Worker neben PostgreSQL. Der Server wendet beim Start die Migrationen an
-und liefert die Oberfläche aus; der Worker ruft Postfächer ab, stellt Webhooks zu und liest Text, mit Texterkennung
-(Tesseract, Deutsch und Englisch) auch aus Scans.
+und liefert die Oberfläche aus; der Worker ruft Postfächer ab, überwacht den Eingangsordner, stellt Webhooks zu und
+liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch) auch aus Scans.
 
 ## Starten
 
@@ -85,6 +85,19 @@ Mit `VORSCHAU_URL=http://gotenberg:3000` in `.env` schickt der Worker Word, Exce
 Netz `vorschau` ohne Internet, weil es fremde Dateien öffnet. Ist der Dienst nicht erreichbar, versucht es der Worker
 später wieder; Dateien, die vor dem Einschalten eingegangen sind, bekommen ihre Ansicht nachträglich. Eine Datei, an der Gotenberg sein Zeitlimit
 (`--api-timeout`, Vorgabe 30 Sekunden) überschreitet, bekommt keine Ansicht.
+
+## Eingangsordner
+
+Für einen Scanner oder eine Freigabe, in die Dateien abgelegt werden, legst du neben `compose.yml` einen Ordner an und
+gibst ihn dem Benutzer des Containers (UID 1000), denn der Worker entfernt aufgenommene Dateien:
+
+```bash
+mkdir eingang && sudo chown 1000 eingang
+```
+
+Dann in `compose.yml` beim Worker die Zeile `- ./eingang:/var/lib/belegt/eingang` einkommentieren, in `.env`
+`EINGANG_ORDNER=/var/lib/belegt/eingang` setzen und `docker compose up -d`. Was dort ankommt, beschreibt
+[Eingang](eingang.md#eingangsordner); Fehler stehen im Log des Workers (`docker compose logs worker`).
 
 ## Texterkennung
 

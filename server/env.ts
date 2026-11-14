@@ -56,6 +56,8 @@ const Schema = z.object({
     .optional(),
   /** Vorschau-Dienst mit der Schnittstelle von Gotenberg, etwa http://gotenberg:3000; Ansichten für Office-Dateien */
   VORSCHAU_URL: z.string().url().optional(),
+  /** Ordner, den der Worker überwacht (etwa Ziel eines Scanners), im Container /var/lib/belegt/eingang */
+  EINGANG_ORDNER: z.string().min(1).optional(),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
   BELEGT_EMBED_ORIGIN: z
     .string()

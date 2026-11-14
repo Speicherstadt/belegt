@@ -16,6 +16,11 @@ describe("readEnv", () => {
     });
   });
 
+  it("liest den Eingangsordner", () => {
+    expect(readEnv({ EINGANG_ORDNER: "/var/lib/belegt/eingang" }).EINGANG_ORDNER).toBe("/var/lib/belegt/eingang");
+    expect(readEnv({ EINGANG_ORDNER: "" }).EINGANG_ORDNER).toBeUndefined();
+  });
+
   it("liest Port und Datenbank", () => {
     const env = readEnv({ PORT: "8080", DATABASE_URL: "postgres://belegt@localhost:5432/belegt" });
     expect(env.PORT).toBe(8080);

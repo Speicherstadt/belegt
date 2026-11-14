@@ -126,4 +126,12 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(JSON.stringify(doku)).toContain("Ein Sprachmodell (qwen2.5:7b auf ollama:11434) schlägt");
     expect(JSON.stringify(doku)).toContain("Regeln und das Sprachmodell machen nur Vorschläge");
   });
+
+  it("nennt den Eingangsordner nur, wenn er eingerichtet ist", async () => {
+    const ohne = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+    expect(ohne).not.toContain("Eingangsordner");
+    const mit = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test", eingangsordner: true }));
+    expect(mit).toContain("Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht");
+    expect(mit).toContain("Unterordner „fehler“");
+  });
 });

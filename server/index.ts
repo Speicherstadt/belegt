@@ -45,6 +45,7 @@ const app = createApp({
   oidcName: oidc?.name,
   embedOrigin: env.BELEGT_EMBED_ORIGIN,
   objektsperre: !!sperrbar,
+  eingangsordner: !!env.EINGANG_ORDNER,
   kiModell: env.KI_URL && env.KI_MODELL ? { modell: env.KI_MODELL, host: new URL(env.KI_URL).host } : undefined,
   oeffnenMit:
     env.OEFFNEN_MIT_NAME && env.OEFFNEN_MIT_URL ? { name: env.OEFFNEN_MIT_NAME, url: env.OEFFNEN_MIT_URL } : undefined,
