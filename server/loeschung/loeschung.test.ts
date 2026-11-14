@@ -135,6 +135,8 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
   });
 
   it("entfernt die Datei später, sobald der Speicher sie freigibt, außer es kam derselbe Inhalt neu dazu", async () => {
+    // Was frühere Tests offen ließen, zählt hier nicht mit
+    await entfernenNachholen(t.db, t.speicher);
     const vorher = t.speicher.entfernen;
     t.speicher.entfernen = async () => {
       throw new Error("S3 Löschen: 403 AccessDenied");

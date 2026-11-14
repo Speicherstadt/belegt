@@ -1,0 +1,1726 @@
+{
+  "id": "a4d5c2a1-1d2e-4056-a3dc-f1f475646ccd",
+  "prevId": "909a6503-f978-4bf4-8388-38517a532bd4",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.account": {
+      "name": "account",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "account_user_id_idx": {
+          "name": "account_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "account_user_id_user_id_fk": {
+          "name": "account_user_id_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.api_tokens": {
+      "name": "api_tokens",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recht": {
+          "name": "recht",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "widerrufen_am": {
+          "name": "widerrufen_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "api_tokens_token_hash_unique": {
+          "name": "api_tokens_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": ["token_hash"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "api_tokens_recht": {
+          "name": "api_tokens_recht",
+          "value": "\"api_tokens\".\"recht\" in ('lesen', 'schreiben')"
+        },
+        "api_tokens_name": {
+          "name": "api_tokens_name",
+          "value": "length(trim(\"api_tokens\".\"name\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.dokumente": {
+      "name": "dokumente",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "groesse": {
+          "name": "groesse",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateiname": {
+          "name": "dateiname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quelle": {
+          "name": "quelle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eingegangen_am": {
+          "name": "eingegangen_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "dokumente_eingegangen": {
+          "name": "dokumente_eingegangen",
+          "columns": [
+            {
+              "expression": "eingegangen_am",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "dokumente_sha256_idx": {
+          "name": "dokumente_sha256_idx",
+          "columns": [
+            {
+              "expression": "sha256",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "dokumente_sha256": {
+          "name": "dokumente_sha256",
+          "value": "\"dokumente\".\"sha256\" ~ '^[0-9a-f]{64}$'"
+        },
+        "dokumente_groesse": {
+          "name": "dokumente_groesse",
+          "value": "\"dokumente\".\"groesse\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.einladungen": {
+      "name": "einladungen",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rolle": {
+          "name": "rolle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zeitraum_von": {
+          "name": "zeitraum_von",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zeitraum_bis": {
+          "name": "zeitraum_bis",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "gueltig_bis": {
+          "name": "gueltig_bis",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eingeloest_am": {
+          "name": "eingeloest_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "eingeloest_von": {
+          "name": "eingeloest_von",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zurueckgezogen_am": {
+          "name": "zurueckgezogen_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "einladungen_token_hash_unique": {
+          "name": "einladungen_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": ["token_hash"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "einladungen_rolle": {
+          "name": "einladungen_rolle",
+          "value": "\"einladungen\".\"rolle\" in ('steuerberatung', 'pruefer')"
+        },
+        "einladungen_zeitraum": {
+          "name": "einladungen_zeitraum",
+          "value": "case when \"einladungen\".\"rolle\" = 'pruefer' then \"einladungen\".\"zeitraum_von\" is not null and \"einladungen\".\"zeitraum_bis\" is not null and \"einladungen\".\"zeitraum_von\" <= \"einladungen\".\"zeitraum_bis\" else \"einladungen\".\"zeitraum_von\" is null and \"einladungen\".\"zeitraum_bis\" is null end"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.einordnungen": {
+      "name": "einordnungen",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "dokument_id": {
+          "name": "dokument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "art": {
+          "name": "art",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entstanden": {
+          "name": "entstanden",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "frist_bis": {
+          "name": "frist_bis",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "titel": {
+          "name": "titel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "korrespondent": {
+          "name": "korrespondent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "einordnungen_dokument": {
+          "name": "einordnungen_dokument",
+          "columns": [
+            {
+              "expression": "dokument_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "erstellt_am",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "einordnungen_dokument_id_dokumente_id_fk": {
+          "name": "einordnungen_dokument_id_dokumente_id_fk",
+          "tableFrom": "einordnungen",
+          "tableTo": "dokumente",
+          "columnsFrom": ["dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "einordnungen_art": {
+          "name": "einordnungen_art",
+          "value": "\"einordnungen\".\"art\" in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')"
+        },
+        "einordnungen_frist": {
+          "name": "einordnungen_frist",
+          "value": "(\"einordnungen\".\"art\" = 'frei') = (\"einordnungen\".\"frist_bis\" is null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.einstellungen": {
+      "name": "einstellungen",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "default": 1
+        },
+        "firma": {
+          "name": "firma",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "anschrift": {
+          "name": "anschrift",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "verantwortlich": {
+          "name": "verantwortlich",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "aufsicht": {
+          "name": "aufsicht",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "datensicherung": {
+          "name": "datensicherung",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "scannen": {
+          "name": "scannen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "ergaenzungen": {
+          "name": "ergaenzungen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "geaendert_am": {
+          "name": "geaendert_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "einstellungen_eine_zeile": {
+          "name": "einstellungen_eine_zeile",
+          "value": "\"einstellungen\".\"id\" = 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inhalte": {
+      "name": "inhalte",
+      "schema": "",
+      "columns": {
+        "dokument_id": {
+          "name": "dokument_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "erechnung": {
+          "name": "erechnung",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fehler": {
+          "name": "fehler",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ocr": {
+          "name": "ocr",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "erzeugt_am": {
+          "name": "erzeugt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inhalte_dokument_id_dokumente_id_fk": {
+          "name": "inhalte_dokument_id_dokumente_id_fk",
+          "tableFrom": "inhalte",
+          "tableTo": "dokumente",
+          "columnsFrom": ["dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.loeschungen": {
+      "name": "loeschungen",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "dokument_id": {
+          "name": "dokument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "beantragt_von": {
+          "name": "beantragt_von",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "beantragt_am": {
+          "name": "beantragt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "bestaetigt_von": {
+          "name": "bestaetigt_von",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bestaetigt_am": {
+          "name": "bestaetigt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "loeschungen_dokument_id_dokumente_id_fk": {
+          "name": "loeschungen_dokument_id_dokumente_id_fk",
+          "tableFrom": "loeschungen",
+          "tableTo": "dokumente",
+          "columnsFrom": ["dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "loeschungen_dokument_id_unique": {
+          "name": "loeschungen_dokument_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["dokument_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "loeschungen_bestaetigung": {
+          "name": "loeschungen_bestaetigung",
+          "value": "(\"loeschungen\".\"bestaetigt_von\" is null) = (\"loeschungen\".\"bestaetigt_am\" is null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.mail_anhaenge": {
+      "name": "mail_anhaenge",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "mail_dokument_id": {
+          "name": "mail_dokument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "anhang_dokument_id": {
+          "name": "anhang_dokument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eingebettet": {
+          "name": "eingebettet",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "mail_anhaenge_mail": {
+          "name": "mail_anhaenge_mail",
+          "columns": [
+            {
+              "expression": "mail_dokument_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mail_anhaenge_mail_dokument_id_dokumente_id_fk": {
+          "name": "mail_anhaenge_mail_dokument_id_dokumente_id_fk",
+          "tableFrom": "mail_anhaenge",
+          "tableTo": "dokumente",
+          "columnsFrom": ["mail_dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mail_anhaenge_anhang_dokument_id_dokumente_id_fk": {
+          "name": "mail_anhaenge_anhang_dokument_id_dokumente_id_fk",
+          "tableFrom": "mail_anhaenge",
+          "tableTo": "dokumente",
+          "columnsFrom": ["anhang_dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "mail_anhaenge_anhang_dokument_id_unique": {
+          "name": "mail_anhaenge_anhang_dokument_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["anhang_dokument_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.mails": {
+      "name": "mails",
+      "schema": "",
+      "columns": {
+        "dokument_id": {
+          "name": "dokument_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "antwort_auf": {
+          "name": "antwort_auf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verweise": {
+          "name": "verweise",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "von": {
+          "name": "von",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "an": {
+          "name": "an",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "betreff": {
+          "name": "betreff",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gesendet_am": {
+          "name": "gesendet_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "mails_message_id": {
+          "name": "mails_message_id",
+          "columns": [
+            {
+              "expression": "message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mails_von": {
+          "name": "mails_von",
+          "columns": [
+            {
+              "expression": "von",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mails_dokument_id_dokumente_id_fk": {
+          "name": "mails_dokument_id_dokumente_id_fk",
+          "tableFrom": "mails",
+          "tableTo": "dokumente",
+          "columnsFrom": ["dokument_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "mails_id_unique": {
+          "name": "mails_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.objektsperren": {
+      "name": "objektsperren",
+      "schema": "",
+      "columns": {
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "bis": {
+          "name": "bis",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gesetzt_am": {
+          "name": "gesetzt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.offene_entfernungen": {
+      "name": "offene_entfernungen",
+      "schema": "",
+      "columns": {
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "seit": {
+          "name": "seit",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.quellen": {
+      "name": "quellen",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "host": {
+          "name": "host",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "port": {
+          "name": "port",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 993
+        },
+        "tls": {
+          "name": "tls",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "benutzer": {
+          "name": "benutzer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordner": {
+          "name": "ordner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'INBOX'"
+        },
+        "ciphertext": {
+          "name": "ciphertext",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "letzte_uid": {
+          "name": "letzte_uid",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "uid_validity": {
+          "name": "uid_validity",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "letzter_abruf": {
+          "name": "letzter_abruf",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "letzter_fehler": {
+          "name": "letzter_fehler",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktiv": {
+          "name": "aktiv",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "art": {
+          "name": "art",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'imap'"
+        },
+        "jmap_stand": {
+          "name": "jmap_stand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oauth": {
+          "name": "oauth",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "quellen_port": {
+          "name": "quellen_port",
+          "value": "\"quellen\".\"port\" between 1 and 65535"
+        },
+        "quellen_art": {
+          "name": "quellen_art",
+          "value": "\"quellen\".\"art\" in ('imap', 'jmap')"
+        },
+        "quellen_oauth": {
+          "name": "quellen_oauth",
+          "value": "\"quellen\".\"oauth\" is null or (\"quellen\".\"oauth\" in ('microsoft', 'google') and \"quellen\".\"art\" = 'imap')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.regeln": {
+      "name": "regeln",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reihenfolge": {
+          "name": "reihenfolge",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "bedingung": {
+          "name": "bedingung",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "art": {
+          "name": "art",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktiv": {
+          "name": "aktiv",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "regeln_art": {
+          "name": "regeln_art",
+          "value": "\"regeln\".\"art\" in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.session": {
+      "name": "session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "session_user_id_idx": {
+          "name": "session_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "session_user_id_user_id_fk": {
+          "name": "session_user_id_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "session_token_unique": {
+          "name": "session_token_unique",
+          "nullsNotDistinct": false,
+          "columns": ["token"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sperren": {
+      "name": "sperren",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "grund": {
+          "name": "grund",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "von": {
+          "name": "von",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bis": {
+          "name": "bis",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "angelegt_am": {
+          "name": "angelegt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "aufgehoben_am": {
+          "name": "aufgehoben_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "sperren_zeitraum": {
+          "name": "sperren_zeitraum",
+          "value": "\"sperren\".\"von\" <= \"sperren\".\"bis\""
+        },
+        "sperren_grund": {
+          "name": "sperren_grund",
+          "value": "length(trim(\"sperren\".\"grund\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pruefer'"
+        },
+        "zeitraum_von": {
+          "name": "zeitraum_von",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zeitraum_bis": {
+          "name": "zeitraum_bis",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "user_inhaber_single": {
+          "name": "user_inhaber_single",
+          "columns": [
+            {
+              "expression": "role",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"user\".\"role\" = 'inhaber'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": ["email"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "user_role": {
+          "name": "user_role",
+          "value": "\"user\".\"role\" in ('inhaber', 'steuerberatung', 'pruefer')"
+        },
+        "user_zeitraum": {
+          "name": "user_zeitraum",
+          "value": "case when \"user\".\"role\" = 'pruefer' then \"user\".\"zeitraum_von\" is not null and \"user\".\"zeitraum_bis\" is not null and \"user\".\"zeitraum_von\" <= \"user\".\"zeitraum_bis\" else \"user\".\"zeitraum_von\" is null and \"user\".\"zeitraum_bis\" is null end"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.verification": {
+      "name": "verification",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.webhook_ereignisse": {
+      "name": "webhook_ereignisse",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "webhook_ereignisse_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "art": {
+          "name": "art",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dokument_id": {
+          "name": "dokument_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zeitpunkt": {
+          "name": "zeitpunkt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.webhook_zustellungen": {
+      "name": "webhook_zustellungen",
+      "schema": "",
+      "columns": {
+        "webhook_id": {
+          "name": "webhook_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ereignis_id": {
+          "name": "ereignis_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zugestellt_am": {
+          "name": "zugestellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "webhook_zustellungen_webhook_id_webhooks_id_fk": {
+          "name": "webhook_zustellungen_webhook_id_webhooks_id_fk",
+          "tableFrom": "webhook_zustellungen",
+          "tableTo": "webhooks",
+          "columnsFrom": ["webhook_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "webhook_zustellungen_ereignis_id_webhook_ereignisse_id_fk": {
+          "name": "webhook_zustellungen_ereignis_id_webhook_ereignisse_id_fk",
+          "tableFrom": "webhook_zustellungen",
+          "tableTo": "webhook_ereignisse",
+          "columnsFrom": ["ereignis_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "webhook_zustellungen_webhook_id_ereignis_id_pk": {
+          "name": "webhook_zustellungen_webhook_id_ereignis_id_pk",
+          "columns": ["webhook_id", "ereignis_id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.webhooks": {
+      "name": "webhooks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arten": {
+          "name": "arten",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ciphertext": {
+          "name": "ciphertext",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "letzte_zustellung": {
+          "name": "letzte_zustellung",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "letzter_fehler": {
+          "name": "letzter_fehler",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktiv": {
+          "name": "aktiv",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "webhooks_url": {
+          "name": "webhooks_url",
+          "value": "\"webhooks\".\"url\" ~ '^https?://'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.zeitstempel": {
+      "name": "zeitstempel",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "seq": {
+          "name": "seq",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dienst": {
+          "name": "dienst",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zeit": {
+          "name": "zeit",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seriennummer": {
+          "name": "seriennummer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "erstellt_am": {
+          "name": "erstellt_am",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

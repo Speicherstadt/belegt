@@ -2,6 +2,7 @@ import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
+import { entfernenNachholen } from "./loeschung/loeschung.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
@@ -68,6 +69,16 @@ async function objektsperren(speicher: SperrbarerSpeicher) {
   }
 }
 
+/** Dateien gelöschter Dokumente, die der Speicher noch nicht entfernen durfte (S3: gesperrt), stündlich wieder */
+async function entfernungen() {
+  for (;;) {
+    const r = await entfernenNachholen(db, speicher).catch((err) => ({ entfernt: 0, fehler: meldung(err) }));
+    if (r.entfernt || r.fehler)
+      console.log(`Gelöschte Dateien: ${r.entfernt} entfernt${r.fehler ? `, noch nicht: ${r.fehler}` : ""}`);
+    await Bun.sleep(3_600_000);
+  }
+}
+
 /** Mit TSA_URL: einmal am Tag ein Zeitstempel über den Kopf der Kette, wenn etwas dazukam */
 async function zeitstempel(dienst: string) {
   for (;;) {
@@ -90,6 +101,7 @@ await Promise.all([
   postfaecher(),
   webhooks(),
   inhalte(),
+  entfernungen(),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
 ]);

@@ -329,6 +329,15 @@ export const objektsperren = pgTable("objektsperren", {
 });
 
 /**
+ * Dateien, die der Speicher nach einer bestätigten Löschung noch nicht entfernen durfte (S3: noch gesperrt); der
+ * Worker versucht es wieder, bis es gelingt.
+ */
+export const offeneEntfernungen = pgTable("offene_entfernungen", {
+  sha256: text("sha256").primaryKey(),
+  seit: timestamp("seit", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
  * Zeitstempel nach RFC 3161 über den Kopf der Hash-Kette: belegt, dass alle Einträge bis seq zu diesem Zeitpunkt so
  * bestanden. Versiegelt ab dem Einfügen.
  */

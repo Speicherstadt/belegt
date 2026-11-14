@@ -33,7 +33,8 @@ ihrer Dokumente; der Worker verlängert die Sperre, sobald ein Dokument eingeord
 solche Sperre kann niemand verkürzen oder aufheben, auch nicht mit dem Schlüssel des Kontos. Mit `S3_SPERRE_TAGE`
 sperrt Belegt schon ab dem Hochladen für so viele Tage, also auch, was noch im Eingang liegt; frei Abgelegtes lässt
 sich dann erst danach aus dem Bucket entfernen. Lehnt der Bucket das Entfernen nach einer bestätigten Löschung ab,
-bleibt die Datei bis zum Ende ihrer Sperre liegen; Belegt liefert sie nicht mehr aus.
+bleibt die Datei bis zum Ende ihrer Sperre liegen; Belegt liefert sie nicht mehr aus, und der Worker versucht das
+Entfernen stündlich wieder.
 
 ## Sichern
 

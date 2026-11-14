@@ -2,7 +2,7 @@ import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { dokumente, einordnungen, loeschungen } from "../db/schema.ts";
+import { dokumente, einordnungen, loeschungen, offeneEntfernungen } from "../db/schema.ts";
 
 export type Loeschung = typeof loeschungen.$inferSelect;
 
@@ -104,10 +104,48 @@ async function dateiEntfernen(db: Datenbank, speicher: Dateispeicher, dokumentId
        and not exists (select 1 from loeschungen l where l.dokument_id = x.id and l.bestaetigt_am is not null)`);
   if (Number(andere?.n ?? 0) > 0) return;
   // Die Löschung steht in der Datenbank; lehnt der Speicher ab (S3: noch gesperrt), bleibt die Datei bis zum Ende der
-  // Sperre liegen, ohne dass die bestätigte Löschung scheitert. Ausliefern tut Belegt sie ohnehin nicht mehr (410).
-  await speicher
-    .entfernen(d.sha256)
-    .catch((err) => console.error(`Datei ${d.sha256} nicht entfernt: ${err instanceof Error ? err.message : err}`));
+  // Sperre liegen, ohne dass die bestätigte Löschung scheitert, und der Worker versucht es wieder (entfernenNachholen).
+  // Ausliefern tut Belegt sie ohnehin nicht mehr (410).
+  await speicher.entfernen(d.sha256).catch(async (err) => {
+    console.error(`Datei ${d.sha256} nicht entfernt: ${err instanceof Error ? err.message : err}`);
+    await db.insert(offeneEntfernungen).values({ sha256: d.sha256 }).onConflictDoNothing();
+  });
+}
+
+/**
+ * Entfernt, was der Speicher nach einer bestätigten Löschung noch nicht entfernen durfte. Kam derselbe Inhalt inzwischen
+ * als neues Dokument dazu, bleibt die Datei und der Eintrag entfällt.
+ */
+export async function entfernenNachholen(db: Datenbank, speicher: Dateispeicher, { stapel = 100 } = {}) {
+  const offen = await db
+    .select({ sha256: offeneEntfernungen.sha256 })
+    .from(offeneEntfernungen)
+    .orderBy(offeneEntfernungen.seit)
+    .limit(stapel);
+  let entfernt = 0;
+  let fehler: string | null = null;
+  for (const { sha256 } of offen) {
+    try {
+      const [andere] = await db.execute<{ n: string }>(sql`
+        select count(*) as n from dokumente x
+         where x.sha256 = ${sha256}
+           and not exists (select 1 from loeschungen l where l.dokument_id = x.id and l.bestaetigt_am is not null)`);
+      if (Number(andere?.n ?? 0) === 0) {
+        await speicher.entfernen(sha256);
+        entfernt++;
+      }
+      await db.delete(offeneEntfernungen).where(eq(offeneEntfernungen.sha256, sha256));
+    } catch (err) {
+      fehler = err instanceof Error ? err.message : String(err);
+      // Hinten anstellen, damit lange gesperrte Dateien den Stapel nicht für die übrigen belegen
+      await db
+        .update(offeneEntfernungen)
+        .set({ seit: new Date() })
+        .where(eq(offeneEntfernungen.sha256, sha256))
+        .catch(() => {});
+    }
+  }
+  return { entfernt, fehler };
 }
 
 /** Bedingung: Dokument ist nicht (bestätigt) gelöscht; d ist die Zeile aus dokumente */

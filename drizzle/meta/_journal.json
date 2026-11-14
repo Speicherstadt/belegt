@@ -148,6 +148,13 @@
       "when": 1794677149301,
       "tag": "0020_zeitstempel",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794677982099,
+      "tag": "0021_offene_entfernungen",
+      "breakpoints": true
     }
   ]
 }
