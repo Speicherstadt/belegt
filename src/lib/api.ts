@@ -386,5 +386,6 @@ export const api = {
 export const exportUrl = (von: string, bis: string) =>
   `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
 
+export const trennblattUrl = "/api/trennblatt.pdf";
 export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

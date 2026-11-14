@@ -80,6 +80,15 @@ export const openapi = {
       },
       post: {
         summary: "Original aufnehmen (Recht schreiben)",
+        parameters: [
+          {
+            name: "trennen",
+            in: "query",
+            schema: { type: "string", enum: ["1"] },
+            description:
+              "Ein PDF an Trennblättern teilen; jedes Teil wird ein eigenes Dokument. Antwort dann `{dokumente: [...]}`",
+          },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -93,9 +102,26 @@ export const openapi = {
           },
         },
         responses: {
-          "201": { description: "Aufgenommen", content: json({ $ref: "#/components/schemas/Dokument" }) },
+          "201": {
+            description: "Aufgenommen; mit trennen=1 alle Teile",
+            content: json({
+              oneOf: [
+                { $ref: "#/components/schemas/Dokument" },
+                {
+                  type: "object",
+                  properties: { dokumente: { type: "array", items: { $ref: "#/components/schemas/Dokument" } } },
+                },
+              ],
+            }),
+          },
           "413": fehler,
         },
+      },
+    },
+    "/api/trennblatt.pdf": {
+      get: {
+        summary: "Trennblatt zum Ausdrucken (QR-Code und Code 128 mit TRENNBLATT_CODE)",
+        responses: { "200": { description: "PDF", content: { "application/pdf": {} } } },
       },
     },
     "/api/dokumente/{id}": {

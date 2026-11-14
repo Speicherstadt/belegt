@@ -68,6 +68,7 @@ export async function verfahrensdoku(
     objektsperre = false,
     kiModell,
     eingangsordner = false,
+    trennblattCode = "BELEGT-TRENNER",
   }: {
     abrufMinuten: number;
     version: string;
@@ -76,6 +77,8 @@ export async function verfahrensdoku(
     kiModell?: { modell: string; host: string };
     /** Der Worker überwacht einen Eingangsordner (EINGANG_ORDNER) */
     eingangsordner?: boolean;
+    /** Inhalt des Codes auf Trennblättern (TRENNBLATT_CODE) */
+    trennblattCode?: string;
   },
 ): Promise<Verfahrensdoku> {
   const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel] = await Promise.all([
@@ -117,6 +120,7 @@ export async function verfahrensdoku(
         eingangsordner
           ? "Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht. Belegt nimmt eine Datei erst auf, wenn sie sich zwischen zwei Blicken nicht mehr ändert, und entfernt sie aus dem Ordner erst, nachdem sie im Archiv liegt. Dateien, die sich nicht aufnehmen lassen (leer, größer als 100 MB), verschiebt es in den Unterordner „fehler“; dort bleiben sie zur Klärung liegen."
           : "",
+        `Gescannte Stapel als PDF teilt Belegt an Trennblättern (QR-Code oder Code 128 mit dem Inhalt „${trennblattCode}“)${eingangsordner ? " aus dem Eingangsordner immer und" : ""} beim Hochladen auf Wunsch in einzelne Dokumente. Der Stapel ist dabei nur das Transportmittel: Jedes Teil wird als eigenes Original aufgenommen, die Trennblätter und der Stapel selbst nicht. Lässt sich ein Stapel nicht teilen, wird er unverändert aufgenommen.`,
       ].filter(Boolean),
       liste: [
         ...quellen.map(

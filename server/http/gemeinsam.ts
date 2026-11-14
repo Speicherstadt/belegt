@@ -25,6 +25,8 @@ export type AppUmgebung = Umgebung & {
   kiModell?: { modell: string; host: string };
   /** Der Worker überwacht einen Eingangsordner (für die Verfahrensdokumentation) */
   eingangsordner?: boolean;
+  /** Code auf Trennblättern (TRENNBLATT_CODE), Vorgabe BELEGT-TRENNER */
+  trennblattCode?: string;
   /** Origin, der Belegt in einem Frame zeigen darf */
   embedOrigin?: string;
   /** App für „Öffnen mit …“ (Name und Adresse mit {url}), wenn eingerichtet */

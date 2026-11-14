@@ -30,6 +30,18 @@ lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht. Leere Dateien un
 `fehler/` im Ordner; dort bleiben sie liegen, bis du sie klärst. Ist die Datenbank oder der Speicher gerade nicht
 erreichbar, bleibt die Datei im Ordner, und der Worker versucht es wieder.
 
+## Trennblätter
+
+Damit du einen ganzen Stapel Belege in einem Rutsch scannen kannst, legst du zwischen zwei Belege ein Trennblatt. Es
+liegt unter Quellen → Scannen zum Ausdrucken bereit (`/api/trennblatt.pdf`) und trägt einen QR-Code und einen Code 128
+mit dem Inhalt `BELEGT-TRENNER` (anders mit `TRENNBLATT_CODE`). Ein PDF aus dem Eingangsordner teilt Belegt an jedem
+Trennblatt; aus `stapel.pdf` werden `stapel-1.pdf`, `stapel-2.pdf` … Jedes Teil ist ein eigenes Dokument mit eigener
+Archivnummer; die Trennblätter und der Stapel selbst kommen nicht ins Archiv, der Stapel ist nur das Transportmittel.
+Beim Hochladen über die Schnittstelle teilt `POST /api/dokumente?trennen=1` genauso ([API](api.md)).
+
+Ein PDF ohne Trennblatt bleibt, wie es ist. Lässt sich ein Stapel nicht teilen (kaputtes PDF, länger als das Zeitlimit),
+nimmt Belegt ihn unverändert auf. Ohne `pdftoppm` (Poppler, im Image enthalten) teilt Belegt nicht.
+
 ## Mails
 
 Eine Mail wird als Original (`.eml`) aufbewahrt. Daraus liest Belegt Absender, Empfänger, Betreff, Datum, den Text

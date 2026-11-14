@@ -12,6 +12,7 @@ import { ordnerEinlesen, type Zustand } from "./ordner/ordner.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
+import { dateiTeilen } from "./trennen/trennen.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
@@ -120,13 +121,21 @@ async function ansichten(url: string) {
   }
 }
 
-/** Mit EINGANG_ORDNER: alle 5 Sekunden ein Blick in den Ordner; aufgenommen wird, was zwei Blicke lang gleich bleibt */
+/**
+ * Mit EINGANG_ORDNER: alle 5 Sekunden ein Blick in den Ordner; aufgenommen wird, was zwei Blicke lang gleich bleibt.
+ * PDFs mit Trennblättern werden vorher geteilt; scheitert das, kommt der Stapel unverändert ins Archiv.
+ */
 async function eingangsordner(ordner: string) {
   let zustand: Zustand = new Map();
   let letzterFehler = "";
+  const teilen = (bytes: Uint8Array, name: string) =>
+    dateiTeilen(bytes, name, { code: env.TRENNBLATT_CODE }).catch((err) => {
+      console.error(`Eingangsordner: ${name} nicht geteilt, unverändert aufgenommen: ${meldung(err)}`);
+      return null;
+    });
   for (;;) {
     try {
-      const r = await ordnerEinlesen({ db, speicher }, { ordner, zustand });
+      const r = await ordnerEinlesen({ db, speicher }, { ordner, zustand, teilen });
       zustand = r.zustand;
       letzterFehler = "";
       const { neu, doppelt, fehler, spaeter } = r.ergebnis;

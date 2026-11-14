@@ -134,4 +134,14 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(mit).toContain("Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht");
     expect(mit).toContain("Unterordner „fehler“");
   });
+
+  it("beschreibt das Teilen an Trennblättern mit dem eingestellten Code", async () => {
+    const ohne = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+    expect(ohne).toContain("an Trennblättern (QR-Code oder Code 128 mit dem Inhalt „BELEGT-TRENNER“) beim Hochladen");
+    const mit = JSON.stringify(
+      await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test", eingangsordner: true, trennblattCode: "X-1" }),
+    );
+    expect(mit).toContain("„X-1“) aus dem Eingangsordner immer und beim Hochladen auf Wunsch");
+    expect(mit).toContain("Jedes Teil wird als eigenes Original aufgenommen");
+  });
 });

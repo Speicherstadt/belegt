@@ -8,7 +8,7 @@ description: >-
 
 Unter **Verfahrensdoku** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:
 Erfassung, Einordnung und Fristen, Unveränderbarkeit, Löschung, Zugriff und Betrieb. Was Belegt selbst tut, Postfächer,
-Regeln, Sperren, Zugänge und API-Tokens stehen darin, wie sie gerade eingerichtet sind.
+Eingangsordner, Regeln, Sperren, Zugänge und API-Tokens stehen darin, wie sie gerade eingerichtet sind.
 
 Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):
 Name, Anschrift, wer verantwortlich ist, Datensicherung und Scannen. Fehlt davon etwas, steht im Dokument „Fehlt: …“.

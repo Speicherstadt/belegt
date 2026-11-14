@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 
@@ -33,5 +34,17 @@ test("jedes Dokument hat eine Archivnummer, sichtbar in Liste und Dokument und a
   await page.getByLabel(SUCHE).fill(`ASN ${asn}`);
   await expect(page.getByRole("row")).toHaveCount(2);
   await expect(link).toBeVisible();
+  await ohneVerstoesse(page);
+});
+
+test("unter Quellen gibt es ein Trennblatt zum Herunterladen", async ({ page }) => {
+  await page.goto("/quellen");
+  await expect(page.getByRole("heading", { name: "Scannen" })).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Trennblatt herunterladen (PDF)" }).click();
+  const datei = await download;
+  expect(datei.suggestedFilename()).toBe("trennblatt.pdf");
+  const pdf = await readFile((await datei.path())!);
+  expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
   await ohneVerstoesse(page);
 });

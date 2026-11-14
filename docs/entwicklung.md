@@ -28,7 +28,8 @@ Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Parag
 
 Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests gegen Postgres brauchen
 `TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer. Die Tests der Texterkennung brauchen `tesseract` (mit
-Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, und werden sonst übersprungen.
+Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, die der Trennblätter `pdftoppm`;
+sonst werden sie übersprungen.
 
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
@@ -57,6 +58,7 @@ löschen sie wieder.
 | `BELEGT_SCHLUESSEL` | Schlüssel für Passwörter von Postfächern und Geheimnisse von Webhooks, 32 Bytes base64 (`openssl rand -base64 32`); Pflicht für den Worker | – |
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 | `EINGANG_ORDNER` | Ordner, den der Worker überwacht (docs/eingang.md) | – |
+| `TRENNBLATT_CODE` | Inhalt des Codes auf Trennblättern, an denen gescannte Stapel geteilt werden | `BELEGT-TRENNER` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
 | `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Apps für IMAP mit OAuth (docs/eingang.md) | – (Mandant `common`) |

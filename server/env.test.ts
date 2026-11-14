@@ -13,6 +13,7 @@ describe("readEnv", () => {
       S3_REGION: "us-east-1",
       S3_PFAD_STIL: true,
       S3_SPERRE_TAGE: 0,
+      TRENNBLATT_CODE: "BELEGT-TRENNER",
     });
   });
 

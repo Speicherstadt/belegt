@@ -21,6 +21,8 @@ import {
   zurueckziehen as loeschungZurueckziehen,
   regelVerletzt,
 } from "../loeschung/loeschung.ts";
+import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
+import { dateiTeilen } from "../trennen/trennen.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
 
@@ -33,14 +35,29 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       const datei = form.get("datei");
       if (!(datei instanceof File)) return c.json({ fehler: "Feld „datei“ fehlt" }, 400);
       const bytes = new Uint8Array(await datei.arrayBuffer());
-      const dokument = await aufnehmen(umgebung, {
-        bytes,
-        dateiname: datei.name || null,
-        quelle: "upload",
-        akteur: akteur(c.get("nutzer")),
-      });
-      return c.json(dokument, 201);
+      const eingang = { quelle: "upload" as const, akteur: akteur(c.get("nutzer")) };
+      if (c.req.query("trennen") !== "1")
+        return c.json(await aufnehmen(umgebung, { ...eingang, bytes, dateiname: datei.name || null }), 201);
+      // Ein Stapel mit Trennblättern: jedes Teil ein eigenes Original. Geteilt wird in einem eigenen Prozess; scheitert
+      // es (kaputtes PDF, Zeitlimit), kommt die Datei unverändert ins Archiv, wie ohne Trennblatt
+      const name = datei.name || "scan.pdf";
+      const teile = await dateiTeilen(bytes, name, {
+        code: umgebung.trennblattCode ?? TRENNBLATT_CODE,
+        zeitlimit: 2 * 60_000,
+      }).catch(() => null);
+      const dokumente = [];
+      for (const teil of teile ?? [{ bytes, dateiname: datei.name || null }])
+        dokumente.push(await aufnehmen(umgebung, { ...eingang, ...teil }));
+      return c.json({ dokumente }, 201);
     },
+  );
+
+  /** Ein Trennblatt zum Ausdrucken: Belegt teilt gescannte Stapel an dieser Seite */
+  app.get("/api/trennblatt.pdf", async (c) =>
+    c.body(new Uint8Array(await trennblattPdf(umgebung.trennblattCode ?? TRENNBLATT_CODE)), 200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=trennblatt.pdf",
+    }),
   );
 
   app.get("/api/dokumente", async (c) => {

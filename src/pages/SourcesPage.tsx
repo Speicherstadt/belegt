@@ -3,6 +3,7 @@ import { ApiTokens } from "../components/ApiTokens.tsx";
 import { Mailboxes } from "../components/Mailboxes.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { Rules } from "../components/Rules.tsx";
+import { Scanning } from "../components/Scanning.tsx";
 import { Webhooks } from "../components/Webhooks.tsx";
 import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
@@ -14,6 +15,7 @@ export function SourcesPage() {
       <PageHeader title={m.sources_title()} intro={m.sources_intro()} />
       <Mailboxes />
       <Rules />
+      <Scanning />
       {ich.data?.role === "inhaber" && (
         <>
           <ApiTokens />
