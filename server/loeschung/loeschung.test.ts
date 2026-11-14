@@ -145,6 +145,6 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
   });
 
   it("hat nach allem eine intakte Kette", async () => {
-    expect(await (await als(inhaber)("/api/pruefung")).json()).toEqual({ ok: true, befunde: [] });
+    expect(await (await als(inhaber)("/api/pruefung")).json()).toMatchObject({ ok: true, befunde: [] });
   });
 });

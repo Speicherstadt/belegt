@@ -45,7 +45,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/einstellungen`, `POST /api/einstellungen` (`firma`, `anschrift`, `verantwortlich`, `aufsicht`, `datensicherung`, `scannen`, `ergaenzungen`) | Angaben zum Betrieb; ändern nur der Inhaber |
 | `GET /api/verfahrensdoku` | Verfahrensdokumentation als Abschnitte, mit `luecken` und `vollstaendig` ([`verfahrensdoku.md`](verfahrensdoku.md)) |
 | `GET /api/export?von=JJJJ-MM-TT&bis=JJJJ-MM-TT` | Datenträger (Z3) als ZIP, gestreamt; Inhalt in [`pruefung.md`](pruefung.md) |
-| `GET /api/pruefung` | Befunde zu Hash-Kette, Kopf und Siegeln, `ok: true`, wenn es keine gibt; mit `?dateien=1` auch jede Datei gegen ihren Hash |
+| `GET /api/pruefung` | Befunde zu Hash-Kette, Kopf und Siegeln, `ok: true`, wenn es keine gibt; mit `?dateien=1` auch jede Datei gegen ihren Hash; `bericht` mit Zeitpunkt, Prüfwert und Zahlen |
 
 Ein Original liegt unter seinem SHA-256 im Speicher (`DOCUMENTS_DIR`); den Typ erkennt Belegt am Inhalt, nicht an der
 Endung. Die Zeile in `dokumente` ist ab dem Einfügen versiegelt: Ändern, Löschen und `TRUNCATE` lehnt Postgres ab,

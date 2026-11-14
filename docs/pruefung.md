@@ -1,7 +1,9 @@
 # Prüfung
 
 Unter **Prüfung** prüft Belegt Hash-Kette, Kopf und Siegel; „Auch alle Dateien prüfen“ liest zusätzlich jedes
-Original und vergleicht es mit seinem Hash.
+Original und vergleicht es mit seinem Hash. Darunter steht der Prüfbericht: Zeitpunkt, Ergebnis, wie viele Dokumente, Siegel und
+Einträge geprüft wurden, und der Prüfwert, der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu
+diesem Eintrag nichts verändert wurde. „Drucken oder als PDF sichern“ gibt den Bericht ohne Navigation aus.
 
 ## Prüferzugang (Z1)
 

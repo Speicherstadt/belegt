@@ -5,6 +5,7 @@ import {
   speichern as einstellungenSpeichern,
 } from "../einstellungen/einstellungen.ts";
 import { z3Export } from "../export/z3.ts";
+import { bericht } from "../pruefung/bericht.ts";
 import { verfahrensdoku } from "../verfahrensdoku/verfahrensdoku.ts";
 import { schnitt } from "../zugang/pruefer.ts";
 
@@ -42,13 +43,15 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
   });
 
   app.get("/api/pruefung", async (c) => {
+    // Der Bericht vor den Befunden: sein Prüfwert ist der Stand, den die Prüfung danach bestätigt
+    const kopf = await bericht(umgebung.db);
     const befunde = await pruefen(umgebung.db);
     // ?dateien=1 liest zusätzlich jede Datei und vergleicht sie mit ihrem Hash
     if (c.req.query("dateien") === "1") {
       const dateien = await dateienPruefen(umgebung);
       const alle = [...befunde, ...dateien.befunde];
-      return c.json({ ok: alle.length === 0, befunde: alle, dateienGeprueft: dateien.geprueft });
+      return c.json({ ok: alle.length === 0, befunde: alle, dateienGeprueft: dateien.geprueft, bericht: kopf });
     }
-    return c.json({ ok: befunde.length === 0, befunde });
+    return c.json({ ok: befunde.length === 0, befunde, bericht: kopf });
   });
 }

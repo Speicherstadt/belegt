@@ -19,3 +19,12 @@ test("die Prüfung lädt den Datenträger (Z3) für einen Zeitraum als ZIP", asy
   // Lokaler Dateikopf eines ZIP
   expect(bytes.subarray(0, 4)).toEqual(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
 });
+
+test("die Prüfung zeigt den Prüfbericht mit Prüfwert", async ({ page }) => {
+  await page.goto("/pruefung");
+  const bericht = page.getByRole("region", { name: "Prüfbericht" });
+  await expect(bericht).toContainText("Kette intakt, alle Siegel stimmen.");
+  await expect(bericht).toContainText(/\d+ Dokumente \(davon \d+ gelöscht\)/);
+  await expect(bericht.getByText(/[0-9a-f]{64}/)).toBeVisible();
+  await expect(bericht.getByRole("button", { name: "Drucken oder als PDF sichern" })).toBeVisible();
+});

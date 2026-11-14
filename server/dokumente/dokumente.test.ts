@@ -166,8 +166,19 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     ).toEqual([]);
   });
 
+  it("nennt im Bericht den Prüfwert der Kette und die Zahl der geprüften Zeilen", async () => {
+    const { bericht } = await (await app.request("/api/pruefung")).json();
+    const [kopf] = await t.sql`select seq, encode(hash, 'hex') as hash from audit_chain`;
+    const [z] = await t.sql`select (select count(*) from dokumente)::int as d, (select count(*) from seals)::int as s,
+                                   (select count(*) from audit_log)::int as p`;
+    expect(bericht).toMatchObject({ dokumente: z!.d, siegel: z!.s, protokoll: z!.p });
+    expect(bericht.pruefwert).toContain(kopf!.hash);
+    expect(bericht.pruefwert).toContain(String(kopf!.seq));
+    expect(Date.parse(bericht.zeitpunkt)).toBeGreaterThan(Date.now() - 60_000);
+  });
+
   it("meldet eine gültige Kette und findet eine an den Triggern vorbei geänderte Zeile", async () => {
-    expect(await (await app.request("/api/pruefung")).json()).toEqual({ ok: true, befunde: [] });
+    expect(await (await app.request("/api/pruefung")).json()).toMatchObject({ ok: true, befunde: [] });
     const dok = await (await hochladen(pdf, "später-geändert.pdf")).json();
     await t.sql.begin(async (tx) => {
       await tx`set local session_replication_role = replica`;

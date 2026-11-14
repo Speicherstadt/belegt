@@ -284,5 +284,13 @@
   "doc_text": "Text",
   "doc_text_file": "{anzahl} Zeichen aus der Datei",
   "doc_text_ocr": "{anzahl} Zeichen aus der Texterkennung",
-  "doc_text_error": "nicht lesbar"
+  "doc_text_error": "nicht lesbar",
+  "report_title": "Prüfbericht",
+  "report_print": "Drucken oder als PDF sichern",
+  "report_time": "Geprüft am",
+  "report_result": "Ergebnis",
+  "report_checked": "Geprüft",
+  "report_counts": "{dokumente} Dokumente (davon {geloescht} gelöscht), {siegel} Siegel, {protokoll} Einträge im Protokoll.",
+  "report_value": "Prüfwert",
+  "report_hint": "Der Prüfwert ist der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu diesem Eintrag nichts verändert wurde."
 }

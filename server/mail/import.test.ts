@@ -192,6 +192,6 @@ describe.skipIf(!testDatenbankUrl)("Mail-Import gegen Postgres", () => {
   });
 
   it("hat nach allem eine intakte Kette", async () => {
-    expect(await (await anfrage("/api/pruefung")).json()).toEqual({ ok: true, befunde: [] });
+    expect(await (await anfrage("/api/pruefung")).json()).toMatchObject({ ok: true, befunde: [] });
   });
 });

@@ -168,6 +168,15 @@ export interface Befund {
   befund: string;
 }
 
+export interface Bericht {
+  zeitpunkt: string;
+  pruefwert: string | null;
+  dokumente: number;
+  geloescht: number;
+  siegel: number;
+  protokoll: number;
+}
+
 export interface Einstellungen {
   firma: string;
   anschrift: string;
@@ -316,7 +325,9 @@ export const api = {
     return aufruf<Dokument>("/api/dokumente", { method: "POST", body: form });
   },
   pruefung: (dateien = false) =>
-    aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number }>(`/api/pruefung${dateien ? "?dateien=1" : ""}`),
+    aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number; bericht: Bericht }>(
+      `/api/pruefung${dateien ? "?dateien=1" : ""}`,
+    ),
 };
 
 export const exportUrl = (von: string, bis: string) =>

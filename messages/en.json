@@ -284,5 +284,13 @@
   "doc_text": "Text",
   "doc_text_file": "{anzahl} characters from the file",
   "doc_text_ocr": "{anzahl} characters from text recognition",
-  "doc_text_error": "not readable"
+  "doc_text_error": "not readable",
+  "report_title": "Audit report",
+  "report_print": "Print or save as PDF",
+  "report_time": "Checked at",
+  "report_result": "Result",
+  "report_checked": "Checked",
+  "report_counts": "{dokumente} documents ({geloescht} deleted), {siegel} seals, {protokoll} log entries.",
+  "report_value": "Check value",
+  "report_hint": "The check value is the head of the hash chain. Whoever notes it can later show that nothing was changed up to that entry."
 }

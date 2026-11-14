@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Export } from "../components/Export.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
+import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
 export function AuditPage() {
@@ -12,7 +13,7 @@ export function AuditPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title={m.audit_title()} intro={m.audit_intro()} />
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 print:hidden">
         <button
           type="button"
           onClick={() => pruefung.refetch()}
@@ -37,6 +38,44 @@ export function AuditPage() {
           </p>
         )}
       </div>
+      {pruefung.data && (
+        <section aria-labelledby="bericht" className="flex flex-col gap-2 rounded-lg border border-border p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="bericht" className="m-0 font-semibold text-base">
+              {m.report_title()}
+            </h2>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="h-8 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle print:hidden"
+            >
+              {m.report_print()}
+            </button>
+          </div>
+          <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted">{m.report_time()}</dt>
+            <dd className="m-0">{zeitpunkt(pruefung.data.bericht.zeitpunkt)}</dd>
+            <dt className="text-muted">{m.report_result()}</dt>
+            <dd className="m-0 font-medium">
+              {pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) })}
+            </dd>
+            <dt className="text-muted">{m.report_checked()}</dt>
+            <dd className="m-0 tabular-nums">
+              {m.report_counts({
+                dokumente: String(pruefung.data.bericht.dokumente),
+                geloescht: String(pruefung.data.bericht.geloescht),
+                siegel: String(pruefung.data.bericht.siegel),
+                protokoll: String(pruefung.data.bericht.protokoll),
+              })}
+              {pruefung.data.dateienGeprueft !== undefined &&
+                ` ${m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })}`}
+            </dd>
+            <dt className="text-muted">{m.report_value()}</dt>
+            <dd className="m-0 break-all font-mono text-xs">{pruefung.data.bericht.pruefwert ?? "–"}</dd>
+          </dl>
+          <p className="m-0 text-muted text-xs">{m.report_hint()}</p>
+        </section>
+      )}
       {!!pruefung.data?.befunde.length && (
         // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
         <section aria-label={m.audit_title()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
@@ -65,7 +104,11 @@ export function AuditPage() {
           </table>
         </section>
       )}
-      {ich.data && <Export freigabe={ich.data.zeitraum} />}
+      {ich.data && (
+        <div className="print:hidden">
+          <Export freigabe={ich.data.zeitraum} />
+        </div>
+      )}
     </div>
   );
 }
