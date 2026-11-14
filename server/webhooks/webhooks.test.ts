@@ -1,4 +1,6 @@
+import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { verschluesseln } from "../crypto.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { signatur, zustellen } from "./webhooks.ts";
@@ -111,6 +113,30 @@ describe.skipIf(!testDatenbankUrl)("Webhooks gegen Postgres", () => {
     const ergebnis = await zustellen(t.db, t.schluessel, r.senden);
     expect(ergebnis.aus).toBeUndefined();
     expect(ergebnis.liste).toEqual({ zugestellt: 0, fehler: null });
+  });
+
+  it("stellt den übrigen Webhooks zu, wenn sich ein Geheimnis nicht entschlüsseln lässt", async () => {
+    // Etwa nach einem Wechsel von BELEGT_SCHLUESSEL: dieses Geheimnis ist mit einem anderen Schlüssel verschlüsselt
+    const [kaputt] = await t.sql<{ id: string }[]>`
+      insert into webhooks (name, url, arten, ciphertext)
+      values ('fremder-schluessel', 'https://empfang.example/fremd', ${["dokument.aufgenommen"]},
+              ${verschluesseln(randomBytes(32), Buffer.from("whsec_x"))})
+      returning id`;
+    const { id } = await webhook("heil", ["dokument.aufgenommen"]);
+    try {
+      await hochladen("trotz-kaputtem-webhook");
+      const r = empfaenger();
+      const ergebnis = await zustellen(t.db, t.schluessel, r.senden);
+      expect(ergebnis.heil).toEqual({ zugestellt: 1, fehler: null });
+      expect(ergebnis["fremder-schluessel"]).toEqual({
+        zugestellt: 0,
+        fehler: expect.stringMatching(/entschlüsseln/),
+      });
+      const [w] = await t.sql`select letzter_fehler from webhooks where id = ${kaputt!.id}`;
+      expect(w!.letzter_fehler).toMatch(/entschlüsseln/);
+    } finally {
+      await t.sql`update webhooks set aktiv = false where id in (${kaputt!.id}, ${id})`;
+    }
   });
 
   it("hält die Ereignisse in Postgres fest: nur anhängen", async () => {
