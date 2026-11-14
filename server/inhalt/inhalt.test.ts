@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFName, StandardFonts } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
@@ -13,6 +13,19 @@ async function pdf(text: string, anhang?: { name: string; xml: Uint8Array }): Pr
   const font = await doc.embedFont(StandardFonts.Helvetica);
   doc.addPage().drawText(text, { x: 50, y: 700, font, size: 12 });
   if (anhang) await doc.attach(anhang.xml, anhang.name, { mimeType: "text/xml" });
+  return doc.save();
+}
+
+/** Ein PDF, dessen Schrift „B“ auf U+0000 abbildet (ToUnicode), wie es kaputte Schriften in echten PDFs tun */
+async function pdfMitNul(): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  doc.addPage().drawText("Nulltext AB", { x: 50, y: 700, font, size: 12 });
+  await doc.flush();
+  const cmap =
+    "/CIDInit /ProcSet findresource begin 12 dict begin begincmap /CMapName /X def 1 begincodespacerange <00> <FF> endcodespacerange 1 beginbfchar <42> <0000> endbfchar endcmap CMapName currentdict /CMap defineresource pop end end";
+  const schrift = doc.context.lookup(font.ref) as unknown as { set: (k: PDFName, v: unknown) => void };
+  schrift.set(PDFName.of("ToUnicode"), doc.context.register(doc.context.stream(cmap)));
   return doc.save();
 }
 
@@ -80,5 +93,34 @@ describe.skipIf(!testDatenbankUrl)("Inhalte gegen Postgres", () => {
 
     const v = await (await als(`/api/dokumente/${xrechnung.id}/vorschlag`)).json();
     expect(v).toMatchObject({ vorschlag: null, erechnung: { datum: "2026-04-02", nummer: "2026/77" } });
+  });
+
+  it("speichert Text mit NUL-Zeichen, die Postgres in text nicht nimmt", async () => {
+    const d = await hochladen(await pdfMitNul(), "nul.pdf");
+    expect(await inhalteErzeugen(t)).toEqual({ gelesen: 1, fehler: 0 });
+    const i = await (await als(`/api/dokumente/${d.id}/inhalt`)).json();
+    expect(i).toMatchObject({ fehler: null });
+    expect(i.textLaenge).toBeGreaterThan(0);
+  });
+
+  it("vergisst den gelesenen Text eines gelöschten Dokuments, auch in der Suche", async () => {
+    const d = await hochladen(await pdf("Schlafzimmerkommode Rechnung"), "kommode.pdf");
+    await inhalteErzeugen(t);
+    const suche = async () =>
+      (await (await als("/api/dokumente?suche=Schlafzimmerkommode&gruppe=geloescht")).json()).length +
+      (await (await als("/api/dokumente?suche=Schlafzimmerkommode")).json()).length;
+    expect(await suche()).toBe(1);
+    const json = (body: unknown): RequestInit => ({
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    expect(
+      (await als(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-01-02" }))).status,
+    ).toBe(201);
+    // Frei Abgelegtes löscht der Inhaber sofort; die Datei ist weg, ihr Text darf nicht bleiben
+    expect((await als(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).status).toBe(201);
+    expect(await (await als(`/api/dokumente/${d.id}/inhalt`)).json()).toBeNull();
+    expect(await suche()).toBe(0);
   });
 });

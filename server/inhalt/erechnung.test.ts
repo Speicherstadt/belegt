@@ -60,4 +60,13 @@ describe("E-Rechnung lesen", () => {
     expect(inCent(null)).toBeNull();
     expect(inCent("99999999999.99")).toBe(9999999999999);
   });
+
+  it("nimmt kein Rechnungsdatum, das es nicht gibt (BT-2)", () => {
+    const ubl = (tag: string) => `<Invoice><ID>1</ID><IssueDate>${tag}</IssueDate></Invoice>`;
+    expect(eRechnungLesen(ubl("2026-13-45"))?.datum).toBeNull();
+    expect(eRechnungLesen(ubl("2026-02-30"))?.datum).toBeNull();
+    expect(eRechnungLesen(ubl("2028-02-29"))?.datum).toBe("2028-02-29");
+    const cii = `<CrossIndustryInvoice><ExchangedDocument><IssueDateTime><DateTimeString>20250229</DateTimeString></IssueDateTime></ExchangedDocument></CrossIndustryInvoice>`;
+    expect(eRechnungLesen(cii)?.datum).toBeNull();
+  });
 });
