@@ -7,6 +7,7 @@ describe("readEnv", () => {
       PORT: 3000,
       DOCUMENTS_DIR: "data/dokumente",
       BETTER_AUTH_URL: "http://localhost:3000",
+      ABRUF_MINUTEN: 5,
     });
   });
 

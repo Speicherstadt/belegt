@@ -201,5 +201,22 @@
   "rules_inactive": "aus",
   "rules_enable": "Einschalten",
   "rules_disable": "Ausschalten",
-  "rules_failed": "Regel fehlgeschlagen: {meldung}"
+  "rules_failed": "Regel fehlgeschlagen: {meldung}",
+  "mailboxes_title": "Postfächer",
+  "mailboxes_intro": "Belegt holt neue Mails per IMAP nur lesend ab, alle paar Minuten im Hintergrund. Das Passwort liegt verschlüsselt in der Datenbank.",
+  "mailboxes_none": "Noch keine Postfächer.",
+  "mailboxes_name": "Name",
+  "mailboxes_host": "Server",
+  "mailboxes_port": "Port",
+  "mailboxes_tls": "TLS",
+  "mailboxes_user": "Benutzer",
+  "mailboxes_password": "Passwort",
+  "mailboxes_folder": "Ordner",
+  "mailboxes_create": "Postfach hinzufügen",
+  "mailboxes_fetch": "Jetzt abrufen",
+  "mailboxes_last": "Zuletzt: {wann}",
+  "mailboxes_never": "Noch nicht abgerufen",
+  "mailboxes_error": "Fehler: {meldung}",
+  "mailboxes_result": "{neu} neu, {doppelt} schon vorhanden",
+  "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}"
 }

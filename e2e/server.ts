@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +8,7 @@ import { createApp } from "../server/app.ts";
 import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrieren } from "../server/db/migrieren.ts";
+import { imapOeffnen } from "../server/mail/imapflow.ts";
 
 /*
  * Server für die E2E-Tests: frische Datenbank neben E2E_DATABASE_URL (sie wird gelöscht und neu angelegt, nie auf echte
@@ -34,5 +36,9 @@ const auth = createAuth({
   baseURL: process.env.E2E_APP_URL ?? "http://localhost:5185",
   einrichtungscode: "e2e-einrichtungscode",
 });
-Bun.serve({ port, fetch: createApp({ db, speicher, auth }).fetch, maxRequestBodySize: 110 * 1024 * 1024 });
+Bun.serve({
+  port,
+  fetch: createApp({ db, speicher, auth, schluessel: randomBytes(32), oeffnen: imapOeffnen }).fetch,
+  maxRequestBodySize: 110 * 1024 * 1024,
+});
 console.log(`E2E-Server auf Port ${port}`);

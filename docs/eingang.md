@@ -15,6 +15,15 @@ Thunderbird oder Google Takeout); Belegt teilt ein Archiv in einzelne Mails. Jed
 denselben Rohdaten nimmt Belegt nicht zweimal auf, ein wiederholter Import desselben Archivs ist also harmlos. Auf der
 Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 
+## Postfächer
+
+Unter Quellen trägst du Postfächer ein (IMAP: Server, Port, TLS, Benutzer, Passwort, Ordner). Der Worker
+(`bun server/worker.ts`, eigener Prozess) holt alle `ABRUF_MINUTEN` neue Mails ab, nur lesend: Belegt markiert nichts
+als gelesen und löscht nichts. Er merkt sich je Postfach die letzte UID; nummeriert der Server das Postfach neu
+(UIDVALIDITY), beginnt er von vorn, und doppelte Mails erkennt der Import. „Jetzt abrufen“ startet einen Abruf sofort.
+Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
+`BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
+
 ## Regeln
 
 Regeln (Seite Quellen) schlagen eine Art vor, etwa „Mails von `telekom.de` mit PDF sind Belege“. Für einen Anhang

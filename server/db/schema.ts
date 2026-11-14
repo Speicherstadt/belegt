@@ -3,6 +3,7 @@ import {
   bigint,
   boolean,
   check,
+  customType,
   date,
   index,
   integer,
@@ -12,6 +13,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+
+const bytea = customType<{ data: Buffer }>({ dataType: () => "bytea" });
 
 export * from "./auth-schema.ts";
 
@@ -171,4 +174,30 @@ export const regeln = pgTable(
       sql`${t.art} in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')`,
     ),
   ],
+);
+
+/**
+ * Postfach, das der Worker per IMAP abruft. Das Passwort liegt nur verschlüsselt in ciphertext (server/crypto.ts),
+ * das Audit-Log lässt diese Spalte aus. letzte_uid merkt sich, bis wohin abgeholt ist; ändert sich uid_validity, ist
+ * das Postfach neu nummeriert und der Abruf beginnt von vorn (doppelte Mails erkennt der Import).
+ */
+export const quellen = pgTable(
+  "quellen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    host: text("host").notNull(),
+    port: integer("port").notNull().default(993),
+    tls: boolean("tls").notNull().default(true),
+    benutzer: text("benutzer").notNull(),
+    ordner: text("ordner").notNull().default("INBOX"),
+    ciphertext: bytea("ciphertext").notNull(),
+    letzteUid: bigint("letzte_uid", { mode: "number" }).notNull().default(0),
+    uidValidity: bigint("uid_validity", { mode: "number" }),
+    letzterAbruf: timestamp("letzter_abruf", { withTimezone: true }),
+    letzterFehler: text("letzter_fehler"),
+    aktiv: boolean("aktiv").notNull().default(true),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("quellen_port", sql`${t.port} between 1 and 65535`)],
 );

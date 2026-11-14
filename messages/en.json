@@ -201,5 +201,22 @@
   "rules_inactive": "off",
   "rules_enable": "Turn on",
   "rules_disable": "Turn off",
-  "rules_failed": "Rule failed: {meldung}"
+  "rules_failed": "Rule failed: {meldung}",
+  "mailboxes_title": "Mailboxes",
+  "mailboxes_intro": "Belegt fetches new mails read-only via IMAP every few minutes in the background. The password is stored encrypted in the database.",
+  "mailboxes_none": "No mailboxes yet.",
+  "mailboxes_name": "Name",
+  "mailboxes_host": "Server",
+  "mailboxes_port": "Port",
+  "mailboxes_tls": "TLS",
+  "mailboxes_user": "User",
+  "mailboxes_password": "Password",
+  "mailboxes_folder": "Folder",
+  "mailboxes_create": "Add mailbox",
+  "mailboxes_fetch": "Fetch now",
+  "mailboxes_last": "Last: {wann}",
+  "mailboxes_never": "Not fetched yet",
+  "mailboxes_error": "Error: {meldung}",
+  "mailboxes_result": "{neu} new, {doppelt} already there",
+  "mailboxes_failed": "Mailbox failed: {meldung}"
 }

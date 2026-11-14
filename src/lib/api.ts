@@ -97,6 +97,20 @@ export interface Regel {
   aktiv: boolean;
 }
 
+export interface Quelle {
+  id: string;
+  name: string;
+  host: string;
+  port: number;
+  tls: boolean;
+  benutzer: string;
+  ordner: string;
+  letzteUid: number;
+  letzterAbruf: string | null;
+  letzterFehler: string | null;
+  aktiv: boolean;
+}
+
 export interface Sperre {
   id: string;
   grund: string;
@@ -195,6 +209,18 @@ export const api = {
   regelAnlegen: (r: { name: string; wenn: Regel["bedingung"]; dann: Art }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>
     aufruf<Regel>(`/api/regeln/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),
+  quellen: () => aufruf<Quelle[]>("/api/quellen"),
+  quelleAnlegen: (q: {
+    name: string;
+    host: string;
+    port: number;
+    tls: boolean;
+    benutzer: string;
+    passwort: string;
+    ordner: string;
+  }) => aufruf<Quelle>("/api/quellen", json(q)),
+  quelleAbrufen: (id: string) =>
+    aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
   sperren: () => aufruf<Sperre[]>("/api/sperren"),
   sperreAnlegen: (eingabe: { grund: string; von: string; bis: string }) =>
     aufruf<Sperre>("/api/sperren", json(eingabe)),

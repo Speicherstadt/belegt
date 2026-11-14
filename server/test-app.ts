@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -6,13 +7,14 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import type postgres from "postgres";
 import { createApp } from "./app.ts";
 import { createAuth } from "./auth.ts";
+import type { Oeffnen } from "./mail/abruf.ts";
 import { testDatenbank } from "./test-db.ts";
 
 const BASIS = "http://localhost:3000";
 export const EINRICHTUNGSCODE = "test-einrichtungscode";
 
 /** App mit echter Anmeldung, eigener Testdatenbank und eigenem Speicher; für Tests gegen Postgres */
-export async function testApp({ begrenzen = false }: { begrenzen?: boolean } = {}) {
+export async function testApp({ begrenzen = false, oeffnen }: { begrenzen?: boolean; oeffnen?: Oeffnen } = {}) {
   const sql: postgres.Sql = await testDatenbank();
   const verzeichnis = await mkdtemp(join(tmpdir(), "belegt-test-"));
   const db = drizzle(sql);
@@ -24,7 +26,8 @@ export async function testApp({ begrenzen = false }: { begrenzen?: boolean } = {
     einrichtungscode: EINRICHTUNGSCODE,
     begrenzen,
   });
-  const app = createApp({ db, speicher, auth });
+  const schluessel = randomBytes(32);
+  const app = createApp({ db, speicher, auth, schluessel, oeffnen });
 
   /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */
   const anfrage = (pfad: string, init: RequestInit = {}, cookie?: string) =>
@@ -60,5 +63,5 @@ export async function testApp({ begrenzen = false }: { begrenzen?: boolean } = {
     await rm(verzeichnis, { recursive: true, force: true });
   }
 
-  return { sql, db, speicher, app, anfrage, registrieren, aufraeumen };
+  return { sql, db, speicher, schluessel, app, anfrage, registrieren, aufraeumen };
 }

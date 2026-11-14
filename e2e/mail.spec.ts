@@ -71,3 +71,25 @@ test("Regel anlegen, Mail mit Anhang importieren, Vorschlag übernehmen", async 
     .setInputFiles({ name: "rechnung.eml", mimeType: "message/rfc822", buffer: rechnungsmail(info.project.name) });
   await expect(page.getByRole("status")).toHaveText("0 neu, 1 schon vorhanden");
 });
+
+test("ein Postfach hinzufügen; ein Abruf gegen einen nicht erreichbaren Server zeigt den Fehler", async ({
+  page,
+}, info) => {
+  await page.goto("/quellen");
+  const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
+  await postfaecher.getByLabel("Name").fill(`rechnung-${info.project.name}`);
+  await postfaecher.getByLabel("Server").fill("127.0.0.1");
+  await postfaecher.getByLabel("Port").fill("1");
+  await postfaecher.getByLabel("Benutzer").fill("rechnung@example.org");
+  await postfaecher.getByLabel("Passwort").fill("geheim-im-test");
+  await postfaecher.getByLabel("TLS").uncheck();
+  await postfaecher.getByRole("button", { name: "Postfach hinzufügen" }).click();
+  const eintrag = postfaecher.getByRole("listitem").filter({ hasText: `rechnung-${info.project.name}` });
+  await expect(eintrag).toContainText("Noch nicht abgerufen");
+  await eintrag.getByRole("button", { name: "Jetzt abrufen" }).click();
+  await expect(eintrag).toContainText("Fehler:");
+  await expect(page.getByText("geheim-im-test")).toHaveCount(0);
+  expect(
+    (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations,
+  ).toEqual([]);
+});

@@ -24,6 +24,14 @@ import {
   zurueckziehen as loeschungZurueckziehen,
   regelVerletzt,
 } from "./loeschung/loeschung.ts";
+import {
+  abrufen,
+  type Oeffnen,
+  QuelleEingabe,
+  anlegen as quelleAnlegen,
+  listen as quellenListen,
+  aktivSetzen as quelleSchalten,
+} from "./mail/abruf.ts";
 import { importieren, mailZuDokument } from "./mail/import.ts";
 import {
   aktivSetzen,
@@ -69,7 +77,7 @@ const akteur = (n: Angemeldet) => `nutzer:${n.email}`;
  * Speicher, Anmeldung) antworten nur /healthz und 404. Alles unter /api außer /api/auth verlangt eine Sitzung;
  * schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen.
  */
-export function createApp(umgebung?: Umgebung & { auth: Auth }) {
+export function createApp(umgebung?: Umgebung & { auth: Auth; schluessel?: Buffer; oeffnen?: Oeffnen }) {
   const app = new Hono<{ Variables: { nutzer: Angemeldet } }>();
 
   /** Für Container und Überwachung: antwortet, sobald der Server läuft */
@@ -271,6 +279,39 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
         ? await aktivSetzen(umgebung.db, id.data, c.req.param("schalter") === "aktivieren", akteur(c.get("nutzer")))
         : null;
       return r ? c.json(r) : c.json({ fehler: "Nicht gefunden" }, 404);
+    });
+
+    // Postfächer: das Passwort geht nur hinein, nie hinaus; ohne BELEGT_SCHLUESSEL lassen sie sich nicht anlegen
+    app.get("/api/quellen", async (c) => c.json(await quellenListen(umgebung.db)));
+
+    app.post("/api/quellen", async (c) => {
+      if (!umgebung.schluessel) return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
+      const eingabe = QuelleEingabe.safeParse(await c.req.json().catch(() => null));
+      if (!eingabe.success)
+        return c.json(
+          {
+            fehler: "Ungültige Quelle",
+            details: eingabe.error.issues.map((i) => ({ path: i.path, message: i.message })),
+          },
+          400,
+        );
+      return c.json(await quelleAnlegen(umgebung.db, umgebung.schluessel, eingabe.data, akteur(c.get("nutzer"))), 201);
+    });
+
+    app.post("/api/quellen/:id/abrufen", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+      if (!umgebung.schluessel || !umgebung.oeffnen)
+        return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
+      return c.json(await abrufen(umgebung, umgebung.schluessel, id.data, umgebung.oeffnen));
+    });
+
+    app.post("/api/quellen/:id/:schalter{aktivieren|deaktivieren}", async (c) => {
+      const id = Id.safeParse(c.req.param("id"));
+      const q = id.success
+        ? await quelleSchalten(umgebung.db, id.data, c.req.param("schalter") === "aktivieren", akteur(c.get("nutzer")))
+        : null;
+      return q ? c.json(q) : c.json({ fehler: "Nicht gefunden" }, 404);
     });
 
     app.get("/api/sperren", async (c) => c.json(await sperrenListen(umgebung.db)));

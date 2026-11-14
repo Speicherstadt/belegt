@@ -11,6 +11,10 @@ const Schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
   /** Adresse, unter der Belegt erreichbar ist, etwa https://belegt.firma.de */
   BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
+  /** Schlüssel für Geheimnisse in der Datenbank (Passwörter von Postfächern), 32 Bytes base64 */
+  BELEGT_SCHLUESSEL: z.string().min(40).optional(),
+  /** Abstand zwischen zwei Abrufen der Postfächer im Worker, in Minuten */
+  ABRUF_MINUTEN: z.coerce.number().int().min(1).max(1440).default(5),
 });
 
 export type Env = z.infer<typeof Schema>;
