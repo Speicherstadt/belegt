@@ -33,6 +33,7 @@ async function pdfMit(text: string) {
 function dienst(antwort: (name: string) => Response | Promise<Response>) {
   const anfragen: { url: string; name: string; groesse: number }[] = [];
   const abfragen: Abfragen = async (url, init) => {
+    if (url.endsWith("/health")) return antwort("/health");
     const datei = (init.body as FormData).get("files") as File;
     anfragen.push({ url, name: datei.name, groesse: datei.size });
     return antwort(datei.name);
@@ -86,6 +87,21 @@ describe("Ansicht als PDF für Office-Dateien", () => {
       ),
     ).rejects.toThrow("zu groß");
     await expect(zuPdf(strToU8("x"), "text/plain", "http://v", d)).rejects.toThrow("Keine Ansicht");
+  });
+
+  it("hält eigenes Zeitlimit beim gesunden Dienst für einen Fehler der Datei, sonst für einen Ausfall", async () => {
+    const zeitlimit =
+      (gesund: boolean): Abfragen =>
+      async (url) => {
+        if (url.endsWith("/health")) return new Response("", { status: gesund ? 200 : 503 });
+        throw new DOMException("Zeitlimit", "TimeoutError");
+      };
+    await expect(zuPdf(docx(), OFFICE_TYPEN.docx, "http://v", { abfragen: zeitlimit(true) })).rejects.toThrow(
+      "Nicht umwandelbar (Zeitlimit)",
+    );
+    await expect(zuPdf(docx(), OFFICE_TYPEN.docx, "http://v", { abfragen: zeitlimit(false) })).rejects.toMatchObject({
+      nichtErreichbar: true,
+    });
   });
 });
 
@@ -171,6 +187,27 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
     // Auch ein Worker, der gerade umwandelt, bringt sie nicht zurück
     await t.sql`insert into ansichten (dokument_id, pdf) values (${d.id}, ${Buffer.from(pdf)})`;
     expect(await t.sql`select 1 from ansichten where dokument_id = ${d.id}`).toHaveLength(0);
+  });
+
+  it("hält eine Datei fest, an der der Dienst sein Zeitlimit überschreitet, statt alle späteren aufzuhalten", async () => {
+    // Gotenberg antwortet 503, wenn eine Umwandlung länger als --api-timeout dauert (pkg/modules/api/middlewares.go)
+    const schwer = await hoch(strToU8("{\\rtf1\\ansi Riesige Tabelle}"), "schwer.rtf");
+    const leicht = await hoch(docx(), "leicht.docx");
+    const pdf = await pdfMit("Leicht");
+    const d = dienst((name) => (name === "dokument.rtf" ? new Response("", { status: 503 }) : new Response(pdf)));
+    for (let lauf = 0; lauf < 3; lauf++) await ansichtenErzeugen(t, "http://vorschau", { abfragen: d.abfragen });
+    expect((await (await als(`/api/dokumente/${leicht.id}`)).json()).ansicht).toBe(true);
+    expect(await t.sql`select fehler from ansichten where dokument_id = ${schwer.id}`).toEqual([
+      { fehler: "Nicht umwandelbar (503)" },
+    ]);
+    expect(d.anfragen.filter((a) => a.name === "dokument.rtf")).toHaveLength(1);
+  });
+
+  it("wartet weiter, wenn der Dienst 503 antwortet und auch sein Gesundheitscheck scheitert", async () => {
+    const spaeter = await hoch(strToU8("{\\rtf1\\ansi Spaeter}"), "spaeter.rtf");
+    const d = dienst(() => new Response("", { status: 503 }));
+    expect(await ansichtenErzeugen(t, "http://vorschau", { abfragen: d.abfragen })).toMatchObject({ erzeugt: 0 });
+    expect(await t.sql`select 1 from ansichten where dokument_id = ${spaeter.id}`).toHaveLength(0);
   });
 });
 

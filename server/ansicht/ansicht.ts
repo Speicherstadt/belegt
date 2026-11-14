@@ -52,6 +52,13 @@ export async function zuPdf(
   if (!endung) throw new Error(`Keine Ansicht für ${mimeType}`);
   const form = new FormData();
   form.append("files", new File([new Uint8Array(bytes)], `dokument.${endung}`));
+  // Gotenberg antwortet auch 503, wenn eine Umwandlung sein Zeitlimit (--api-timeout) überschreitet. Ist der Dienst
+  // dabei gesund, liegt es an der Datei; sonst stünde sie in jedem Lauf vorn und hielte alle späteren auf.
+  const gesund = () =>
+    abfragen(new URL("/health", url).href, { method: "GET", signal: AbortSignal.timeout(10_000) }).then(
+      (r) => r.ok,
+      () => false,
+    );
   let res: Response;
   try {
     res = await abfragen(new URL("/forms/libreoffice/convert", url).href, {
@@ -59,10 +66,13 @@ export async function zuPdf(
       body: form,
       signal: AbortSignal.timeout(zeitlimit),
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError" && (await gesund()))
+      throw new Error("Nicht umwandelbar (Zeitlimit)");
     throw nichtErreichbar("Vorschau-Dienst nicht erreichbar");
   }
-  if ([502, 503, 504].includes(res.status)) throw nichtErreichbar(`Vorschau-Dienst antwortet ${res.status}`);
+  if ([502, 503, 504].includes(res.status) && !(await gesund()))
+    throw nichtErreichbar(`Vorschau-Dienst antwortet ${res.status}`);
   if (!res.ok) throw new Error(`Nicht umwandelbar (${res.status})`);
   const pdf = await begrenztLesen(res);
   if (new TextDecoder().decode(pdf.subarray(0, 5)) !== "%PDF-") throw new Error("Antwort ist kein PDF");

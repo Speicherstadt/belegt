@@ -83,7 +83,8 @@ docker compose --profile vorschau up -d
 Mit `VORSCHAU_URL=http://gotenberg:3000` in `.env` schickt der Worker Word, Excel, PowerPoint, OpenDocument und RTF an
 [Gotenberg](https://gotenberg.dev) und legt das PDF als Ansicht ab. LibreOffice läuft dort im eigenen Container und im
 Netz `vorschau` ohne Internet, weil es fremde Dateien öffnet. Ist der Dienst nicht erreichbar, versucht es der Worker
-später wieder; Dateien von vorher bekommen ihre Ansicht nachträglich.
+später wieder; Dateien von vorher bekommen ihre Ansicht nachträglich. Eine Datei, an der Gotenberg sein Zeitlimit
+(`--api-timeout`, Vorgabe 30 Sekunden) überschreitet, bekommt keine Ansicht.
 
 ## Texterkennung
 
