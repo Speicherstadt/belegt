@@ -28,6 +28,22 @@ const Id = z.uuid();
 /** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
 const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
 
+/** Dateiname für filename* nach RFC 8187: encodeURIComponent lässt ' ( ) * stehen, die dort nicht erlaubt sind */
+const dateinameKodiert = (name: string) =>
+  encodeURIComponent(name).replace(/['()*]/g, (z) => `%${z.charCodeAt(0).toString(16).toUpperCase()}`);
+
+/**
+ * Ob eine schreibende Anfrage von einer fremden Seite kommt (CSRF): Das Cookie schickt der Browser auch bei Formularen
+ * anderer Seiten unter derselben Domain mit. Browser setzen Origin und Sec-Fetch-Site; Aufrufe ohne beide (curl,
+ * andere Programme) laufen weiter.
+ */
+function vonFremderSeite(headers: Headers, eigeneHerkunft: string): boolean {
+  const seite = headers.get("sec-fetch-site");
+  if (seite === "cross-site" || seite === "same-site") return true;
+  const herkunft = headers.get("origin");
+  return herkunft !== null && herkunft !== eigeneHerkunft;
+}
+
 /** Akteur im Audit-Log: wer angemeldet ist, mit Adresse, damit das Protokoll ohne die Tabelle user lesbar bleibt */
 const akteur = (n: Angemeldet) => `nutzer:${n.email}`;
 
@@ -44,6 +60,7 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
 
   if (umgebung) {
     const { auth } = umgebung;
+    const eigeneHerkunft = new URL(auth.options.baseURL as string).origin;
     app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
     /** Öffentlich: ob es schon einen Inhaber gibt (Anmelden oder Einrichten) */
@@ -58,8 +75,10 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
         email: sitzung.user.email,
         role: (sitzung.user as { role?: Rolle }).role ?? "pruefer",
       };
-      if (c.req.method !== "GET" && c.req.method !== "HEAD" && !darfSchreiben(nutzer.role)) {
-        return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
+      const schreibt = c.req.method !== "GET" && c.req.method !== "HEAD";
+      if (schreibt && !darfSchreiben(nutzer.role)) return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
+      if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {
+        return c.json({ fehler: "Anfrage von einer fremden Seite" }, 403);
       }
       c.set("nutzer", nutzer);
       return next();
@@ -139,7 +158,7 @@ export function createApp(umgebung?: Umgebung & { auth: Auth }) {
       return c.body(new Uint8Array(bytes), 200, {
         "Content-Type": dokument.mimeType,
         // ?ansicht=1 zeigt PDFs und Bilder im Browser an, alles andere wird immer heruntergeladen
-        "Content-Disposition": `${c.req.query("ansicht") && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(dokument.dateiname ?? dokument.sha256)}`,
+        "Content-Disposition": `${c.req.query("ansicht") && ANSICHT.has(dokument.mimeType) ? "inline" : "attachment"}; filename*=UTF-8''${dateinameKodiert(dokument.dateiname ?? dokument.sha256)}`,
         "X-Content-Type-Options": "nosniff",
       });
     });
