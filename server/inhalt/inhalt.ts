@@ -2,9 +2,15 @@ import { fileURLToPath } from "node:url";
 import { eq, sql } from "drizzle-orm";
 import { extractText, getDocumentProxy } from "unpdf";
 import { inhalte } from "../db/schema.ts";
+import { dateityp } from "../dokumente/dateityp.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { type ERechnung, eRechnungLesen, speicherbar } from "./erechnung.ts";
 import { ausfuehren, bildText, ocrVerfuegbar, pdfScanText } from "./ocr.ts";
+import { OFFICE_TYPEN, officeText } from "./office.ts";
+
+const OFFICE: string[] = Object.values(OFFICE_TYPEN);
+/** Was der Worker immer liest (ohne Texterkennung); unbekannte Dateien prüft er auf Office oder Text */
+export const LESBAR = ["application/pdf", "application/xml", "text/plain", "application/octet-stream", ...OFFICE];
 
 /** So viel Text wird höchstens gespeichert; für die Suche reicht das, das Original bleibt vollständig */
 const MAX_TEXT = 1_000_000;
@@ -51,8 +57,12 @@ async function pdfLesen(bytes: Uint8Array, ocr: boolean): Promise<Gelesen> {
  * Liest Text und E-Rechnung aus einer Datei. Mit ocr gehen Bilder und PDFs ohne Text durch die Texterkennung, sonst
  * ergeben sie leeren Text.
  */
-export async function lesen(bytes: Uint8Array, mimeType: string, { ocr = false } = {}): Promise<Gelesen> {
+export async function lesen(bytes: Uint8Array, gespeichert: string, { ocr = false } = {}): Promise<Gelesen> {
+  // Ältere Dokumente stehen als unbekannte Datei da; ihr Typ kommt dann aus dem Inhalt
+  const mimeType = gespeichert === "application/octet-stream" ? dateityp(bytes) : gespeichert;
   if (mimeType === "application/pdf") return pdfLesen(bytes, ocr);
+  if (OFFICE.includes(mimeType)) return { text: fuerDatenbank(officeText(bytes, mimeType)), erechnung: null };
+  if (mimeType === "text/plain") return { text: fuerDatenbank(new TextDecoder().decode(bytes)), erechnung: null };
   if (ocr && BILDER.includes(mimeType))
     return { text: fuerDatenbank(await bildText(bytes)), erechnung: null, ocr: true };
   if (mimeType === "application/xml") {
@@ -87,6 +97,10 @@ export async function inhalteErzeugen(
   { db, speicher }: Umgebung,
   { stapel = 20, ocr = ocrVerfuegbar(), zeitlimit }: { stapel?: number; ocr?: boolean; zeitlimit?: number } = {},
 ) {
+  const lesbar = sql`array[${sql.join(
+    LESBAR.map((b) => sql`${b}`),
+    sql`, `,
+  )}]::text[]`;
   const bilder = sql`array[${sql.join(
     BILDER.map((b) => sql`${b}`),
     sql`, `,
@@ -94,9 +108,10 @@ export async function inhalteErzeugen(
   const offen = await db.execute<{ id: string; sha256: string; mime_type: string }>(sql`
     select d.id, d.sha256, d.mime_type from dokumente d
       left join inhalte i on i.dokument_id = d.id
-     where (d.mime_type in ('application/pdf', 'application/xml') or (${ocr} and d.mime_type = any(${bilder})))
+     where (d.mime_type = any(${lesbar}) or (${ocr} and d.mime_type = any(${bilder})))
        and (i.dokument_id is null
-            or (${ocr} and not i.ocr and i.fehler is null and d.mime_type <> 'application/xml'
+            or (${ocr} and not i.ocr and i.fehler is null
+                and (d.mime_type = 'application/pdf' or d.mime_type = any(${bilder}))
                 and length(regexp_replace(i.text, '[[:space:]]', '', 'g')) < 20))
        and not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
      order by d.eingegangen_am limit ${stapel}`);

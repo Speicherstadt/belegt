@@ -1,7 +1,7 @@
-import { sniff } from "@firsttris/gobd-kern/dateityp";
 import { and, eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import { dokumente, mailAnhaenge, mails } from "../db/schema.ts";
+import { dateityp } from "../dokumente/dateityp.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { aufnehmen } from "../dokumente/dokumente.ts";
 import { emlLesen } from "./eml.ts";
@@ -79,7 +79,7 @@ export async function mailAufnehmen(
         .values({
           sha256: a.sha256,
           groesse: a.groesse,
-          mimeType: sniff(a.bytes)?.mimeType ?? a.mimeType ?? "application/octet-stream",
+          mimeType: dateityp(a.bytes, a.mimeType ?? "application/octet-stream"),
           dateiname: a.dateiname,
           quelle,
         })

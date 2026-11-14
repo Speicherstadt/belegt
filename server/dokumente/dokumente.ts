@@ -1,10 +1,10 @@
 import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
-import { sniff } from "@firsttris/gobd-kern/dateityp";
 import { eq, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumente } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
+import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
 export interface Umgebung {
@@ -26,7 +26,7 @@ export async function aufnehmen(
   eingang: { bytes: Uint8Array; dateiname: string | null; quelle: Quelle; akteur: string },
 ): Promise<Dokument> {
   const sha256 = await speicher.speichern(eingang.bytes);
-  const mimeType = sniff(eingang.bytes)?.mimeType ?? "application/octet-stream";
+  const mimeType = dateityp(eingang.bytes);
   const [neu] = await mitAkteur(db, eingang.akteur, (tx) =>
     tx
       .insert(dokumente)

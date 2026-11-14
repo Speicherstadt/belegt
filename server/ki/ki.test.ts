@@ -118,6 +118,8 @@ describe.skipIf(!testDatenbankUrl)("Vorschläge im Eingang gegen Postgres", () =
     const f = new FormData();
     f.append("datei", new File(["noch ein Dokument"], "n.txt"));
     const d = await (await anfrage("/api/dokumente", { method: "POST", body: f })).json();
+    // Textdateien werden gelesen; der Vorschlag wartet auf ihren Text
+    await inhalteErzeugen(t);
     const kaputt = ollama(() => 503);
     expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: kaputt.abfragen })).toEqual({ erzeugt: 0, fehler: 1 });
     expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: kaputt.abfragen })).toEqual({ erzeugt: 0, fehler: 0 });

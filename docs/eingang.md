@@ -64,8 +64,8 @@ Ein Vorschlag setzt noch keine Frist. Erst wenn du ihn übernimmst, wird das Dok
 ## Suche
 
 Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
-Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs und Nummer und Verkäufer
-einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
+Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs, Office- und Textdateien
+und Nummer und Verkäufer einer E-Rechnung. Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
 und Ausschlüsse mit Minus.
 
 ## Outlook-Datendateien (PST, OST)
@@ -109,3 +109,8 @@ Einordnen übernimmt „Übernehmen“ Datum, „Rechnung <Nummer>“ als Titel 
 passenden Regel, sonst „Buchungsbeleg“. Geprüft wird die Rechnung dabei nicht, und maßgeblich bleibt das Original.
 Bilder (JPEG, PNG, WebP) und PDFs ohne Textebene gehen durch die Texterkennung (Tesseract, Deutsch und Englisch);
 die Seite des Dokuments sagt dann „aus der Texterkennung“. HEIC liest sie nicht.
+
+Aus Word, Excel und PowerPoint (`.docx`, `.xlsx`, `.pptx`) und OpenDocument (`.odt`, `.ods`, `.odp`) kommt der Text
+von Absätzen, Kopf- und Fußzeilen, Zellen, Folien und Notizen, aus reinen Textdateien (`.txt`, `.csv`, `.md`, UTF-8)
+der ganze Inhalt. Den Typ erkennt Belegt am Inhalt, nicht an der Endung. Die alten Formate `.doc`, `.xls` und `.ppt`
+liest es nicht. Dokumente, die vorher als unbekannte Datei eingegangen sind, liest der Worker nach.

@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
 import { kiVorschlaege } from "../db/schema.ts";
-import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
+import { inhaltZu, LESBAR, textZu } from "../inhalt/inhalt.ts";
 import { mailZuDokument } from "../mail/import.ts";
 import { type Abfragen, type KiKonfig, KiVorschlag, kiFragen } from "./ki.ts";
 
@@ -19,8 +19,11 @@ export async function kiVorschlaegeErzeugen(
      where not exists (select 1 from einordnungen e where e.dokument_id = d.id)
        and not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
        and not exists (select 1 from ki_vorschlaege k where k.dokument_id = d.id)
-       -- PDFs, XML und Bilder erst, wenn der Worker ihren Text gelesen hat
-       and (d.mime_type not in ('application/pdf', 'application/xml', 'image/jpeg', 'image/png', 'image/webp')
+       -- Was der Worker liest (PDF, XML, Office, Text, Bilder), erst, wenn sein Text da ist
+       and (not d.mime_type = any(${sql`array[${sql.join(
+         [...LESBAR, "image/jpeg", "image/png", "image/webp"].map((m) => sql`${m}`),
+         sql`, `,
+       )}]::text[]`})
             or exists (select 1 from inhalte i where i.dokument_id = d.id))
      order by d.eingegangen_am limit ${stapel}`);
   let erzeugt = 0;
