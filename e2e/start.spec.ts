@@ -64,7 +64,10 @@ test.describe("auf Englisch", () => {
   test("folgt der Sprache des Browsers", async ({ page }) => {
     await page.goto("/fristen");
     await expect(page.getByRole("heading", { level: 1, name: "Retention" })).toBeVisible();
-    await expect(page.getByRole("row", { name: /Accounting receipts/ })).toContainText("8 years");
+    const beleg = page.getByRole("row", { name: /Accounting receipts/ });
+    await expect(beleg).toContainText("8 years");
+    // Auch die Grundlage kommt aus Paraglide, zitiert wie in den übrigen englischen Texten
+    await expect(beleg).toContainText("§ 147 (1) no. 4 AO");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 });
