@@ -3,6 +3,7 @@ import { z } from "zod";
 import paket from "../../package.json" with { type: "json" };
 import type { Angemeldet, Auth } from "../auth.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import type { OeffnenMit } from "../freigabe/freigabe.ts";
 import type { Oeffnen } from "../mail/abruf.ts";
 import type { OAuthKonfig } from "../mail/oauth.ts";
 
@@ -24,6 +25,8 @@ export type AppUmgebung = Umgebung & {
   kiModell?: { modell: string; host: string };
   /** Origin, der Belegt in einem Frame zeigen darf */
   embedOrigin?: string;
+  /** App für „Öffnen mit …“ (Name und Adresse mit {url}), wenn eingerichtet */
+  oeffnenMit?: OeffnenMit;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
 };

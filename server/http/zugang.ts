@@ -22,7 +22,9 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       c.req.path.startsWith("/api/auth/") ||
       c.req.path === "/api/status" ||
       c.req.path === "/api/openapi.json" ||
-      c.req.path.startsWith("/api/einladung/")
+      c.req.path.startsWith("/api/einladung/") ||
+      // Der Link selbst ist die Berechtigung („Öffnen mit …“, server/freigabe/freigabe.ts)
+      c.req.path.startsWith("/api/freigabe/")
     )
       return next();
     // Programme melden sich mit einem API-Token an, nicht mit dem Cookie; deshalb gilt für sie keine CSRF-Prüfung
@@ -56,7 +58,12 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       nutzer.role === "steuerberatung" &&
       c.req.method === "POST" &&
       /^\/api\/loeschungen\/[^/]+\/bestaetigen$/.test(c.req.path);
-    if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson)
+    // Eine Kopie für „Öffnen mit …“ ist Lesen, auch wenn der Link per POST entsteht
+    const kopie =
+      nutzer.role === "steuerberatung" &&
+      c.req.method === "POST" &&
+      /^\/api\/dokumente\/[^/]+\/freigabe$/.test(c.req.path);
+    if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson && !kopie)
       return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
     if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {
       return c.json({ fehler: "Anfrage von einer fremden Seite" }, 403);

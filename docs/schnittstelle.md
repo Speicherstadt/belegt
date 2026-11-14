@@ -1,7 +1,7 @@
 ---
 title: "Schnittstellen für Programme"
 description: >-
-  API-Tokens, Webhooks mit Signatur und MCP für KI-Assistenten: wie andere Programme Belegt nutzen.
+  API-Tokens, „Öffnen mit …“, Webhooks mit Signatur und MCP für KI-Assistenten: wie andere Programme Belegt nutzen.
 ---
 
 # Schnittstelle für andere Programme
@@ -15,6 +15,24 @@ Unter **Quellen und Schnittstellen** legt der Inhaber ein Token an und kopiert e
 `Authorization: Bearer belegt_…`. Mit dem Recht **Lesen** liest es Dokumente, Originale, Mails und Verlauf, mit
 **Lesen, aufnehmen und einordnen** nimmt es zusätzlich Dateien und Mails auf und ordnet ein. Löschen, bestätigen und
 Einstellungen ändern kann kein Token. Im Protokoll steht `token:<Name>`.
+
+## Öffnen mit einer anderen App
+
+Mit `OEFFNEN_MIT_NAME` und `OEFFNEN_MIT_URL` zeigt die Seite einer Office- oder Textdatei den Knopf „Öffnen mit
+<Name>“, etwa für ein Office im Browser:
+
+```bash
+OEFFNEN_MIT_NAME=Office im Browser
+OEFFNEN_MIT_URL=https://office.firma.de/oeffnen?datei={url}&name={name}
+```
+
+Beim Klick legt Belegt einen Link auf das Original an und öffnet die Adresse in einem neuen Tab, mit dem Link für
+`{url}` und dem Dateinamen für `{name}`. Über den Link holt die App die Datei ohne Anmeldung, zehn Minuten lang und nur
+dieses eine Dokument; nur ihr Origin darf die Antwort im Browser lesen. Inhaber und Steuerberatung dürfen das, der
+Prüfer nicht. Wer wann einen Link anlegte, steht im Protokoll, der Link selbst nicht.
+
+Die App bearbeitet eine Kopie. Was sie speichern will, nimmt sie als neues Dokument mit einem API-Token auf; das Original
+bleibt unverändert.
 
 ## KI-Assistenten (MCP)
 

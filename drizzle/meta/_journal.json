@@ -169,6 +169,13 @@
       "when": 1794683698203,
       "tag": "0023_ansichten",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794685950779,
+      "tag": "0024_freigaben",
+      "breakpoints": true
     }
   ]
 }

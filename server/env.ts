@@ -47,6 +47,13 @@ const Schema = z.object({
   /** Sprachmodell für Vorschläge zur Einordnung, auf eigenem Server (Ollama), etwa http://ollama:11434 */
   KI_URL: z.string().url().optional(),
   KI_MODELL: z.string().min(1).optional(),
+  /** „Öffnen mit …“: Name der App auf dem Knopf und ihre Adresse mit {url} (Link auf die Datei), optional {name} */
+  OEFFNEN_MIT_NAME: z.string().trim().min(1).max(60).optional(),
+  OEFFNEN_MIT_URL: z
+    .string()
+    .url()
+    .refine((u) => /^https?:\/\//.test(u) && u.includes("{url}"), "http(s)-Adresse mit {url}")
+    .optional(),
   /** Vorschau-Dienst mit der Schnittstelle von Gotenberg, etwa http://gotenberg:3000; Ansichten für Office-Dateien */
   VORSCHAU_URL: z.string().url().optional(),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */

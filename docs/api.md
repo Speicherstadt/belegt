@@ -6,7 +6,7 @@ description: >-
 
 # Schnittstelle
 
-Alles unter `/api` außer `/api/auth`, `/api/status` und `/api/einladung/:token` verlangt eine Sitzung (Cookie von
+Alles unter `/api` außer `/api/auth`, `/api/status`, `/api/einladung/:token` und `/api/freigabe/:token` verlangt eine Sitzung (Cookie von
 Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
 Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
 Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
@@ -23,7 +23,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | Aufruf | Wirkung |
 | --- | --- |
 | `POST /api/auth/sign-up/email`, `POST /api/auth/sign-in/email`, `POST /api/auth/sign-out` | Einrichten, Anmelden, Abmelden (Better Auth) |
-| `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; `oidc` (Name des Anbieters oder `null`), `embedOrigin` und `version`; ohne Sitzung |
+| `GET /api/status` | `eingerichtet: true`, sobald es einen Inhaber gibt; `oidc` (Name des Anbieters oder `null`), `embedOrigin`, `version` und `oeffnenMit` (Name der App oder `null`); ohne Sitzung |
 | `GET /api/ich` | der angemeldete Zugang mit Rolle |
 | `GET /api/zugaenge`, `POST /api/einladungen` (`rolle`: `steuerberatung`, oder `pruefer` mit `zeitraum`: `{von, bis}`), `POST /api/einladungen/:id/zurueckziehen` | Zugänge und Einladungen, nur für den Inhaber; die Antwort beim Einladen enthält den Link einmal, gespeichert ist nur der Hash des Tokens, gültig 72 Stunden |
 | `GET /api/tokens`, `POST /api/tokens` (`name`, `recht`: `lesen` oder `schreiben`), `POST /api/tokens/:id/widerrufen` | API-Tokens, nur für den Inhaber mit Sitzung; die Antwort beim Anlegen enthält den Klartext einmal (`klartext`) |
@@ -31,6 +31,8 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/openapi.json` | OpenAPI 3.1 für Programme; ohne Sitzung |
 | `GET /api/webhooks`, `POST /api/webhooks` (`name`, `url`, `arten`), `POST /api/webhooks/:id/aktivieren`, `…/deaktivieren` | Webhooks, nur für den Inhaber; das Geheimnis steht einmal in der Antwort (`geheimnis`); `503` ohne `BELEGT_SCHLUESSEL` ([`schnittstelle.md`](schnittstelle.md)) |
 | `GET /api/einladung/:token` | öffentlich: ob ein Link noch gilt und für welche Rolle |
+| `POST /api/dokumente/:id/freigabe` | Link für „Öffnen mit …“ ([`schnittstelle.md`](schnittstelle.md#öffnen-mit-einer-anderen-app)): `url` (Adresse der App mit Link), `gueltigBis`; auch die Steuerberatung |
+| `GET /api/freigabe/:token` | öffentlich, nur mit dem Link: das Original, zehn Minuten lang; `404` danach, `410` nach der Löschung |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail und über Teile von Dateiname und Titel |
 | `GET /api/dokumente/:id` | ein Dokument |

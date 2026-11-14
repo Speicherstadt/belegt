@@ -50,6 +50,8 @@ Bun.serve({
     oeffnen: imapOeffnen,
     // Die Seite, die Belegt im Frame zeigen darf; der Test baut sie im Browser nach (e2e/einbetten.spec.ts)
     embedOrigin: "http://localhost:5199",
+    // „Öffnen mit …“: die App fängt der Test im Browser ab (e2e/ansicht.spec.ts)
+    oeffnenMit: { name: "Office im Browser", url: "https://office.example/oeffnen?datei={url}&name={name}" },
     // Google mit nachgebautem Token-Endpunkt; die Anmeldeseite des Anbieters fängt der Test im Browser ab
     oauth: { google: { clientId: "e2e-client", clientSecret: "e2e-geheim" } },
     abfragen: async () =>

@@ -4,6 +4,7 @@ import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
+import { OpenWith } from "../components/OpenWith.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
@@ -50,12 +51,15 @@ export function DocumentPage() {
       </Link>
       <PageHeader title={d.einordnung?.titel ?? d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
       {!geloescht && (
-        <a
-          href={dateiUrl(d.id)}
-          className="h-9 self-start rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
-        >
-          {m.doc_download()}
-        </a>
+        <div className="flex flex-wrap items-start gap-3">
+          <a
+            href={dateiUrl(d.id)}
+            className="h-9 rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
+          >
+            {m.doc_download()}
+          </a>
+          <OpenWith dokumentId={d.id} mimeType={d.mimeType} />
+        </div>
       )}
       <div className="flex flex-wrap items-start gap-6">
         <section

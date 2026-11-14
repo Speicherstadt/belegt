@@ -21,6 +21,7 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       oidc: null,
       embedOrigin: null,
       version: VERSION,
+      oeffnenMit: null,
     });
   });
 
@@ -51,6 +52,7 @@ describe.skipIf(!testDatenbankUrl)("Anmeldung gegen Postgres", () => {
       oidc: null,
       embedOrigin: null,
       version: VERSION,
+      oeffnenMit: null,
     });
     const zweites = await t.registrieren("mallory@example.org");
     expect(zweites.res.status).toBe(403);

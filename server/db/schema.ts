@@ -380,3 +380,19 @@ export const ansichten = pgTable("ansichten", {
   fehler: text("fehler"),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Kurzlebige Links auf das Original für „Öffnen mit …“: Eine andere App holt darüber eine Kopie, ohne Anmeldung, nur
+ * dieses eine Dokument und nur bis gueltig_bis. Den Link gibt es nur in der Antwort, hier nur seinen Hash; jede
+ * Freigabe steht im Audit-Log.
+ */
+export const freigaben = pgTable("freigaben", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dokumentId: uuid("dokument_id")
+    .notNull()
+    .references(() => dokumente.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  erstelltVon: text("erstellt_von").notNull(),
+  erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
+});

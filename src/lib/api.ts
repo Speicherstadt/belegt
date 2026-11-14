@@ -246,9 +246,13 @@ export const api = {
   einstellungenSpeichern: (e: Einstellungen) => aufruf<Einstellungen>("/api/einstellungen", json(e)),
   verfahrensdoku: () => aufruf<Verfahrensdoku>("/api/verfahrensdoku"),
   status: () =>
-    aufruf<{ eingerichtet: boolean; oidc: { name: string } | null; embedOrigin: string | null; version: string }>(
-      "/api/status",
-    ),
+    aufruf<{
+      eingerichtet: boolean;
+      oidc: { name: string } | null;
+      embedOrigin: string | null;
+      version: string;
+      oeffnenMit: { name: string } | null;
+    }>("/api/status"),
   /** Anmelden über den OIDC-Anbieter; stumm: prompt=none, ohne Rückfrage beim Anbieter (im Frame) */
   anmeldenMitAnbieter: async (ziel: string, stumm = false) => {
     const { url } = await aufruf<{ url: string }>(
@@ -272,6 +276,8 @@ export const api = {
   },
   konten: () => aufruf<{ providerId: string }[]>("/api/auth/list-accounts"),
   ich: () => aufruf<Ich>("/api/ich"),
+  freigabe: (id: string) =>
+    aufruf<{ url: string; gueltigBis: string }>(`/api/dokumente/${id}/freigabe`, { method: "POST" }),
   einrichten: (email: string, passwort: string, code: string) =>
     aufruf<unknown>("/api/auth/sign-up/email", {
       ...json({ email, password: passwort, name: email }),

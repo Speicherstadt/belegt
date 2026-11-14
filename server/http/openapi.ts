@@ -121,6 +121,27 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/freigabe": {
+      post: {
+        summary:
+          "Link für „Öffnen mit …“ (OEFFNEN_MIT_URL): Adresse der App mit einem Link auf das Original, 10 Minuten gültig",
+        parameters: [idParam],
+        responses: { "201": { description: "url, gueltigBis" }, "404": fehler, "410": fehler },
+      },
+    },
+    "/api/freigabe/{token}": {
+      get: {
+        summary: "Öffentlich, nur mit dem Link: das Original",
+        security: [],
+        parameters: [{ name: "token", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          "200": { description: "Datei", content: { "application/octet-stream": {} } },
+          "404": fehler,
+          "409": fehler,
+          "410": fehler,
+        },
+      },
+    },
     "/api/dokumente/{id}/einordnung": {
       post: {
         summary: "Einordnen (Recht schreiben); die Frist rechnet Belegt nach § 147 AO",

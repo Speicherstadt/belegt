@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { eingerichtet } from "./db/status.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
+import { freigabeRouten } from "./http/freigabe.ts";
 import { type App, type AppUmgebung, VERSION } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
 import { oauthRouten } from "./http/oauth.ts";
@@ -38,6 +39,7 @@ export function createApp(umgebung?: AppUmgebung) {
         oidc: umgebung.oidcName ? { name: umgebung.oidcName } : null,
         embedOrigin: umgebung.embedOrigin ?? null,
         version: VERSION,
+        oeffnenMit: umgebung.oeffnenMit ? { name: umgebung.oeffnenMit.name } : null,
       }),
     );
 
@@ -50,6 +52,7 @@ export function createApp(umgebung?: AppUmgebung) {
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
+    freigabeRouten(app, umgebung);
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);

@@ -21,7 +21,8 @@ export async function testApp({
   abfragen,
   oidc,
   embedOrigin,
-}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen" | "embedOrigin"> & {
+  oeffnenMit,
+}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen" | "embedOrigin" | "oeffnenMit"> & {
   begrenzen?: boolean;
   oidc?: OidcKonfig;
 } = {}) {
@@ -44,6 +45,7 @@ export async function testApp({
     auth,
     schluessel,
     oeffnen,
+    oeffnenMit,
     oauth,
     abfragen,
     oidcName: oidc?.name,
