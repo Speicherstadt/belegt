@@ -1,7 +1,7 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
-import { mitAkteur } from "../db/akteur.ts";
+import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
 
@@ -33,35 +33,38 @@ export type Einordnung = typeof einordnungen.$inferSelect;
  * Ordnet ein Dokument ein: Die Frist rechnet shared/fristen.ts (§ 147 AO), gespeichert wird sie mit, damit sie
  * versiegelt ist und sich abfragen lässt. Eine neue Einordnung ersetzt die alte nicht, sie kommt dazu.
  */
-export async function einordnen(
+export function einordnen(
   db: Datenbank,
   dokumentId: string,
   eingabe: EinordnungEingabe,
   akteur: string,
 ): Promise<Einordnung> {
+  return mitAkteur(db, akteur, (tx) => einordnenIn(tx, dokumentId, eingabe));
+}
+
+/** Wie einordnen, in einer laufenden Transaktion mit Akteur (Sammelbearbeitung) */
+export async function einordnenIn(tx: Tx, dokumentId: string, eingabe: EinordnungEingabe): Promise<Einordnung> {
   // Institute unter Aufsicht bewahren Buchungsbelege zehn Jahre auf (Art. 97 § 19a Abs. 3 EGAO)
-  const [betrieb] = await db.execute<{ aufsicht: boolean }>(sql`select aufsicht from einstellungen where id = 1`);
+  const [betrieb] = await tx.execute<{ aufsicht: boolean }>(sql`select aufsicht from einstellungen where id = 1`);
   const frist = fristende(eingabe.art, eingabe.entstanden, {
     freiwilligBis: eingabe.freiwilligBis,
     aufsicht: betrieb?.aufsicht ?? false,
   });
-  const [neu] = await mitAkteur(db, akteur, (tx) =>
-    tx
-      .insert(einordnungen)
-      .values({
-        dokumentId,
-        art: eingabe.art,
-        entstanden: eingabe.entstanden,
-        fristBis: frist.bis,
-        titel: eingabe.titel || null,
-        korrespondent: eingabe.korrespondent || null,
-      })
-      .returning(),
-  );
+  const [neu] = await tx
+    .insert(einordnungen)
+    .values({
+      dokumentId,
+      art: eingabe.art,
+      entstanden: eingabe.entstanden,
+      fristBis: frist.bis,
+      titel: eingabe.titel || null,
+      korrespondent: eingabe.korrespondent || null,
+    })
+    .returning();
   return neu!;
 }
 
-export async function aktuelle(db: Datenbank, dokumentId: string): Promise<Einordnung | null> {
+export async function aktuelle(db: Datenbank | Tx, dokumentId: string): Promise<Einordnung | null> {
   const [e] = await db
     .select()
     .from(einordnungen)

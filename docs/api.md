@@ -10,14 +10,14 @@ Alles unter `/api` außer `/api/auth`, `/api/status`, `/api/einladung/:token` un
 Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
 Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
 Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
-lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Ein Prüfer liest nur Dokumente, Export und Prüfung, und nur in seinem Zeitraum (`404` für ein Dokument außerhalb, [`pruefung.md`](pruefung.md)). Schreibt ein
+lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Ein Prüfer liest nur Dokumente (mit Tags, Dokumenttypen und Feldern), Export und Prüfung, und nur in seinem Zeitraum (`404` für ein Dokument außerhalb, [`pruefung.md`](pruefung.md)). Schreibt ein
 Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Site`), antwortet Belegt ebenfalls mit
 `403`. Das Audit-Log nennt als Akteur `nutzer:<E-Mail>`.
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`), mit `schreiben` nimmt es zusätzlich
-Dokumente und Mails auf und ordnet ein; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`) und Tags, Dokumenttypen und Felder,
+mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein und setzt Tags, Dokumenttyp und Feldwerte; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
 | Aufruf | Wirkung |
@@ -37,7 +37,12 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente?trennen=1` | teilt ein PDF an Trennblättern ([`eingang.md`](eingang.md#trennblätter)) und antwortet mit `{dokumente: [...]}`, ohne Trennblatt mit dem einen Dokument darin |
 | `GET /api/trennblatt.pdf` | ein Trennblatt zum Ausdrucken |
 | `GET /api/dokumente?suche=…&limit=…` | Dokumente, neueste zuerst; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail, über Teile von Dateiname und Titel und über die Archivnummer (`ASN 123` oder `123`) |
-| `GET /api/dokumente/:id` | ein Dokument; jedes Dokument hat das Feld `asn`, seine Archivnummer |
+| `GET /api/dokumente/:id` | ein Dokument; jedes Dokument hat das Feld `asn`, seine Archivnummer, dazu `tags`, `dokumenttyp` und `felder` (`feldId`, `name`, `typ`, `wert`) |
+| `GET /api/dokumente?tag=…&dokumenttyp=…&feld.<id>=gesetzt` | Filter ([`ordnung.md`](ordnung.md)): `tag` mehrfach (alle), `dokumenttyp` (ID oder `ohne`), je Feld `feld.<id>=gesetzt`, `feld.<id>.enthaelt=…` (Text, Auswahl, Link), `feld.<id>.von=…` und `.bis=…` (Betrag in Cent oder `1.234,56`, Zahl, Datum); `400` bei unpassendem Filter. Jeder Eintrag hat `tags` und `dokumenttyp` |
+| `GET /api/tags`, `POST /api/tags` (`name`, `farbe`), `PATCH /api/tags/:id`, `DELETE /api/tags/:id` | Tags; `farbe` eine von `grau`, `rot`, `orange`, `gelb`, `gruen`, `tuerkis`, `blau`, `violett`, `rosa`; `409` bei doppeltem Namen; löschen entfernt die Zuordnungen |
+| `GET /api/dokumenttypen`, `POST /api/dokumenttypen` (`name`, `vorgabeArt` oder `null`), `PATCH …/:id`, `DELETE …/:id` | Dokumenttypen |
+| `GET /api/felder`, `POST /api/felder` (`name`, `typ`: `text`, `zahl`, `betrag`, `datum`, `ja_nein`, `auswahl`, `link`, bei `auswahl` `optionen`), `PATCH …/:id` (`name`, `optionen`), `DELETE …/:id` | Eigene Felder; der Typ ist fest |
+| `POST /api/dokumente/:id/ordnung` (`tagsHinzu`, `tagsWeg`, `dokumenttyp` (ID oder `null`), `felder`: `[{feldId, wert}]`) | Tags, Dokumenttyp und Feldwerte setzen; `wert` `null` entfernt, ein Betrag in Cent oder als `1.234,56`; Antwort der neue Stand; `400` bei ungültigem Wert, `409` nach der Löschung |
 | `GET /api/dokumente/:id/datei` | das Original; `409`, wenn die Datei fehlt oder ihr Hash nicht mehr stimmt |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
@@ -53,7 +58,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (frei Abgelegtes: sofort gelöscht); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |
 | `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
-| `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument und sein Siegel |
+| `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp und Feldwerte, mit `detail`: deren Name) und sein Siegel |
 | `GET /api/einstellungen`, `POST /api/einstellungen` (`firma`, `anschrift`, `verantwortlich`, `aufsicht`, `datensicherung`, `scannen`, `ergaenzungen`) | Angaben zum Betrieb; ändern nur der Inhaber |
 | `GET /api/verfahrensdoku` | Verfahrensdokumentation als Abschnitte, mit `luecken` und `vollstaendig` ([`verfahrensdoku.md`](verfahrensdoku.md)) |
 | `GET /api/export?von=JJJJ-MM-TT&bis=JJJJ-MM-TT` | Datenträger (Z3) als ZIP, gestreamt; Inhalt in [`pruefung.md`](pruefung.md) |

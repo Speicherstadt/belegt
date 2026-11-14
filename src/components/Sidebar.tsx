@@ -7,6 +7,7 @@ import { Darstellung } from "./Darstellung.tsx";
 const ITEMS = [
   { to: "/", label: () => m.nav_inbox() },
   { to: "/archiv", label: () => m.nav_archive() },
+  { to: "/ordnung", label: () => m.nav_order() },
   { to: "/fristen", label: () => m.nav_retention() },
   { to: "/pruefung", label: () => m.nav_audit() },
   { to: "/quellen", label: () => m.nav_sources() },

@@ -21,6 +21,9 @@ import {
   zurueckziehen as loeschungZurueckziehen,
   regelVerletzt,
 } from "../loeschung/loeschung.ts";
+import { filterAus } from "../ordnung/filter.ts";
+import { felderListen } from "../ordnung/ordnung.ts";
+import { ordnungZu } from "../ordnung/zuordnung.ts";
 import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
 import { dateiTeilen } from "../trennen/trennen.ts";
 
@@ -63,6 +66,10 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
   app.get("/api/dokumente", async (c) => {
     const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
     const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
+    const parameter = c.req.queries();
+    const felder = Object.keys(parameter).some((k) => k.startsWith("feld.")) ? await felderListen(umgebung.db) : [];
+    const ordnung = filterAus(parameter, felder);
+    if (!ordnung) return c.json({ fehler: "Ungültiger Filter" }, 400);
     return c.json(
       await listen(umgebung.db, {
         suche: c.req.query("suche"),
@@ -70,6 +77,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
         gruppe,
         heute: heute(),
         zeitraum: c.get("nutzer").zeitraum,
+        ordnung,
       }),
     );
   });
@@ -83,6 +91,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       einordnung: await aktuelle(umgebung.db, dokument.id),
       loeschung: await fuerDokument(umgebung.db, dokument.id),
       ansicht: await hatAnsicht(umgebung.db, dokument.id),
+      ...(await ordnungZu(umgebung.db, dokument.id)),
     });
   });
 

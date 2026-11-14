@@ -60,8 +60,14 @@ const LESEN = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf))?$/,
+  /^\/api\/(tags|dokumenttypen|felder)$/,
 ];
-const SCHREIBEN = [/^\/api\/dokumente$/, /^\/api\/mails$/, /^\/api\/dokumente\/[^/]+\/einordnung$/];
+const SCHREIBEN = [
+  /^\/api\/dokumente$/,
+  /^\/api\/mails$/,
+  /^\/api\/dokumente\/[^/]+\/(einordnung|ordnung)$/,
+  /^\/api\/dokumente\/sammeln$/,
+];
 
 /** Was ein Token darf: lesen nur GET auf Dokumente, schreiben zusätzlich Aufnehmen und Einordnen */
 export function tokenDarf(recht: Recht, methode: string, pfad: string): boolean {

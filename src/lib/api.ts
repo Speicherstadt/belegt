@@ -1,3 +1,4 @@
+import type { Farbe, Feldtyp, Feldwert } from "../../shared/ordnung.ts";
 import type { Rolle } from "../../shared/rollen.ts";
 
 /* Aufrufe der Schnittstelle (docs/api.md); Cookies der Sitzung schickt der Browser mit */
@@ -54,10 +55,58 @@ export interface Dokument {
 export type Art = "buecher" | "zoll" | "beleg" | "geschaeftsbrief" | "sonstige" | "freiwillig" | "frei";
 export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei" | "loeschbar" | "geloescht";
 
+export interface TagKurz {
+  id: string;
+  name: string;
+  farbe: Farbe;
+}
+
 export interface Eintrag extends Dokument {
   art: Art | null;
   fristBis: string | null;
   titel: string | null;
+  tags: TagKurz[];
+  dokumenttyp: { id: string; name: string } | null;
+}
+
+export interface Tag extends TagKurz {
+  anzahl: number;
+}
+
+export interface Dokumenttyp {
+  id: string;
+  name: string;
+  vorgabeArt: Art | null;
+  anzahl: number;
+}
+
+export interface Feld {
+  id: string;
+  name: string;
+  typ: Feldtyp;
+  optionen: string[];
+}
+
+/** Tags, Dokumenttyp und Feldwerte eines Dokuments */
+export interface Ordnung {
+  tags: TagKurz[];
+  dokumenttyp: { id: string; name: string; vorgabeArt: Art | null } | null;
+  felder: { feldId: string; name: string; typ: Feldtyp; wert: Feldwert }[];
+}
+
+/** Änderung an Tags, Dokumenttyp und Feldwerten (POST /api/dokumente/:id/ordnung) */
+export interface OrdnungAenderung {
+  tagsHinzu?: string[];
+  tagsWeg?: string[];
+  dokumenttyp?: string | null;
+  felder?: { feldId: string; wert: Feldwert | null }[];
+}
+
+/** Filter der Archivliste nach Tags, Dokumenttyp und einem Feld (server/ordnung/filter.ts) */
+export interface ListenFilter {
+  tags: string[];
+  dokumenttyp: string;
+  feld: { feldId: string; art: "gesetzt" | "enthaelt" | "bereich"; text: string; von: string; bis: string } | null;
 }
 
 export interface Einordnung {
@@ -162,6 +211,7 @@ export interface Ereignis {
   akteur: string | null;
   aktion: string;
   tabelle: string;
+  detail: string | null;
 }
 
 export interface Befund {
@@ -304,12 +354,29 @@ export const api = {
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),
   abmelden: () => aufruf<unknown>("/api/auth/sign-out", json({})),
-  dokumente: (suche: string, gruppe: Gruppe = "alle") =>
-    aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}`),
+  dokumente: (suche: string, gruppe: Gruppe = "alle", filter = "") =>
+    aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}${filter}`),
   dokument: (id: string) =>
-    aufruf<Dokument & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
+    aufruf<Dokument & Ordnung & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
       `/api/dokumente/${id}`,
     ),
+  ordnen: (id: string, aenderung: OrdnungAenderung) => aufruf<Ordnung>(`/api/dokumente/${id}/ordnung`, json(aenderung)),
+  tags: () => aufruf<Tag[]>("/api/tags"),
+  tagAnlegen: (t: { name: string; farbe: Farbe }) => aufruf<Tag>("/api/tags", json(t)),
+  tagAendern: (id: string, t: { name?: string; farbe?: Farbe }) =>
+    aufruf<Tag>(`/api/tags/${id}`, { ...json(t), method: "PATCH" }),
+  tagLoeschen: (id: string) => aufruf<unknown>(`/api/tags/${id}`, { method: "DELETE" }),
+  dokumenttypen: () => aufruf<Dokumenttyp[]>("/api/dokumenttypen"),
+  dokumenttypAnlegen: (t: { name: string; vorgabeArt: Art | null }) =>
+    aufruf<Dokumenttyp>("/api/dokumenttypen", json(t)),
+  dokumenttypAendern: (id: string, t: { name?: string; vorgabeArt?: Art | null }) =>
+    aufruf<Dokumenttyp>(`/api/dokumenttypen/${id}`, { ...json(t), method: "PATCH" }),
+  dokumenttypLoeschen: (id: string) => aufruf<unknown>(`/api/dokumenttypen/${id}`, { method: "DELETE" }),
+  felder: () => aufruf<Feld[]>("/api/felder"),
+  feldAnlegen: (f: { name: string; typ: Feldtyp; optionen: string[] }) => aufruf<Feld>("/api/felder", json(f)),
+  feldAendern: (id: string, f: { name?: string; optionen?: string[] }) =>
+    aufruf<Feld>(`/api/felder/${id}`, { ...json(f), method: "PATCH" }),
+  feldLoeschen: (id: string) => aufruf<unknown>(`/api/felder/${id}`, { method: "DELETE" }),
   loeschungBeantragen: (id: string) => aufruf<Loeschung>(`/api/dokumente/${id}/loeschung`, { method: "POST" }),
   loeschungen: () => aufruf<Loeschung[]>("/api/loeschungen"),
   loeschungBestaetigen: (id: string) => aufruf<Loeschung>(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" }),

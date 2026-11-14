@@ -2,7 +2,7 @@ import { akteurEinstellung } from "@firsttris/gobd-kern/sql";
 import { sql } from "drizzle-orm";
 import type { Datenbank } from "./client.ts";
 
-type Tx = Parameters<Parameters<Datenbank["transaction"]>[0]>[0];
+export type Tx = Parameters<Parameters<Datenbank["transaction"]>[0]>[0];
 
 const EINSTELLUNG = akteurEinstellung("belegt");
 

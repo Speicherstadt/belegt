@@ -4,6 +4,7 @@ import { expect, test } from "@playwright/test";
 const SEITEN = [
   { pfad: "/", titel: "Eingang" },
   { pfad: "/archiv", titel: "Archiv" },
+  { pfad: "/ordnung", titel: "Ordnung" },
   { pfad: "/fristen", titel: "Fristen" },
   { pfad: "/pruefung", titel: "Prüfung" },
   { pfad: "/quellen", titel: "Quellen und Schnittstellen" },

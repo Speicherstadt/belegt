@@ -2,11 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { api, type Eintrag, type Gruppe } from "../lib/api.ts";
+import { api, type Eintrag, type Gruppe, type ListenFilter } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
+import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
+import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
+import { TagChip } from "./TagChip.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -40,7 +43,13 @@ export function DocumentList({
   const gruppe = feste ?? gewaehlt;
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
-  const liste = useQuery({ queryKey: ["dokumente", suche, gruppe], queryFn: () => api.dokumente(suche, gruppe) });
+  const [filter, setFilter] = useState<ListenFilter>(LEERER_FILTER);
+  const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder, enabled: !feste });
+  const parameter = feste ? "" : filterParameter(filter, felder.data ?? []);
+  const liste = useQuery({
+    queryKey: ["dokumente", suche, gruppe, parameter],
+    queryFn: () => api.dokumente(suche, gruppe, parameter),
+  });
   const eingabe = useRef<HTMLInputElement>(null);
   const mailEingabe = useRef<HTMLInputElement>(null);
   const mailImport = useMutation({
@@ -144,6 +153,12 @@ export function DocumentList({
           ))}
         </fieldset>
       )}
+      {!feste && <OrderFilter filter={filter} onChange={setFilter} />}
+      {liste.error && (
+        <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+          {m.list_failed({ meldung: liste.error.message })}
+        </p>
+      )}
       {mailImport.data && (
         <p role="status" className="m-0 text-sm">
           {m.import_result({ neu: String(mailImport.data.neu), doppelt: String(mailImport.data.doppelt) })}
@@ -182,6 +197,14 @@ export function DocumentList({
                     <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">
                       {d.titel ?? d.dateiname ?? m.unnamed()}
                     </Link>
+                    {(d.dokumenttyp || d.tags.length > 0) && (
+                      <span className="mt-1 flex flex-wrap items-center gap-1.5 font-normal">
+                        {d.dokumenttyp && <span className="text-muted text-xs">{d.dokumenttyp.name}</span>}
+                        {d.tags.map((t) => (
+                          <TagChip key={t.id} tag={t} />
+                        ))}
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-3">{aufbewahrung(d)}</td>
                   <td className="px-3 py-3 text-muted">{d.mimeType}</td>

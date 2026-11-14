@@ -6,6 +6,7 @@ import { type App, type AppUmgebung, VERSION } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
 import { oauthRouten } from "./http/oauth.ts";
 import { openapi } from "./http/openapi.ts";
+import { ordnungRouten } from "./http/ordnung.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { statischRouten } from "./http/statisch.ts";
@@ -52,6 +53,7 @@ export function createApp(umgebung?: AppUmgebung) {
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
+    ordnungRouten(app, umgebung);
     freigabeRouten(app, umgebung);
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);

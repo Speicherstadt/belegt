@@ -11,6 +11,7 @@ const ERLAUBT = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf))?$/,
+  /^\/api\/(tags|dokumenttypen|felder)$/,
   /^\/api\/export$/,
   /^\/api\/pruefung$/,
   /^\/api\/zeitstempel(\/[^/]+\/token)?$/,

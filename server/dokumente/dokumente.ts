@@ -4,6 +4,7 @@ import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { archivnummern, dokumente } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
+import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
 import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
@@ -52,6 +53,8 @@ export interface Eintrag extends Dokument {
   art: string | null;
   fristBis: string | null;
   titel: string | null;
+  tags: { id: string; name: string; farbe: string }[];
+  dokumenttyp: { id: string; name: string } | null;
 }
 
 /** „ASN 123“, „asn123“ oder nur „123“: die gesuchte Archivnummer, sonst null */
@@ -62,7 +65,7 @@ export function archivnummerAus(suche: string | undefined): number | null {
 
 /**
  * Neueste zuerst. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus Dateiname,
- * Einordnung und Mail, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter) und über die
+ * Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter) und über die
  * Archivnummer („ASN 123“).
  */
 export async function listen(
@@ -73,7 +76,16 @@ export async function listen(
     gruppe = "alle",
     heute,
     zeitraum,
-  }: { suche?: string; limit?: number; gruppe?: Gruppe; heute: string; zeitraum?: { von: string; bis: string } },
+    ordnung,
+  }: {
+    suche?: string;
+    limit?: number;
+    gruppe?: Gruppe;
+    heute: string;
+    zeitraum?: { von: string; bis: string };
+    /** Tags, Dokumenttyp und eigene Felder (server/ordnung/filter.ts) */
+    ordnung?: OrdnungFilter;
+  },
 ): Promise<Eintrag[]> {
   const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
   const zeilen = await db.execute<{
@@ -88,13 +100,22 @@ export async function listen(
     art: string | null;
     frist_bis: string | null;
     titel: string | null;
+    tags: Eintrag["tags"];
+    dokumenttyp: Eintrag["dokumenttyp"];
   }>(sql`
-    select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel
+    select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel,
+           (select coalesce(json_agg(json_build_object('id', t.id, 'name', t.name, 'farbe', t.farbe)
+                                     order by lower(t.name)), '[]'::json)
+              from dokument_tags dt join tags t on t.id = dt.tag_id where dt.dokument_id = d.id) as tags,
+           (select json_build_object('id', ty.id, 'name', ty.name)
+              from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
+             where dd.dokument_id = d.id) as dokumenttyp
       from dokumente d
       join archivnummern a on a.dokument_id = d.id
       left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
       left join suchtexte st on st.dokument_id = d.id
      where ${gruppenBedingung(gruppe, heute)}
+       and ${filterBedingung(ordnung)}
        and (${zeitraum?.von ?? null}::date is null
             or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
@@ -114,6 +135,8 @@ export async function listen(
     art: z.art,
     fristBis: z.frist_bis,
     titel: z.titel,
+    tags: z.tags,
+    dokumenttyp: z.dokumenttyp,
   }));
 }
 
@@ -152,9 +175,14 @@ export interface Ereignis {
   akteur: string | null;
   aktion: string;
   tabelle: string;
+  /** Bei Tags, Dokumenttyp und Feldern: der Name (heute; null, wenn inzwischen gelöscht) */
+  detail: string | null;
 }
 
-/** Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile und sein Siegel, in der Reihenfolge der Kette */
+/**
+ * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp und Feldwerte und
+ * sein Siegel, in der Reihenfolge der Kette
+ */
 export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
   const ereignisse = await db.execute<{
     seq: string;
@@ -162,11 +190,22 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
     actor: string | null;
     action: string;
     table_name: string;
+    detail: string | null;
   }>(sql`
-    select a.seq, a.at, a.actor, a.action, a.table_name
+    select a.seq, a.at, a.actor, a.action, a.table_name,
+           case a.table_name
+             when 'dokument_tags' then (select t.name from tags t
+                                         where t.id::text = coalesce(a.new_value, a.old_value) ->> 'tag_id')
+             when 'dokument_dokumenttypen' then (select ty.name from dokumenttypen ty
+                                                  where ty.id::text = coalesce(a.new_value, a.old_value) ->> 'dokumenttyp_id')
+             when 'feldwerte' then (select f.name from felder f
+                                     where f.id::text = coalesce(a.new_value, a.old_value) ->> 'feld_id')
+           end as detail
       from audit_log a
      where (a.table_name = 'dokumente' and a.row_id = ${id})
         or (a.table_name = 'einordnungen' and a.new_value ->> 'dokument_id' = ${id})
+        or (a.table_name in ('dokument_tags', 'dokument_dokumenttypen', 'feldwerte')
+            and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
         or (a.table_name = 'seals' and a.new_value ->> 'row_id' in (
               select ${id} union all select x.id::text from einordnungen x where x.dokument_id = ${id}::uuid))
      order by a.seq`);
@@ -180,6 +219,7 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
       akteur: e.actor,
       aktion: e.action,
       tabelle: e.table_name,
+      detail: e.detail,
     })),
     siegel: siegel?.digest ?? null,
   };

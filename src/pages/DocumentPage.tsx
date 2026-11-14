@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
+import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
@@ -20,6 +21,13 @@ const QUELLE: Record<string, () => string> = {
 function ereignis(e: Ereignis): string {
   if (e.tabelle === "seals") return m.event_seal();
   if (e.tabelle === "einordnungen") return m.event_classified();
+  const name = e.detail ?? "–";
+  if (e.tabelle === "dokument_tags")
+    return e.aktion === "DELETE" ? m.event_tag_removed({ name }) : m.event_tag_added({ name });
+  if (e.tabelle === "dokument_dokumenttypen")
+    return e.aktion === "DELETE" ? m.event_doctype_removed({ name }) : m.event_doctype_set({ name });
+  if (e.tabelle === "feldwerte")
+    return e.aktion === "DELETE" ? m.event_field_removed({ name }) : m.event_field_set({ name });
   if (e.aktion === "INSERT") return m.event_insert();
   return m.event_other({ aktion: e.aktion });
 }
@@ -86,12 +94,18 @@ export function DocumentPage() {
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && (
             <Classification
-              key={d.einordnung?.id ?? "neu"}
+              key={`${d.einordnung?.id ?? "neu"}:${d.dokumenttyp?.id ?? ""}`}
               dokumentId={d.id}
               einordnung={d.einordnung}
               eingang={d.eingegangenAm}
+              dokumenttyp={d.dokumenttyp}
             />
           )}
+          <DocumentOrdnung
+            dokumentId={d.id}
+            ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, felder: d.felder }}
+            geloescht={geloescht}
+          />
           <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
             <h2 id="angaben" className="m-0 font-semibold text-base">
               {m.doc_details()}

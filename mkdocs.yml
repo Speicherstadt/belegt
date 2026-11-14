@@ -22,6 +22,7 @@ nav:
       - Anmelden über einen Anbieter, Einbetten: einbetten.md
   - Arbeiten mit Belegt:
       - Eingang, Mails und Suche: eingang.md
+      - Tags, Dokumenttypen und Felder: ordnung.md
       - Fristen und Löschen: fristen.md
       - Prüfung, Z1 und Z3: pruefung.md
       - Verfahrensdokumentation: verfahrensdoku.md

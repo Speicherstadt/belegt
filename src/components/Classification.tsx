@@ -13,15 +13,18 @@ export function Classification({
   dokumentId,
   einordnung,
   eingang,
+  dokumenttyp,
 }: {
   dokumentId: string;
   einordnung: Einordnung | null;
   eingang: string;
+  /** Dokumenttyp mit Vorgabe-Art: ein Vorschlag, die Art bleibt maßgeblich für die Frist */
+  dokumenttyp?: { name: string; vorgabeArt: Art | null } | null;
 }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const queryClient = useQueryClient();
   const [offen, setOffen] = useState(!einordnung);
-  const [art, setArt] = useState<Art>(einordnung?.art ?? "beleg");
+  const [art, setArt] = useState<Art>(einordnung?.art ?? dokumenttyp?.vorgabeArt ?? "beleg");
   // Angaben aus einer erkannten E-Rechnung; das Formular übernimmt sie beim Klick auf „Übernehmen“
   const [vorgabe, setVorgabe] = useState<{ entstanden?: string; titel?: string; korrespondent?: string } | null>(null);
   const vorschlag = useQuery({
@@ -78,6 +81,18 @@ export function Classification({
         >
           {m.classify_change()}
         </button>
+      )}
+      {darfSchreiben(ich.data?.role) && offen && dokumenttyp?.vorgabeArt && (
+        <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
+          {m.suggest_doctype({ art: artLabel(dokumenttyp.vorgabeArt), typ: dokumenttyp.name })}
+          <button
+            type="button"
+            onClick={() => setArt(dokumenttyp.vorgabeArt!)}
+            className="h-8 rounded-md border border-border bg-bg px-3 font-medium"
+          >
+            {m.suggest_apply()}
+          </button>
+        </p>
       )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.vorschlag && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">

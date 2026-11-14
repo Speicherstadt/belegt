@@ -8,6 +8,7 @@ import { DocumentPage } from "./pages/DocumentPage.tsx";
 import { InboxPage } from "./pages/InboxPage.tsx";
 import { InvitePage } from "./pages/InvitePage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
+import { OrderPage } from "./pages/OrderPage.tsx";
 import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
@@ -40,6 +41,7 @@ const seiten = [
   createRoute({ getParentRoute: () => app, path: "/", component: InboxPage }),
   createRoute({ getParentRoute: () => app, path: "/archiv", component: ArchivePage }),
   createRoute({ getParentRoute: () => app, path: "/dokumente/$id", component: DocumentPage }),
+  createRoute({ getParentRoute: () => app, path: "/ordnung", component: OrderPage }),
   createRoute({ getParentRoute: () => app, path: "/fristen", component: RetentionPage }),
   createRoute({ getParentRoute: () => app, path: "/pruefung", component: AuditPage }),
   createRoute({ getParentRoute: () => app, path: "/zugaenge", component: AccessPage }),
