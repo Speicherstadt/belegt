@@ -54,7 +54,10 @@ function zeitLesen(e: Element): Date {
   const t = Buffer.from(e.inhalt).toString("ascii");
   const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(?:\.(\d+))?Z$/.exec(t);
   if (!m) throw new Error(`Zeitstempel: Zeit nicht lesbar (${t})`);
-  return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}.${(m[7] ?? "0").padEnd(3, "0").slice(0, 3)}Z`);
+  const zeit = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}.${(m[7] ?? "0").padEnd(3, "0").slice(0, 3)}Z`);
+  // Ziffern allein reichen nicht: Monat 13 oder Stunde 25 ergäben ein ungültiges Datum
+  if (Number.isNaN(zeit.getTime())) throw new Error(`Zeitstempel: Zeit nicht lesbar (${t})`);
+  return zeit;
 }
 
 /** Liest die Antwort (TimeStampResp), prüft Status, Hash und Nonce und gibt das Token zurück */
