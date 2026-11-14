@@ -14,9 +14,8 @@ export function mboxAufteilen(archiv: Uint8Array): Uint8Array[] {
   const text = Buffer.from(archiv).toString("latin1");
   const starts = [...text.matchAll(TRENNER)].map((t) => ({ trenner: t.index, inhalt: t.index + t[0].length }));
   return starts.map((s, i) => {
-    let mail = text.slice(s.inhalt, starts[i + 1]?.trenner ?? text.length);
-    // Die Leerzeile vor der nächsten Trennzeile gehört zum Format, nicht zur Mail
-    if (starts[i + 1]) mail = mail.replace(/\r?\n$/, "");
+    // Die Leerzeile nach jeder Mail, auch nach der letzten, gehört zum Format, nicht zur Mail (RFC 4155)
+    const mail = text.slice(s.inhalt, starts[i + 1]?.trenner ?? text.length).replace(/(\r?\n)\r?\n$/, "$1");
     return new Uint8Array(Buffer.from(mail.replace(MASKIERT, "$1"), "latin1"));
   });
 }
