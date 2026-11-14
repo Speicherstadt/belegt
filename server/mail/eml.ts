@@ -61,7 +61,11 @@ function personen(liste: Adresse[] | undefined): Person[] {
 function isoDatum(wert: string | undefined): string | null {
   if (!wert) return null;
   const zeit = Date.parse(wert);
-  return Number.isNaN(zeit) ? null : new Date(zeit).toISOString();
+  if (Number.isNaN(zeit)) return null;
+  // Jahre außerhalb von 0 bis 9999 schreibt toISOString sechsstellig (+010000-…), das nimmt Postgres nicht an; ein
+  // solches Datum ist ohnehin nicht echt, die Mail kommt trotzdem ins Archiv
+  const iso = new Date(zeit).toISOString();
+  return /^\d{4}-/.test(iso) ? iso : null;
 }
 
 /** Message-IDs aus einem Kopf wie References: „<a@x> <b@y>“ */
