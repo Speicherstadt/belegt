@@ -64,7 +64,7 @@ export function oauthRouten(app: App, umgebung: AppUmgebung) {
         umgebung.db,
         umgebung.schluessel,
         {
-          name: v.name,
+          name: `${v.name} (${adresse})`,
           ordner: v.ordner,
           host: endpunkte(v.anbieter, konfig).host,
           benutzer: adresse,

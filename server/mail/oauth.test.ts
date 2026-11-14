@@ -77,7 +77,9 @@ describe.skipIf(!testDatenbankUrl)("OAuth gegen Postgres", () => {
     const res = await verbinden("google");
     expect(res.headers.get("location")).toBe("/quellen?oauth=verbunden");
     const [q] = await t.sql`select * from quellen where oauth = 'google'`;
+    // Mit der Adresse im Namen, damit zwei verbundene Konten nicht gleich heißen
     expect(q).toMatchObject({
+      name: "google-Postfach (anna@gmail.example)",
       host: "imap.gmail.com",
       port: 993,
       tls: true,
