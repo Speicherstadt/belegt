@@ -1,7 +1,7 @@
 # Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://firsttris.github.io/belegt/
 # In Pull Requests nur bauen (ein kaputter Link oder eine fehlende Seite fällt vor dem Merge auf), auf main
-# veröffentlichen. Voraussetzung einmalig: Settings → Pages → Source „GitHub Actions“ (configure-pages schaltet das
-# beim ersten Lauf selbst ein).
+# veröffentlichen. Voraussetzung einmalig, von Hand: Settings → Pages → Source „GitHub Actions“. Anlegen kann die
+# Seite der Token des Workflows nicht (Resource not accessible by integration).
 name: Docs
 
 on:
@@ -34,13 +34,11 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-docs.txt
       - run: pip install -r requirements-docs.txt
-      - uses: actions/configure-pages@v6
-        if: github.event_name != 'pull_request'
-        with:
-          enablement: true
       - run: zensical build --strict
       # Jede Seite mit eigener Beschreibung (Suchmaschinen, Vorschau beim Teilen)
       - run: test -z "$(grep -L '^description:' docs/*.md)"
+      - uses: actions/configure-pages@v6
+        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:

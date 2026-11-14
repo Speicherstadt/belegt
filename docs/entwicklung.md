@@ -88,7 +88,8 @@ Einmalig im Repository einzurichten:
 
 - Secret `DOCKER_PAT`: Zugangstoken von Docker Hub für `tristanteu` (Account Settings → Personal access tokens, Recht
   Read & Write).
-- Settings → Pages → Source „GitHub Actions“ für die Doku (`docs.yml` baut sie bei jeder Änderung an `docs/`).
+- Settings → Pages → Source „GitHub Actions“ für die Doku, von Hand; danach veröffentlicht `docs.yml` sie bei jeder
+  Änderung an `docs/` (den ersten Lauf unter Actions → Docs → Re-run starten).
 - Die GitHub-App [Renovate](https://github.com/apps/renovate) für dieses Repository (`.github/renovate.json5`).
 
 Die Bilder in README und Doku erzeugt `bun run screenshots` (erfundene Daten, hell und dunkel, nach `docs/assets/`).
