@@ -71,6 +71,8 @@ export async function zuPdf(
       throw new Error("Nicht umwandelbar (Zeitlimit)");
     throw nichtErreichbar("Vorschau-Dienst nicht erreichbar");
   }
+  // 429: Warteschlange voll, das liegt nie an der Datei
+  if (res.status === 429) throw nichtErreichbar("Vorschau-Dienst ausgelastet (429)");
   if ([502, 503, 504].includes(res.status) && !(await gesund()))
     throw nichtErreichbar(`Vorschau-Dienst antwortet ${res.status}`);
   if (!res.ok) throw new Error(`Nicht umwandelbar (${res.status})`);
@@ -103,7 +105,11 @@ export async function ansichtenErzeugen(
   for (const d of offen) {
     let pdf: Uint8Array;
     try {
-      pdf = await zuPdf(new Uint8Array(await speicher.laden(d.sha256)), d.mime_type, url, { abfragen });
+      // Fehlt der Speicher kurz (S3 nicht erreichbar), liegt es nicht an der Datei: Lauf beenden, nichts festhalten
+      const bytes = await speicher.laden(d.sha256).catch(() => {
+        throw nichtErreichbar("Speicher nicht erreichbar");
+      });
+      pdf = await zuPdf(new Uint8Array(bytes), d.mime_type, url, { abfragen });
     } catch (err) {
       if (istNichtErreichbar(err)) return { erzeugt, fehler, meldung: (err as Error).message };
       const meldung = speicherbar(
