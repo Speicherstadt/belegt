@@ -77,7 +77,8 @@ Bun.serve({
 function immerWieder(lauf: () => Promise<unknown>) {
   void (async () => {
     for (;;) {
-      await lauf().catch(() => {});
+      // Fehler sichtbar lassen: ein stiller Fehler im Worker sieht im Test aus wie eine Zeitüberschreitung
+      await lauf().catch((err) => console.error(`E2E-Worker: ${err instanceof Error ? err.message : String(err)}`));
       await Bun.sleep(1000);
     }
   })();
