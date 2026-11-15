@@ -1,4 +1,4 @@
-import type { Feldtyp, Feldwert } from "../../shared/ordnung.ts";
+import { betragAusText, type Feldtyp, type Feldwert } from "../../shared/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import type { Feld, ListenFilter } from "./api.ts";
 import { betrag, tag } from "./format.ts";
@@ -23,7 +23,13 @@ export function feldwertText(typ: Feldtyp, wert: Feldwert): string {
 
 export const LEERER_FILTER: ListenFilter = { tags: [], tagModus: "alle", dokumenttyp: "", feld: null };
 
-/** Parameter für GET /api/dokumente aus dem Filter der Liste; Beträge gehen als Text („1.234,56“), der Server liest sie */
+/**
+ * Grenze eines Bereichs, wie sie der Server liest: Beträge als Cent, denn nur Ziffern hieße dort Cent („100“ wären
+ * 1,00 €). Was kein Betrag ist, geht unverändert hin; der Server lehnt es ab
+ */
+const grenze = (feld: Feld, text: string) => (feld.typ === "betrag" ? String(betragAusText(text) ?? text) : text);
+
+/** Parameter für GET /api/dokumente aus dem Filter der Liste */
 export function filterParameter(f: ListenFilter, felder: Feld[]): string {
   const p = new URLSearchParams();
   for (const t of f.tags) p.append("tag", t);
@@ -35,8 +41,8 @@ export function filterParameter(f: ListenFilter, felder: Feld[]): string {
     if (f.feld.art === "gesetzt") p.set(name, "gesetzt");
     else if (f.feld.art === "enthaelt" && f.feld.text.trim()) p.set(`${name}.enthaelt`, f.feld.text.trim());
     else if (f.feld.art === "bereich") {
-      if (f.feld.von.trim()) p.set(`${name}.von`, f.feld.von.trim());
-      if (f.feld.bis.trim()) p.set(`${name}.bis`, f.feld.bis.trim());
+      if (f.feld.von.trim()) p.set(`${name}.von`, grenze(feld, f.feld.von.trim()));
+      if (f.feld.bis.trim()) p.set(`${name}.bis`, grenze(feld, f.feld.bis.trim()));
     }
   }
   const text = p.toString();
