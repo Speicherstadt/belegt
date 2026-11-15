@@ -296,7 +296,12 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     const id = Id.safeParse(c.req.param("id"));
     const dokument = id.success ? await laden(umgebung.db, id.data) : null;
     return dokument
-      ? c.json(await verlauf(umgebung.db, dokument.id, { notizen: !c.get("nutzer").zeitraum }))
+      ? c.json(
+          await verlauf(umgebung.db, dokument.id, {
+            notizen: !c.get("nutzer").zeitraum,
+            sicht: sichtVon(c.get("nutzer")),
+          }),
+        )
       : c.json({ fehler: "Nicht gefunden" }, 404);
   });
 }

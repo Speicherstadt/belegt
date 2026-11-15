@@ -1,3 +1,4 @@
+import { PDFDocument } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
@@ -494,6 +495,39 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     expect(await suche(p2025, "Bilanz")).toEqual([c.anhang]);
     expect((await als(p2024)(`/api/dokumente/${c.mail}/datei`)).status).toBe(404);
     expect(await suche(p2024, "Jahresabschluss")).toEqual([]);
+  });
+
+  it("zeigt im Verlauf keine Ableitung zu einem Dokument außerhalb", async () => {
+    const pdf = await PDFDocument.create();
+    pdf.addPage([200, 200]);
+    const form = new FormData();
+    form.append("datei", new File([new Uint8Array(await pdf.save())], "quelle.pdf"));
+    const quelle = (
+      (await (await als(inhaber)("/api/dokumente", { method: "POST", body: form })).json()) as {
+        id: string;
+      }
+    ).id;
+    await ordnen(quelle, { tagsHinzu: [projekt] });
+    const gedreht = await als(inhaber)(
+      `/api/dokumente/${quelle}/seiten`,
+      json({ operation: "drehen", drehungen: [{ seite: 1, grad: 90 }] }),
+    );
+    expect(gedreht.status).toBe(201);
+    const neu = ((await gedreht.json()) as { dokumente: { id: string }[] }).dokumente[0]!.id;
+    await ordnen(neu, { tagsHinzu: [projekt, personal] });
+    const m = await zugangAnlegen(t, inhaber, "verlauf@example.org", {
+      rolle: "mitarbeiter",
+      recht: "lesen",
+      sichtbereich: { tags: [projekt], ohneTags: [personal] },
+    });
+    const ableitungen = async (cookie: string) =>
+      (
+        (await (await als(cookie)(`/api/dokumente/${quelle}/verlauf`)).json()) as {
+          ereignisse: { tabelle: string }[];
+        }
+      ).ereignisse.filter((e) => e.tabelle === "ableitungen");
+    expect(await ableitungen(inhaber)).toHaveLength(1);
+    expect(await ableitungen(m)).toEqual([]);
   });
 
   it("führt Mitarbeiter mit Recht und Sichtbereich in der Verfahrensdokumentation", async () => {

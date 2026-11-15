@@ -277,7 +277,7 @@ export interface Ereignis {
 export async function verlauf(
   db: Datenbank,
   id: string,
-  { notizen = true }: { notizen?: boolean } = {},
+  { notizen = true, sicht }: { notizen?: boolean; sicht?: Sicht } = {},
 ): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
   const ereignisse = await db.execute<{
     seq: string;
@@ -309,8 +309,11 @@ export async function verlauf(
         or (a.table_name = 'einordnungen' and a.new_value ->> 'dokument_id' = ${id})
         or (a.table_name in ('dokument_tags', 'dokument_dokumenttypen', 'dokument_korrespondenten', 'feldwerte')
             and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
+        -- Eine Ableitung nur, wenn die Sicht auch das andere Dokument sieht
         or (a.table_name = 'ableitungen'
-            and (a.new_value ->> 'dokument_id' = ${id} or a.new_value ->> 'quelle_id' = ${id}))
+            and ((a.new_value ->> 'dokument_id' = ${id} and ${sichtBedingung("(a.new_value ->> 'quelle_id')::uuid", sicht)})
+                 or (a.new_value ->> 'quelle_id' = ${id}
+                     and ${sichtBedingung("(a.new_value ->> 'dokument_id')::uuid", sicht)})))
         or (${notizen} and a.table_name = 'notizen' and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
         or (${notizen} and a.table_name = 'notiz_widerrufe'
             and coalesce(a.new_value, a.old_value) ->> 'notiz_id' in (
