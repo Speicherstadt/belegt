@@ -38,9 +38,17 @@ export function teilbereiche(seiten: number, trenner: Iterable<number>): number[
   return voll.length ? voll : null;
 }
 
-/** Seiten (ab 0), auf denen ein Code mit genau diesem Text steht */
-export async function trennerSuchen(pdf: Uint8Array, code: string, zeitlimit: number): Promise<number[]> {
-  const ordner = await mkdtemp(join(tmpdir(), "belegt-trennen-"));
+/**
+ * Seiten (ab 0), auf denen ein Code mit genau diesem Text steht. Die Seitenbilder liegen in einem Ordner unter basis;
+ * im Kind ist das der Ordner von teilenImKind, der auch nach einem Abbruch weggeräumt wird
+ */
+export async function trennerSuchen(
+  pdf: Uint8Array,
+  code: string,
+  zeitlimit: number,
+  basis = tmpdir(),
+): Promise<number[]> {
+  const ordner = await mkdtemp(join(basis, "belegt-trennen-"));
   try {
     await writeFile(join(ordner, "stapel.pdf"), pdf);
     await ausfuehren(
@@ -79,9 +87,10 @@ export async function stapelTeilen(
   pdf: Uint8Array,
   code: string,
   zeitlimit = 5 * 60_000,
+  basis?: string,
 ): Promise<Uint8Array[] | null> {
   const seiten = (await PDFDocument.load(pdf, { updateMetadata: false })).getPageCount();
-  const teile = teilbereiche(seiten, await trennerSuchen(pdf, code, zeitlimit));
+  const teile = teilbereiche(seiten, await trennerSuchen(pdf, code, zeitlimit, basis));
   return teile ? pdfTeilen(pdf, teile) : null;
 }
 
@@ -98,7 +107,9 @@ export async function teilenImKind(
 ): Promise<Uint8Array[] | null> {
   const ordner = await mkdtemp(join(tmpdir(), "belegt-teile-"));
   try {
-    const { teile } = JSON.parse(await ausfuehren("bun", [KIND, code, ordner], pdf, zeitlimit)) as { teile: number };
+    const { teile } = JSON.parse(await ausfuehren("bun", [KIND, code, ordner], pdf, zeitlimit, { gruppe: true })) as {
+      teile: number;
+    };
     if (!teile) return null;
     const ergebnis: Uint8Array[] = [];
     for (let i = 1; i <= teile; i++) ergebnis.push(new Uint8Array(await readFile(join(ordner, `teil-${i}.pdf`))));

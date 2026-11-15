@@ -8,6 +8,6 @@ import { stapelTeilen } from "./trennen.ts";
  */
 const [code = "", ordner = ""] = process.argv.slice(2);
 const pdf = new Uint8Array(await new Response(Bun.stdin.stream()).arrayBuffer());
-const teile = (await stapelTeilen(pdf, code)) ?? [];
+const teile = (await stapelTeilen(pdf, code, undefined, ordner)) ?? [];
 for (const [i, teil] of teile.entries()) await writeFile(join(ordner, `teil-${i + 1}.pdf`), teil);
 process.stdout.write(JSON.stringify({ teile: teile.length }));

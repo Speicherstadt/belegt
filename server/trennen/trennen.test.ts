@@ -109,6 +109,35 @@ describe.skipIf(!trennenVerfuegbar())("Trennblätter (pdftoppm)", { timeout: 60_
     await expect(teilenImKind(mitTrenner, TRENNBLATT_CODE, 1)).rejects.toThrow(/abgebrochen/);
   });
 
+  it("lässt nach dem Zeitlimit kein pdftoppm des Kindes weiterlaufen", async () => {
+    // Wenige KB, aber riesige Seiten: pdftoppm rechnet an jeder Seite Sekunden
+    const doc = await PDFDocument.create();
+    for (let i = 0; i < 20; i++) doc.addPage([3000, 3000]).drawCircle({ x: 1500, y: 1500, size: 1400 });
+    const gross = await doc.save();
+    const eigenes = await mkdtemp(join(tmpdir(), "belegt-zeitlimit-"));
+    const vorher = process.env.TMPDIR;
+    process.env.TMPDIR = eigenes;
+    const laufend = () => {
+      try {
+        return execFileSync("pgrep", ["-f", eigenes], { encoding: "utf8" }).trim();
+      } catch {
+        return "";
+      }
+    };
+    try {
+      await expect(teilenImKind(gross, TRENNBLATT_CODE, 2_000)).rejects.toThrow(/abgebrochen/);
+      await new Promise((r) => setTimeout(r, 1_000));
+      expect(laufend(), "pdftoppm läuft noch").toBe("");
+      // Auch die Seitenbilder des abgebrochenen Kindes bleiben nicht liegen
+      expect(await readdir(eigenes)).toEqual([]);
+    } finally {
+      process.env.TMPDIR = vorher;
+      if (vorher === undefined) delete process.env.TMPDIR;
+      for (const pid of laufend().split("\n").filter(Boolean)) process.kill(Number(pid), "SIGKILL");
+      await rm(eigenes, { recursive: true, force: true });
+    }
+  });
+
   describe.skipIf(!testDatenbankUrl)("im Archiv", () => {
     let t: Awaited<ReturnType<typeof testApp>>;
     let cookie: string;

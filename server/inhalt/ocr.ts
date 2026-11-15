@@ -21,31 +21,50 @@ let verfuegbar: boolean | undefined;
 /** Ob Tesseract und pdftoppm installiert sind; einmal geprüft (pdftoppm kennt nur -v, nicht --version) */
 export const ocrVerfuegbar = () => (verfuegbar ??= vorhanden("tesseract", "--version") && vorhanden("pdftoppm", "-v"));
 
-/** Startet ein Programm mit Eingabe auf stdin und gibt stdout zurück; nach dem Zeitlimit wird es beendet */
+/**
+ * Startet ein Programm mit Eingabe auf stdin und gibt stdout zurück; nach dem Zeitlimit wird es beendet. Mit gruppe
+ * läuft es in einer eigenen Prozessgruppe, und das Zeitlimit beendet auch die Programme, die es selbst startet (etwa
+ * pdftoppm im Kind von teilenImKind); sonst rechneten die ohne Grenze weiter.
+ */
 export function ausfuehren(
   programm: string,
   argumente: string[],
   eingabe?: Uint8Array,
   zeitlimit = ZEITLIMIT,
+  { gruppe = false }: { gruppe?: boolean } = {},
 ): Promise<string> {
   return new Promise((ok, fehler) => {
-    const p = spawn(programm, argumente, {
-      stdio: ["pipe", "pipe", "pipe"],
-      timeout: zeitlimit,
-      killSignal: "SIGKILL",
-    });
+    const p = spawn(programm, argumente, { stdio: ["pipe", "pipe", "pipe"], detached: gruppe });
+    let abgebrochen = false;
+    const uhr = setTimeout(() => {
+      abgebrochen = true;
+      try {
+        if (gruppe && p.pid) process.kill(-p.pid, "SIGKILL");
+        else p.kill("SIGKILL");
+      } catch {
+        p.kill("SIGKILL");
+      }
+    }, zeitlimit);
     const aus: Buffer[] = [];
     let fehlertext = "";
     p.stdout.on("data", (d: Buffer) => aus.push(d));
     p.stderr.on("data", (d: Buffer) => {
       fehlertext = (fehlertext + d.toString()).slice(-500);
     });
-    p.on("error", fehler);
+    p.on("error", (err) => {
+      clearTimeout(uhr);
+      fehler(err);
+    });
     p.on("close", (code, signal) => {
-      if (code === 0) ok(Buffer.concat(aus).toString("utf8"));
+      clearTimeout(uhr);
+      if (code === 0 && !abgebrochen) ok(Buffer.concat(aus).toString("utf8"));
       else
         fehler(
-          new Error(signal ? `${programm}: abgebrochen (${signal})` : `${programm}: ${fehlertext.trim() || code}`),
+          new Error(
+            signal || abgebrochen
+              ? `${programm}: abgebrochen (${signal ?? "SIGKILL"})`
+              : `${programm}: ${fehlertext.trim() || code}`,
+          ),
         );
     });
     p.stdin.on("error", () => {});
