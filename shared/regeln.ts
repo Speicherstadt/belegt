@@ -20,7 +20,8 @@ export interface Regel {
   id: string;
   name: string;
   wenn: Bedingung;
-  dann: Aufbewahrungsart;
+  /** null: die Regel schlägt nur Tags, Dokumenttyp oder Feldwerte vor */
+  dann: Aufbewahrungsart | null;
 }
 
 export interface Merkmale {
@@ -30,7 +31,7 @@ export interface Merkmale {
 }
 
 export interface Vorschlag {
-  art: Aufbewahrungsart;
+  art: Aufbewahrungsart | null;
   regel: { id: string; name: string };
 }
 

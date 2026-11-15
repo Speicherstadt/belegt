@@ -124,4 +124,53 @@ describe.skipIf(!testDatenbankUrl)("Vorschläge für Tags, Dokumenttyp und Felde
     expect(ki.ordnung.tags.map((x: { name: string }) => x.name)).toEqual(["Strom"]);
     expect(ki.ordnung.dokumenttyp.name).toBe("Abrechnung");
   });
+
+  it("eine Regel ohne Art schlägt nur Tags, Dokumenttyp und Feldwerte vor", async () => {
+    const reise = await anlegen("/api/tags", { name: "Reise" });
+    const ort = await anlegen("/api/felder", { name: "Ort", typ: "text" });
+    const km = await anlegen("/api/felder", { name: "Kilometer", typ: "zahl" });
+    const res = await als(
+      "/api/regeln",
+      json({
+        name: "Nur taggen",
+        wenn: { betreffEnthaelt: "Bahnticket" },
+        dann: null,
+        reihenfolge: 0,
+        ordnung: {
+          tags: [reise],
+          felder: [
+            { feldId: ort, wert: "Berlin" },
+            { feldId: km, wert: 600 },
+          ],
+        },
+      }),
+    );
+    expect(res.status).toBe(201);
+    expect((await res.json()).art).toBeNull();
+    // Ein anderer Absender, sonst gewänne die Regel „Versorger“ aus dem ersten Test
+    const id = await importieren(mail("Ihr Bahnticket", "bahn1").replace("versorger.example>", "bahn.example>"));
+    const { vorschlag } = await (await als(`/api/dokumente/${id}/vorschlag`)).json();
+    expect(vorschlag).toMatchObject({ art: null, regel: { name: "Nur taggen" } });
+    expect(vorschlag.ordnung.tags.map((x: { name: string }) => x.name)).toEqual(["Reise"]);
+    expect(vorschlag.ordnung.felder.map((f: { wert: unknown }) => f.wert)).toEqual(["Berlin", 600]);
+
+    // Ohne Art und ohne Ordnung schlägt eine Regel nichts vor: die Schnittstelle und Postgres lehnen sie ab
+    const leer = (dann: unknown, ordnung?: object) =>
+      als("/api/regeln", json({ name: "Leer", wenn: { domain: "leer.example" }, dann, ordnung }));
+    expect((await leer(null)).status).toBe(400);
+    expect((await leer(null, { tags: [] })).status).toBe(400);
+    await expect(
+      t.sql`insert into regeln (name, bedingung, art) values ('Leer', '{"domain":"leer.example"}', null)`,
+    ).rejects.toThrow(/regeln_art_oder_ordnung/);
+    await expect(
+      t.sql`insert into regeln (name, bedingung, art, ordnung)
+            values ('Leer', '{"domain":"leer.example"}', null, '{"tags":[],"dokumenttyp":null,"felder":[]}')`,
+    ).rejects.toThrow(/regeln_art_oder_ordnung/);
+
+    // Ist alles Vorgeschlagene inzwischen gelöscht, bleibt nichts zum Vorschlagen
+    await als(`/api/tags/${reise}`, { method: "DELETE" });
+    await als(`/api/felder/${ort}`, { method: "DELETE" });
+    await als(`/api/felder/${km}`, { method: "DELETE" });
+    expect((await (await als(`/api/dokumente/${id}/vorschlag`)).json()).vorschlag).toBeNull();
+  });
 });

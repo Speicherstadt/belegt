@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
+import type { Feldwert } from "../../shared/ordnung.ts";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { type Art, api } from "../lib/api.ts";
+import { type Art, api, type Feld } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { m } from "../paraglide/messages.js";
 import { feldLabel } from "./DocumentOrdnung.tsx";
@@ -15,13 +16,16 @@ export function Rules() {
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const liste = useQuery({ queryKey: ["regeln"], queryFn: api.regeln });
-  const [art, setArt] = useState<Art>("beleg");
-  const [feldId, setFeldId] = useState("");
-  const [ungueltig, setUngueltig] = useState(false);
+  // "" heißt: keine Art, die Regel schlägt nur Tags, Dokumenttyp oder Feldwerte vor
+  const [art, setArt] = useState<Art | "">("beleg");
+  // Vorgeschlagene Feldwerte: je Zeile ein Feld; der Schlüssel hält die Eingabe beim Entfernen einer Zeile fest
+  const [zeilen, setZeilen] = useState<{ schluessel: number; feldId: string }[]>([]);
+  const [naechste, setNaechste] = useState(0);
+  const [ungueltig, setUngueltig] = useState<Feld | null>(null);
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
-  const feld = felder.data?.find((f) => f.id === feldId);
+  const feldZu = (id: string) => felder.data?.find((f) => f.id === id);
   const neu = () => queryClient.invalidateQueries({ queryKey: ["regeln"] });
   const anlegen = useMutation({ mutationFn: api.regelAnlegen, onSuccess: neu });
   const schalten = useMutation({
@@ -35,9 +39,15 @@ export function Rules() {
     const form = e.currentTarget;
     const f = new FormData(form);
     const text = (k: string) => String(f.get(k) ?? "").trim() || undefined;
-    const wert = feld ? ausEingabe(feld, String(f.get("wert") ?? "")) : null;
-    setUngueltig(wert === undefined);
-    if (wert === undefined) return;
+    const werte: { feldId: string; wert: Feldwert }[] = [];
+    for (const z of zeilen) {
+      const feld = feldZu(z.feldId);
+      if (!feld) continue;
+      const wert = ausEingabe(feld, String(f.get(`wert-${z.schluessel}`) ?? ""));
+      if (wert === undefined) return setUngueltig(feld);
+      if (wert !== null) werte.push({ feldId: feld.id, wert });
+    }
+    setUngueltig(null);
     anlegen.mutate(
       {
         name: String(f.get("name")),
@@ -47,17 +57,17 @@ export function Rules() {
           betreffEnthaelt: text("betreff"),
           anhangTyp: text("anhang"),
         },
-        dann: art,
+        dann: art || null,
         ordnung: {
           tags: f.getAll("tags").map(String),
           dokumenttyp: text("dokumenttyp") ?? null,
-          felder: feld && wert !== null ? [{ feldId: feld.id, wert }] : [],
+          felder: werte,
         },
       },
       {
         onSuccess: () => {
           form.reset();
-          setFeldId("");
+          setZeilen([]);
         },
       },
     );
@@ -78,7 +88,7 @@ export function Rules() {
           >
             <span className="flex flex-col">
               <span className="font-medium">
-                {r.name} → {artLabel(r.art)}
+                {r.name} → {r.art ? artLabel(r.art) : m.rules_no_kind()}
               </span>
               <span className="text-muted">
                 {Object.entries(r.bedingung)
@@ -128,7 +138,8 @@ export function Rules() {
           </label>
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.rules_then()}
-            <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feldKlasseRegel}>
+            <select value={art} onChange={(e) => setArt(e.target.value as Art | "")} className={feldKlasseRegel}>
+              <option value="">{m.rules_no_kind()}</option>
               {ARTEN.map((a) => (
                 <option key={a.art} value={a.art}>
                   {a.label()}
@@ -150,23 +161,62 @@ export function Rules() {
             </label>
           )}
           {!!felder.data?.length && (
-            <label className="flex flex-col gap-1.5 font-medium text-sm">
-              {m.rules_field()}
-              <select value={feldId} onChange={(e) => setFeldId(e.target.value)} className={feldKlasseRegel}>
-                <option value="">{m.filter_field_none()}</option>
-                {felder.data.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {feldLabel(f)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {feld && (
-            <label htmlFor="regel-wert" className="flex flex-col gap-1.5 font-medium text-sm">
-              {m.rules_field_value()}
-              <FieldInput key={feld.id} id="regel-wert" feld={feld} name="wert" />
-            </label>
+            <fieldset className="col-span-full m-0 flex flex-col gap-2 border-0 p-0 text-sm">
+              <legend className="mb-1.5 font-medium">{m.rules_fields()}</legend>
+              {zeilen.map((z, i) => {
+                const feld = feldZu(z.feldId);
+                const vergeben = new Set(zeilen.filter((x) => x !== z).map((x) => x.feldId));
+                return (
+                  <div key={z.schluessel} className="flex flex-wrap items-end gap-3">
+                    <label className="flex flex-col gap-1.5 font-medium">
+                      {m.rules_field_n({ nummer: String(i + 1) })}
+                      <select
+                        value={z.feldId}
+                        onChange={(e) => setZeilen(zeilen.map((x) => (x === z ? { ...x, feldId: e.target.value } : x)))}
+                        className={feldKlasseRegel}
+                      >
+                        <option value="">{m.filter_field_none()}</option>
+                        {felder.data.map((f) => (
+                          <option key={f.id} value={f.id} disabled={vergeben.has(f.id)}>
+                            {feldLabel(f)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {feld && (
+                      <label htmlFor={`regel-wert-${z.schluessel}`} className="flex flex-col gap-1.5 font-medium">
+                        {m.rules_field_value_n({ nummer: String(i + 1) })}
+                        <FieldInput
+                          key={feld.id}
+                          id={`regel-wert-${z.schluessel}`}
+                          feld={feld}
+                          name={`wert-${z.schluessel}`}
+                        />
+                      </label>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setZeilen(zeilen.filter((x) => x !== z))}
+                      className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle"
+                    >
+                      {m.rules_field_remove({ nummer: String(i + 1) })}
+                    </button>
+                  </div>
+                );
+              })}
+              {zeilen.length < felder.data.length && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZeilen([...zeilen, { schluessel: naechste, feldId: "" }]);
+                    setNaechste(naechste + 1);
+                  }}
+                  className="h-9 self-start rounded-md border border-border px-3 font-medium hover:bg-subtle"
+                >
+                  {m.rules_field_add()}
+                </button>
+              )}
+            </fieldset>
           )}
           {!!tags.data?.length && (
             <fieldset className="col-span-full m-0 flex flex-wrap gap-3 border-0 p-0 text-sm">
@@ -186,7 +236,8 @@ export function Rules() {
       )}
       {ungueltig && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
-          {feld?.typ === "betrag" ? m.order_field_invalid_amount() : m.order_field_invalid()}
+          {feldLabel(ungueltig)}:{" "}
+          {ungueltig.typ === "betrag" ? m.order_field_invalid_amount() : m.order_field_invalid()}
         </p>
       )}
       {(anlegen.error ?? schalten.error) && (

@@ -23,14 +23,22 @@ const Bedingung = z
   })
   .refine((b) => Object.values(b).some(Boolean), { message: "Mindestens eine Bedingung" });
 
-export const RegelEingabe = z.object({
-  name: z.string().trim().min(1).max(200),
-  wenn: Bedingung,
-  dann: z.enum(ARTEN),
-  reihenfolge: z.number().int().min(0).max(10_000).default(0),
-  /** Zusätzlich vorgeschlagen: Tags, Dokumenttyp und Feldwerte */
-  ordnung: OrdnungsVorschlag.optional(),
-});
+export const RegelEingabe = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    wenn: Bedingung,
+    /** null: die Regel schlägt nur Tags, Dokumenttyp oder Feldwerte vor, die Einordnung bleibt offen */
+    dann: z.enum(ARTEN).nullable().default(null),
+    reihenfolge: z.number().int().min(0).max(10_000).default(0),
+    /** Zusätzlich vorgeschlagen: Tags, Dokumenttyp und Feldwerte */
+    ordnung: OrdnungsVorschlag.optional(),
+  })
+  .refine((r) => r.dann !== null || !ordnungLeer(r.ordnung), {
+    message: "Eine Regel ohne Art schlägt mindestens einen Tag, einen Dokumenttyp oder einen Feldwert vor",
+  });
+
+const ordnungLeer = (o: OrdnungsVorschlag | null | undefined) =>
+  !o || (!o.tags.length && !o.dokumenttyp && !o.felder.length);
 
 export async function listen(db: Datenbank) {
   return db.select().from(regeln).orderBy(asc(regeln.reihenfolge), asc(regeln.erstelltAm));
@@ -39,7 +47,7 @@ export async function listen(db: Datenbank) {
 /** Legt eine Regel an; Tags, Dokumenttyp und Felder im Vorschlag muss es geben, Werte passen zu ihrem Feld */
 export async function anlegen(db: Datenbank, eingabe: z.infer<typeof RegelEingabe>, akteur: string) {
   const ordnung = eingabe.ordnung ? await vorschlagPruefen(db, eingabe.ordnung) : null;
-  const leer = !ordnung || (!ordnung.tags.length && !ordnung.dokumenttyp && !ordnung.felder.length);
+  const leer = ordnungLeer(ordnung);
   const [neu] = await mitAkteur(db, akteur, (tx) =>
     tx
       .insert(regeln)
@@ -92,5 +100,7 @@ export async function vorschlag(
     anhangTypen: mail ? mail.anhaenge.map((a) => a.mimeType) : [dokument.mimeType],
   });
   if (!v) return null;
-  return { ...v, ordnung: await vorschlagAufloesen(db, zeilen.find((r) => r.id === v.regel.id)?.ordnung) };
+  const ordnung = await vorschlagAufloesen(db, zeilen.find((r) => r.id === v.regel.id)?.ordnung);
+  // Eine Regel ohne Art, deren Tags, Typ und Felder inzwischen gelöscht sind, hat nichts mehr vorzuschlagen
+  return v.art === null && !ordnung ? null : { ...v, ordnung };
 }

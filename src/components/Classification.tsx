@@ -103,13 +103,19 @@ export function Classification({
       )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.vorschlag && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
-          {m.suggest_label({ art: artLabel(vorschlag.data.vorschlag.art), regel: vorschlag.data.vorschlag.regel.name })}
+          {vorschlag.data.vorschlag.art
+            ? m.suggest_label({
+                art: artLabel(vorschlag.data.vorschlag.art),
+                regel: vorschlag.data.vorschlag.regel.name,
+              })
+            : m.suggest_label_order({ regel: vorschlag.data.vorschlag.regel.name })}
           {vorschlag.data.vorschlag.ordnung && <SuggestionOrder ordnung={vorschlag.data.vorschlag.ordnung} />}
           <button
             type="button"
             onClick={() => {
               const v = vorschlag.data!.vorschlag!;
-              setArt(v.art);
+              // Ohne Art setzt die Regel nur die Ordnung; die Einordnung bleibt offen
+              if (v.art) setArt(v.art);
               if (v.ordnung) ordnen.mutate(v.ordnung);
             }}
             className="h-8 rounded-md border border-border bg-bg px-3 font-medium"

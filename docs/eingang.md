@@ -116,11 +116,12 @@ gelten die Merkmale seiner Mail. Eine Regel kann auf Absender,
 Domain (auch Subdomains), einen Teil des Betreffs und den Typ eines Anhangs prüfen; alle Bedingungen müssen
 zutreffen, die erste passende Regel gewinnt. Eine Regel ohne Bedingung trifft nichts.
 
-Eine Regel kann zusätzlich Tags, einen Dokumenttyp und einen Feldwert vorschlagen ([Ordnung](ordnung.md)). Was
-seitdem gelöscht wurde, schlägt sie nicht mehr vor.
+Eine Regel kann zusätzlich Tags, einen Dokumenttyp und Feldwerte vorschlagen ([Ordnung](ordnung.md)), oder nur diese:
+Mit „Keine Art, nur Ordnung“ taggt sie, ohne eine Art vorzuschlagen. Was seitdem gelöscht wurde, schlägt sie nicht mehr
+vor.
 
-Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Dokumenttyp und Feldwert sofort und trägt die Art ins
-Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt.
+Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Dokumenttyp und Feldwerte sofort und trägt die Art, wenn
+die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt.
 
 ## Suche
 

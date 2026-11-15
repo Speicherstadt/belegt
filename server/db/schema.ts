@@ -180,7 +180,8 @@ export const regeln = pgTable(
     name: text("name").notNull(),
     reihenfolge: integer("reihenfolge").notNull().default(0),
     bedingung: jsonb("bedingung").notNull(),
-    art: text("art").notNull(),
+    /** NULL: die Regel schlägt nur Tags, Dokumenttyp oder Feldwerte vor, die Einordnung bleibt offen */
+    art: text("art"),
     aktiv: boolean("aktiv").notNull().default(true),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
     /** Zusätzlich vorgeschlagen: Tags, Dokumenttyp und Feldwerte (server/ordnung/vorschlag.ts) */
@@ -190,6 +191,14 @@ export const regeln = pgTable(
     check(
       "regeln_art",
       sql`${t.art} in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')`,
+    ),
+    // Eine Regel schlägt etwas vor: eine Art oder mindestens einen Tag, einen Dokumenttyp oder einen Feldwert
+    check(
+      "regeln_art_oder_ordnung",
+      sql`${t.art} is not null
+          or coalesce(${t.ordnung} -> 'tags', '[]'::jsonb) <> '[]'::jsonb
+          or coalesce(${t.ordnung} -> 'dokumenttyp', 'null'::jsonb) <> 'null'::jsonb
+          or coalesce(${t.ordnung} -> 'felder', '[]'::jsonb) <> '[]'::jsonb`,
     ),
   ],
 );

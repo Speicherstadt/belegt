@@ -72,6 +72,61 @@ test("Regel anlegen, Mail mit Anhang importieren, Vorschlag übernehmen", async 
   await expect(page.getByRole("status")).toHaveText("0 neu, 1 schon vorhanden");
 });
 
+test("Regel ohne Art: schlägt Tag und zwei Feldwerte vor, die Einordnung bleibt offen", async ({ page }, info) => {
+  const projekt = info.project.name;
+  const r = page.request;
+  const tag = `Reise ${projekt}`;
+  await r.post("/api/tags", { data: { name: tag } });
+  await r.post("/api/felder", { data: { name: `Ort ${projekt}`, typ: "text" } });
+  await r.post("/api/felder", { data: { name: `Kilometer ${projekt}`, typ: "zahl" } });
+
+  await page.goto("/quellen");
+  const regeln = page.locator("section", { has: page.getByRole("heading", { name: "Regeln" }) });
+  await regeln.getByLabel("Name").fill(`Bahn ${projekt}`);
+  await regeln.getByLabel("Domain").fill(`bahn-${projekt}.example`);
+  await regeln.getByLabel("Dann").selectOption("");
+  await regeln.getByLabel(tag).check();
+  await regeln.getByRole("button", { name: "Feld hinzufügen" }).click();
+  await regeln.getByRole("combobox", { name: "Feld 1", exact: true }).selectOption({ label: `Ort ${projekt}` });
+  await regeln.getByLabel("Wert 1").fill("Berlin");
+  await regeln.getByRole("button", { name: "Feld hinzufügen" }).click();
+  await regeln.getByRole("combobox", { name: "Feld 2", exact: true }).selectOption({ label: `Kilometer ${projekt}` });
+  await regeln.getByLabel("Wert 2").fill("600");
+  expect(
+    (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations,
+  ).toEqual([]);
+  await regeln.getByRole("button", { name: "Regel anlegen" }).click();
+  await expect(regeln.getByRole("listitem").filter({ hasText: `Bahn ${projekt}` })).toContainText(
+    "Keine Art, nur Ordnung",
+  );
+
+  await page.goto("/");
+  const eml = [
+    `From: Bahn <ticket@bahn-${projekt}.example>`,
+    "To: anna@example.org",
+    `Subject: Ihr Ticket ${projekt}`,
+    `Message-ID: <ticket-${projekt}@bahn.example>`,
+    "",
+    "Gute Reise.",
+    "",
+  ].join("\r\n");
+  await page
+    .getByTestId("mail-import")
+    .setInputFiles({ name: "ticket.eml", mimeType: "message/rfc822", buffer: Buffer.from(eml) });
+  await page.getByRole("link", { name: `Ihr Ticket ${projekt}.eml` }).click();
+  const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
+  await expect(einordnung).toContainText(`Vorschlag: nur Ordnung, keine Art (Regel „Bahn ${projekt}“)`);
+  await einordnung.getByLabel("Art").selectOption("frei");
+  await einordnung.getByRole("button", { name: "Übernehmen" }).click();
+  const ordnung = page.locator("section", { has: page.getByRole("heading", { name: "Ordnung", exact: true }) });
+  await expect(ordnung.getByRole("button", { name: `Tag ${tag} entfernen` })).toBeVisible();
+  await expect(ordnung.getByRole("textbox", { name: `Ort ${projekt}`, exact: true })).toHaveValue("Berlin");
+  await expect(ordnung.getByRole("textbox", { name: `Kilometer ${projekt}`, exact: true })).toHaveValue("600");
+  // Die Art bleibt, wie sie war, und das Dokument im Eingang
+  await expect(einordnung.getByLabel("Art")).toHaveValue("frei");
+  await expect(einordnung).toContainText("Noch nicht eingeordnet");
+});
+
 test("ein Postfach hinzufügen; ein Abruf gegen einen nicht erreichbaren Server zeigt den Fehler", async ({
   page,
 }, info) => {

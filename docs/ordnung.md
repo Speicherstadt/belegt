@@ -44,7 +44,7 @@ einzeln im Audit-Log.
 
 ## Vorschläge und Eingangsordner
 
-[Regeln](eingang.md#regeln) schlagen neben der Art auch Tags, einen Dokumenttyp und einen Feldwert vor, das
+[Regeln](eingang.md#regeln) schlagen neben der Art (oder ohne sie) Tags, einen Dokumenttyp und Feldwerte vor, das
 [Sprachmodell](eingang.md#vorschläge-eines-sprachmodells) passende vorhandene Tags und einen Dokumenttyp. „Übernehmen“
 auf der Seite des Dokuments setzt sie. Mit `EINGANG_ORDNER_TAGS=true` werden die Unterordner des
 [Eingangsordners](eingang.md#eingangsordner) zu Tags.

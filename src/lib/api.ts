@@ -145,7 +145,8 @@ export interface Regel {
   name: string;
   reihenfolge: number;
   bedingung: { absender?: string; domain?: string; betreffEnthaelt?: string; anhangTyp?: string };
-  art: Art;
+  /** null: die Regel schlägt nur Tags, Dokumenttyp oder Feldwerte vor */
+  art: Art | null;
   aktiv: boolean;
   ordnung: OrdnungsVorschlag | null;
 }
@@ -421,7 +422,7 @@ export const api = {
   },
   vorschlag: (id: string) =>
     aufruf<{
-      vorschlag: { art: Art; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
+      vorschlag: { art: Art | null; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
       erechnung: ERechnung | null;
       ki: {
         art: Art;
@@ -437,7 +438,7 @@ export const api = {
   regelAnlegen: (r: {
     name: string;
     wenn: Regel["bedingung"];
-    dann: Art;
+    dann: Art | null;
     ordnung?: { tags: string[]; dokumenttyp: string | null; felder: { feldId: string; wert: Feldwert }[] };
   }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>

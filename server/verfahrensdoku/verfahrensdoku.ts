@@ -131,7 +131,7 @@ export async function verfahrensdoku(
         ),
         ...regeln.map(
           (r) =>
-            `Regel „${r.name}“ schlägt vor: ${ART[r.art as Aufbewahrungsart] ?? r.art}${r.aktiv ? "" : " (deaktiviert)"}`,
+            `Regel „${r.name}“ schlägt vor: ${r.art ? (ART[r.art as Aufbewahrungsart] ?? r.art) : "nur Tags, Dokumenttyp oder Feldwerte"}${r.aktiv ? "" : " (deaktiviert)"}`,
         ),
       ],
     },
