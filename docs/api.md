@@ -16,7 +16,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
 mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein, setzt Tags, Dokumenttyp und Feldwerte und schreibt Notizen; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
@@ -54,6 +54,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/seiten` (`operation`: `drehen` mit `drehungen`: `[{seite, grad: 90 \| 180 \| 270}]`, `entfernen` mit `seiten`, `teilen` mit `nach`) | legt aus einem PDF ein neues Dokument an, beim Teilen zwei ([`dokument.md`](dokument.md#seiten-bearbeiten)); das Original bleibt. Antwort `201` mit `{dokumente: [...]}`; `400` bei Seiten, die es nicht gibt, oder keinem PDF, `410` nach der Löschung, `422` bei einem PDF, das sich nicht bearbeiten lässt. Nur der Inhaber mit Sitzung |
 | `POST /api/dokumente/zusammenfuegen` (`ids`: 2 bis 20 PDFs in der gewünschten Reihenfolge) | fügt die PDFs zu einem neuen Dokument zusammen; Antwort `201` mit dem Dokument. Nur der Inhaber mit Sitzung |
 | `GET /api/dokumente/:id/ableitungen` | `aus` (woraus das Dokument abgeleitet ist) und `daraus` (was daraus abgeleitet wurde), je mit `dokumentId`, `asn`, `operation`, `parameter`, `position`, `akteur`, `erstelltAm`; ein Prüfer sieht nur Dokumente seines Zeitraums |
+| `GET /api/dokumente/:id/aehnliche` | bis zu fünf ähnliche Dokumente ([`dokument.md`](dokument.md#ähnliche-dokumente)) mit `id`, `asn`, `dateiname`, `titel`, `mimeType`, `vorschaubild`; ohne gelöschte, ein Prüfer nur in seinem Zeitraum |
 | `GET /api/dokumente/:id/notizen`, `POST /api/dokumente/:id/notizen` (`text`: 1 bis 5000 Zeichen) | Notizen ([`dokument.md`](dokument.md#notizen)), älteste zuerst, ohne zurückgezogene; je `id`, `text`, `erstelltVon`, `erstelltAm`. Inhaber und Steuerberatung, nicht Prüfer; `409` nach der Löschung |
 | `POST /api/dokumente/:id/notizen/:notiz/zurueckziehen` | blendet eine Notiz aus; wer sie schrieb oder der Inhaber, sonst `404` |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |

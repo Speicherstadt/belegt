@@ -193,6 +193,16 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/aehnliche": {
+      get: {
+        summary: "Bis zu fünf ähnliche Dokumente aus dem Volltext, ohne gelöschte",
+        parameters: [idParam],
+        responses: {
+          "200": { description: "Liste mit id, asn, dateiname, titel, mimeType, vorschaubild" },
+          "404": fehler,
+        },
+      },
+    },
     "/api/dokumente/{id}/notizen": {
       get: {
         summary: "Notizen zum Dokument, älteste zuerst, ohne zurückgezogene",

@@ -123,3 +123,22 @@ test("Notiz anlegen und über die Suche finden", async ({ page }, info) => {
   await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   await expect(page.getByRole("row")).toHaveCount(2);
 });
+
+test("ähnliche Dokumente stehen auf der Seite des Dokuments", async ({ page }, info) => {
+  const p = info.project.name;
+  const text = `Wartungsvertrag Heizungsanlage${p} Kesselprüfung${p} Brennwerttechnik${p}`;
+  const erstes = `wartung-1-${p}.pdf`;
+  const zweites = `wartung-2-${p}.pdf`;
+  await hochladen(page, erstes, await pdf(text));
+  const id = await hochladen(page, zweites, await pdf(text));
+  // Der Text kommt aus dem gelesenen PDF; der E2E-Server liest ihn kurz nach dem Hochladen
+  await expect
+    .poll(async () => (await (await page.request.get(`/api/dokumente/${id}/aehnliche`)).json()).length, {
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
+  await page.goto(`/dokumente/${id}`);
+  const aehnliche = page.getByRole("region", { name: "Ähnliche Dokumente" });
+  await expect(aehnliche.getByRole("link", { name: erstes, exact: true })).toBeVisible();
+  await axeHellUndDunkel(page);
+});

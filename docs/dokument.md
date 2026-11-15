@@ -1,7 +1,7 @@
 ---
-title: "Dokument: Vorschaubilder, Seiten, Notizen"
+title: "Dokument: Vorschaubilder, Seiten, Notizen, Ähnliches"
 description: >-
-  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder, Seiten bearbeiten, ohne das Original zu ändern, und Notizen.
+  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder, Seiten bearbeiten, ohne das Original zu ändern, Notizen und ähnliche Dokumente.
 ---
 
 # Dokument
@@ -46,3 +46,11 @@ Die Suche findet Notizen. Prüfer sehen keine, auch nicht über die Suche: Notiz
 nach § 147 AO. Mit der Löschung des Dokuments gehen die Notizen mit. Das Audit-Log hält jede Notiz ohne ihren Text
 fest, nur mit dessen SHA-256; so lässt sich später zeigen, was stand, ohne dass der Text das Dokument überlebt.
 Programme lesen Notizen mit einem Token mit dem Recht lesen und schreiben sie mit schreiben, auch über MCP.
+
+## Ähnliche Dokumente
+
+Auf der Seite eines Dokuments stehen unter **Ähnliche Dokumente** bis zu fünf andere, die ihm im Text am meisten
+gleichen, etwa die Stromrechnungen der anderen Monate. Belegt nimmt dafür aus dem Volltext des Dokuments (Dateiname,
+Einordnung, Mail, gelesener Text, Tags) die Wörter, die darin oft und im übrigen Archiv selten vorkommen, und sucht
+nach Dokumenten mit möglichst vielen davon. Gelöschte erscheinen nicht, Prüfer sehen nur Dokumente ihres Zeitraums.
+Notizen zählen nicht mit. Hat ein Dokument keinen Text, der anderswo vorkommt, bleibt der Bereich weg.

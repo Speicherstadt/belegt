@@ -191,6 +191,17 @@ export const dokumenteApi = {
   zusammenfuegen: (ids: string[]) => aufruf<Dokument>("/api/dokumente/zusammenfuegen", json({ ids })),
   ableitungen: (id: string) =>
     aufruf<{ aus: Verknuepfung[]; daraus: Verknuepfung[] }>(`/api/dokumente/${id}/ableitungen`),
+  aehnliche: (id: string) =>
+    aufruf<
+      {
+        id: string;
+        asn: number;
+        dateiname: string | null;
+        titel: string | null;
+        mimeType: string;
+        vorschaubild: boolean;
+      }[]
+    >(`/api/dokumente/${id}/aehnliche`),
   notizen: (id: string) => aufruf<Notiz[]>(`/api/dokumente/${id}/notizen`),
   notizAnlegen: (id: string, text: string) => aufruf<Notiz>(`/api/dokumente/${id}/notizen`, json({ text })),
   notizZurueckziehen: (id: string, notiz: string) =>

@@ -12,6 +12,7 @@ import { OpenWith } from "../components/OpenWith.tsx";
 import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
+import { Similar } from "../components/Similar.tsx";
 import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -117,6 +118,7 @@ export function DocumentPage() {
             />
           )}
           {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
+          {!geloescht && <Similar dokumentId={d.id} />}
           <DocumentOrdnung
             dokumentId={d.id}
             ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, felder: d.felder }}

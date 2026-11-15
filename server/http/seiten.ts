@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { aehnliche } from "../aehnliche/aehnliche.ts";
 import { laden } from "../dokumente/dokumente.ts";
 import { fuerDokument } from "../loeschung/loeschung.ts";
 import { ableiten, ableitungenZu, istAbleitungsFehler } from "../seiten/ableiten.ts";
@@ -7,8 +8,9 @@ import { rasterVerfuegbar, seiteAlsJpeg, seitenzahl } from "../vorschaubild/rast
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
 /*
- * Seiten eines PDFs als Bilder und neue Dokumente daraus (docs/dokument.md#seiten-bearbeiten). Bearbeiten darf nur, wer
- * schreibt, und nur mit Sitzung: Kein Token erreicht diese Aufrufe (server/zugang/tokens.ts).
+ * Seiten eines PDFs als Bilder und neue Dokumente daraus (docs/dokument.md#seiten-bearbeiten), dazu Ableitungen und
+ * ähnliche Dokumente. Bearbeiten darf nur, wer schreibt, und nur mit Sitzung: Kein Token erreicht diese Aufrufe
+ * (server/zugang/tokens.ts).
  */
 
 const Zusammenfuegen = z.object({ ids: z.array(Id).min(2).max(20) });
@@ -84,6 +86,14 @@ export function seitenRouten(app: App, umgebung: AppUmgebung) {
       if (istAbleitungsFehler(err)) return c.json({ fehler: err.message }, err.status);
       throw err;
     }
+  });
+
+  /** Bis zu fünf ähnliche Dokumente aus dem Volltext (server/aehnliche/) */
+  app.get("/api/dokumente/:id/aehnliche", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    return c.json(await aehnliche(umgebung.db, dokument.id, { zeitraum: c.get("nutzer").zeitraum }));
   });
 
   app.get("/api/dokumente/:id/ableitungen", async (c) => {

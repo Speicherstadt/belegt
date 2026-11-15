@@ -515,5 +515,6 @@
   "notes_withdraw": "Zurückziehen",
   "event_note_added": "Notiz hinzugefügt",
   "event_note_withdrawn": "Notiz zurückgezogen",
-  "event_note_removed": "Notiz mit der Löschung entfernt"
+  "event_note_removed": "Notiz mit der Löschung entfernt",
+  "similar_title": "Ähnliche Dokumente"
 }
