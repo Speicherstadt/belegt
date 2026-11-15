@@ -94,7 +94,7 @@ const ohneSatzzeichen = (t: string) => t.replace(/[^\p{L}\p{N}_\s]/gu, "");
 
 /**
  * Ob eine Regel auf den Text passt; null bei „regex“ (das prüft server/abgleich/regex.ts mit Zeitlimit) und bei
- * „automatisch“ (keine Regel mit Text). Ein leerer Text trifft nie (wie in matching.py).
+ * „automatisch“ (das entscheidet der gelernte Klassifikator). Ein leerer Text trifft nie (wie in matching.py).
  */
 export function trifft(regel: Abgleich, text: string): boolean | null {
   const muster = regel.abgleichText.trim();

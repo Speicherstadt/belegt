@@ -6,6 +6,7 @@ import {
   check,
   date,
   index,
+  integer,
   jsonb,
   pgTable,
   text,
@@ -204,3 +205,22 @@ export const zuordnungVorschlaege = pgTable("zuordnung_vorschlaege", {
   vorschlag: jsonb("vorschlag").notNull(),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Das gelernte Modell (server/lernen/), eine Zeile. Abgeleitet und jederzeit neu erzeugbar: Wörter aus Inhalten,
+ * deshalb nicht im Audit-Log, und mit jeder bestätigten Löschung weg, bis der Worker ohne das Dokument neu lernt.
+ * loeschungen: Zahl der bestätigten Löschungen beim Lesen der Beispiele; passt sie beim Schreiben nicht mehr, lehnt
+ * Postgres das Modell ab.
+ */
+export const klassifikator = pgTable(
+  "klassifikator",
+  {
+    id: integer("id").primaryKey().default(1),
+    modell: jsonb("modell").notNull(),
+    beispiele: integer("beispiele").notNull(),
+    stand: text("stand").notNull(),
+    loeschungen: bigint("loeschungen", { mode: "number" }).notNull(),
+    trainiertAm: timestamp("trainiert_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("klassifikator_eine_zeile", sql`${t.id} = 1`)],
+);

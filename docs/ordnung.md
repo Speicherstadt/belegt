@@ -1,7 +1,7 @@
 ---
 title: "Korrespondenten, Tags, Dokumenttypen und eigene Felder"
 description: >-
-  Das Archiv in Belegt ordnen: Korrespondenten, Tags, Dokumenttypen und eigene Felder neben der Art, die die Frist bestimmt, mit Zuordnungsregeln, Filter, Suche und Verlauf.
+  Das Archiv in Belegt ordnen: Korrespondenten, Tags, Dokumenttypen und eigene Felder neben der Art, die die Frist bestimmt, mit Zuordnungsregeln, gelernten Vorschlägen, Filter, Suche und Verlauf.
 ---
 
 # Ordnung
@@ -70,17 +70,35 @@ Belegt die Dokumente im Eingang neu.
 
 | Zuordnung | trifft, wenn der Text … |
 | --- | --- |
-| Keine | nie |
+| Keine | nie, auch nicht gelernt |
 | Irgendein Wort | eines der Wörter als ganzes Wort enthält; Wörter in Anführungszeichen gelten zusammen |
 | Alle Wörter | jedes der Wörter enthält, in beliebiger Reihenfolge |
 | Exakt | genau diese Zeichenfolge als ganze Wörter enthält |
 | Regulärer Ausdruck | auf den Ausdruck passt (JavaScript, Unicode); nach 0,1 Sekunden bricht Belegt ab, die Regel trifft dann nicht und der Vorschlag nennt sie |
 | Unscharf | dem Text an einer Stelle zu mindestens 90 % gleicht, Satzzeichen nicht gezählt (Tippfehler, „Telekon“ statt „Telekom“) |
-| Automatisch | Vorgabe: kein Text, vorgesehen für Vorschläge, die aus den Einordnungen lernen |
+| Automatisch | Vorgabe: kein Text, Belegt lernt aus deinen Einordnungen (unten) |
 
 „Groß- und Kleinschreibung ignorieren“ ist vorgegeben. Wortgrenzen und Groß- und Kleinschreibung gelten auch für
 Umlaute. Von mehreren passenden Korrespondenten oder Dokumenttypen schlägt Belegt den ersten nach Namen vor, Tags alle,
 die passen. Einen regulären Ausdruck, der sich nicht übersetzen lässt, nimmt Belegt nicht an.
+
+## Gelernte Vorschläge
+
+Aus den eingeordneten, nicht gelöschten Dokumenten lernt Belegt, welche Wörter zu welchem Korrespondenten, Dokumenttyp,
+Tag und welcher Art gehören, ohne fremden Dienst (ein naiver Bayes-Klassifikator). Der Worker lernt neu, wenn sich
+etwas getan hat, höchstens alle zehn Minuten. Ein Vorschlag kommt nur, wenn
+
+- mindestens 10 Dokumente eingeordnet sind und der Korrespondent, Typ, Tag oder die Art mindestens 3 davon hat,
+- der Korrespondent, Dokumenttyp oder Tag auf „Automatisch“ steht (die Art lernt Belegt immer) und
+- Belegt sich zu mindestens 80 % sicher ist.
+
+Jeder Vorschlag sagt, woraus er gelernt ist, etwa „Korrespondent Stadtwerke (wie 7 Dokumente; Wörter: abschlag, strom)“.
+Die Art trägt „Übernehmen“ nur ins Formular; eingeordnet wird erst mit „Einordnen“.
+
+Das Gelernte ist aus Inhalten abgeleitet und lässt sich jederzeit neu erzeugen. Deshalb steht es nicht im Audit-Log,
+und mit jeder bestätigten Löschung verwirft Belegt es ganz und lernt danach ohne das gelöschte Dokument neu; Postgres
+lehnt ein Modell ab, dessen Beispiele vor einer Löschung gelesen wurden. So bleibt von einem gelöschten Dokument nichts
+im Gelernten (GoBD: keine Unterlage; DSGVO: keine Kopie über die Löschung hinaus).
 
 ## Vorschläge und Eingangsordner
 

@@ -5,7 +5,7 @@ import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/a
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
-import { RuleMatchSuggestion } from "./MatchSuggestions.tsx";
+import { LearnedSuggestion, RuleMatchSuggestion } from "./MatchSuggestions.tsx";
 import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -140,6 +140,9 @@ export function Classification({
       )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.zuordnung && (
         <RuleMatchSuggestion zuordnung={vorschlag.data.zuordnung} onUebernehmen={(o) => ordnen.mutate(o)} />
+      )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.gelernt && (
+        <LearnedSuggestion gelernt={vorschlag.data.gelernt} onArt={setArt} onOrdnung={(o) => ordnen.mutate(o)} />
       )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.erechnung && !vorgabe && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">

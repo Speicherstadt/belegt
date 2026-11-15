@@ -154,8 +154,10 @@ Auf der Seite eines Dokuments im Eingang stehen die Vorschläge in dieser Reihen
 
 1. [Regel](#regeln): Art und Ordnung nach Absender, Domain, Betreff und Anhang.
 2. [Zuordnungsregel](ordnung.md#zuordnungsregeln) an Korrespondenten, Dokumenttypen und Tags.
-3. E-Rechnung und Import aus Paperless-ngx: Datum, Titel und Korrespondent.
-4. [Sprachmodell](#vorschläge-eines-sprachmodells), wenn eingerichtet.
+3. [Gelernt](ordnung.md#gelernte-vorschläge) aus den eigenen Einordnungen; ohne, was Regel und Zuordnungsregel schon
+   vorschlagen, denn die hast du selbst festgelegt.
+4. E-Rechnung und Import aus Paperless-ngx: Datum, Titel und Korrespondent.
+5. [Sprachmodell](#vorschläge-eines-sprachmodells), wenn eingerichtet.
 
 Jeder Vorschlag hat sein eigenes „Übernehmen“; keiner ordnet von selbst ein.
 

@@ -157,7 +157,7 @@ const ALGORITHMUS_TEXT: Record<Algorithmus, string> = {
   exakt: "genau",
   regex: "regulärer Ausdruck",
   unscharf: "unscharf",
-  automatisch: "automatisch",
+  automatisch: "gelernt",
 };
 
 /** Zuordnungsregeln in Worten für die Verfahrensdokumentation, je Korrespondent, Dokumenttyp und Tag eine Zeile */

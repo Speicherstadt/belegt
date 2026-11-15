@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { inhalteErzeugen } from "../inhalt/inhalt.ts";
+import { klassifikatorLernen } from "../lernen/lernen.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { zuordnungVorschlaegeErzeugen } from "./vorschlaege.ts";
@@ -17,9 +18,15 @@ type Vorschlag = {
     tags: { id: string; name: string }[];
     uebersprungen: string[];
   } | null;
+  gelernt: {
+    art: { wert: string; anzahl: number } | null;
+    korrespondent: { id: string; name: string; anzahl: number; woerter: string[]; sicherheit: number } | null;
+    dokumenttyp: { id: string; name: string } | null;
+    tags: { id: string; name: string }[];
+  } | null;
 };
 
-describe.skipIf(!testDatenbankUrl)("Zuordnungsregeln gegen Postgres", () => {
+describe.skipIf(!testDatenbankUrl)("Zuordnungsregeln und gelernte Vorschläge gegen Postgres", () => {
   let t: Awaited<ReturnType<typeof testApp>>;
   let inhaber: string;
   const als =
@@ -115,14 +122,87 @@ describe.skipIf(!testDatenbankUrl)("Zuordnungsregeln gegen Postgres", () => {
     ).toBe(400);
   });
 
-  it("der Vorschlag der Regeln geht mit der Löschung", async () => {
-    const d = await hoch("Ihre MAGENTA Rechnung", "weg.txt");
+  it("lernt aus eingeordneten Dokumenten und schlägt Korrespondent und Art mit Begründung vor", async () => {
+    const strom = await anlegen("/api/korrespondenten", { name: "Stadtwerke" });
+    await anlegen("/api/korrespondenten", { name: "Allianz" });
+    for (let i = 0; i < 6; i++) {
+      const s = await hoch(`Stadtwerke Musterstadt Abschlag Strom Zählerstand Verbrauch Monat ${i}`, `strom-${i}.txt`);
+      await als(inhaber)(
+        `/api/dokumente/${s.id}/einordnung`,
+        json({ art: "beleg", entstanden: "2026-02-01", korrespondent: "Stadtwerke" }),
+      );
+      const a = await hoch(`Allianz Versicherung Police Beitrag Haftpflicht Jahr ${i}`, `police-${i}.txt`);
+      await als(inhaber)(
+        `/api/dokumente/${a.id}/einordnung`,
+        json({ art: "freiwillig", entstanden: "2026-02-01", freiwilligBis: "2036-12-31", korrespondent: "Allianz" }),
+      );
+    }
+    await inhalteErzeugen(t, { ocr: false });
+    const neu = await hoch("Ihre Stadtwerke: neuer Abschlag für Strom", "neu.txt");
     await worker();
-    expect(await t.sql`select 1 from zuordnung_vorschlaege where dokument_id = ${d.id}`).toHaveLength(1);
-    await als(inhaber)(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-01-01" }));
-    expect((await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).status).toBe(201);
-    expect(await t.sql`select 1 from zuordnung_vorschlaege where dokument_id = ${d.id}`).toHaveLength(0);
+    expect((await vorschlag(neu.id)).gelernt).toBeNull();
+
+    expect(await klassifikatorLernen(t.db)).toEqual({ gelernt: true, beispiele: 12 });
+    // Ohne Änderung lernt er nicht noch einmal
+    expect((await klassifikatorLernen(t.db)).gelernt).toBe(false);
+    const v = await vorschlag(neu.id);
+    expect(v.gelernt?.korrespondent).toMatchObject({ id: strom.id, name: "Stadtwerke", anzahl: 6 });
+    expect(v.gelernt?.korrespondent?.woerter).toEqual(expect.arrayContaining(["stadtwerke"]));
+    expect(v.gelernt?.art).toMatchObject({ wert: "beleg", anzahl: 6 });
+
+    // Eine Zuordnungsregel geht vor: Der gelernte Vorschlag nennt dann keinen Korrespondenten mehr
+    await als(inhaber)(
+      `/api/korrespondenten/${strom.id}`,
+      json({ abgleich: "irgendein_wort", abgleichText: "abschlag" }, "PATCH"),
+    );
+    await worker();
+    const danach = await vorschlag(neu.id);
+    expect(danach.zuordnung?.korrespondent?.name).toBe("Stadtwerke");
+    expect(danach.gelernt?.korrespondent ?? null).toBeNull();
+    expect(danach.gelernt?.art?.wert).toBe("beleg");
+
+    // Die Verfahrensdokumentation nennt die Regeln und den Stand des Gelernten
     const doku = JSON.stringify(await (await als(inhaber)("/api/verfahrensdoku")).json());
     expect(doku).toContain("Zuordnungsregel Korrespondent „Telekom“: irgendein Wort aus „telekom magenta“");
+    expect(doku).toContain("Zuordnungsregel Dokumenttyp „Rechnung“: regulärer Ausdruck");
+    expect(doku).toMatch(/Zuletzt gelernt am [0-9-]+ aus 12 Dokumenten/);
+  });
+
+  it("gelöschte Dokumente fließen nicht ins Modell, und ihre Vorschläge gehen mit der Löschung", async () => {
+    await klassifikatorLernen(t.db, { immer: true });
+    const zwei = [];
+    for (const n of [1, 2]) {
+      const d = await hoch(`Zebrastreifen Werbung Prospekt ${n}`, `werbung-${n}.txt`);
+      await als(inhaber)(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-01-01" }));
+      zwei.push(d.id);
+    }
+    await inhalteErzeugen(t, { ocr: false });
+    await klassifikatorLernen(t.db);
+    const modell = async () => (await t.sql`select modell, beispiele from klassifikator`)[0];
+    expect((await modell())!.modell.wortschatz).toContain("zebrastreifen");
+
+    const offen = await hoch("Zebrastreifen im Eingang", "eingang.txt");
+    await worker();
+    expect(await t.sql`select 1 from zuordnung_vorschlaege where dokument_id = ${offen.id}`).toHaveLength(1);
+    await als(inhaber)(`/api/dokumente/${offen.id}/einordnung`, json({ art: "frei", entstanden: "2026-01-01" }));
+
+    for (const id of [...zwei, offen.id])
+      expect((await als(inhaber)(`/api/dokumente/${id}/loeschung`, { method: "POST" })).status).toBe(201);
+    // Mit der bestätigten Löschung ist das Modell weg, ebenso der Vorschlag der Regeln
+    expect(await modell()).toBeUndefined();
+    expect(await t.sql`select 1 from zuordnung_vorschlaege where dokument_id = ${offen.id}`).toHaveLength(0);
+    const r = await klassifikatorLernen(t.db);
+    // 12 aus dem Training davor; die drei gelöschten zählen nicht
+    expect(r).toEqual({ gelernt: true, beispiele: 12 });
+    expect((await modell())!.modell.wortschatz).not.toContain("zebrastreifen");
+  });
+
+  it("Postgres verwirft ein Modell aus Beispielen, die vor einer Löschung gelesen wurden", async () => {
+    await t.sql`delete from klassifikator`;
+    const [n] = await t.sql`select count(*)::int as n from loeschungen where bestaetigt_am is not null`;
+    await t.sql`insert into klassifikator (modell, beispiele, stand, loeschungen) values ('{}', 1, 'x', ${n!.n - 1})`;
+    expect(await t.sql`select 1 from klassifikator`).toHaveLength(0);
+    await t.sql`insert into klassifikator (modell, beispiele, stand, loeschungen) values ('{}', 1, 'x', ${n!.n})`;
+    expect(await t.sql`select 1 from klassifikator`).toHaveLength(1);
   });
 });

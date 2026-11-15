@@ -89,7 +89,8 @@ function immerWieder(lauf: () => Promise<unknown>) {
 immerWieder(() => inhalteErzeugen({ db, speicher }));
 // Workflows
 immerWieder(() => workflowsAusfuehren(db));
-// Zuordnungsregeln
+// Zuordnungsregeln. Gelernte Vorschläge prüft Vitest gegen Postgres; hier tauchten sie je nach Reihenfolge der Specs
+// bei Dokumenten anderer Tests auf
 immerWieder(() => zuordnungVorschlaegeErzeugen(db));
 // Vorschaubilder
 immerWieder(() => vorschaubilderErzeugen({ db, speicher }));

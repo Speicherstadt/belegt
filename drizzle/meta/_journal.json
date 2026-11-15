@@ -288,6 +288,13 @@
       "when": 1794773606971,
       "tag": "0040_korrespondenten",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794774403762,
+      "tag": "0041_klassifikator",
+      "breakpoints": true
     }
   ]
 }

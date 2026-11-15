@@ -31,6 +31,8 @@ export type {
   Eintrag,
   ERechnung,
   Ereignis,
+  Erklaerung,
+  GelernterVorschlag,
   GeteilterLink,
   Gruppe,
   Loeschung,

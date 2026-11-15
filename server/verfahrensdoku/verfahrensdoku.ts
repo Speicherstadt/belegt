@@ -6,6 +6,7 @@ import { pruefen } from "../dokumente/dokumente.ts";
 import { sperrenListen } from "../einordnung/einordnung.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 import { geteiltZahlen } from "../freigabe/teilen.ts";
+import { klassifikatorStand } from "../lernen/lernen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
 import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
@@ -93,22 +94,37 @@ export async function verfahrensdoku(
     trennblattCode?: string;
   },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt, importe, workflows, zuordnung] =
-    await Promise.all([
-      einstellungenLaden(db),
-      zugaengeListen(db),
-      tokensListen(db),
-      quellenListen(db),
-      regelnListen(db),
-      sperrenListen(db),
-      zahlen(db),
-      pruefen(db),
-      zeitstempelListen(db),
-      geteiltZahlen(db),
-      laeufeFuerVerfahrensdoku(db),
-      workflowsBeschreiben(db),
-      zuordnungsregelnBeschreiben(db),
-    ]);
+  const [
+    e,
+    zugaenge,
+    tokens,
+    quellen,
+    regeln,
+    sperren,
+    z,
+    befunde,
+    stempel,
+    geteilt,
+    importe,
+    workflows,
+    zuordnung,
+    lernstand,
+  ] = await Promise.all([
+    einstellungenLaden(db),
+    zugaengeListen(db),
+    tokensListen(db),
+    quellenListen(db),
+    regelnListen(db),
+    sperrenListen(db),
+    zahlen(db),
+    pruefen(db),
+    zeitstempelListen(db),
+    geteiltZahlen(db),
+    laeufeFuerVerfahrensdoku(db),
+    workflowsBeschreiben(db),
+    zuordnungsregelnBeschreiben(db),
+    klassifikatorStand(db),
+  ]);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
   const abschnitte: Abschnitt[] = [
@@ -163,7 +179,7 @@ export async function verfahrensdoku(
       titel: "3. Einordnung und Aufbewahrung",
       absaetze: [
         `${kiModell ? `Ein Sprachmodell (${kiModell.modell} auf ${kiModell.host}) schlägt für Dokumente im Eingang eine Einordnung vor; es bekommt dafür Dateiname, Mailkopf und Text des Dokuments. ` : ""}Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln${kiModell ? " und das Sprachmodell" : ""} machen nur Vorschläge.${workflows.ordnenEin ? " Ausnahme: Workflows, bei denen der Inhaber das Einordnen ausdrücklich gewählt hat, ordnen Dokumente im Eingang ohne weitere Bestätigung ein; das Protokoll nennt sie als Akteur „workflow:<Name>“." : ""} Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.`,
-        `Korrespondenten führt Belegt als Liste. Die Einordnung hält den Namen fest, den der Korrespondent beim Einordnen hatte, und ist versiegelt; umbenennen und zusammenführen ändern nur die Liste und die Zuordnung zum Dokument, jede Änderung steht im Protokoll. Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags (irgendein Wort, alle Wörter, genau, regulärer Ausdruck mit Zeitlimit, unscharf) prüft Belegt einmal gegen Dateiname, Mailkopf und gelesenen Text eines neuen Dokuments; das Ergebnis ist nur ein Vorschlag.`,
+        `Korrespondenten führt Belegt als Liste. Die Einordnung hält den Namen fest, den der Korrespondent beim Einordnen hatte, und ist versiegelt; umbenennen und zusammenführen ändern nur die Liste und die Zuordnung zum Dokument, jede Änderung steht im Protokoll. Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags (irgendein Wort, alle Wörter, genau, regulärer Ausdruck mit Zeitlimit, unscharf) prüft Belegt einmal gegen Dateiname, Mailkopf und gelesenen Text eines neuen Dokuments; das Ergebnis ist nur ein Vorschlag. Daneben lernt Belegt ohne fremden Dienst aus den eigenen eingeordneten Dokumenten (naiver Bayes-Klassifikator über deren Wörter) und schlägt Korrespondent, Dokumenttyp, Tags und Art vor, wenn es sich sicher genug ist; jeder Vorschlag nennt, aus wie vielen Dokumenten er gelernt ist. Das gelernte Modell ist abgeleitet, wird mit jeder bestätigten Löschung verworfen und ohne das gelöschte Dokument neu gelernt.${lernstand ? ` Zuletzt gelernt am ${tag(lernstand.am)} aus ${lernstand.beispiele} Dokumenten.` : ""}`,
         e.aufsicht
           ? "Der Betrieb ist Kredit- oder Wertpapierinstitut oder steht unter Versicherungsaufsicht; Buchungsbelege werden deshalb zehn Jahre aufbewahrt (Art. 97 § 19a Abs. 3 EGAO)."
           : "Buchungsbelege werden acht Jahre aufbewahrt (§ 147 Abs. 3 AO in der Fassung ab 2025, Art. 97 § 19a EGAO).",

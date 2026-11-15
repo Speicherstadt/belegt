@@ -30,6 +30,20 @@ export interface Eintrag extends Dokument {
   vorschaubild: boolean;
 }
 
+/** Wie sicher ein gelernter Vorschlag ist und woraus er gelernt ist */
+export interface Erklaerung {
+  sicherheit: number;
+  anzahl: number;
+  woerter: string[];
+}
+
+export interface GelernterVorschlag {
+  art: ({ wert: Art } & Erklaerung) | null;
+  korrespondent: ({ id: string; name: string } & Erklaerung) | null;
+  dokumenttyp: ({ id: string; name: string } & Erklaerung) | null;
+  tags: (TagKurz & Erklaerung)[];
+}
+
 export interface Einordnung {
   id: string;
   art: Art;
@@ -186,6 +200,8 @@ export const dokumenteApi = {
       vorschlag: { art: Art | null; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
       /** Aus den Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags */
       zuordnung: (OrdnungsVorschlag & { uebersprungen: string[] }) | null;
+      /** Aus den eigenen Einordnungen gelernt; ohne, was Regel und Zuordnungsregel schon vorschlagen */
+      gelernt: GelernterVorschlag | null;
       erechnung: ERechnung | null;
       ki: {
         art: Art;
