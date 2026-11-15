@@ -7,6 +7,7 @@ import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
 import { fuerDokument, regelVerletzt } from "../loeschung/loeschung.ts";
 import { mailZuDokument } from "../mail/import.ts";
 import { NotizEingabe, notizAnlegen, notizenZu } from "../notizen/notizen.ts";
+import { korrespondentenListen } from "../ordnung/korrespondenten.ts";
 import { dokumenttypenListen, felderListen, istKonflikt, tagsListen } from "../ordnung/ordnung.ts";
 import { Aenderung, ordnungZu, sammeln } from "../ordnung/zuordnung.ts";
 
@@ -264,19 +265,25 @@ export const WERKZEUGE: Werkzeug[] = [
     schreibt: false,
     eingabe: z.object({}),
     ausfuehren: async ({ db }) => {
-      const [t, typen, felder] = await Promise.all([tagsListen(db), dokumenttypenListen(db), felderListen(db)]);
+      const [t, typen, korrespondenten, felder] = await Promise.all([
+        tagsListen(db),
+        dokumenttypenListen(db),
+        korrespondentenListen(db),
+        felderListen(db),
+      ]);
       return {
         tags: t.map(({ id, name }) => ({ id, name })),
         dokumenttypen: typen.map(({ id, name }) => ({ id, name })),
+        korrespondenten: korrespondenten.map(({ id, name }) => ({ id, name })),
         felder: felder.map(({ id, name, typ, optionen }) => ({ id, name, typ, optionen })),
       };
     },
   },
   {
     name: "dokument_ordnen",
-    title: "Tags, Dokumenttyp und Feldwerte setzen",
+    title: "Tags, Dokumenttyp, Korrespondent und Feldwerte setzen",
     description:
-      "Setzt an einem Dokument Tags (tagsHinzu, tagsWeg), den Dokumenttyp (ID, null entfernt) und Feldwerte (felder: feldId und wert; null entfernt, Betrag in Cent oder als „1.234,56“). Nur vorhandene Tags, Typen und Felder (ordnung_listen); anlegen kann das Werkzeug nichts. Jede Änderung steht im Audit-Log. Antwort: der neue Stand. Braucht ein Token mit dem Recht schreiben.",
+      "Setzt an einem Dokument Tags (tagsHinzu, tagsWeg), den Dokumenttyp und den Korrespondenten (ID, null entfernt) und Feldwerte (felder: feldId und wert; null entfernt, Betrag in Cent oder als „1.234,56“). Nur vorhandene Tags, Typen, Korrespondenten und Felder (ordnung_listen); anlegen kann das Werkzeug nichts. Jede Änderung steht im Audit-Log. Antwort: der neue Stand. Braucht ein Token mit dem Recht schreiben.",
     inputSchema: {
       type: "object",
       required: ["id"],
@@ -285,6 +292,7 @@ export const WERKZEUGE: Werkzeug[] = [
         tagsHinzu: { type: "array", items: { type: "string", format: "uuid" }, maxItems: 50 },
         tagsWeg: { type: "array", items: { type: "string", format: "uuid" }, maxItems: 50 },
         dokumenttyp: { type: ["string", "null"], format: "uuid" },
+        korrespondent: { type: ["string", "null"], format: "uuid" },
         felder: {
           type: "array",
           maxItems: 50,

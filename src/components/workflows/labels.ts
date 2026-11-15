@@ -17,7 +17,10 @@ export const AUSLOESER_LABEL: Record<Ausloeser, () => string> = {
 };
 
 /** Die Bedingungen eines Workflows in Worten, je Bedingung ein Eintrag */
-export function bedingungenText(w: Workflow, tags: Tag[], typen: { id: string; name: string }[]): string[] {
+type Namen = { id: string; name: string }[];
+const nameIn = (liste: Namen, id: string) => liste.find((x) => x.id === id)?.name ?? "?";
+
+export function bedingungenText(w: Workflow, tags: Tag[], typen: Namen, korrespondenten: Namen = []): string[] {
   const b = w.bedingungen;
   const tagName = (id: string) => tags.find((t) => t.id === id)?.name ?? "?";
   const teile: string[] = [];
@@ -38,13 +41,19 @@ export function bedingungenText(w: Workflow, tags: Tag[], typen: { id: string; n
           b.dokumenttyp === "ohne" ? m.order_doctype_none() : (typen.find((t) => t.id === b.dokumenttyp)?.name ?? "?"),
       }),
     );
+  if (b.korrespondent)
+    teile.push(
+      m.workflow_c_party({
+        name: b.korrespondent === "ohne" ? m.order_party_none() : nameIn(korrespondenten, b.korrespondent),
+      }),
+    );
   if (b.postfach) teile.push(m.workflow_c_mailbox({ text: b.postfach }));
   if (b.unterordner) teile.push(m.workflow_c_subfolder({ text: b.unterordner }));
   return teile.length ? teile : [m.workflow_c_all()];
 }
 
 /** Eine Aktion in Worten */
-export function aktionText(a: WorkflowAktion, tags: Tag[], typen: { id: string; name: string }[]): string {
+export function aktionText(a: WorkflowAktion, tags: Tag[], typen: Namen, korrespondenten: Namen = []): string {
   const tagNamen = (ids: string[]) => ids.map((id) => tags.find((t) => t.id === id)?.name ?? "?").join(", ");
   switch (a.art) {
     case "tagsHinzu":
@@ -53,6 +62,8 @@ export function aktionText(a: WorkflowAktion, tags: Tag[], typen: { id: string; 
       return m.workflow_a_remove_tags({ tags: tagNamen(a.tags) });
     case "dokumenttyp":
       return m.workflow_a_doctype({ typ: typen.find((t) => t.id === a.dokumenttyp)?.name ?? "?" });
+    case "korrespondent":
+      return m.workflow_a_party({ name: nameIn(korrespondenten, a.korrespondent) });
     case "feld":
       return m.workflow_a_field();
     case "einordnen":

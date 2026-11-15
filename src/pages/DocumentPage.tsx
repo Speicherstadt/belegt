@@ -28,12 +28,15 @@ const QUELLE: Record<string, () => string> = {
 
 function ereignis(e: Ereignis): string {
   if (e.tabelle === "seals") return m.event_seal();
-  if (e.tabelle === "einordnungen") return m.event_classified();
+  if (e.tabelle === "einordnungen")
+    return e.detail ? m.event_classified_party({ name: e.detail }) : m.event_classified();
   const name = e.detail ?? "–";
   if (e.tabelle === "dokument_tags")
     return e.aktion === "DELETE" ? m.event_tag_removed({ name }) : m.event_tag_added({ name });
   if (e.tabelle === "dokument_dokumenttypen")
     return e.aktion === "DELETE" ? m.event_doctype_removed({ name }) : m.event_doctype_set({ name });
+  if (e.tabelle === "dokument_korrespondenten")
+    return e.aktion === "DELETE" ? m.event_party_removed({ name }) : m.event_party_set({ name });
   if (e.tabelle === "feldwerte")
     return e.aktion === "DELETE" ? m.event_field_removed({ name }) : m.event_field_set({ name });
   if (e.tabelle === "notizen") return e.aktion === "DELETE" ? m.event_note_removed() : m.event_note_added();
@@ -138,13 +141,14 @@ export function DocumentPage() {
               einordnung={d.einordnung}
               eingang={d.eingegangenAm}
               dokumenttyp={d.dokumenttyp}
+              korrespondent={d.korrespondent}
             />
           )}
           {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
           {!geloescht && <Similar dokumentId={d.id} />}
           <DocumentOrdnung
             dokumentId={d.id}
-            ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, felder: d.felder }}
+            ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, korrespondent: d.korrespondent, felder: d.felder }}
             geloescht={geloescht}
           />
           <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">

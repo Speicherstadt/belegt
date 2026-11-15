@@ -3,6 +3,7 @@ import type { Eintrag } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { PartyChip } from "./PartyChip.tsx";
 import { TagChip } from "./TagChip.tsx";
 import { Thumbnail } from "./Thumbnail.tsx";
 
@@ -24,9 +25,10 @@ export interface Auswahl {
 export const name = (d: Eintrag) => d.titel ?? d.dateiname ?? m.unnamed();
 
 export function Ordnungszeile({ d }: { d: Eintrag }) {
-  if (!d.dokumenttyp && d.tags.length === 0) return null;
+  if (!d.dokumenttyp && !d.korrespondent && d.tags.length === 0) return null;
   return (
     <span className="mt-1 flex flex-wrap items-center gap-1.5 font-normal">
+      {d.korrespondent && <PartyChip korrespondent={d.korrespondent} />}
       {d.dokumenttyp && <span className="text-muted text-xs">{d.dokumenttyp.name}</span>}
       {d.tags.map((t) => (
         <TagChip key={t.id} tag={t} />

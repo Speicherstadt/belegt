@@ -1,6 +1,6 @@
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
-import { dokumenttypen, kiVorschlaege, tags } from "../db/schema.ts";
+import { dokumenttypen, kiVorschlaege, korrespondenten, tags } from "../db/schema.ts";
 import { ALTE_OFFICE_TYPEN } from "../dokumente/dateityp.ts";
 import { inhaltZu, LESBAR, textZu } from "../inhalt/inhalt.ts";
 import { mailZuDokument } from "../mail/import.ts";
@@ -46,6 +46,13 @@ export async function kiVorschlaegeErzeugen(
         dokumenttypen: (
           await db.select({ name: dokumenttypen.name }).from(dokumenttypen).orderBy(asc(dokumenttypen.name)).limit(200)
         ).map((t) => t.name),
+        korrespondenten: (
+          await db
+            .select({ name: korrespondenten.name })
+            .from(korrespondenten)
+            .orderBy(asc(korrespondenten.name))
+            .limit(200)
+        ).map((k) => k.name),
       }
     : undefined;
   for (const d of offen) {
@@ -89,7 +96,8 @@ export async function kiVorschlaegeErzeugen(
 }
 
 /**
- * Der Vorschlag mit Tags und Dokumenttyp, wie es sie heute gibt (IDs und Farben); was seitdem gelöscht wurde, fällt weg
+ * Der Vorschlag mit Tags, Dokumenttyp und Korrespondent, wie es sie heute gibt (IDs und Farben); was seitdem gelöscht
+ * wurde, fällt weg
  */
 export async function kiVorschlagZu(db: Datenbank, dokumentId: string) {
   const [k] = await db.select().from(kiVorschlaege).where(eq(kiVorschlaege.dokumentId, dokumentId));
@@ -97,7 +105,7 @@ export async function kiVorschlagZu(db: Datenbank, dokumentId: string) {
   const v = KiVorschlag.safeParse(k.vorschlag);
   if (!v.success) return null;
   const namen = (v.data.tags ?? []).map((t) => t.toLowerCase());
-  const [t, typ] = await Promise.all([
+  const [t, typ, korr] = await Promise.all([
     namen.length
       ? db
           .select({ id: tags.id, name: tags.name, farbe: tags.farbe })
@@ -110,11 +118,21 @@ export async function kiVorschlagZu(db: Datenbank, dokumentId: string) {
           .from(dokumenttypen)
           .where(sql`lower(${dokumenttypen.name}) = lower(${v.data.dokumenttyp})`)
       : [],
+    v.data.korrespondent
+      ? db
+          .select({ id: korrespondenten.id, name: korrespondenten.name })
+          .from(korrespondenten)
+          .where(sql`lower(${korrespondenten.name}) = lower(${v.data.korrespondent})`)
+      : [],
   ]);
   const { tags: _t, dokumenttyp: _d, ...rest } = v.data;
   return {
     ...rest,
     modell: k.modell,
-    ordnung: t.length || typ[0] ? { tags: t, dokumenttyp: typ[0] ?? null, felder: [] } : null,
+    // Ein Korrespondent, den es in der Liste gibt, kommt mit; einen neuen legt erst das Einordnen an
+    ordnung:
+      t.length || typ[0] || korr[0]
+        ? { tags: t, dokumenttyp: typ[0] ?? null, korrespondent: korr[0] ?? null, felder: [] }
+        : null,
   };
 }

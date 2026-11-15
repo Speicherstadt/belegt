@@ -4,6 +4,7 @@ import { type Art, api, type Dokumenttyp } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { m } from "../paraglide/messages.js";
 import { feldKlasse } from "./FieldInput.tsx";
+import { MatchingRule, regelAus, regelText } from "./MatchingRule.tsx";
 
 function ArtAuswahl({ id, wert }: { id: string; wert?: Art | null }) {
   return (
@@ -26,7 +27,7 @@ function TypZeile({ typ, schreiben }: { typ: Dokumenttyp; schreiben: boolean }) 
   const [loeschen, setLoeschen] = useState(false);
   const neu = () => queryClient.invalidateQueries();
   const aendern = useMutation({
-    mutationFn: (t: { name: string; vorgabeArt: Art | null }) => api.dokumenttypAendern(typ.id, t),
+    mutationFn: (t: Parameters<typeof api.dokumenttypAendern>[1]) => api.dokumenttypAendern(typ.id, t),
     onSuccess: () => {
       setBearbeiten(false);
       return neu();
@@ -37,7 +38,7 @@ function TypZeile({ typ, schreiben }: { typ: Dokumenttyp; schreiben: boolean }) 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    aendern.mutate({ name: String(f.get("name")), vorgabeArt: artAus(f) });
+    aendern.mutate({ name: String(f.get("name")), vorgabeArt: artAus(f), ...regelAus(f) });
   }
 
   return (
@@ -47,7 +48,7 @@ function TypZeile({ typ, schreiben }: { typ: Dokumenttyp; schreiben: boolean }) 
           <span className="font-medium">{typ.name}</span>
           <span className="text-muted">
             {typ.vorgabeArt ? m.order_default_kind({ art: artLabel(typ.vorgabeArt) }) : m.order_default_kind_none()} ·{" "}
-            {m.order_count({ anzahl: String(typ.anzahl) })}
+            {m.order_count({ anzahl: String(typ.anzahl) })} · {regelText(typ)}
           </span>
         </span>
         {schreiben && (
@@ -92,6 +93,7 @@ function TypZeile({ typ, schreiben }: { typ: Dokumenttyp; schreiben: boolean }) 
             {m.order_default_kind_label()}
             <ArtAuswahl id={`art-${typ.id}`} wert={typ.vorgabeArt} />
           </label>
+          <MatchingRule id={`regel-${typ.id}`} wert={typ} />
           <button type="submit" className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary">
             {m.save()}
           </button>

@@ -123,12 +123,13 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     const zeile = dokumente.split("\r\n").find((z) => z.startsWith(beleg.id))!;
     expect(zeile).toContain(`;beleg;${jahr}-03-01;${Number(jahr) + 8}-12-31;"Rechnung ""Nr. 42""";Muster GmbH;`);
     expect(zeile).toContain(`"${pfadBeleg}"`);
-    // ASN, Dokumenttyp und Tags hinten angehängt; ein Tag mit Semikolon steht in Anführungszeichen
+    // ASN, Dokumenttyp, Tags und der Korrespondent der Liste hinten angehängt; ein Tag mit Semikolon steht in
+    // Anführungszeichen
     const [{ nummer }] = (await t.sql`select nummer from archivnummern where dokument_id = ${beleg.id}`) as unknown as [
       { nummer: string },
     ];
-    expect(zeile.endsWith(`;${nummer};Eingangsrechnung;"Auto, Steuer; 2026"`)).toBe(true);
-    expect(dokumente.split("\r\n")[0]!.endsWith(";Pfad;ASN;Dokumenttyp;Tags")).toBe(true);
+    expect(zeile.endsWith(`;${nummer};Eingangsrechnung;"Auto, Steuer; 2026";Muster GmbH`)).toBe(true);
+    expect(dokumente.split("\r\n")[0]!.endsWith(";Pfad;ASN;Dokumenttyp;Tags;Korrespondent (Liste)")).toBe(true);
 
     const tags = strFromU8(zip["tags.csv"]!).split("\r\n");
     expect(tags[0]).toBe("\uFEFFDokument-ID;ASN;Tag");
@@ -175,6 +176,23 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     expect(protokoll.split("\r\n")[0]).toBe("﻿Nr;Zeitpunkt;Akteur;Tabelle;Zeile;Aktion;Neuer Wert;Hash Vorgänger;Hash");
   });
 
+  it("Korrespondent: der versiegelte Text der Einordnung und der heutige Name der Liste nebeneinander", async () => {
+    const [k] = (await (await als(inhaber)("/api/korrespondenten")).json()) as { id: string; name: string }[];
+    expect(k!.name).toBe("Muster GmbH");
+    expect(
+      (await als(inhaber)(`/api/korrespondenten/${k!.id}`, { ...json({ name: "Muster AG" }), method: "PATCH" })).status,
+    ).toBe(200);
+    const zip = await exportieren(inhaber, `${jahr}-01-01`, `${jahr}-12-31`);
+    const zeile = strFromU8(zip["dokumente.csv"]!)
+      .split("\r\n")
+      .find((z) => z.startsWith(beleg.id))!;
+    expect(zeile).toContain(`;"Rechnung ""Nr. 42""";Muster GmbH;`);
+    expect(zeile.endsWith(";Muster AG")).toBe(true);
+    const protokoll = strFromU8(zip["protokoll.csv"]!);
+    expect(protokoll).toContain(";korrespondenten;");
+    expect(protokoll).toContain(";dokument_korrespondenten;");
+  });
+
   it("gibt dem Prüfer im Protokoll die Zuordnungen seiner Dokumente, nicht die Verwaltung der Tags", async () => {
     const { pfad } = await (
       await als(inhaber)(
@@ -193,6 +211,9 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     expect(tabellen).toContain("dokument_tags");
     expect(tabellen).toContain("feldwerte");
     expect(tabellen).toContain("dokument_dokumenttypen");
+    // Zuordnung und Umbenennung des Korrespondenten seiner Dokumente gehören zu deren Nachweis
+    expect(tabellen).toContain("dokument_korrespondenten");
+    expect(tabellen).toContain("korrespondenten");
     expect(tabellen).not.toContain("tags");
     expect(tabellen).not.toContain("felder");
     expect(strFromU8(zip["tags.csv"]!)).toContain("Auto");

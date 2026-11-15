@@ -6,11 +6,12 @@ import { m } from "../paraglide/messages.js";
 import { feldLabel } from "./DocumentOrdnung.tsx";
 import { ausEingabe, FieldInput, feldKlasse } from "./FieldInput.tsx";
 
-type Aktion = "tagsHinzu" | "tagsWeg" | "dokumenttyp" | "feld" | "einordnen";
+type Aktion = "tagsHinzu" | "tagsWeg" | "korrespondent" | "dokumenttyp" | "feld" | "einordnen";
 
 const AKTIONEN: { aktion: Aktion; label: () => string }[] = [
   { aktion: "tagsHinzu", label: () => m.bulk_tags_add() },
   { aktion: "tagsWeg", label: () => m.bulk_tags_remove() },
+  { aktion: "korrespondent", label: () => m.bulk_party() },
   { aktion: "dokumenttyp", label: () => m.bulk_doctype() },
   { aktion: "feld", label: () => m.bulk_field() },
   { aktion: "einordnen", label: () => m.bulk_classify() },
@@ -35,6 +36,7 @@ export function BulkEdit({
   const queryClient = useQueryClient();
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const [aktion, setAktion] = useState<Aktion>("tagsHinzu");
   const [feldId, setFeldId] = useState("");
@@ -67,6 +69,7 @@ export function BulkEdit({
     setUngueltig(false);
     if (aktion === "tagsHinzu" || aktion === "tagsWeg") ausfuehren.mutate({ [aktion]: [text("tag")] });
     else if (aktion === "dokumenttyp") ausfuehren.mutate({ dokumenttyp: text("dokumenttyp") || null });
+    else if (aktion === "korrespondent") ausfuehren.mutate({ korrespondent: text("korrespondent") || null });
     else if (aktion === "feld" && feld) {
       const wert = ausEingabe(feld, text("wert"));
       if (wert === undefined) setUngueltig(true);
@@ -119,6 +122,19 @@ export function BulkEdit({
           ) : (
             <p className="m-0 text-muted">{m.order_tags_none()}</p>
           ))}
+        {aktion === "korrespondent" && (
+          <label className={label}>
+            {m.order_party()}
+            <select name="korrespondent" className={feldKlasse}>
+              <option value="">{m.order_party_none()}</option>
+              {korrespondenten.data?.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {aktion === "dokumenttyp" && (
           <label className={label}>
             {m.order_doctype()}

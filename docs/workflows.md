@@ -1,8 +1,8 @@
 ---
 title: "Workflows"
 description: >-
-  Workflows in Belegt: wenn ein Dokument ankommt oder eingeordnet wird und Bedingungen zutreffen, Tags, Dokumenttyp,
-  Feldwerte, Notiz oder Webhook setzen, protokolliert und genau einmal je Dokument.
+  Workflows in Belegt: wenn ein Dokument ankommt oder eingeordnet wird und Bedingungen zutreffen, Tags, Korrespondent,
+  Dokumenttyp, Feldwerte, Notiz oder Webhook setzen, protokolliert und genau einmal je Dokument.
 ---
 
 # Workflows
@@ -14,7 +14,7 @@ Steuerberatung sieht sie, der Prüfer nicht.
 ## Regeln und Workflows
 
 [Regeln](eingang.md#regeln) schlagen vor, Workflows handeln. Eine Regel ändert nichts, bis jemand „Übernehmen“
-klickt; ein Workflow setzt Tags, Dokumenttyp und Feldwerte sofort. Beides bleibt getrennt, damit klar ist, was nur ein
+klickt; ein Workflow setzt Tags, Korrespondent, Dokumenttyp und Feldwerte sofort. Beides bleibt getrennt, damit klar ist, was nur ein
 Vorschlag ist und was Belegt selbst getan hat.
 
 ## Auslöser
@@ -37,7 +37,7 @@ Alle ausgefüllten Bedingungen müssen zutreffen; ohne Bedingung gilt der Workfl
 | Dateiname, Text enthält | der Dateiname oder der gelesene Text (PDF, Office, Texterkennung, Mailtext) das Wort enthält, ohne Unterschied zwischen Groß- und Kleinschreibung |
 | Betreff, Absender, Domain, Anhangtyp | wie bei den Regeln; ein Anhang hat die Merkmale seiner Mail, ohne Mail ist der Dateiname der Betreff |
 | Dateityp | der Typ genau passt (`application/pdf`) oder mit Stern (`image/*`) |
-| Hat den Tag, Dokumenttyp | das Dokument den Tag hat, den Dokumenttyp oder keinen |
+| Hat den Tag, Dokumenttyp, Korrespondent | das Dokument den Tag hat, den Dokumenttyp oder Korrespondenten oder keinen |
 | Postfach | eine Mail (oder die Mail eines Anhangs) aus dem Postfach mit diesem Namen kam |
 | Unterordner | die Datei im Eingangsordner in diesem Unterordner lag, auch tiefer („Steuer“ trifft „Steuer/2026“) |
 
@@ -45,7 +45,7 @@ Braucht eine Bedingung den Text, wartet der Workflow, bis der Worker ihn gelesen
 
 ## Aktionen
 
-- Tag hinzufügen oder entfernen, Dokumenttyp setzen, Feldwert setzen
+- Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen
 - Notiz anlegen
 - Webhook-Ereignis `dokument.workflow` auslösen; die Nachricht nennt den Workflow ([Webhooks](schnittstelle.md#webhooks))
 - Ohne Bestätigung einordnen (siehe unten)

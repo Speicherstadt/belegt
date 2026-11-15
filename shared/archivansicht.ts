@@ -1,5 +1,6 @@
 /*
- * Der Zustand der Archivliste als URL-Suchparameter: Suche, Gruppe, Tags mit Modus, Dokumenttyp, ein Feldfilter,
+ * Der Zustand der Archivliste als URL-Suchparameter: Suche, Gruppe, Tags mit Modus, Dokumenttyp, Korrespondent, ein
+ * Feldfilter,
  * Sortierung, Darstellung und Einträge je Seite. Dieselbe Form steht in einer gespeicherten Ansicht
  * (server/archivansichten/), damit eine Ansicht nur ein Link ist und sich teilen lässt. Alles sind einfache Texte, mehrere
  * Tags mit Komma getrennt; Unbekanntes oder Ungültiges fällt auf die Vorgabe zurück, statt die Seite zu brechen.
@@ -31,6 +32,8 @@ export interface ArchivAnsicht {
   tagModus: "alle" | "einer";
   /** ID eines Dokumenttyps, „ohne“ oder leer für alle */
   dokumenttyp: string;
+  /** ID eines Korrespondenten, „ohne“ oder leer für alle */
+  korrespondent: string;
   feld: FeldFilterZustand | null;
   sortierung: Sortierung;
   /** null: was der Browser sich gemerkt hat */
@@ -44,6 +47,7 @@ export const LEERE_ANSICHT: ArchivAnsicht = {
   tags: [],
   tagModus: "alle",
   dokumenttyp: "",
+  korrespondent: "",
   feld: null,
   sortierung: "neu",
   darstellung: null,
@@ -66,6 +70,7 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
     ),
   ].slice(0, 50);
   const typ = p.dokumenttyp ?? "";
+  const korrespondent = p.korrespondent ?? "";
   const feldId = (p.feld ?? "").toLowerCase();
   const proSeite = Number(p.proSeite);
   return {
@@ -74,6 +79,7 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
     tags,
     tagModus: tags.length > 1 ? aus(["alle", "einer"] as const, p.tagModus, "alle") : "alle",
     dokumenttyp: typ === "ohne" || UUID.test(typ) ? typ.toLowerCase() : "",
+    korrespondent: korrespondent === "ohne" || UUID.test(korrespondent) ? korrespondent.toLowerCase() : "",
     feld: UUID.test(feldId)
       ? {
           feldId,
@@ -97,6 +103,7 @@ export function ansichtZuParametern(a: ArchivAnsicht): Record<string, string> {
   if (a.tags.length) p.tags = a.tags.join(",");
   if (a.tags.length > 1 && a.tagModus === "einer") p.tagModus = "einer";
   if (a.dokumenttyp) p.dokumenttyp = a.dokumenttyp;
+  if (a.korrespondent) p.korrespondent = a.korrespondent;
   if (a.feld) {
     p.feld = a.feld.feldId;
     if (a.feld.art !== "gesetzt") p.feldArt = a.feld.art;

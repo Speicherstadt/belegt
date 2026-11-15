@@ -8,7 +8,7 @@ description: >-
 
 Unter **Verfahrensdoku** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:
 Erfassung, Einordnung und Fristen, Unveränderbarkeit, Löschung, Zugriff und Betrieb. Was Belegt selbst tut, Postfächer,
-Eingangsordner, Regeln, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen, Sperren, Zugänge und API-Tokens stehen darin, wie sie gerade eingerichtet sind, dazu jeder
+Eingangsordner, Regeln, [Zuordnungsregeln](ordnung.md#zuordnungsregeln), aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen, Sperren, Zugänge und API-Tokens stehen darin, wie sie gerade eingerichtet sind, dazu jeder
 [Import aus Paperless-ngx](umzug.md) mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der Prüfsummen.
 
 Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):

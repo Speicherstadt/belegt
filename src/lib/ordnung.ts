@@ -21,7 +21,13 @@ export function feldwertText(typ: Feldtyp, wert: Feldwert): string {
   return String(wert);
 }
 
-export const LEERER_FILTER: ListenFilter = { tags: [], tagModus: "alle", dokumenttyp: "", feld: null };
+export const LEERER_FILTER: ListenFilter = {
+  tags: [],
+  tagModus: "alle",
+  dokumenttyp: "",
+  korrespondent: "",
+  feld: null,
+};
 
 /**
  * Grenze eines Bereichs, wie sie der Server liest: Beträge als Cent, denn nur Ziffern hieße dort Cent („100“ wären
@@ -35,6 +41,7 @@ export function filterParameter(f: ListenFilter, felder: Feld[]): string {
   for (const t of f.tags) p.append("tag", t);
   if (f.tags.length > 1 && f.tagModus === "einer") p.set("tagModus", "einer");
   if (f.dokumenttyp) p.set("dokumenttyp", f.dokumenttyp);
+  if (f.korrespondent) p.set("korrespondent", f.korrespondent);
   const feld = f.feld && felder.find((x) => x.id === f.feld!.feldId);
   if (f.feld && feld) {
     const name = `feld.${feld.id}`;

@@ -34,6 +34,7 @@ export const Bedingungen = z
       .optional(),
     tags: z.array(Id).min(1).max(20).optional(),
     dokumenttyp: z.union([Id, z.literal("ohne")]).optional(),
+    korrespondent: z.union([Id, z.literal("ohne")]).optional(),
     postfach: Text(200).optional(),
     unterordner: Text(500).optional(),
   })
@@ -43,6 +44,7 @@ export const Aktion = z.discriminatedUnion("art", [
   z.object({ art: z.literal("tagsHinzu"), tags: z.array(Id).min(1).max(50) }),
   z.object({ art: z.literal("tagsWeg"), tags: z.array(Id).min(1).max(50) }),
   z.object({ art: z.literal("dokumenttyp"), dokumenttyp: Id }),
+  z.object({ art: z.literal("korrespondent"), korrespondent: Id }),
   z.object({ art: z.literal("feld"), feldId: Id, wert: z.unknown() }),
   z
     .object({
@@ -76,7 +78,7 @@ export const Reihenfolge = z.object({ ids: z.array(Id).min(1).max(200) });
 
 export type Workflow = typeof workflows.$inferSelect & { bedingungen: Bedingungen; aktionen: Aktion[] };
 
-/** Tags, Dokumenttyp und Felder der Aktionen gibt es, Feldwerte passen; sonst ein Konflikt */
+/** Tags, Dokumenttyp, Korrespondent und Felder der Aktionen gibt es, Feldwerte passen; sonst ein Konflikt */
 async function aktionenPruefen(db: Datenbank, aktionen: Aktion[]) {
   await db.transaction(async (tx) => {
     for (const a of aktionen) {
@@ -84,6 +86,8 @@ async function aktionenPruefen(db: Datenbank, aktionen: Aktion[]) {
       if (a.art === "tagsWeg") await aenderungPruefen(tx, { tagsHinzu: [], tagsWeg: a.tags, felder: [] });
       if (a.art === "dokumenttyp")
         await aenderungPruefen(tx, { tagsHinzu: [], tagsWeg: [], felder: [], dokumenttyp: a.dokumenttyp });
+      if (a.art === "korrespondent")
+        await aenderungPruefen(tx, { tagsHinzu: [], tagsWeg: [], felder: [], korrespondent: a.korrespondent });
       if (a.art === "feld") {
         if (a.wert === null || a.wert === undefined || a.wert === "") throw konflikt("Feldwert fehlt");
         await aenderungPruefen(tx, { tagsHinzu: [], tagsWeg: [], felder: [{ feldId: a.feldId, wert: a.wert }] });

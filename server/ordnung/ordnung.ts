@@ -1,5 +1,6 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { ALGORITHMEN, MAX_ABGLEICH_TEXT, regexGueltig } from "../../shared/abgleich.ts";
 import { betragAusText, FARBNAMEN, type Farbe, FELDTYPEN, type Feldtyp, GRENZE } from "../../shared/ordnung.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
@@ -13,15 +14,40 @@ import { ARTEN } from "../einordnung/einordnung.ts";
 
 const Name = z.string().trim().min(1).max(100);
 
-export const TagEingabe = z.object({ name: Name, farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).default("grau") });
-export const TagAenderung = z
-  .object({ name: Name.optional(), farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).optional() })
-  .refine((t) => t.name !== undefined || t.farbe !== undefined, { message: "Name oder Farbe" });
+/**
+ * Zuordnungsregel (shared/abgleich.ts); ein regulärer Ausdruck kommt mit seinem Text und muss sich übersetzen lassen
+ */
+export const Abgleich = z.object({
+  abgleich: z.enum(ALGORITHMEN).optional(),
+  abgleichText: z.string().max(MAX_ABGLEICH_TEXT).optional(),
+  grossKleinEgal: z.boolean().optional(),
+});
+const abgleichGueltig = (a: z.infer<typeof Abgleich>) =>
+  a.abgleich !== "regex" || (a.abgleichText !== undefined && regexGueltig(a.abgleichText.trim()));
+const REGEX_UNGUELTIG = { message: "Kein gültiger regulärer Ausdruck", path: ["abgleichText"] };
+/** Ob eine Änderung etwas an der Zuordnungsregel ändert */
+export const aendertAbgleich = (a: z.infer<typeof Abgleich>) =>
+  a.abgleich !== undefined || a.abgleichText !== undefined || a.grossKleinEgal !== undefined;
 
-export const DokumenttypEingabe = z.object({ name: Name, vorgabeArt: z.enum(ARTEN).nullable().default(null) });
+export const TagEingabe = z
+  .object({ name: Name, farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).default("grau"), ...Abgleich.shape })
+  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+export const TagAenderung = z
+  .object({ name: Name.optional(), farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).optional(), ...Abgleich.shape })
+  .refine((t) => t.name !== undefined || t.farbe !== undefined || aendertAbgleich(t), {
+    message: "Name, Farbe oder Zuordnung",
+  })
+  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+
+export const DokumenttypEingabe = z
+  .object({ name: Name, vorgabeArt: z.enum(ARTEN).nullable().default(null), ...Abgleich.shape })
+  .refine(abgleichGueltig, REGEX_UNGUELTIG);
 export const DokumenttypAenderung = z
-  .object({ name: Name.optional(), vorgabeArt: z.enum(ARTEN).nullable().optional() })
-  .refine((t) => t.name !== undefined || t.vorgabeArt !== undefined, { message: "Name oder Vorgabe-Art" });
+  .object({ name: Name.optional(), vorgabeArt: z.enum(ARTEN).nullable().optional(), ...Abgleich.shape })
+  .refine((t) => t.name !== undefined || t.vorgabeArt !== undefined || aendertAbgleich(t), {
+    message: "Name, Vorgabe-Art oder Zuordnung",
+  })
+  .refine(abgleichGueltig, REGEX_UNGUELTIG);
 
 const Optionen = z
   .array(z.string().trim().min(1).max(100))
@@ -47,7 +73,7 @@ export const istKonflikt = (err: unknown): err is Error & { konflikt: true } =>
   err instanceof Error && "konflikt" in err;
 
 /** Doppelter Name (eindeutiger Index ohne Groß- und Kleinschreibung) als verständlicher Konflikt */
-async function eindeutig<T>(arbeit: Promise<T>): Promise<T> {
+export async function eindeutig<T>(arbeit: Promise<T>): Promise<T> {
   try {
     return await arbeit;
   } catch (err) {
@@ -61,7 +87,7 @@ async function eindeutig<T>(arbeit: Promise<T>): Promise<T> {
  * Nur Dokumente im Zeitraum eines Prüfers zählen (belegt_dokument_tag wie in der Liste). Die Spalte der äußeren Tabelle
  * ist ausgeschrieben: Drizzle ließe den Tabellennamen weg, und "id" träfe dann die innere Tabelle
  */
-const imZeitraum = (spalte: string, zeitraum?: { von: string; bis: string }) =>
+export const imZeitraum = (spalte: string, zeitraum?: { von: string; bis: string }) =>
   zeitraum
     ? sql` and belegt_dokument_tag(${sql.raw(spalte)}) between ${zeitraum.von}::date and ${zeitraum.bis}::date`
     : sql``;

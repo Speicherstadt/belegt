@@ -1,4 +1,5 @@
 import { bodyLimit } from "hono/body-limit";
+import { zuordnungVorschlagZu } from "../abgleich/vorschlaege.ts";
 import { inhaltZu } from "../inhalt/inhalt.ts";
 import { kiVorschlagZu } from "../ki/vorschlaege.ts";
 import {
@@ -62,17 +63,24 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
 
   app.get("/api/dokumente/:id/vorschlag", async (c) => {
     const id = Id.safeParse(c.req.param("id"));
-    if (!id.success) return c.json({ vorschlag: null, erechnung: null, ki: null, import: null });
+    if (!id.success) return c.json({ vorschlag: null, zuordnung: null, erechnung: null, ki: null, import: null });
     // Dazu die Kopfdaten einer erkannten E-Rechnung: Datum, Nummer und Verkäufer für die Einordnung
-    const [regel, inhalt, ki, aus] = await Promise.all([
+    const [regel, zuordnung, inhalt, ki, aus] = await Promise.all([
       vorschlag(umgebung.db, id.data),
+      zuordnungVorschlagZu(umgebung.db, id.data),
       inhaltZu(umgebung.db, id.data),
       kiVorschlagZu(umgebung.db, id.data),
       importVorschlagZu(umgebung.db, id.data),
     ]);
-    // ki: Vorschlag des Sprachmodells (nur mit KI_URL); import: Titel, Korrespondent und Entstehung aus Paperless-ngx.
-    // Übernommen wird nur, was ein Mensch bestätigt
-    return c.json({ vorschlag: regel, erechnung: inhalt?.erechnung ?? null, ki, import: aus });
+    // Reihenfolge: Regel, Zuordnungsregel, Sprachmodell. zuordnung: aus den Zuordnungsregeln; ki: Sprachmodell (nur mit KI_URL); import: Titel,
+    // Korrespondent und Entstehung aus Paperless-ngx. Übernommen wird nur, was ein Mensch bestätigt
+    return c.json({
+      vorschlag: regel,
+      zuordnung,
+      erechnung: inhalt?.erechnung ?? null,
+      ki,
+      import: aus,
+    });
   });
 
   app.get("/api/regeln", async (c) => c.json(await regelnListen(umgebung.db)));

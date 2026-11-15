@@ -1,6 +1,16 @@
 import type { Context } from "hono";
 import type { z } from "zod";
 import {
+  KorrespondentAenderung,
+  KorrespondentEingabe,
+  korrespondentAendern,
+  korrespondentAnlegen,
+  korrespondentenListen,
+  korrespondentLoeschen,
+  Zusammenfuehrung,
+  zusammenfuehren,
+} from "../ordnung/korrespondenten.ts";
+import {
   DokumenttypAenderung,
   DokumenttypEingabe,
   dokumenttypAendern,
@@ -38,7 +48,7 @@ async function eingabe<T extends z.ZodType>(c: Ctx, schema: T): Promise<z.infer<
 }
 
 /**
- * Anlegen, ändern und löschen für Tags, Dokumenttypen und Felder; alle drei gleich gebaut. Ändern ist PATCH,
+ * Anlegen, ändern und löschen für Tags, Dokumenttypen, Korrespondenten und Felder; alle gleich gebaut. Ändern ist PATCH,
  * löschen entfernt erst die Zuordnungen (jede im Audit-Log).
  */
 function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
@@ -75,8 +85,11 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
   });
   app.delete(`${pfad}/:id`, async (c) => {
     const id = Id.safeParse(c.req.param("id"));
-    const ok = id.success && (await f.loeschen(id.data, akteur(c.get("nutzer"))));
-    return ok ? c.json({ ok: true }) : c.json({ fehler: "Nicht gefunden" }, 404);
+    if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+    return f.loeschen(id.data, akteur(c.get("nutzer"))).then(
+      (ok) => (ok ? c.json({ ok: true }) : c.json({ fehler: "Nicht gefunden" }, 404)),
+      (err) => konfliktAntwort(c, err),
+    );
   });
 }
 
@@ -96,6 +109,26 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     anlegen: (e, a) => dokumenttypAnlegen(db, e, a),
     aendern: (id, e, a) => dokumenttypAendern(db, id, e, a),
     loeschen: (id, a) => dokumenttypLoeschen(db, id, a),
+  });
+  verwalten(app, "/api/korrespondenten", {
+    listen: (zeitraum) => korrespondentenListen(db, zeitraum),
+    Eingabe: KorrespondentEingabe,
+    Aenderung: KorrespondentAenderung,
+    anlegen: (e, a) => korrespondentAnlegen(db, e, a),
+    aendern: (id, e, a) => korrespondentAendern(db, id, e, a),
+    loeschen: (id, a) => korrespondentLoeschen(db, id, a),
+  });
+
+  /** Zwei Schreibweisen zusammenführen: :id geht in ziel auf; Antwort: der verbleibende Korrespondent */
+  app.post("/api/korrespondenten/:id/zusammenfuehren", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+    const e = await eingabe(c, Zusammenfuehrung);
+    if (!e) return c.json({ fehler: "ziel (ID des verbleibenden Korrespondenten) angeben" }, 400);
+    return zusammenfuehren(db, id.data, e.ziel, akteur(c.get("nutzer"))).then(
+      (k) => (k ? c.json(k) : c.json({ fehler: "Nicht gefunden" }, 404)),
+      (err) => konfliktAntwort(c, err),
+    );
   });
   verwalten(app, "/api/felder", {
     listen: () => felderListen(db),

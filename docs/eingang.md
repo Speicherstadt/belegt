@@ -139,17 +139,30 @@ gelten die Merkmale seiner Mail. Eine Regel kann auf Absender,
 Domain (auch Subdomains), einen Teil des Betreffs und den Typ eines Anhangs prüfen; alle Bedingungen müssen
 zutreffen, die erste passende Regel gewinnt. Eine Regel ohne Bedingung trifft nichts.
 
-Eine Regel kann zusätzlich Tags, einen Dokumenttyp und Feldwerte vorschlagen ([Ordnung](ordnung.md)), oder nur diese:
+Eine Regel kann zusätzlich Tags, einen Korrespondenten, einen Dokumenttyp und Feldwerte vorschlagen
+([Ordnung](ordnung.md)), oder nur diese:
 Mit „Keine Art, nur Ordnung“ taggt sie, ohne eine Art vorzuschlagen. Was seitdem gelöscht wurde, schlägt sie nicht mehr
 vor.
 
-Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Dokumenttyp und Feldwerte sofort und trägt die Art, wenn
-die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt. Was ohne Klick
-geschehen soll, erledigt ein [Workflow](workflows.md).
+Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Korrespondent, Dokumenttyp und Feldwerte sofort und
+trägt die Art, wenn die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument eingeordnet und
+gesperrt. Was ohne Klick geschehen soll, erledigt ein [Workflow](workflows.md).
+
+## Vorschläge
+
+Auf der Seite eines Dokuments im Eingang stehen die Vorschläge in dieser Reihenfolge:
+
+1. [Regel](#regeln): Art und Ordnung nach Absender, Domain, Betreff und Anhang.
+2. [Zuordnungsregel](ordnung.md#zuordnungsregeln) an Korrespondenten, Dokumenttypen und Tags.
+3. E-Rechnung und Import aus Paperless-ngx: Datum, Titel und Korrespondent.
+4. [Sprachmodell](#vorschläge-eines-sprachmodells), wenn eingerichtet.
+
+Jeder Vorschlag hat sein eigenes „Übernehmen“; keiner ordnet von selbst ein.
 
 ## Suche
 
-Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
+Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, der Korrespondent aus
+der Liste, bei Mails Absender,
 Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs, Office- und Textdateien
 Nummer und Verkäufer einer E-Rechnung, Tags, Dokumenttyp und Textfelder ([Ordnung](ordnung.md)) und Notizen ([Dokument](dokument.md#notizen)). Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
 und Ausschlüsse mit Minus. `ASN 123` oder nur `123` findet das Dokument mit dieser Archivnummer.
@@ -167,7 +180,7 @@ Datei nicht sein; eine größere teilst du in Outlook auf.
 
 Mit `KI_URL` und `KI_MODELL` fragt der Worker ein Sprachmodell nach einer Einordnung für jedes Dokument im Eingang: Art,
 Tag der Entstehung, Titel, Korrespondent und eine kurze Begründung; gibt es Tags und Dokumenttypen, wählt es passende
-davon aus, neue legt es nie an. Er schickt dafür Dateiname, Mailkopf und Text des
+davon aus, neue legt es nie an. Für den Korrespondenten bekommt es die Namen der Liste und nimmt deren Schreibweise. Er schickt dafür Dateiname, Mailkopf und Text des
 Dokuments an das Modell; deshalb gehört es auf einen eigenen Server, etwa Ollama im selben Netz (in Compose mit
 `--profile ki`, dann einmal `docker compose exec ollama ollama pull <Modell>`). Ein Vorschlag ist nur ein Vorschlag: Auf
 der Seite des Dokuments übernimmt „Übernehmen“ die Felder ins Formular, eingeordnet wird erst mit „Einordnen“. Belegt

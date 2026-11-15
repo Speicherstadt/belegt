@@ -4,6 +4,7 @@ import { type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
+import { korrespondentMitNamen, korrespondentSetzen } from "../ordnung/korrespondent-setzen.ts";
 
 export const ARTEN = [
   "buecher",
@@ -31,7 +32,10 @@ export type Einordnung = typeof einordnungen.$inferSelect;
 
 /**
  * Ordnet ein Dokument ein: Die Frist rechnet shared/fristen.ts (§ 147 AO), gespeichert wird sie mit, damit sie
- * versiegelt ist und sich abfragen lässt. Eine neue Einordnung ersetzt die alte nicht, sie kommt dazu.
+ * versiegelt ist und sich abfragen lässt. Eine neue Einordnung ersetzt die alte nicht, sie kommt dazu. Ein
+ * Korrespondent kommt in die Liste (vorhandene Schreibweise ohne Groß- und Kleinschreibung, sonst neu) und wird dem
+ * Dokument zugeordnet; die Einordnung hält seinen Namen fest, wie er beim Einordnen hieß. Ohne Korrespondent bleibt
+ * die Zuordnung, wie sie ist.
  */
 export function einordnen(
   db: Datenbank,
@@ -50,6 +54,7 @@ export async function einordnenIn(tx: Tx, dokumentId: string, eingabe: Einordnun
     freiwilligBis: eingabe.freiwilligBis,
     aufsicht: betrieb?.aufsicht ?? false,
   });
+  const korrespondent = eingabe.korrespondent?.trim() ? await korrespondentMitNamen(tx, eingabe.korrespondent) : null;
   const [neu] = await tx
     .insert(einordnungen)
     .values({
@@ -58,9 +63,10 @@ export async function einordnenIn(tx: Tx, dokumentId: string, eingabe: Einordnun
       entstanden: eingabe.entstanden,
       fristBis: frist.bis,
       titel: eingabe.titel || null,
-      korrespondent: eingabe.korrespondent || null,
+      korrespondent: korrespondent?.name ?? null,
     })
     .returning();
+  if (korrespondent) await korrespondentSetzen(tx, dokumentId, korrespondent.id);
   return neu!;
 }
 

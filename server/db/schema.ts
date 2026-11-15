@@ -196,12 +196,14 @@ export const regeln = pgTable(
       "regeln_art",
       sql`${t.art} in ('buecher', 'zoll', 'beleg', 'geschaeftsbrief', 'sonstige', 'freiwillig', 'frei')`,
     ),
-    // Eine Regel schlägt etwas vor: eine Art oder mindestens einen Tag, einen Dokumenttyp oder einen Feldwert
+    // Eine Regel schlägt etwas vor: eine Art oder mindestens einen Tag, einen Dokumenttyp, einen Korrespondenten oder
+    // einen Feldwert
     check(
       "regeln_art_oder_ordnung",
       sql`${t.art} is not null
           or coalesce(${t.ordnung} -> 'tags', '[]'::jsonb) <> '[]'::jsonb
           or coalesce(${t.ordnung} -> 'dokumenttyp', 'null'::jsonb) <> 'null'::jsonb
+          or coalesce(${t.ordnung} -> 'korrespondent', 'null'::jsonb) <> 'null'::jsonb
           or coalesce(${t.ordnung} -> 'felder', '[]'::jsonb) <> '[]'::jsonb`,
     ),
   ],

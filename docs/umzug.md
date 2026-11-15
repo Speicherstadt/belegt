@@ -54,8 +54,9 @@ Belegt nicht. Einen abgebrochenen Export lädst du neu hoch; was schon übernomm
 
 ## Zuordnung
 
-Paperless-ngx kennt keine Aufbewahrungsfrist. Deshalb landet jedes Dokument zuerst im [Eingang](eingang.md). Titel,
-Korrespondent und Datum (`created`) aus Paperless-ngx stehen dort als Vorschlag; „Übernehmen“ trägt sie ins Formular,
+Paperless-ngx kennt keine Aufbewahrungsfrist. Deshalb landet jedes Dokument zuerst im [Eingang](eingang.md). Der
+Korrespondent kommt gleich in die [Liste](ordnung.md#korrespondenten) und zum Dokument. Titel, Korrespondent und Datum
+(`created`) aus Paperless-ngx stehen dort als Vorschlag; „Übernehmen“ trägt sie ins Formular,
 eingeordnet wird erst mit „Einordnen“. Nach der Löschung des Dokuments zeigt Belegt den Vorschlag nicht mehr.
 
 Unter **Zuordnung zur Art** legst du fest, welche Dokumenttypen oder Tags aus Paperless-ngx schon eine Art bestimmen,
@@ -67,6 +68,7 @@ gibt es dort nicht, denn dafür braucht es ein Datum. Die Zuordnung gilt für Im
 | --- | --- |
 | Original | Dokument mit eigener Archivnummer, Quelle „Importiert“ |
 | Titel, Korrespondent, `created` | Vorschlag für die Einordnung, mit Zuordnung gleich die Einordnung |
+| Korrespondent | [Korrespondent](ordnung.md#korrespondenten), per Namen zugeordnet oder angelegt |
 | Tags | [Tags](ordnung.md#tags), per Namen zugeordnet oder angelegt |
 | Dokumenttyp | [Dokumenttyp](ordnung.md#dokumenttypen), per Namen zugeordnet oder angelegt |
 | Archivnummer (ASN) | Feld „Paperless-ASN“ (Zahl); Belegt vergibt eine eigene |

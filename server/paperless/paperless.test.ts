@@ -216,8 +216,14 @@ describe.skipIf(!testDatenbankUrl)("Import aus Paperless-ngx über die API", { t
       dokumenttyp: { name: string };
       felder: { name: string; typ: string; wert: unknown }[];
       einordnung: { art: string; entstanden: string; titel: string; korrespondent: string } | null;
+      korrespondent: { name: string } | null;
     }>(`/api/dokumente/${strom.id}`);
     expect(d.tags.map((x) => x.name)).toEqual(["Strom"]);
+    // Der Korrespondent aus Paperless-ngx steht in der Liste und ist dem Dokument zugeordnet
+    expect(d.korrespondent?.name).toBe("Stadtwerke");
+    expect(
+      (await get<{ name: string; anzahl: number }[]>("/api/korrespondenten")).map((k) => [k.name, k.anzahl]),
+    ).toEqual([["Stadtwerke", 1]]);
     expect(d.dokumenttyp.name).toBe("Rechnung");
     expect(Object.fromEntries(d.felder.map((f) => [f.name, [f.typ, f.wert]]))).toEqual({
       Summe: ["betrag", 8990],
@@ -262,9 +268,10 @@ describe.skipIf(!testDatenbankUrl)("Import aus Paperless-ngx über die API", { t
     // Akteur im Audit-Log: import:paperless für Dokument, Tags, Felder, Notizen und Einordnung
     const akteure = await t.sql<{ table_name: string; actor: string }[]>`
       select distinct table_name, actor from audit_log
-       where table_name in ('dokumente', 'dokument_tags', 'feldwerte', 'notizen', 'einordnungen', 'import_eintraege', 'felder', 'tags')`;
+       where table_name in ('dokumente', 'dokument_tags', 'feldwerte', 'notizen', 'einordnungen', 'import_eintraege', 'felder',
+                            'tags', 'korrespondenten', 'dokument_korrespondenten')`;
     expect(new Set(akteure.map((a) => a.actor))).toEqual(new Set(["import:paperless"]));
-    expect(new Set(akteure.map((a) => a.table_name)).size).toBe(8);
+    expect(new Set(akteure.map((a) => a.table_name)).size).toBe(10);
     // Die Verfahrensdokumentation führt den Import mit Zahlen und Prüfsummenabgleich auf
     const doku = JSON.stringify(await get("/api/verfahrensdoku"));
     expect(doku).toContain("Import aus Paperless-ngx (API „Alt“) vom ");

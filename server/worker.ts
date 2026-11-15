@@ -1,3 +1,4 @@
+import { zuordnungVorschlaegeErzeugen } from "./abgleich/vorschlaege.ts";
 import { ansichtenErzeugen } from "./ansicht/ansicht.ts";
 import { archivfassungenErzeugen } from "./archivfassung/archivfassung.ts";
 import { schluesselAus } from "./crypto.ts";
@@ -24,7 +25,7 @@ import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
- * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
+ * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, wertet Zuordnungsregeln aus, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
  * und erzeugt Vorschaubilder und durchsuchbare PDFs von Scans. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
  * aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
@@ -79,6 +80,18 @@ async function workflows() {
     });
     if (r.ausgefuehrt || r.fehler) console.log(`Workflows: ${r.ausgefuehrt} ausgeführt, ${r.fehler} fehlgeschlagen`);
     if (r.ausgefuehrt + r.fehler < 50) await Bun.sleep(5_000);
+  }
+}
+
+/** Zuordnungsregeln für Dokumente im Eingang, sobald ihr Text gelesen ist, alle 10 Sekunden */
+async function zuordnungen() {
+  for (;;) {
+    const r = await zuordnungVorschlaegeErzeugen(db).catch((err) => {
+      console.error(`Zuordnungsregeln fehlgeschlagen: ${meldung(err)}`);
+      return { ausgewertet: 0, treffer: 0 };
+    });
+    if (r.ausgewertet) console.log(`Zuordnungsregeln: ${r.ausgewertet} ausgewertet, ${r.treffer} mit Vorschlag`);
+    if (r.ausgewertet < 20) await Bun.sleep(10_000);
   }
 }
 
@@ -235,6 +248,7 @@ await Promise.all([
   webhooks(),
   inhalte(),
   workflows(),
+  zuordnungen(),
   entfernungen(),
   ...(rasterVerfuegbar() ? [vorschaubilder()] : []),
   ...(env.ARCHIVFASSUNG && ocrVerfuegbar() ? [archivfassungen()] : []),

@@ -50,8 +50,10 @@ export {
   vorschaubildUrl,
 } from "./api-dokumente.ts";
 export type {
+  Abgleich,
   Dokumenttyp,
   Feld,
+  Korrespondent,
   ListenFilter,
   Ordnung,
   OrdnungAenderung,

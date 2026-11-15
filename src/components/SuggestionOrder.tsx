@@ -7,13 +7,15 @@ import { TagChip } from "./TagChip.tsx";
 export const alsAenderung = (o: OrdnungsVorschlag): OrdnungAenderung => ({
   tagsHinzu: o.tags.map((t) => t.id),
   ...(o.dokumenttyp ? { dokumenttyp: o.dokumenttyp.id } : {}),
+  ...(o.korrespondent ? { korrespondent: o.korrespondent.id } : {}),
   felder: o.felder.map((f) => ({ feldId: f.feldId, wert: f.wert })),
 });
 
-/** Was ein Vorschlag an Tags, Dokumenttyp und Feldwerten mitbringt */
+/** Was ein Vorschlag an Korrespondent, Tags, Dokumenttyp und Feldwerten mitbringt */
 export function SuggestionOrder({ ordnung }: { ordnung: OrdnungsVorschlag }) {
   return (
     <span className="flex flex-wrap items-center gap-1.5">
+      {ordnung.korrespondent && <span>{m.suggest_party_short({ name: ordnung.korrespondent.name })}</span>}
       {ordnung.dokumenttyp && <span>{m.suggest_doctype_short({ typ: ordnung.dokumenttyp.name })}</span>}
       {ordnung.tags.map((t) => (
         <TagChip key={t.id} tag={t} />

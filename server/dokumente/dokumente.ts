@@ -77,6 +77,8 @@ export interface Eintrag extends Dokument {
   titel: string | null;
   tags: { id: string; name: string; farbe: string }[];
   dokumenttyp: { id: string; name: string } | null;
+  /** Korrespondent aus der Liste mit seinem heutigen Namen */
+  korrespondent: { id: string; name: string } | null;
   /** Ob es ein Vorschaubild gibt (GET /api/dokumente/:id/vorschaubild) */
   vorschaubild: boolean;
 }
@@ -160,6 +162,7 @@ export async function listen(
     titel: string | null;
     tags: Eintrag["tags"];
     dokumenttyp: Eintrag["dokumenttyp"];
+    korrespondent: Eintrag["korrespondent"];
     vorschaubild: boolean;
   }>(sql`
     select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel,
@@ -169,6 +172,9 @@ export async function listen(
            (select json_build_object('id', ty.id, 'name', ty.name)
               from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
              where dd.dokument_id = d.id) as dokumenttyp,
+           (select json_build_object('id', k.id, 'name', k.name)
+              from dokument_korrespondenten dk join korrespondenten k on k.id = dk.korrespondent_id
+             where dk.dokument_id = d.id) as korrespondent,
            exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild
       ${listenQuelle(abfrage)}
      order by ${REIHENFOLGE[sortierung]}
@@ -187,6 +193,7 @@ export async function listen(
     titel: z.titel,
     tags: z.tags,
     dokumenttyp: z.dokumenttyp,
+    korrespondent: z.korrespondent,
     vorschaubild: z.vorschaubild,
   }));
 }
@@ -226,14 +233,18 @@ export interface Ereignis {
   akteur: string | null;
   aktion: string;
   tabelle: string;
-  /** Bei Tags, Dokumenttyp und Feldern: der Name (heute; null, wenn inzwischen gelöscht); bei Ableitungen die Operation */
+  /**
+   * Bei Tags, Dokumenttyp, Korrespondent und Feldern: der Name (heute; null, wenn inzwischen gelöscht); bei einer
+   * Einordnung ihr Korrespondent, wie er beim Einordnen hieß; bei Ableitungen die Operation
+   */
   detail: string | null;
   /** Nur bei Ableitungen: aus einer Quelle abgeleitet oder ein neues Dokument daraus */
   richtung?: "aus" | "daraus";
 }
 
 /**
- * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp und Feldwerte,
+ * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp, Korrespondent
+ * und Feldwerte,
  * Ableitungen in beide Richtungen, Notizen (ohne Text; nicht für Prüfer) und sein Siegel, in der Reihenfolge der Kette
  */
 export async function verlauf(
@@ -254,10 +265,14 @@ export async function verlauf(
            case when a.table_name = 'ableitungen'
                 then case when a.new_value ->> 'dokument_id' = ${id} then 'aus' else 'daraus' end end as richtung,
            case a.table_name
+             -- Der Korrespondent, wie ihn die versiegelte Einordnung festhält, auch nach Umbenennen in der Liste
+             when 'einordnungen' then a.new_value ->> 'korrespondent'
              when 'dokument_tags' then (select t.name from tags t
                                          where t.id::text = coalesce(a.new_value, a.old_value) ->> 'tag_id')
              when 'dokument_dokumenttypen' then (select ty.name from dokumenttypen ty
                                                   where ty.id::text = coalesce(a.new_value, a.old_value) ->> 'dokumenttyp_id')
+             when 'dokument_korrespondenten' then (select k.name from korrespondenten k
+                                                    where k.id::text = coalesce(a.new_value, a.old_value) ->> 'korrespondent_id')
              when 'feldwerte' then (select f.name from felder f
                                      where f.id::text = coalesce(a.new_value, a.old_value) ->> 'feld_id')
              when 'ableitungen' then a.new_value ->> 'operation'
@@ -265,7 +280,7 @@ export async function verlauf(
       from audit_log a
      where (a.table_name = 'dokumente' and a.row_id = ${id})
         or (a.table_name = 'einordnungen' and a.new_value ->> 'dokument_id' = ${id})
-        or (a.table_name in ('dokument_tags', 'dokument_dokumenttypen', 'feldwerte')
+        or (a.table_name in ('dokument_tags', 'dokument_dokumenttypen', 'dokument_korrespondenten', 'feldwerte')
             and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
         or (a.table_name = 'ableitungen'
             and (a.new_value ->> 'dokument_id' = ${id} or a.new_value ->> 'quelle_id' = ${id}))

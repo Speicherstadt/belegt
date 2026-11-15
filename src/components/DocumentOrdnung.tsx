@@ -5,13 +5,14 @@ import { api, type Feld, type Ordnung, type OrdnungAenderung } from "../lib/api.
 import { feldwertText } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { ausEingabe, FieldInput, feldKlasse } from "./FieldInput.tsx";
+import { PartyChip } from "./PartyChip.tsx";
 import { TagChip } from "./TagChip.tsx";
 
 /** Bezeichnung eines Feldes; ein Betrag nennt die Währung */
 export const feldLabel = (f: Feld) => (f.typ === "betrag" ? `${f.name} (EUR)` : f.name);
 
 /**
- * Tags, Dokumenttyp und eigene Felder eines Dokuments: für alle lesbar, für den Inhaber änderbar. Metadaten, nicht das
+ * Korrespondent, Tags, Dokumenttyp und eigene Felder eines Dokuments: für alle lesbar, für den Inhaber änderbar. Metadaten, nicht das
  * Original; jede Änderung steht im Verlauf.
  */
 export function DocumentOrdnung({
@@ -27,6 +28,7 @@ export function DocumentOrdnung({
   const schreiben = darfSchreiben(ich.data?.role) && !geloescht;
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten, enabled: schreiben });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const queryClient = useQueryClient();
   const [ungueltig, setUngueltig] = useState<string | null>(null);
@@ -89,6 +91,30 @@ export function DocumentOrdnung({
               {m.order_tag_add()}
             </button>
           </form>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 text-sm">
+        {schreiben && korrespondenten.data?.length ? (
+          <label className="flex flex-col gap-1.5 font-medium">
+            {m.order_party()}
+            <select
+              value={ordnung.korrespondent?.id ?? ""}
+              onChange={(e) => aendern.mutate({ korrespondent: e.target.value || null })}
+              className={feldKlasse}
+            >
+              <option value="">{m.order_party_none()}</option>
+              {korrespondenten.data.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <p className="m-0 flex flex-wrap items-center gap-1.5">
+            <span className="text-muted">{m.order_party()}: </span>
+            {ordnung.korrespondent ? <PartyChip korrespondent={ordnung.korrespondent} /> : m.order_party_none()}
+          </p>
         )}
       </div>
       <div className="flex flex-col gap-2 text-sm">

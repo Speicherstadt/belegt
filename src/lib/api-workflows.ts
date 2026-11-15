@@ -17,6 +17,8 @@ export interface WorkflowBedingungen {
   mimeTyp?: string;
   tags?: string[];
   dokumenttyp?: string;
+  /** ID eines Korrespondenten oder „ohne“ */
+  korrespondent?: string;
   postfach?: string;
   unterordner?: string;
 }
@@ -25,6 +27,7 @@ export type WorkflowAktion =
   | { art: "tagsHinzu"; tags: string[] }
   | { art: "tagsWeg"; tags: string[] }
   | { art: "dokumenttyp"; dokumenttyp: string }
+  | { art: "korrespondent"; korrespondent: string }
   | { art: "feld"; feldId: string; wert: unknown }
   | {
       art: "einordnen";

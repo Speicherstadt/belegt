@@ -1,5 +1,5 @@
 /*
- * OpenAPI für Tags, Dokumenttypen, eigene Felder und die Sammelbearbeitung (docs/ordnung.md); nur, was ein API-Token
+ * OpenAPI für Tags, Dokumenttypen, Korrespondenten, eigene Felder und die Sammelbearbeitung (docs/ordnung.md); nur, was ein API-Token
  * erreicht: lesen und zuweisen, nicht anlegen.
  */
 
@@ -42,6 +42,10 @@ export const ordnungsFelder = {
       },
     ],
   },
+  korrespondent: {
+    description: "Korrespondent aus der Liste mit seinem heutigen Namen",
+    oneOf: [{ type: "null" }, { type: "object", properties: { id: uuid, name: { type: "string" } } }],
+  },
 } as const;
 
 const ordnung = {
@@ -67,6 +71,10 @@ const aenderung = {
   tagsHinzu: { type: "array", items: uuid, maxItems: 50 },
   tagsWeg: { type: "array", items: uuid, maxItems: 50 },
   dokumenttyp: { oneOf: [uuid, { type: "null" }], description: "null entfernt den Dokumenttyp" },
+  korrespondent: {
+    oneOf: [uuid, { type: "null" }],
+    description: "ID aus der Liste; null entfernt den Korrespondenten",
+  },
   felder: {
     type: "array",
     maxItems: 50,
@@ -105,6 +113,12 @@ export const listenParameter = [
     description:
       "ID eines Dokumenttyps oder „ohne“. Dazu je Feld: feld.<id>=gesetzt, feld.<id>.enthaelt, feld.<id>.von, feld.<id>.bis",
   },
+  {
+    name: "korrespondent",
+    in: "query",
+    schema: { type: "string" },
+    description: "ID eines Korrespondenten aus der Liste oder „ohne“",
+  },
 ] as const;
 
 const liste = (summary: string) => ({
@@ -114,10 +128,11 @@ const liste = (summary: string) => ({
 export const ordnungPfade = {
   "/api/tags": liste("Tags mit Name, Farbe und Anzahl der Dokumente"),
   "/api/dokumenttypen": liste("Dokumenttypen mit Vorgabe-Art"),
+  "/api/korrespondenten": liste("Korrespondenten mit Zuordnungsregel und Anzahl der Dokumente"),
   "/api/felder": liste("Eigene Felder mit Typ und Optionen"),
   "/api/dokumente/{id}/ordnung": {
     post: {
-      summary: "Tags, Dokumenttyp und Feldwerte eines Dokuments setzen (Recht schreiben)",
+      summary: "Tags, Dokumenttyp, Korrespondent und Feldwerte eines Dokuments setzen (Recht schreiben)",
       parameters: [idParam],
       requestBody: { required: true, content: json({ type: "object", properties: aenderung }) },
       responses: {

@@ -107,7 +107,12 @@ export const betriebApi = {
     name: string;
     wenn: Regel["bedingung"];
     dann: Art | null;
-    ordnung?: { tags: string[]; dokumenttyp: string | null; felder: { feldId: string; wert: Feldwert }[] };
+    ordnung?: {
+      tags: string[];
+      dokumenttyp: string | null;
+      korrespondent?: string | null;
+      felder: { feldId: string; wert: Feldwert }[];
+    };
   }) => aufruf<Regel>("/api/regeln", json(r)),
   regelSchalten: (id: string, aktiv: boolean) =>
     aufruf<Regel>(`/api/regeln/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),

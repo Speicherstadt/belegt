@@ -1,4 +1,4 @@
-import type { Art, Dokumenttyp, Feld, Tag, WorkflowQuelle } from "../../lib/api.ts";
+import type { Art, Dokumenttyp, Feld, Korrespondent, Tag, WorkflowQuelle } from "../../lib/api.ts";
 import { ARTEN } from "../../lib/arten.ts";
 import { m } from "../../paraglide/messages.js";
 import { feldLabel } from "../DocumentOrdnung.tsx";
@@ -23,7 +23,27 @@ function TagOptionen({ tags }: { tags: Tag[] }) {
   );
 }
 
-export function WorkflowConditions({ tags, typen }: { tags: Tag[]; typen: Dokumenttyp[] }) {
+function KorrespondentOptionen({ korrespondenten }: { korrespondenten: Korrespondent[] }) {
+  return (
+    <>
+      {korrespondenten.map((k) => (
+        <option key={k.id} value={k.id}>
+          {k.name}
+        </option>
+      ))}
+    </>
+  );
+}
+
+export function WorkflowConditions({
+  tags,
+  typen,
+  korrespondenten,
+}: {
+  tags: Tag[];
+  typen: Dokumenttyp[];
+  korrespondenten: Korrespondent[];
+}) {
   return (
     <fieldset className="m-0 flex flex-col gap-3 rounded-lg border border-border p-4">
       <legend className="px-1 font-semibold">{m.workflow_conditions()}</legend>
@@ -73,6 +93,14 @@ export function WorkflowConditions({ tags, typen }: { tags: Tag[]; typen: Dokume
             ))}
           </select>
         </label>
+        <label className={feld}>
+          {m.order_party()}
+          <select name="bedKorrespondent" className={feldKlasse}>
+            <option value="">{m.workflow_none()}</option>
+            <option value="ohne">{m.order_party_none()}</option>
+            <KorrespondentOptionen korrespondenten={korrespondenten} />
+          </select>
+        </label>
       </div>
     </fieldset>
   );
@@ -81,6 +109,7 @@ export function WorkflowConditions({ tags, typen }: { tags: Tag[]; typen: Dokume
 export function WorkflowActions(p: {
   tags: Tag[];
   typen: Dokumenttyp[];
+  korrespondenten: Korrespondent[];
   felder: Feld[];
   feldId: string;
   setFeldId: (id: string) => void;
@@ -115,6 +144,13 @@ export function WorkflowActions(p: {
                 {t.name}
               </option>
             ))}
+          </select>
+        </label>
+        <label className={feld}>
+          {m.workflow_set_party()}
+          <select name="korrespondent" className={feldKlasse}>
+            <option value="">{m.workflow_none()}</option>
+            <KorrespondentOptionen korrespondenten={p.korrespondenten} />
           </select>
         </label>
         <label className={feld}>

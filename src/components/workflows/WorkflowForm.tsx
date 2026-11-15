@@ -22,6 +22,7 @@ function bedingungenAus(f: FormData): WorkflowBedingungen {
     mimeTyp: text(f, "mimeTyp"),
     tags: tag ? [tag] : undefined,
     dokumenttyp: text(f, "bedTyp"),
+    korrespondent: text(f, "bedKorrespondent"),
     postfach: text(f, "postfach"),
     unterordner: text(f, "unterordner"),
   };
@@ -33,6 +34,7 @@ export function WorkflowForm() {
   const queryClient = useQueryClient();
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const [feldId, setFeldId] = useState("");
   const [einordnen, setEinordnen] = useState(false);
@@ -56,6 +58,8 @@ export function WorkflowForm() {
     if (hinzu) aktionen.push({ art: "tagsHinzu", tags: [hinzu] });
     if (weg) aktionen.push({ art: "tagsWeg", tags: [weg] });
     if (typ) aktionen.push({ art: "dokumenttyp", dokumenttyp: typ });
+    const korrespondent = text(f, "korrespondent");
+    if (korrespondent) aktionen.push({ art: "korrespondent", korrespondent });
     if (gewaehltesFeld) {
       const wert = ausEingabe(gewaehltesFeld, String(f.get("feldwert") ?? ""));
       if (wert === undefined || wert === null) return setHinweis(m.workflow_field_invalid());
@@ -108,10 +112,15 @@ export function WorkflowForm() {
         </label>
       </div>
 
-      <WorkflowConditions tags={tags.data ?? []} typen={typen.data ?? []} />
+      <WorkflowConditions
+        tags={tags.data ?? []}
+        typen={typen.data ?? []}
+        korrespondenten={korrespondenten.data ?? []}
+      />
       <WorkflowActions
         tags={tags.data ?? []}
         typen={typen.data ?? []}
+        korrespondenten={korrespondenten.data ?? []}
         felder={felder.data ?? []}
         feldId={feldId}
         setFeldId={setFeldId}

@@ -25,6 +25,7 @@ export interface Eintrag extends Dokument {
   titel: string | null;
   tags: TagKurz[];
   dokumenttyp: { id: string; name: string } | null;
+  korrespondent: { id: string; name: string } | null;
   /** Ob es ein Vorschaubild der ersten Seite gibt */
   vorschaubild: boolean;
 }
@@ -183,6 +184,8 @@ export const dokumenteApi = {
   vorschlag: (id: string) =>
     aufruf<{
       vorschlag: { art: Art | null; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
+      /** Aus den Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags */
+      zuordnung: (OrdnungsVorschlag & { uebersprungen: string[] }) | null;
       erechnung: ERechnung | null;
       ki: {
         art: Art;

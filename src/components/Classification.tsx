@@ -5,6 +5,7 @@ import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/a
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { RuleMatchSuggestion } from "./MatchSuggestions.tsx";
 import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -15,12 +16,15 @@ export function Classification({
   einordnung,
   eingang,
   dokumenttyp,
+  korrespondent,
 }: {
   dokumentId: string;
   einordnung: Einordnung | null;
   eingang: string;
   /** Dokumenttyp mit Vorgabe-Art: ein Vorschlag, die Art bleibt maßgeblich für die Frist */
   dokumenttyp?: { name: string; vorgabeArt: Art | null } | null;
+  /** Korrespondent aus der Liste; das Formular nimmt seinen heutigen Namen */
+  korrespondent?: { id: string; name: string } | null;
 }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const queryClient = useQueryClient();
@@ -34,6 +38,12 @@ export function Classification({
     // Vorschläge gibt es nur für den, der einordnen darf
     enabled: !einordnung && ich.data?.role === "inhaber",
   });
+  // Vorhandene Korrespondenten zur Auswahl; ein neuer Name legt beim Einordnen einen an
+  const korrespondenten = useQuery({
+    queryKey: ["korrespondenten"],
+    queryFn: api.korrespondenten,
+    enabled: darfSchreiben(ich.data?.role),
+  });
   const speichern = useMutation({
     mutationFn: (eingabe: Parameters<typeof api.einordnen>[1]) => api.einordnen(dokumentId, eingabe),
     onSuccess: async () => {
@@ -45,7 +55,11 @@ export function Classification({
   // Tags, Dokumenttyp und Feldwerte eines Vorschlags sind Metadaten: Übernehmen setzt sie sofort, die Art erst beim Einordnen
   const ordnen = useMutation({
     mutationFn: (o: OrdnungsVorschlag) => api.ordnen(dokumentId, alsAenderung(o)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["dokument", dokumentId] }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["dokument", dokumentId] }),
+        queryClient.invalidateQueries({ queryKey: ["verlauf", dokumentId] }),
+      ]),
   });
 
   function absenden(e: FormEvent<HTMLFormElement>) {
@@ -124,6 +138,9 @@ export function Classification({
           </button>
         </p>
       )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.zuordnung && (
+        <RuleMatchSuggestion zuordnung={vorschlag.data.zuordnung} onUebernehmen={(o) => ordnen.mutate(o)} />
+      )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.erechnung && !vorgabe && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {m.suggest_einvoice({
@@ -201,7 +218,11 @@ export function Classification({
         </div>
       )}
       {darfSchreiben(ich.data?.role) && offen && (
-        <form key={JSON.stringify(vorgabe)} onSubmit={absenden} className="flex flex-col gap-3">
+        <form
+          key={`${JSON.stringify(vorgabe)}:${korrespondent?.id ?? ""}`}
+          onSubmit={absenden}
+          className="flex flex-col gap-3"
+        >
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_kind()}
             <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feld}>
@@ -242,9 +263,16 @@ export function Classification({
             {m.classify_party()}
             <input
               name="korrespondent"
-              defaultValue={vorgabe?.korrespondent ?? einordnung?.korrespondent ?? ""}
+              list="korrespondenten-liste"
+              maxLength={300}
+              defaultValue={vorgabe?.korrespondent ?? korrespondent?.name ?? einordnung?.korrespondent ?? ""}
               className={feld}
             />
+            <datalist id="korrespondenten-liste">
+              {korrespondenten.data?.map((k) => (
+                <option key={k.id} value={k.name} />
+              ))}
+            </datalist>
           </label>
           {einordnung && <p className="m-0 text-muted text-xs">{m.classify_hint()}</p>}
           {ordnen.error && (

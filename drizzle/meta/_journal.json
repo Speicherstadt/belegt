@@ -281,6 +281,13 @@
       "when": 1794768829849,
       "tag": "0039_archivfassungen",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794773606971,
+      "tag": "0040_korrespondenten",
+      "breakpoints": true
     }
   ]
 }

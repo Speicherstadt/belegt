@@ -47,6 +47,12 @@ const sichererName = (name: string | null, ersatz: string): string => {
   return bereinigt || ersatz;
 };
 
+/*
+ * Zwei Spalten für den Korrespondenten: „Korrespondent“ ist der Text der versiegelten Einordnung, so wie er beim
+ * Einordnen festgehalten wurde; das ist die Aussage, die der Prüfer nachvollziehen muss, und sie ändert sich nie.
+ * „Korrespondent (Liste)“ ist der heutige Name aus der Liste, unter dem das Archiv das Dokument zeigt und filtert; jede
+ * Umbenennung, Zusammenführung und Zuordnung steht im Protokoll (korrespondenten, dokument_korrespondenten).
+ */
 const DOKUMENTE: BeschriebeneTabelle = {
   path: "dokumente.csv",
   name: "Dokumente",
@@ -68,6 +74,7 @@ const DOKUMENTE: BeschriebeneTabelle = {
     { name: "ASN", typ: { art: "zahl", nachkommastellen: 0 } },
     { name: "Dokumenttyp", typ: { art: "text" } },
     { name: "Tags", typ: { art: "text" } },
+    { name: "Korrespondent (Liste)", typ: { art: "text" } },
   ],
 };
 
@@ -107,6 +114,7 @@ type DokumentZeile = {
   frist_bis: string | null;
   titel: string | null;
   korrespondent: string | null;
+  korrespondent_liste: string | null;
   asn: string;
   dokumenttyp: string | null;
   tags: string | null;
@@ -118,6 +126,8 @@ async function dokumenteImZeitraum({ db }: Umgebung, { von, bis }: Zeitraum): Pr
     select d.id, d.dateiname, d.mime_type, d.groesse, d.sha256, d.eingegangen_am, d.quelle,
            e.art, e.entstanden::text as entstanden, e.frist_bis::text as frist_bis, e.titel, e.korrespondent,
            a.nummer as asn,
+           (select k.name from dokument_korrespondenten dk join korrespondenten k on k.id = dk.korrespondent_id
+             where dk.dokument_id = d.id) as korrespondent_liste,
            (select ty.name from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
              where dd.dokument_id = d.id) as dokumenttyp,
            (select string_agg(t.name, ', ' order by lower(t.name)) from dokument_tags dt join tags t on t.id = dt.tag_id
@@ -180,6 +190,11 @@ const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     union all select x.id::text from mail_anhaenge x
                where x.mail_dokument_id in (select id from dok) and x.anhang_dokument_id in (select id from dok)`;
 
+/** Korrespondenten der Liste, die Dokumente des Zeitraums haben: Umbenennungen gehören zu deren Nachweis */
+const korrespondentenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
+    select dk.korrespondent_id::text from dokument_korrespondenten dk
+     where belegt_dokument_tag(dk.dokument_id) between ${von}::date and ${bis}::date`;
+
 const ordnungDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     (table_name in (${sql.join(
       ORDNUNG_IM_PROTOKOLL.map((t) => sql`${t}`),
@@ -209,6 +224,7 @@ async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigab
            ? sql`and ((table_name in ('dokumente', 'archivnummern', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
                        and row_id in (${zeilenDerFreigabe({ von, bis })}))
                    or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })}))
+                   or (table_name = 'korrespondenten' and row_id in (${korrespondentenDerFreigabe({ von, bis })}))
                    or ${ordnungDerFreigabe({ von, bis })})`
            : sql``
        }
@@ -276,6 +292,7 @@ export async function z3Export(
           Number(d.asn),
           d.dokumenttyp,
           d.tags,
+          d.korrespondent_liste,
         ]),
       ),
     },

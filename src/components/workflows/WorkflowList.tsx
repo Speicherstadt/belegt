@@ -13,6 +13,7 @@ export function WorkflowList() {
   const liste = useQuery({ queryKey: ["workflows"], queryFn: api.workflows });
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const neu = () => queryClient.invalidateQueries({ queryKey: ["workflows"] });
   const schalten = useMutation({
     mutationFn: ({ id, aktiv }: { id: string; aktiv: boolean }) => api.workflowSchalten(id, aktiv),
@@ -83,10 +84,14 @@ export function WorkflowList() {
               <dt className="text-muted">{m.workflow_trigger()}</dt>
               <dd className="m-0">{AUSLOESER_LABEL[w.ausloeser]()}</dd>
               <dt className="text-muted">{m.workflow_conditions()}</dt>
-              <dd className="m-0">{bedingungenText(w, tags.data ?? [], typen.data ?? []).join(" · ")}</dd>
+              <dd className="m-0">
+                {bedingungenText(w, tags.data ?? [], typen.data ?? [], korrespondenten.data ?? []).join(" · ")}
+              </dd>
               <dt className="text-muted">{m.workflow_actions()}</dt>
               <dd className="m-0">
-                {w.aktionen.map((a) => aktionText(a, tags.data ?? [], typen.data ?? [])).join(" · ")}
+                {w.aktionen
+                  .map((a) => aktionText(a, tags.data ?? [], typen.data ?? [], korrespondenten.data ?? []))
+                  .join(" · ")}
                 {w.anhalten && ` · ${m.workflow_stops()}`}
               </dd>
             </dl>

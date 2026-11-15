@@ -4,6 +4,7 @@ import { FARBNAMEN, type Farbe } from "../../shared/ordnung.ts";
 import { api, type Tag } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 import { feldKlasse } from "./FieldInput.tsx";
+import { MatchingRule, regelAus, regelText } from "./MatchingRule.tsx";
 import { TagChip } from "./TagChip.tsx";
 
 export const FARBE_LABEL: Record<Farbe, () => string> = {
@@ -37,7 +38,7 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
   const [loeschen, setLoeschen] = useState(false);
   const neu = () => queryClient.invalidateQueries();
   const aendern = useMutation({
-    mutationFn: (t: { name: string; farbe: Farbe }) => api.tagAendern(tag.id, t),
+    mutationFn: (t: Parameters<typeof api.tagAendern>[1]) => api.tagAendern(tag.id, t),
     onSuccess: () => {
       setBearbeiten(false);
       return neu();
@@ -48,7 +49,7 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    aendern.mutate({ name: String(f.get("name")), farbe: String(f.get("farbe")) as Farbe });
+    aendern.mutate({ name: String(f.get("name")), farbe: String(f.get("farbe")) as Farbe, ...regelAus(f) });
   }
 
   return (
@@ -56,7 +57,9 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex min-w-0 items-center gap-2">
           <TagChip tag={tag} />
-          <span className="text-muted">{m.order_count({ anzahl: String(tag.anzahl) })}</span>
+          <span className="text-muted">
+            {m.order_count({ anzahl: String(tag.anzahl) })} · {regelText(tag)}
+          </span>
         </span>
         {schreiben && (
           <span className="flex flex-wrap gap-2">
@@ -100,6 +103,7 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
             {m.order_color()}
             <FarbAuswahl id={`farbe-${tag.id}`} name="farbe" wert={tag.farbe} />
           </label>
+          <MatchingRule id={`regel-${tag.id}`} wert={tag} />
           <button type="submit" className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary">
             {m.save()}
           </button>

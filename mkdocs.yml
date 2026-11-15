@@ -23,7 +23,7 @@ nav:
   - Arbeiten mit Belegt:
       - Eingang, Mails und Suche: eingang.md
       - Von Paperless-ngx zu Belegt: umzug.md
-      - Tags, Dokumenttypen und Felder: ordnung.md
+      - Korrespondenten, Tags, Typen und Felder: ordnung.md
       - Workflows: workflows.md
       - Dokument, Seiten und Notizen: dokument.md
       - Fristen und Löschen: fristen.md

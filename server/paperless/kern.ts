@@ -6,6 +6,7 @@ import type { Datenbank } from "../db/client.ts";
 import { dokumentDokumenttypen, felder, feldwerte, importEintraege, importZuordnungen, notizen } from "../db/schema.ts";
 import { type Umgebung, zeileAnlegen } from "../dokumente/dokumente.ts";
 import { einordnenIn } from "../einordnung/einordnung.ts";
+import { korrespondentMitNamen, korrespondentSetzen } from "../ordnung/korrespondent-setzen.ts";
 import { dokumenttypMitNamen, feldwertSpalten } from "../ordnung/ordnung.ts";
 import {
   type Feldabbildung,
@@ -22,7 +23,7 @@ import {
  * Gemeinsamer Kern für Import über die API und aus einem Export: ein Dokument aus Paperless-ngx mit seinem Original
  * aufnehmen. Die Prüfsumme aus Paperless-ngx muss zum Original passen, sonst kommt es nicht ins Archiv. Liegt dasselbe
  * Original (SHA-256) schon im Archiv, wird es nur verknüpft. Sonst entstehen Dokument (Quelle „import“), Tags,
- * Dokumenttyp, Feldwerte, Notizen und, wenn eine Zuordnung passt, die Einordnung in einer Transaktion mit dem Akteur
+ * Dokumenttyp, Korrespondent, Feldwerte, Notizen und, wenn eine Zuordnung passt, die Einordnung in einer Transaktion mit dem Akteur
  * import:paperless, zusammen mit dem Ergebnis in import_eintraege. Ein abgebrochener Lauf hinterlässt so nie ein
  * Dokument ohne Ergebnis.
  */
@@ -250,6 +251,8 @@ export async function dokumentUebernehmen(
       const typ = await dokumenttypMitNamen(tx, d.dokumenttyp);
       await tx.insert(dokumentDokumenttypen).values({ dokumentId: dok.id, dokumenttypId: typ.id });
     }
+    // Korrespondent aus Paperless-ngx in die Liste (vorhandene Schreibweise ohne Groß- und Kleinschreibung) und zum Dokument
+    if (v0.korrespondent) await korrespondentSetzen(tx, dok.id, (await korrespondentMitNamen(tx, v0.korrespondent)).id);
     await ordnungSetzen(tx, dok.id, v, d);
     const art = artFuer(v, d);
     if (art) {

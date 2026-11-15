@@ -197,6 +197,47 @@ describe.skipIf(!testDatenbankUrl)("Workflows gegen Postgres", { timeout: 60_000
     );
   });
 
+  it("setzt einen Korrespondenten und prüft ihn als Bedingung", async () => {
+    await alleAus();
+    const k = (await (await senden(inhaber, "POST", "/api/korrespondenten", { name: "Werkstatt" })).json()) as {
+      id: string;
+    };
+    expect(
+      (
+        await senden(inhaber, "POST", "/api/workflows", {
+          name: "Unbekannt",
+          ausloeser: "eingang",
+          aktionen: [{ art: "korrespondent", korrespondent: "00000000-0000-4000-8000-000000000000" }],
+        })
+      ).status,
+    ).toBe(409);
+    await anlegen({
+      name: "Werkstatt setzen",
+      ausloeser: "eingang",
+      bedingungen: { korrespondent: "ohne", dateinameEnthaelt: "werkstatt" },
+      aktionen: [{ art: "korrespondent", korrespondent: k.id }],
+    });
+    const markiert = await tag("Auto");
+    await anlegen({
+      name: "Auto taggen",
+      ausloeser: "eingang",
+      bedingungen: { korrespondent: k.id },
+      aktionen: [{ art: "tagsHinzu", tags: [markiert] }],
+    });
+    const d = await hochladen("werkstatt-rechnung.pdf");
+    await lauf();
+    const [z] = await t.sql`select korrespondent_id from dokument_korrespondenten where dokument_id = ${d.id}`;
+    expect(z!.korrespondent_id).toBe(k.id);
+    // Der zweite Workflow sieht, was der erste gesetzt hat
+    expect(await tagsVon(d.id)).toEqual(["Auto"]);
+    const [log] = await t.sql`select actor from audit_log where table_name = 'dokument_korrespondenten'
+                               and new_value ->> 'dokument_id' = ${d.id}`;
+    expect(log!.actor).toBe("workflow:Werkstatt setzen");
+    const doku = JSON.stringify(await (await senden(inhaber, "GET", "/api/verfahrensdoku")).json());
+    expect(doku).toContain("Korrespondent keiner");
+    expect(doku).toContain("Korrespondent „Werkstatt“ setzen");
+  });
+
   it("Auslöser eingeordnet, Reihenfolge und Anhalten", async () => {
     await alleAus();
     const erst = await tag("Erst");

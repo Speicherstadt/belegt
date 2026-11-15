@@ -71,12 +71,14 @@ async function merkmale(db: Datenbank | Tx, dokumentId: string, mitText: boolean
     mime_type: string;
     tags: string[];
     dokumenttyp: string | null;
+    korrespondent: string | null;
     herkunft: string | null;
     text: string | null;
   }>(sql`
     select d.quelle, d.dateiname, d.mime_type,
            array(select dt.tag_id::text from dokument_tags dt where dt.dokument_id = d.id) as tags,
            (select dd.dokumenttyp_id::text from dokument_dokumenttypen dd where dd.dokument_id = d.id) as dokumenttyp,
+           (select dk.korrespondent_id::text from dokument_korrespondenten dk where dk.dokument_id = d.id) as korrespondent,
            (select a.actor from audit_log a where a.table_name = 'dokumente' and a.row_id = d.id::text
                and a.action = 'INSERT' order by a.seq limit 1) as herkunft,
            case when ${mitText} then concat_ws(' ', (select i.text from inhalte i where i.dokument_id = d.id),
@@ -94,6 +96,7 @@ async function merkmale(db: Datenbank | Tx, dokumentId: string, mitText: boolean
     text: d.text,
     tags: d.tags,
     dokumenttyp: d.dokumenttyp,
+    korrespondent: d.korrespondent,
     herkunft: d.herkunft,
   };
 }
@@ -122,6 +125,9 @@ async function aktionAusfuehren(tx: Tx, w: Workflow, dokumentId: string, a: Akti
     case "dokumenttyp":
       await aenderungAnwenden(tx, dokumentId, { ...leer, dokumenttyp: a.dokumenttyp });
       return { art: a.art, dokumenttyp: a.dokumenttyp };
+    case "korrespondent":
+      await aenderungAnwenden(tx, dokumentId, { ...leer, korrespondent: a.korrespondent });
+      return { art: a.art, korrespondent: a.korrespondent };
     case "feld":
       await aenderungAnwenden(tx, dokumentId, { ...leer, felder: [{ feldId: a.feldId, wert: a.wert }] });
       return { art: a.art, feldId: a.feldId };

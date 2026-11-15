@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
-import { dokumenttypen, felder, tags } from "../db/schema.ts";
+import { dokumenttypen, felder, korrespondenten, tags } from "../db/schema.ts";
 import { type Aktion, type Bedingungen, type Workflow, workflowsListen } from "./workflows.ts";
 
 /*
@@ -28,7 +28,12 @@ const ART: Record<string, string> = {
   frei: "frei",
 };
 
-type Namen = { tag: (id: string) => string; typ: (id: string) => string; feld: (id: string) => string };
+type Namen = {
+  tag: (id: string) => string;
+  typ: (id: string) => string;
+  korrespondent: (id: string) => string;
+  feld: (id: string) => string;
+};
 
 function bedingungen(b: Bedingungen, n: Namen): string {
   const teile = [
@@ -42,6 +47,7 @@ function bedingungen(b: Bedingungen, n: Namen): string {
     b.mimeTyp ? `Dateityp ${b.mimeTyp}` : "",
     b.tags?.length ? `hat Tag ${b.tags.map(n.tag).join(", ")}` : "",
     b.dokumenttyp ? `Dokumenttyp ${b.dokumenttyp === "ohne" ? "keiner" : n.typ(b.dokumenttyp)}` : "",
+    b.korrespondent ? `Korrespondent ${b.korrespondent === "ohne" ? "keiner" : n.korrespondent(b.korrespondent)}` : "",
     b.postfach ? `aus Postfach „${b.postfach}“` : "",
     b.unterordner ? `aus Unterordner „${b.unterordner}“` : "",
   ].filter(Boolean);
@@ -56,6 +62,8 @@ function aktion(a: Aktion, n: Namen): string {
       return `Tag ${a.tags.map(n.tag).join(", ")} entfernen`;
     case "dokumenttyp":
       return `Dokumenttyp „${n.typ(a.dokumenttyp)}“ setzen`;
+    case "korrespondent":
+      return `Korrespondent „${n.korrespondent(a.korrespondent)}“ setzen`;
     case "feld":
       return `Feld „${n.feld(a.feldId)}“ setzen`;
     case "einordnen":
@@ -71,14 +79,15 @@ function aktion(a: Aktion, n: Namen): string {
 export async function workflowsBeschreiben(db: Datenbank): Promise<{ texte: string[]; ordnenEin: boolean }> {
   const aktive = (await workflowsListen(db)).filter((w: Workflow) => w.aktiv);
   if (!aktive.length) return { texte: [], ordnenEin: false };
-  const [t, ty, f] = await Promise.all([
+  const [t, ty, k, f] = await Promise.all([
     db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
     db.select({ id: dokumenttypen.id, name: dokumenttypen.name }).from(dokumenttypen),
+    db.select({ id: korrespondenten.id, name: korrespondenten.name }).from(korrespondenten),
     db.select({ id: felder.id, name: felder.name }).from(felder),
   ]);
   const name = (liste: { id: string; name: string }[]) => (id: string) =>
     liste.find((x) => x.id === id)?.name ?? "(gelöscht)";
-  const n: Namen = { tag: name(t), typ: name(ty), feld: name(f) };
+  const n: Namen = { tag: name(t), typ: name(ty), korrespondent: name(k), feld: name(f) };
   return {
     texte: aktive.map(
       (w) =>

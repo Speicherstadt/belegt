@@ -24,6 +24,7 @@ export function Rules() {
   const [ungueltig, setUngueltig] = useState<Feld | null>(null);
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const feldZu = (id: string) => felder.data?.find((f) => f.id === id);
   const neu = () => queryClient.invalidateQueries({ queryKey: ["regeln"] });
@@ -61,6 +62,7 @@ export function Rules() {
         ordnung: {
           tags: f.getAll("tags").map(String),
           dokumenttyp: text("dokumenttyp") ?? null,
+          korrespondent: text("korrespondent") ?? null,
           felder: werte,
         },
       },
@@ -147,6 +149,19 @@ export function Rules() {
               ))}
             </select>
           </label>
+          {!!korrespondenten.data?.length && (
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_party()}
+              <select name="korrespondent" className={feldKlasseRegel}>
+                <option value="">{m.order_party_none()}</option>
+                {korrespondenten.data.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {!!typen.data?.length && (
             <label className="flex flex-col gap-1.5 font-medium text-sm">
               {m.rules_doctype()}

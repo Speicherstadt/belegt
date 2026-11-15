@@ -3,12 +3,22 @@ import { z } from "zod";
 import type { Feldtyp } from "../../shared/ordnung.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { dokumentDokumenttypen, dokumente, dokumentTags, dokumenttypen, feldwerte, tags } from "../db/schema.ts";
+import {
+  dokumentDokumenttypen,
+  dokumente,
+  dokumentKorrespondenten,
+  dokumentTags,
+  dokumenttypen,
+  feldwerte,
+  korrespondenten,
+  tags,
+} from "../db/schema.ts";
 import { aktuelle, EinordnungEingabe, einordnenIn } from "../einordnung/einordnung.ts";
+import { korrespondentSetzen } from "./korrespondent-setzen.ts";
 import { type Feld, felderListen, feldwertAus, feldwertSpalten, konflikt } from "./ordnung.ts";
 
 /*
- * Tags, Dokumenttyp und Feldwerte an Dokumenten, einzeln und als Sammelbearbeitung. Alles in einer Transaktion mit
+ * Tags, Dokumenttyp, Korrespondent und Feldwerte an Dokumenten, einzeln und als Sammelbearbeitung. Alles in einer Transaktion mit
  * Akteur; jede Zeile steht im Audit-Log. Die Sammelbearbeitung kann auch einordnen, mit denselben Regeln wie die
  * Einordnung eines einzelnen Dokuments (Trigger in Postgres: nicht nach der Löschung).
  */
@@ -28,6 +38,8 @@ export const Aenderung = z
     tagsWeg: z.array(Id).max(50).default([]),
     /** undefined lässt den Typ, null entfernt ihn */
     dokumenttyp: Id.nullable().optional(),
+    /** Korrespondent aus der Liste; undefined lässt ihn, null entfernt ihn */
+    korrespondent: Id.nullable().optional(),
     /** wert null entfernt den Wert */
     felder: z
       .array(z.object({ feldId: Id, wert: z.unknown() }))
@@ -39,6 +51,7 @@ export const Aenderung = z
     (a) =>
       a.tagsHinzu.length + a.tagsWeg.length + a.felder.length > 0 ||
       a.dokumenttyp !== undefined ||
+      a.korrespondent !== undefined ||
       a.einordnung !== undefined,
     { message: "Keine Änderung" },
   );
@@ -49,12 +62,14 @@ export const Sammlung = z.intersection(z.object({ ids: z.array(Id).min(1).max(50
 export interface Ordnung {
   tags: { id: string; name: string; farbe: string }[];
   dokumenttyp: { id: string; name: string; vorgabeArt: string | null } | null;
+  /** Korrespondent aus der Liste, mit seinem heutigen Namen */
+  korrespondent: { id: string; name: string } | null;
   felder: { feldId: string; name: string; typ: Feldtyp; wert: string | number | boolean }[];
 }
 
-/** Tags, Dokumenttyp und Feldwerte eines Dokuments */
+/** Tags, Dokumenttyp, Korrespondent und Feldwerte eines Dokuments */
 export async function ordnungZu(db: Datenbank, dokumentId: string): Promise<Ordnung> {
-  const [t, typ, werte, alleFelder] = await Promise.all([
+  const [t, typ, korr, werte, alleFelder] = await Promise.all([
     db
       .select({ id: tags.id, name: tags.name, farbe: tags.farbe })
       .from(dokumentTags)
@@ -66,6 +81,11 @@ export async function ordnungZu(db: Datenbank, dokumentId: string): Promise<Ordn
       .from(dokumentDokumenttypen)
       .innerJoin(dokumenttypen, eq(dokumenttypen.id, dokumentDokumenttypen.dokumenttypId))
       .where(eq(dokumentDokumenttypen.dokumentId, dokumentId)),
+    db
+      .select({ id: korrespondenten.id, name: korrespondenten.name })
+      .from(dokumentKorrespondenten)
+      .innerJoin(korrespondenten, eq(korrespondenten.id, dokumentKorrespondenten.korrespondentId))
+      .where(eq(dokumentKorrespondenten.dokumentId, dokumentId)),
     db.select().from(feldwerte).where(eq(feldwerte.dokumentId, dokumentId)),
     felderListen(db),
   ]);
@@ -73,6 +93,7 @@ export async function ordnungZu(db: Datenbank, dokumentId: string): Promise<Ordn
   return {
     tags: t,
     dokumenttyp: typ[0] ?? null,
+    korrespondent: korr[0] ?? null,
     felder: alleFelder.flatMap((f) => {
       const w = wertJeFeld.get(f.id);
       const wert = w ? feldwertAus(w) : null;
@@ -94,6 +115,13 @@ async function vorbereiten(tx: Tx, a: Aenderung) {
       .from(dokumenttypen)
       .where(eq(dokumenttypen.id, a.dokumenttyp));
     if (!typ) throw konflikt("Unbekannter Dokumenttyp");
+  }
+  if (a.korrespondent) {
+    const [k] = await tx
+      .select({ id: korrespondenten.id })
+      .from(korrespondenten)
+      .where(eq(korrespondenten.id, a.korrespondent));
+    if (!k) throw konflikt("Unbekannter Korrespondent");
   }
   const jeId = new Map<string, Feld>((await felderListen(tx)).map((f) => [f.id, f]));
   return a.felder.map(({ feldId, wert }) => {
@@ -153,6 +181,7 @@ async function anwenden(
         // Gleicher Typ: keine Änderung, kein Eintrag im Audit-Log
         setWhere: sql`${dokumentDokumenttypen.dokumenttypId} is distinct from excluded.dokumenttyp_id`,
       });
+  if (a.korrespondent !== undefined) await korrespondentSetzen(tx, id, a.korrespondent);
   for (const { feldId, spalten } of werte) {
     const wo = and(eq(feldwerte.dokumentId, id), eq(feldwerte.feldId, feldId));
     if (!spalten) await tx.delete(feldwerte).where(wo);

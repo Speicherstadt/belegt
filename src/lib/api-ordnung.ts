@@ -1,8 +1,16 @@
+import type { Algorithmus } from "../../shared/abgleich.ts";
 import type { Farbe, Feldtyp, Feldwert } from "../../shared/ordnung.ts";
 import { ApiFehler, aufruf, json } from "./api-aufruf.ts";
 import type { Art } from "./api-dokumente.ts";
 
-/* Tags, Dokumenttypen, eigene Felder und die Sammelbearbeitung (docs/api.md) */
+/* Tags, Dokumenttypen, Korrespondenten, eigene Felder und die Sammelbearbeitung (docs/api.md) */
+
+/** Zuordnungsregel an Tag, Dokumenttyp oder Korrespondent (shared/abgleich.ts) */
+export interface Abgleich {
+  abgleich: Algorithmus;
+  abgleichText: string;
+  grossKleinEgal: boolean;
+}
 
 export interface TagKurz {
   id: string;
@@ -10,14 +18,20 @@ export interface TagKurz {
   farbe: Farbe;
 }
 
-export interface Tag extends TagKurz {
+export interface Tag extends TagKurz, Abgleich {
   anzahl: number;
 }
 
-export interface Dokumenttyp {
+export interface Dokumenttyp extends Abgleich {
   id: string;
   name: string;
   vorgabeArt: Art | null;
+  anzahl: number;
+}
+
+export interface Korrespondent extends Abgleich {
+  id: string;
+  name: string;
   anzahl: number;
 }
 
@@ -32,6 +46,7 @@ export interface Feld {
 export interface Ordnung {
   tags: TagKurz[];
   dokumenttyp: { id: string; name: string; vorgabeArt: Art | null } | null;
+  korrespondent: { id: string; name: string } | null;
   felder: { feldId: string; name: string; typ: Feldtyp; wert: Feldwert }[];
 }
 
@@ -40,6 +55,7 @@ export interface OrdnungAenderung {
   tagsHinzu?: string[];
   tagsWeg?: string[];
   dokumenttyp?: string | null;
+  korrespondent?: string | null;
   felder?: { feldId: string; wert: Feldwert | null }[];
 }
 
@@ -61,13 +77,16 @@ export interface ListenFilter {
   /** „alle“: jedes gewählte Tag; „einer“: mindestens eines */
   tagModus: "alle" | "einer";
   dokumenttyp: string;
+  /** ID eines Korrespondenten, „ohne“ oder leer */
+  korrespondent: string;
   feld: { feldId: string; art: "gesetzt" | "enthaelt" | "bereich"; text: string; von: string; bis: string } | null;
 }
 
-/** Vorschlag für Tags, Dokumenttyp und Feldwerte aus einer Regel oder vom Sprachmodell, mit Namen */
+/** Vorschlag für Tags, Dokumenttyp, Korrespondent und Feldwerte aus einer Regel oder vom Sprachmodell, mit Namen */
 export interface OrdnungsVorschlag {
   tags: TagKurz[];
   dokumenttyp: { id: string; name: string } | null;
+  korrespondent?: { id: string; name: string } | null;
   felder: { feldId: string; name: string; typ: Feldtyp; wert: Feldwert }[];
 }
 
@@ -86,16 +105,25 @@ export const ordnungApi = {
     }
   },
   tags: () => aufruf<Tag[]>("/api/tags"),
-  tagAnlegen: (t: { name: string; farbe: Farbe }) => aufruf<Tag>("/api/tags", json(t)),
-  tagAendern: (id: string, t: { name?: string; farbe?: Farbe }) =>
+  tagAnlegen: (t: { name: string; farbe: Farbe } & Partial<Abgleich>) => aufruf<Tag>("/api/tags", json(t)),
+  tagAendern: (id: string, t: { name?: string; farbe?: Farbe } & Partial<Abgleich>) =>
     aufruf<Tag>(`/api/tags/${id}`, { ...json(t), method: "PATCH" }),
   tagLoeschen: (id: string) => aufruf<unknown>(`/api/tags/${id}`, { method: "DELETE" }),
   dokumenttypen: () => aufruf<Dokumenttyp[]>("/api/dokumenttypen"),
-  dokumenttypAnlegen: (t: { name: string; vorgabeArt: Art | null }) =>
+  dokumenttypAnlegen: (t: { name: string; vorgabeArt: Art | null } & Partial<Abgleich>) =>
     aufruf<Dokumenttyp>("/api/dokumenttypen", json(t)),
-  dokumenttypAendern: (id: string, t: { name?: string; vorgabeArt?: Art | null }) =>
+  dokumenttypAendern: (id: string, t: { name?: string; vorgabeArt?: Art | null } & Partial<Abgleich>) =>
     aufruf<Dokumenttyp>(`/api/dokumenttypen/${id}`, { ...json(t), method: "PATCH" }),
   dokumenttypLoeschen: (id: string) => aufruf<unknown>(`/api/dokumenttypen/${id}`, { method: "DELETE" }),
+  korrespondenten: () => aufruf<Korrespondent[]>("/api/korrespondenten"),
+  korrespondentAnlegen: (k: { name: string } & Partial<Abgleich>) =>
+    aufruf<Korrespondent>("/api/korrespondenten", json(k)),
+  korrespondentAendern: (id: string, k: { name?: string } & Partial<Abgleich>) =>
+    aufruf<Korrespondent>(`/api/korrespondenten/${id}`, { ...json(k), method: "PATCH" }),
+  korrespondentLoeschen: (id: string) => aufruf<unknown>(`/api/korrespondenten/${id}`, { method: "DELETE" }),
+  /** :id geht in ziel auf */
+  zusammenfuehren: (id: string, ziel: string) =>
+    aufruf<Korrespondent>(`/api/korrespondenten/${id}/zusammenfuehren`, json({ ziel })),
   felder: () => aufruf<Feld[]>("/api/felder"),
   feldAnlegen: (f: { name: string; typ: Feldtyp; optionen: string[] }) => aufruf<Feld>("/api/felder", json(f)),
   feldAendern: (id: string, f: { name?: string; optionen?: string[] }) =>

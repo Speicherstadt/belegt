@@ -60,7 +60,7 @@ const LESEN = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|vorschaubild|ableitungen|aehnliche|notizen))?$/,
-  /^\/api\/(tags|dokumenttypen|felder)$/,
+  /^\/api\/(tags|dokumenttypen|korrespondenten|felder)$/,
 ];
 const SCHREIBEN = [
   /^\/api\/dokumente$/,

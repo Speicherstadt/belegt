@@ -2,11 +2,11 @@ import { inArray } from "drizzle-orm";
 import { z } from "zod";
 import type { Feldtyp, Feldwert } from "../../shared/ordnung.ts";
 import type { Datenbank } from "../db/client.ts";
-import { dokumenttypen, tags } from "../db/schema.ts";
+import { dokumenttypen, korrespondenten, tags } from "../db/schema.ts";
 import { felderListen, feldwertAus, feldwertSpalten, konflikt } from "./ordnung.ts";
 
 /*
- * Vorschläge für Tags, Dokumenttyp und Feldwerte, wie sie eine Regel speichert. Ein Vorschlag ist nur ein Vorschlag:
+ * Vorschläge für Tags, Dokumenttyp, Korrespondent und Feldwerte, wie sie eine Regel speichert. Ein Vorschlag ist nur ein Vorschlag:
  * Gesetzt wird er erst, wenn ein Mensch ihn übernimmt. Was seit dem Anlegen der Regel gelöscht wurde, fällt weg.
  */
 
@@ -15,6 +15,7 @@ const Id = z.uuid();
 export const OrdnungsVorschlag = z.object({
   tags: z.array(Id).max(20).default([]),
   dokumenttyp: Id.nullable().default(null),
+  korrespondent: Id.nullable().default(null),
   felder: z
     .array(z.object({ feldId: Id, wert: z.unknown() }))
     .max(20)
@@ -25,6 +26,7 @@ export type OrdnungsVorschlag = z.infer<typeof OrdnungsVorschlag>;
 export interface AufgeloesterVorschlag {
   tags: { id: string; name: string; farbe: string }[];
   dokumenttyp: { id: string; name: string } | null;
+  korrespondent: { id: string; name: string } | null;
   felder: { feldId: string; name: string; typ: Feldtyp; wert: Feldwert }[];
 }
 
@@ -41,10 +43,18 @@ export async function vorschlagPruefen(db: Datenbank, o: OrdnungsVorschlag): Pro
       .where(inArray(dokumenttypen.id, [o.dokumenttyp]));
     if (!da.length) throw konflikt("Unbekannter Dokumenttyp");
   }
+  if (o.korrespondent) {
+    const da = await db
+      .select({ id: korrespondenten.id })
+      .from(korrespondenten)
+      .where(inArray(korrespondenten.id, [o.korrespondent]));
+    if (!da.length) throw konflikt("Unbekannter Korrespondent");
+  }
   const jeId = new Map((await felderListen(db)).map((f) => [f.id, f]));
   return {
     tags: [...new Set(o.tags)],
     dokumenttyp: o.dokumenttyp,
+    korrespondent: o.korrespondent,
     felder: o.felder.map(({ feldId, wert }) => {
       const feld = jeId.get(feldId);
       if (!feld) throw konflikt("Unbekanntes Feld");
@@ -61,8 +71,8 @@ export async function vorschlagPruefen(db: Datenbank, o: OrdnungsVorschlag): Pro
 export async function vorschlagAufloesen(db: Datenbank, roh: unknown): Promise<AufgeloesterVorschlag | null> {
   const o = OrdnungsVorschlag.safeParse(roh ?? {});
   if (!o.success) return null;
-  const { tags: tagIds, dokumenttyp, felder } = o.data;
-  const [t, typ, alleFelder] = await Promise.all([
+  const { tags: tagIds, dokumenttyp, korrespondent, felder } = o.data;
+  const [t, typ, korr, alleFelder] = await Promise.all([
     tagIds.length
       ? db.select({ id: tags.id, name: tags.name, farbe: tags.farbe }).from(tags).where(inArray(tags.id, tagIds))
       : [],
@@ -72,12 +82,19 @@ export async function vorschlagAufloesen(db: Datenbank, roh: unknown): Promise<A
           .from(dokumenttypen)
           .where(inArray(dokumenttypen.id, [dokumenttyp]))
       : [],
+    korrespondent
+      ? db
+          .select({ id: korrespondenten.id, name: korrespondenten.name })
+          .from(korrespondenten)
+          .where(inArray(korrespondenten.id, [korrespondent]))
+      : [],
     felder.length ? felderListen(db) : [],
   ]);
   const jeId = new Map(alleFelder.map((f) => [f.id, f]));
   const aufgeloest: AufgeloesterVorschlag = {
     tags: t,
     dokumenttyp: typ[0] ?? null,
+    korrespondent: korr[0] ?? null,
     felder: felder.flatMap(({ feldId, wert }) => {
       const feld = jeId.get(feldId);
       if (!feld) return [];
@@ -89,5 +106,7 @@ export async function vorschlagAufloesen(db: Datenbank, roh: unknown): Promise<A
       }
     }),
   };
-  return aufgeloest.tags.length || aufgeloest.dokumenttyp || aufgeloest.felder.length ? aufgeloest : null;
+  return aufgeloest.tags.length || aufgeloest.dokumenttyp || aufgeloest.korrespondent || aufgeloest.felder.length
+    ? aufgeloest
+    : null;
 }

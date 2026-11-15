@@ -24,6 +24,8 @@ export interface WorkflowBedingungen extends Bedingung {
   tags?: string[];
   /** ID eines Dokumenttyps oder „ohne“ */
   dokumenttyp?: string;
+  /** ID eines Korrespondenten oder „ohne“ */
+  korrespondent?: string;
   /** Name des Postfachs, aus dem eine Mail (oder die Mail eines Anhangs) kam */
   postfach?: string;
   /** Unterordner im Eingangsordner, auch tiefer liegende („Steuer“ trifft „Steuer/2026“) */
@@ -40,6 +42,8 @@ export interface DokumentMerkmale {
   text: string | null;
   tags: string[];
   dokumenttyp: string | null;
+  /** ID des Korrespondenten aus der Liste */
+  korrespondent?: string | null;
   /** Akteur der Aufnahme im Audit-Log, etwa system:imap:Büro oder system:ordner:Steuer/2026 */
   herkunft: string | null;
 }
@@ -69,6 +73,9 @@ export function bedingungenErfuellt(b: WorkflowBedingungen, m: DokumentMerkmale)
   if (b.mimeTyp && !mimePasst(b.mimeTyp, m.mimeType)) return false;
   if (b.tags?.length && !b.tags.every((t) => m.tags.includes(t))) return false;
   if (b.dokumenttyp === "ohne" ? m.dokumenttyp !== null : b.dokumenttyp && m.dokumenttyp !== b.dokumenttyp)
+    return false;
+  const korrespondent = m.korrespondent ?? null;
+  if (b.korrespondent === "ohne" ? korrespondent !== null : b.korrespondent && korrespondent !== b.korrespondent)
     return false;
   if (b.postfach && klein(postfachAus(m.herkunft)) !== klein(b.postfach.trim())) return false;
   if (b.unterordner) {

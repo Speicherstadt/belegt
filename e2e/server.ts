@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import postgres from "postgres";
+import { zuordnungVorschlaegeErzeugen } from "../server/abgleich/vorschlaege.ts";
 import { ansichtenErzeugen } from "../server/ansicht/ansicht.ts";
 import { createApp } from "../server/app.ts";
 import { archivfassungenErzeugen } from "../server/archivfassung/archivfassung.ts";
@@ -88,6 +89,8 @@ function immerWieder(lauf: () => Promise<unknown>) {
 immerWieder(() => inhalteErzeugen({ db, speicher }));
 // Workflows
 immerWieder(() => workflowsAusfuehren(db));
+// Zuordnungsregeln
+immerWieder(() => zuordnungVorschlaegeErzeugen(db));
 // Vorschaubilder
 immerWieder(() => vorschaubilderErzeugen({ db, speicher }));
 // Durchsuchbare PDFs von Scans (mit Tesseract), einer je Lauf

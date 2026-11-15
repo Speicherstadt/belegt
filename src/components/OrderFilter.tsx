@@ -12,13 +12,24 @@ const ART_LABEL = {
   bereich: () => m.filter_field_range(),
 };
 
-/** Filter der Archivliste nach Tags (alle gewählten oder mindestens einer), Dokumenttyp und einem eigenen Feld */
+/**
+ * Filter der Archivliste nach Tags (alle gewählten oder mindestens einer), Korrespondent, Dokumenttyp und einem
+ * eigenen Feld
+ */
 export function OrderFilter({ filter, onChange }: { filter: ListenFilter; onChange: (f: ListenFilter) => void }) {
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
+  const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const feld = filter.feld && felder.data?.find((f) => f.id === filter.feld!.feldId);
-  if (!tags.data?.length && !typen.data?.length && !felder.data?.length) return null;
+  if (
+    !tags.data?.length &&
+    !typen.data?.length &&
+    !felder.data?.length &&
+    !korrespondenten.data?.length &&
+    !filter.korrespondent
+  )
+    return null;
 
   const tagUmschalten = (id: string) =>
     onChange({
@@ -68,6 +79,24 @@ export function OrderFilter({ filter, onChange }: { filter: ListenFilter; onChan
         </div>
       )}
       <div className="flex flex-wrap items-end gap-3 text-sm">
+        {(!!korrespondenten.data?.length || !!filter.korrespondent) && (
+          <label className="flex min-w-0 flex-col gap-1.5 font-medium">
+            {m.order_party()}
+            <select
+              value={filter.korrespondent}
+              onChange={(e) => onChange({ ...filter, korrespondent: e.target.value })}
+              className={feldKlasse}
+            >
+              <option value="">{m.filter_party_all()}</option>
+              <option value="ohne">{m.order_party_none()}</option>
+              {korrespondenten.data?.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {!!typen.data?.length && (
           <label className="flex flex-col gap-1.5 font-medium">
             {m.order_doctype()}

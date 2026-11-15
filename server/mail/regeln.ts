@@ -34,11 +34,12 @@ export const RegelEingabe = z
     ordnung: OrdnungsVorschlag.optional(),
   })
   .refine((r) => r.dann !== null || !ordnungLeer(r.ordnung), {
-    message: "Eine Regel ohne Art schlägt mindestens einen Tag, einen Dokumenttyp oder einen Feldwert vor",
+    message:
+      "Eine Regel ohne Art schlägt mindestens einen Tag, einen Dokumenttyp, einen Korrespondenten oder einen Feldwert vor",
   });
 
 const ordnungLeer = (o: OrdnungsVorschlag | null | undefined) =>
-  !o || (!o.tags.length && !o.dokumenttyp && !o.felder.length);
+  !o || (!o.tags.length && !o.dokumenttyp && !o.korrespondent && !o.felder.length);
 
 export async function listen(db: Datenbank) {
   return db.select().from(regeln).orderBy(asc(regeln.reihenfolge), asc(regeln.erstelltAm));

@@ -85,4 +85,9 @@ export async function feldZeilen(db: Datenbank, ids: string[]): Promise<(string 
 }
 
 /** Tabellen der Ordnung, deren Einträge im Protokoll über dokument_id zu einem Dokument gehören */
-export const ORDNUNG_IM_PROTOKOLL = ["dokument_tags", "dokument_dokumenttypen", "feldwerte"] as const;
+export const ORDNUNG_IM_PROTOKOLL = [
+  "dokument_tags",
+  "dokument_dokumenttypen",
+  "dokument_korrespondenten",
+  "feldwerte",
+] as const;
