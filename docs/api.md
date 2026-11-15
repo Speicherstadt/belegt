@@ -38,7 +38,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/links/:link/widerrufen` | widerruft einen geteilten Link, nur der Inhaber |
 | `GET /api/geteilt/:token` | öffentlich, nur mit dem geteilten Link: das Original als Download, jeder Abruf mit Zeitpunkt festgehalten; `404` nach Ablauf oder Widerruf, `410` nach der Löschung |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
-| `POST /api/dokumente?trennen=1` | teilt ein PDF an Trennblättern ([`eingang.md`](eingang.md#trennblätter)) und antwortet mit `{dokumente: [...]}`, ohne Trennblatt mit dem einen Dokument darin |
+| `POST /api/dokumente?trennen=1` | teilt ein PDF an Trennblättern ([`eingang.md`](eingang.md#trennblätter)) und antwortet mit `{dokumente: [...]}`, ohne Trennblatt mit dem einen Dokument darin; `503` mit `Retry-After`, wenn schon zu viele Stapel geteilt werden |
 | `GET /api/trennblatt.pdf` | ein Trennblatt zum Ausdrucken |
 | `GET /api/dokumente?suche=…&seite=…&proSeite=…` | Dokumente, neueste zuerst, in Seiten: `seite` ab 1, `proSeite` 1 bis 200 (Vorgabe 50, `limit` geht auch); die Zahl aller Treffer steht in der Kopfzeile `X-Gesamt`; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail, über Teile von Dateiname und Titel, über die Archivnummer (`ASN 123` oder `123`) und, außer für Prüfer, über Notizen |
 | `GET /api/dokumente/:id` | ein Dokument; jedes Dokument hat das Feld `asn`, seine Archivnummer, dazu `tags`, `dokumenttyp` und `felder` (`feldId`, `name`, `typ`, `wert`) |

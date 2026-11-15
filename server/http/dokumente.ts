@@ -26,7 +26,7 @@ import { filterAus } from "../ordnung/filter.ts";
 import { felderListen } from "../ordnung/ordnung.ts";
 import { ordnungZu } from "../ordnung/zuordnung.ts";
 import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
-import { dateiTeilen } from "../trennen/trennen.ts";
+import { begrenzt, dateiTeilen } from "../trennen/trennen.ts";
 import { vorschaubildZu } from "../vorschaubild/vorschaubild.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
@@ -39,6 +39,9 @@ const Seite = z
   .pipe(z.number().int().min(1));
 
 export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
+  // Teilen kostet CPU: höchstens zwei Stapel zugleich, vier warten. Ungeteilt aufnehmen wäre keine Ausweichlösung,
+  // denn ein aufgenommener Stapel bleibt als Original; darüber hinaus antwortet der Upload mit 503
+  const teilenTor = begrenzt(2, 4);
   app.post(
     "/api/dokumente",
     bodyLimit({ maxSize: MAX_UPLOAD, onError: (c) => c.json({ fehler: "Datei zu groß" }, 413) }),
@@ -53,10 +56,17 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       // Ein Stapel mit Trennblättern: jedes Teil ein eigenes Original. Geteilt wird in einem eigenen Prozess; scheitert
       // es (kaputtes PDF, Zeitlimit), kommt die Datei unverändert ins Archiv, wie ohne Trennblatt
       const name = datei.name || "scan.pdf";
-      const teile = await dateiTeilen(bytes, name, {
-        code: umgebung.trennblattCode ?? TRENNBLATT_CODE,
-        zeitlimit: 2 * 60_000,
-      }).catch(() => null);
+      const geteilt = await teilenTor(async () => ({
+        teile: await dateiTeilen(bytes, name, {
+          code: umgebung.trennblattCode ?? TRENNBLATT_CODE,
+          zeitlimit: 2 * 60_000,
+        }).catch(() => null),
+      }));
+      if (!geteilt)
+        return c.json({ fehler: "Belegt teilt gerade andere Stapel; bitte gleich noch einmal" }, 503, {
+          "Retry-After": "60",
+        });
+      const { teile } = geteilt;
       const dokumente = [];
       for (const teil of teile ?? [{ bytes, dateiname: datei.name || null }])
         dokumente.push(await aufnehmen(umgebung, { ...eingang, ...teil }));

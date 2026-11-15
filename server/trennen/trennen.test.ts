@@ -8,7 +8,17 @@ import { ordnerEinlesen, type Zustand } from "../ordner/ordner.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { TRENNBLATT_CODE, trennblattPdf } from "./trennblatt.ts";
-import { dateiTeilen, stapelTeilen, teilbereiche, teilenImKind, teilName, trennenVerfuegbar } from "./trennen.ts";
+import {
+  begrenzt,
+  dateiTeilen,
+  MAX_SEITEN,
+  stapelTeilen,
+  teilbereiche,
+  teilenImKind,
+  teilName,
+  trennenVerfuegbar,
+  trennerSuchen,
+} from "./trennen.ts";
 
 describe("teilbereiche", () => {
   it("teilt an den Trennblättern und lässt sie weg", () => {
@@ -32,6 +42,35 @@ describe("teilName", () => {
     expect(teilName("scan.pdf", 1)).toBe("scan-1.pdf");
     expect(teilName("Stapel.PDF", 2)).toBe("Stapel-2.pdf");
     expect(teilName("ohne-endung", 3)).toBe("ohne-endung-3.pdf");
+  });
+});
+
+describe("begrenzt", () => {
+  it("lässt höchstens max Arbeiten zugleich laufen, weitere warten, über die Warteschlange hinaus null", async () => {
+    const tor = begrenzt(1, 1);
+    let laufend = 0;
+    let hoechstens = 0;
+    const freigeben: (() => void)[] = [];
+    const arbeit = () =>
+      new Promise<string>((ok) => {
+        laufend++;
+        hoechstens = Math.max(hoechstens, laufend);
+        freigeben.push(() => {
+          laufend--;
+          ok("fertig");
+        });
+      });
+    const a = tor(arbeit);
+    const b = tor(arbeit);
+    // Eine läuft, eine wartet: die dritte bekommt keinen Platz
+    expect(await tor(arbeit)).toBeNull();
+    await Promise.resolve();
+    freigeben.shift()!();
+    expect(await a).toBe("fertig");
+    await new Promise((r) => setTimeout(r, 0));
+    freigeben.shift()!();
+    expect(await b).toBe("fertig");
+    expect(hoechstens).toBe(1);
   });
 });
 
@@ -101,6 +140,19 @@ describe.skipIf(!trennenVerfuegbar())("Trennblätter (pdftoppm)", { timeout: 60_
   it("liest einen eigenen Code aus TRENNBLATT_CODE", async () => {
     const teile = await stapelTeilen(await stapel(await trennblattPdf("FIRMA-TRENNER")), "FIRMA-TRENNER");
     expect(teile).toHaveLength(2);
+  });
+
+  it("teilt einen Stapel mit mehr als MAX_SEITEN Seiten nicht", async () => {
+    const doc = await PDFDocument.load(mitTrenner);
+    const [blatt] = await doc.copyPages(await PDFDocument.load(await stapel()), [0]);
+    for (let i = 0; i < MAX_SEITEN; i++) doc.addPage(i === 0 ? blatt : [100, 100]);
+    expect(await stapelTeilen(await doc.save(), TRENNBLATT_CODE)).toBeNull();
+  });
+
+  it("rendert riesige Seiten verkleinert, statt minutenlang zu rechnen", async () => {
+    const doc = await PDFDocument.create();
+    for (let i = 0; i < 10; i++) doc.addPage([3000, 3000]).drawCircle({ x: 1500, y: 1500, size: 1400 });
+    await expect(trennerSuchen(await doc.save(), TRENNBLATT_CODE, 10_000)).resolves.toEqual([]);
   });
 
   it("bricht ein kaputtes PDF im Kind ab, statt den Worker aufzuhalten", async () => {

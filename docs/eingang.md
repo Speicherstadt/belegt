@@ -63,9 +63,11 @@ liegt unter Quellen → Scannen zum Ausdrucken bereit (`/api/trennblatt.pdf`) un
 mit dem Inhalt `BELEGT-TRENNER` (anders mit `TRENNBLATT_CODE`). Ein PDF aus dem Eingangsordner teilt Belegt an jedem
 Trennblatt; aus `stapel.pdf` werden `stapel-1.pdf`, `stapel-2.pdf` … Jedes Teil ist ein eigenes Dokument mit eigener
 Archivnummer; die Trennblätter und der Stapel selbst kommen nicht ins Archiv, der Stapel ist nur das Transportmittel.
-Beim Hochladen über die Schnittstelle teilt `POST /api/dokumente?trennen=1` genauso ([API](api.md)).
+Beim Hochladen über die Schnittstelle teilt `POST /api/dokumente?trennen=1` genauso ([API](api.md)). Dabei teilt der
+Server höchstens zwei Stapel zugleich, vier weitere warten; darüber hinaus antwortet er mit 503 und `Retry-After`, statt
+den Stapel ungeteilt aufzunehmen.
 
-Ein PDF ohne Trennblatt bleibt, wie es ist. Lässt sich ein Stapel nicht teilen (kaputtes PDF, länger als das Zeitlimit),
+Ein PDF ohne Trennblatt oder mit mehr als 200 Seiten bleibt, wie es ist. Lässt sich ein Stapel nicht teilen (kaputtes PDF, länger als das Zeitlimit),
 nimmt Belegt ihn unverändert auf. Ohne `pdftoppm` (Poppler, im Image enthalten) teilt Belegt nicht.
 
 ## Mails

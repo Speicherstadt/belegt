@@ -15,8 +15,13 @@ import { codesLesen } from "./barcode.ts";
  * Teil wird als eigenes Original aufgenommen, die Trennblätter fallen weg.
  */
 
-/** Auflösung zum Suchen der Codes; ein gedrucktes Trennblatt liest sich damit sicher, und es geht schnell */
-const DPI = "150";
+/**
+ * Größe der Seitenbilder zum Suchen der Codes: die längste Seite höchstens 1800 Pixel, etwa A4 mit 150 dpi. Ein
+ * gedrucktes Trennblatt liest sich damit sicher, und eine riesige Seite (wenige KB im PDF) kostet nicht Minuten.
+ */
+const PIXEL = "1800";
+/** Ein Stapel mit mehr Seiten wird nicht geteilt, sondern unverändert aufgenommen */
+export const MAX_SEITEN = 200;
 
 let verfuegbar: boolean | undefined;
 /** Ob pdftoppm installiert ist; ohne wird nicht geteilt */
@@ -53,7 +58,16 @@ export async function trennerSuchen(
     await writeFile(join(ordner, "stapel.pdf"), pdf);
     await ausfuehren(
       "pdftoppm",
-      ["-r", DPI, "-gray", "-png", join(ordner, "stapel.pdf"), join(ordner, "seite")],
+      [
+        "-scale-to",
+        PIXEL,
+        "-l",
+        String(MAX_SEITEN),
+        "-gray",
+        "-png",
+        join(ordner, "stapel.pdf"),
+        join(ordner, "seite"),
+      ],
       undefined,
       zeitlimit,
     );
@@ -82,7 +96,7 @@ export async function pdfTeilen(pdf: Uint8Array, teile: number[][]): Promise<Uin
   return ergebnis;
 }
 
-/** Teilt einen Stapel; null, wenn er kein Trennblatt hat */
+/** Teilt einen Stapel; null, wenn er kein Trennblatt oder mehr als MAX_SEITEN Seiten hat */
 export async function stapelTeilen(
   pdf: Uint8Array,
   code: string,
@@ -90,6 +104,7 @@ export async function stapelTeilen(
   basis?: string,
 ): Promise<Uint8Array[] | null> {
   const seiten = (await PDFDocument.load(pdf, { updateMetadata: false })).getPageCount();
+  if (seiten > MAX_SEITEN) return null;
   const teile = teilbereiche(seiten, await trennerSuchen(pdf, code, zeitlimit, basis));
   return teile ? pdfTeilen(pdf, teile) : null;
 }
@@ -137,4 +152,27 @@ export async function dateiTeilen(
   if (dateityp(bytes) !== "application/pdf" || !trennenVerfuegbar()) return null;
   const teile = await teilenImKind(bytes, code, zeitlimit);
   return teile?.map((t, i) => ({ bytes: t, dateiname: teilName(dateiname, i + 1) })) ?? null;
+}
+
+/**
+ * Begrenzt, wie viele Arbeiten zugleich laufen: höchstens max, bis zu warten weitere warten der Reihe nach, darüber
+ * hinaus gibt es sofort null (der Aufrufer lehnt dann ab). Für das Teilen beim Upload im Server-Prozess.
+ */
+export function begrenzt(max: number, warten: number) {
+  let laufend = 0;
+  const schlange: (() => void)[] = [];
+  return async <T>(arbeit: () => Promise<T>): Promise<T | null> => {
+    if (laufend >= max) {
+      if (schlange.length >= warten) return null;
+      await new Promise<void>((weiter) => schlange.push(weiter));
+    } else laufend++;
+    try {
+      return await arbeit();
+    } finally {
+      // Der Platz geht direkt an die nächste wartende Arbeit über
+      const naechste = schlange.shift();
+      if (naechste) naechste();
+      else laufend--;
+    }
+  };
 }
