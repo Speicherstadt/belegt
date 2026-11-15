@@ -41,6 +41,11 @@ export class ApiFehler extends Error {
 }
 
 async function aufruf<T>(pfad: string, init?: RequestInit): Promise<T> {
+  return (await antwort(pfad, init)).json() as Promise<T>;
+}
+
+/** Die Antwort mit Kopfzeilen; Fehler wie bei aufruf */
+async function antwort(pfad: string, init?: RequestInit): Promise<Response> {
   const res = await fetch(pfad, { credentials: "same-origin", ...init });
   if (!res.ok) {
     const text = await res.text();
@@ -58,7 +63,7 @@ async function aufruf<T>(pfad: string, init?: RequestInit): Promise<T> {
     } catch {}
     throw new ApiFehler(res.status, meldung, ergebnis);
   }
-  return res.json() as Promise<T>;
+  return res;
 }
 
 const json = (body: unknown): RequestInit => ({
@@ -281,6 +286,9 @@ export interface ERechnung {
   waehrung: string | null;
 }
 
+/** Einträge je Seite in Archiv und Eingang */
+export const PRO_SEITE = 50;
+
 export const api = {
   inhalt: (id: string) =>
     aufruf<{ erechnung: ERechnung | null; fehler: string | null; ocr: boolean; textLaenge: number } | null>(
@@ -364,8 +372,14 @@ export const api = {
     await geteilteVerwerfen();
     return aufruf<unknown>("/api/auth/sign-out", json({}));
   },
-  dokumente: (suche: string, gruppe: Gruppe = "alle", filter = "") =>
-    aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}${filter}`),
+  /** Eine Seite der Liste (ab 1) und die Zahl aller Treffer aus X-Gesamt */
+  dokumente: async (suche: string, gruppe: Gruppe = "alle", filter = "", seite = 1, proSeite = PRO_SEITE) => {
+    const res = await antwort(
+      `/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}&seite=${seite}&proSeite=${proSeite}${filter}`,
+    );
+    const eintraege = (await res.json()) as Eintrag[];
+    return { eintraege, gesamt: Number(res.headers.get("x-gesamt") ?? eintraege.length) };
+  },
   dokument: (id: string) =>
     aufruf<Dokument & Ordnung & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
       `/api/dokumente/${id}`,

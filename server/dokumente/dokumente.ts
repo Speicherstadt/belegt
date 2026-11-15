@@ -69,31 +69,48 @@ export function archivnummerAus(suche: string | undefined): number | null {
   return treffer ? Number(treffer[1]) : null;
 }
 
+/** Suche und Filter der Liste: dieselben für die Seite und die Gesamtzahl */
+export interface ListenAbfrage {
+  suche?: string;
+  gruppe?: Gruppe;
+  heute: string;
+  zeitraum?: { von: string; bis: string };
+  /** Tags, Dokumenttyp und eigene Felder (server/ordnung/filter.ts) */
+  ordnung?: OrdnungFilter;
+}
+
 /**
- * Neueste zuerst. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus Dateiname,
- * Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch „_100%“ oder Teilwörter) und über die
- * Archivnummer („ASN 123“).
+ * FROM und WHERE der Liste. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus
+ * Dateiname, Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch
+ * „_100%“ oder Teilwörter) und über die Archivnummer („ASN 123“).
  */
+function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung }: ListenAbfrage) {
+  const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
+  return sql`
+      from dokumente d
+      join archivnummern a on a.dokument_id = d.id
+      left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
+      left join suchtexte st on st.dokument_id = d.id
+     where ${gruppenBedingung(gruppe, heute)}
+       and ${filterBedingung(ordnung)}
+       and (${zeitraum?.von ?? null}::date is null
+            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
+       and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
+            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
+            or a.nummer = ${archivnummerAus(suche)})`;
+}
+
+/** Wie viele Dokumente die Liste mit dieser Suche und diesen Filtern hat, über alle Seiten */
+export async function anzahl(db: Datenbank, abfrage: ListenAbfrage): Promise<number> {
+  const [z] = await db.execute<{ n: string }>(sql`select count(*) as n ${listenQuelle(abfrage)}`);
+  return Number(z?.n ?? 0);
+}
+
+/** Eine Seite der Liste, neueste zuerst; versatz überspringt so viele Einträge (Seiten in server/http/dokumente.ts) */
 export async function listen(
   db: Datenbank,
-  {
-    suche,
-    limit = 50,
-    gruppe = "alle",
-    heute,
-    zeitraum,
-    ordnung,
-  }: {
-    suche?: string;
-    limit?: number;
-    gruppe?: Gruppe;
-    heute: string;
-    zeitraum?: { von: string; bis: string };
-    /** Tags, Dokumenttyp und eigene Felder (server/ordnung/filter.ts) */
-    ordnung?: OrdnungFilter;
-  },
+  { limit = 50, versatz = 0, ...abfrage }: ListenAbfrage & { limit?: number; versatz?: number },
 ): Promise<Eintrag[]> {
-  const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
   const zeilen = await db.execute<{
     id: string;
     sha256: string;
@@ -116,19 +133,9 @@ export async function listen(
            (select json_build_object('id', ty.id, 'name', ty.name)
               from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
              where dd.dokument_id = d.id) as dokumenttyp
-      from dokumente d
-      join archivnummern a on a.dokument_id = d.id
-      left join lateral (select * from einordnungen x where x.dokument_id = d.id order by x.erstellt_am desc, x.id desc limit 1) e on true
-      left join suchtexte st on st.dokument_id = d.id
-     where ${gruppenBedingung(gruppe, heute)}
-       and ${filterBedingung(ordnung)}
-       and (${zeitraum?.von ?? null}::date is null
-            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
-       and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
-            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
-            or a.nummer = ${archivnummerAus(suche)})
+      ${listenQuelle(abfrage)}
      order by d.eingegangen_am desc, d.id desc
-     limit ${limit}`);
+     limit ${limit} offset ${versatz}`);
   return [...zeilen].map((z) => ({
     id: z.id,
     sha256: z.sha256,

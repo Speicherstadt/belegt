@@ -57,8 +57,9 @@ dem Namen. Die Suche findet die Namen von Tags und Dokumenttyp und die Werte der
 
 ## Mehrfachauswahl
 
-Im Eingang und im Archiv wählst du Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der
-Seite. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Dokumenttyp setzen, Feldwert setzen oder
+Eingang und Archiv zeigen 50 Dokumente je Seite, darunter „1–50 von 312“ und die Knöpfe zum Blättern. Du wählst
+Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der Seite; beim Blättern beginnt die
+Auswahl neu. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Dokumenttyp setzen, Feldwert setzen oder
 einordnen. Einordnen geht wie bei einem einzelnen Dokument: Art, Tag der Entstehung (auf Wunsch der Tag des Eingangs
 jedes Dokuments), Titel und Korrespondent. Ohne „Auch schon eingeordnete neu einordnen“ ordnet Belegt nur Dokumente im
 Eingang ein und überspringt die übrigen; mit dem Häkchen kommt bei jedem eine neue Einordnung als Version dazu.

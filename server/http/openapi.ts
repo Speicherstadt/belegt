@@ -71,14 +71,25 @@ export const openapi = {
               enum: ["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht"],
             },
           },
-          { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 200, default: 50 } },
+          { name: "seite", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
+          { name: "proSeite", in: "query", schema: { type: "integer", minimum: 1, maximum: 200, default: 50 } },
+          {
+            name: "limit",
+            in: "query",
+            schema: { type: "integer", minimum: 1, maximum: 200 },
+            description: "Anderer Name für proSeite",
+          },
           ...listenParameter,
         ],
         responses: {
           "200": {
-            description: "Liste",
+            description: "Eine Seite der Liste",
+            headers: {
+              "X-Gesamt": { description: "Zahl aller Treffer über alle Seiten", schema: { type: "integer" } },
+            },
             content: json({ type: "array", items: { $ref: "#/components/schemas/Dokument" } }),
           },
+          "400": fehler,
         },
       },
       post: {

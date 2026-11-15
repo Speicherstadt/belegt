@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { api, type Eintrag, type Gruppe, type ListenFilter } from "../lib/api.ts";
+import { api, type Eintrag, type Gruppe, type ListenFilter, PRO_SEITE } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
@@ -51,14 +51,28 @@ export function DocumentList({
   const [filter, setFilter] = useState<ListenFilter>(LEERER_FILTER);
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder, enabled: !feste });
   const parameter = feste ? "" : filterParameter(filter, felder.data ?? []);
-  const liste = useQuery({
-    queryKey: ["dokumente", suche, gruppe, parameter],
-    queryFn: () => api.dokumente(suche, gruppe, parameter),
+  // Seite ab 1; eine andere Suche, Gruppe oder ein anderer Filter beginnt wieder vorn
+  const [seiteWahl, setSeiteWahl] = useState({ seite: 1, fuer: "" });
+  const abfrage = JSON.stringify([suche, gruppe, parameter]);
+  const seite = seiteWahl.fuer === abfrage ? seiteWahl.seite : 1;
+  const abfrageDaten = useQuery({
+    queryKey: ["dokumente", suche, gruppe, parameter, seite],
+    queryFn: () => api.dokumente(suche, gruppe, parameter, seite),
+    placeholderData: keepPreviousData,
   });
+  const liste = { ...abfrageDaten, data: abfrageDaten.data?.eintraege };
+  const gesamt = abfrageDaten.data?.gesamt ?? 0;
+  const seiten = Math.max(1, Math.ceil(gesamt / PRO_SEITE));
+  const blaettern = (neu: number) => setSeiteWahl({ seite: neu, fuer: abfrage });
+  // Ist die Seite leer geworden (etwa nach dem Einordnen im Eingang), zur letzten mit Einträgen
+  const leereSeite = !abfrageDaten.isPlaceholderData && liste.data?.length === 0 && seite > 1;
+  useEffect(() => {
+    if (leereSeite) setSeiteWahl({ seite: seiten, fuer: abfrage });
+  }, [leereSeite, seiten, abfrage]);
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
   const schreiben = darfSchreiben(ich.data?.role);
-  // Gewählt ist nur, was die Liste gerade zeigt; ein anderer Filter nimmt nichts Unsichtbares mit
+  // Gewählt ist nur, was die Liste gerade zeigt; ein anderer Filter oder eine andere Seite nimmt nichts Unsichtbares mit
   const ausgewaehlt = (liste.data ?? []).filter((d) => auswahl.has(d.id)).map((d) => d.id);
   const alleGewaehlt = !!liste.data?.length && ausgewaehlt.length === liste.data.length;
   const umschalten = (id: string) => {
@@ -209,7 +223,7 @@ export function DocumentList({
           {sammelMeldung}
         </p>
       )}
-      {liste.data?.length === 0 && <EmptyState title={leer.title} text={leer.text} />}
+      {liste.data?.length === 0 && seite === 1 && <EmptyState title={leer.title} text={leer.text} />}
       {!!liste.data?.length && (
         // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
         <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
@@ -275,6 +289,38 @@ export function DocumentList({
             </tbody>
           </table>
         </section>
+      )}
+      {gesamt > 0 && (
+        <nav aria-label={m.pages_label()} className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <p className="m-0 text-muted tabular-nums" aria-live="polite">
+            {m.pages_range({
+              von: String((seite - 1) * PRO_SEITE + 1),
+              bis: String(Math.min(seite * PRO_SEITE, gesamt)),
+              gesamt: String(gesamt),
+            })}
+          </p>
+          {seiten > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => blaettern(seite - 1)}
+                disabled={seite <= 1}
+                className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle disabled:opacity-60"
+              >
+                {m.pages_previous()}
+              </button>
+              <span className="tabular-nums">{m.pages_of({ seite: String(seite), seiten: String(seiten) })}</span>
+              <button
+                type="button"
+                onClick={() => blaettern(seite + 1)}
+                disabled={seite >= seiten}
+                className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle disabled:opacity-60"
+              >
+                {m.pages_next()}
+              </button>
+            </div>
+          )}
+        </nav>
       )}
     </div>
   );

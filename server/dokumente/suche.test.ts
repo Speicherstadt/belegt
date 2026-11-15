@@ -69,3 +69,39 @@ describe.skipIf(!testDatenbankUrl)("Volltextsuche gegen Postgres", () => {
     expect(await treffer("&|!():*")).toEqual([]);
   });
 });
+
+describe.skipIf(!testDatenbankUrl)("Seiten der Liste gegen Postgres", () => {
+  let t: Awaited<ReturnType<typeof testApp>>;
+  let cookie: string;
+  const anfrage = (pfad: string) => t.anfrage(pfad, {}, cookie);
+
+  beforeAll(async () => {
+    t = await testApp();
+    cookie = (await t.registrieren("anna@example.org")).cookie;
+    for (let i = 1; i <= 5; i++) {
+      const form = new FormData();
+      form.append("datei", new File([`seite ${i}`], `seite-${i}.pdf`));
+      await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie);
+    }
+  });
+  afterAll(() => t?.aufraeumen());
+
+  it("blättert mit seite und proSeite und nennt die Gesamtzahl in X-Gesamt", async () => {
+    const seite = async (pfad: string) => {
+      const res = await anfrage(pfad);
+      const namen = ((await res.json()) as { dateiname: string }[]).map((d) => d.dateiname);
+      return { namen, gesamt: res.headers.get("x-gesamt") };
+    };
+    expect(await seite("/api/dokumente?proSeite=2")).toEqual({ namen: ["seite-5.pdf", "seite-4.pdf"], gesamt: "5" });
+    expect(await seite("/api/dokumente?proSeite=2&seite=2")).toEqual({
+      namen: ["seite-3.pdf", "seite-2.pdf"],
+      gesamt: "5",
+    });
+    expect(await seite("/api/dokumente?proSeite=2&seite=3")).toEqual({ namen: ["seite-1.pdf"], gesamt: "5" });
+    expect(await seite("/api/dokumente?proSeite=2&seite=4")).toEqual({ namen: [], gesamt: "5" });
+    // Die Gesamtzahl folgt Suche und Filter; limit bleibt ein anderer Name für proSeite
+    expect(await seite("/api/dokumente?suche=seite-3&limit=1")).toEqual({ namen: ["seite-3.pdf"], gesamt: "1" });
+    expect((await anfrage("/api/dokumente?seite=0")).status).toBe(400);
+    expect((await anfrage("/api/dokumente?seite=abc")).status).toBe(400);
+  });
+});

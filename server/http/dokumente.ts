@@ -1,6 +1,7 @@
 import { bodyLimit } from "hono/body-limit";
+import { z } from "zod";
 import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
-import { aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
+import { anzahl, aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
 import {
   aktuelle,
   EinordnungEingabe,
@@ -28,6 +29,13 @@ import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
 import { dateiTeilen } from "../trennen/trennen.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
+
+/** Nummer einer Seite der Liste, ab 1 */
+const Seite = z
+  .string()
+  .regex(/^\d{1,9}$/)
+  .transform(Number)
+  .pipe(z.number().int().min(1));
 
 export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
   app.post(
@@ -63,23 +71,33 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     }),
   );
 
+  // Seiten: seite (ab 1) und proSeite (limit ist ein anderer Name dafür); die Gesamtzahl steht in X-Gesamt, damit der
+  // Rumpf eine Liste bleibt wie vorher
   app.get("/api/dokumente", async (c) => {
-    const limit = Math.min(Math.max(Math.trunc(Number(c.req.query("limit") ?? 50)) || 50, 1), 200);
+    const proSeite = Math.min(
+      Math.max(Math.trunc(Number(c.req.query("proSeite") ?? c.req.query("limit") ?? 50)) || 50, 1),
+      200,
+    );
+    const seite = Seite.safeParse(c.req.query("seite") ?? "1");
+    if (!seite.success) return c.json({ fehler: "Ungültige Seite" }, 400);
     const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
     const parameter = c.req.queries();
     const felder = Object.keys(parameter).some((k) => k.startsWith("feld.")) ? await felderListen(umgebung.db) : [];
     const ordnung = filterAus(parameter, felder);
     if (!ordnung) return c.json({ fehler: "Ungültiger Filter" }, 400);
-    return c.json(
-      await listen(umgebung.db, {
-        suche: c.req.query("suche"),
-        limit,
-        gruppe,
-        heute: heute(),
-        zeitraum: c.get("nutzer").zeitraum,
-        ordnung,
-      }),
-    );
+    const abfrage = {
+      suche: c.req.query("suche"),
+      gruppe,
+      heute: heute(),
+      zeitraum: c.get("nutzer").zeitraum,
+      ordnung,
+    };
+    const [eintraege, gesamt] = await Promise.all([
+      listen(umgebung.db, { ...abfrage, limit: proSeite, versatz: (seite.data - 1) * proSeite }),
+      anzahl(umgebung.db, abfrage),
+    ]);
+    c.header("X-Gesamt", String(gesamt));
+    return c.json(eintraege);
   });
 
   app.get("/api/dokumente/:id", async (c) => {
