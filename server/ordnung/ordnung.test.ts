@@ -196,6 +196,22 @@ describe.skipIf(!testDatenbankUrl)("Tags, Dokumenttypen und Felder gegen Postgre
     expect((await (await als(inhaber)(`/api/dokumente/${d.id}`)).json()).tags).toEqual([]);
   });
 
+  it("zählt für einen Prüfer nur Dokumente seines Zeitraums", async () => {
+    const eng = await einladen(
+      { rolle: "pruefer", zeitraum: { von: "2001-01-01", bis: "2001-12-31" } },
+      "p2@example.org",
+    );
+    const d = await hoch("ausserhalb", "Ausserhalb.pdf");
+    const tag = await anlegen("/api/tags", { name: "Außerhalb des Zeitraums" });
+    const typ = await anlegen("/api/dokumenttypen", { name: "Typ außerhalb" });
+    expect((await ordnen(d.id, { tagsHinzu: [tag.id], dokumenttyp: typ.id })).status).toBe(200);
+    const anzahl = async (cookie: string, pfad: string, id: string) =>
+      ((await (await als(cookie)(pfad)).json()) as { id: string; anzahl: number }[]).find((x) => x.id === id)?.anzahl;
+    expect(await anzahl(inhaber, "/api/tags", tag.id)).toBe(1);
+    expect(await anzahl(eng, "/api/tags", tag.id)).toBe(0);
+    expect(await anzahl(eng, "/api/dokumenttypen", typ.id)).toBe(0);
+  });
+
   it("filtert die Liste nach Tags, Dokumenttyp und Feldern", async () => {
     const a = await hoch("f1", "filter-a.pdf");
     const b = await hoch("f2", "filter-b.pdf");

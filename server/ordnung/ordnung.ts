@@ -57,9 +57,26 @@ async function eindeutig<T>(arbeit: Promise<T>): Promise<T> {
   }
 }
 
-export async function tagsListen(db: Datenbank): Promise<(Tag & { anzahl: number })[]> {
+/**
+ * Nur Dokumente im Zeitraum eines Prüfers zählen (belegt_dokument_tag wie in der Liste). Die Spalte der äußeren Tabelle
+ * ist ausgeschrieben: Drizzle ließe den Tabellennamen weg, und "id" träfe dann die innere Tabelle
+ */
+const imZeitraum = (spalte: string, zeitraum?: { von: string; bis: string }) =>
+  zeitraum
+    ? sql` and belegt_dokument_tag(${sql.raw(spalte)}) between ${zeitraum.von}::date and ${zeitraum.bis}::date`
+    : sql``;
+
+/** Tags mit der Zahl ihrer Dokumente; mit zeitraum (Prüfer) nur der Dokumente darin */
+export async function tagsListen(
+  db: Datenbank,
+  zeitraum?: { von: string; bis: string },
+): Promise<(Tag & { anzahl: number })[]> {
   const zeilen = await db
-    .select({ tag: tags, anzahl: sql<string>`(select count(*) from dokument_tags dt where dt.tag_id = ${tags.id})` })
+    .select({
+      tag: tags,
+      anzahl: sql<string>`(select count(*) from dokument_tags dt
+                            where dt.tag_id = "tags"."id"${imZeitraum("dt.dokument_id", zeitraum)})`,
+    })
     .from(tags)
     .orderBy(asc(sql`lower(${tags.name})`));
   return zeilen.map((z) => ({ ...z.tag, anzahl: Number(z.anzahl) }));
@@ -98,11 +115,16 @@ export async function tagMitNamen(tx: Tx, name: string): Promise<Tag> {
   return t!;
 }
 
-export async function dokumenttypenListen(db: Datenbank): Promise<(Dokumenttyp & { anzahl: number })[]> {
+/** Dokumenttypen mit der Zahl ihrer Dokumente; mit zeitraum (Prüfer) nur der Dokumente darin */
+export async function dokumenttypenListen(
+  db: Datenbank,
+  zeitraum?: { von: string; bis: string },
+): Promise<(Dokumenttyp & { anzahl: number })[]> {
   const zeilen = await db
     .select({
       typ: dokumenttypen,
-      anzahl: sql<string>`(select count(*) from dokument_dokumenttypen dd where dd.dokumenttyp_id = ${dokumenttypen.id})`,
+      anzahl: sql<string>`(select count(*) from dokument_dokumenttypen dd
+                            where dd.dokumenttyp_id = "dokumenttypen"."id"${imZeitraum("dd.dokument_id", zeitraum)})`,
     })
     .from(dokumenttypen)
     .orderBy(asc(sql`lower(${dokumenttypen.name})`));

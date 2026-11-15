@@ -45,7 +45,8 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
   app: App,
   pfad: string,
   f: {
-    listen: () => Promise<T[]>;
+    /** zeitraum: der eines Prüfers, der nur Dokumente darin zählen sieht */
+    listen: (zeitraum?: { von: string; bis: string }) => Promise<T[]>;
     Eingabe: E;
     Aenderung: A;
     anlegen: (e: z.infer<E>, akteur: string) => Promise<T>;
@@ -53,7 +54,7 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
     loeschen: (id: string, akteur: string) => Promise<boolean>;
   },
 ) {
-  app.get(pfad, async (c) => c.json(await f.listen()));
+  app.get(pfad, async (c) => c.json(await f.listen(c.get("nutzer").zeitraum)));
   app.post(pfad, async (c) => {
     const e = await eingabe(c, f.Eingabe);
     if (!e) return c.json({ fehler: "Ungültige Angaben" }, 400);
@@ -81,7 +82,7 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
 
 export function ordnungRouten(app: App, { db }: AppUmgebung) {
   verwalten(app, "/api/tags", {
-    listen: () => tagsListen(db),
+    listen: (zeitraum) => tagsListen(db, zeitraum),
     Eingabe: TagEingabe,
     Aenderung: TagAenderung,
     anlegen: (e, a) => tagAnlegen(db, e, a),
@@ -89,7 +90,7 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     loeschen: (id, a) => tagLoeschen(db, id, a),
   });
   verwalten(app, "/api/dokumenttypen", {
-    listen: () => dokumenttypenListen(db),
+    listen: (zeitraum) => dokumenttypenListen(db, zeitraum),
     Eingabe: DokumenttypEingabe,
     Aenderung: DokumenttypAenderung,
     anlegen: (e, a) => dokumenttypAnlegen(db, e, a),
