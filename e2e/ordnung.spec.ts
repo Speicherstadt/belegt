@@ -5,7 +5,7 @@ const axe = (page: Page) =>
   new AxeBuilder({ page }).exclude("iframe").withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
 
 async function hochladen(page: Page, name: string) {
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
@@ -30,7 +30,7 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
     expect((await axe(page)).violations, colorScheme).toEqual([]);
   }
 
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByRole("link", { name }).click();
   const ordnung = page.locator("section", { has: page.getByRole("heading", { name: "Ordnung", exact: true }) });
   await ordnung.getByRole("combobox", { name: "Tag", exact: true }).selectOption({ label: tag });
@@ -96,7 +96,7 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   await felder.getByRole("button", { name: "Feld anlegen" }).click();
   await expect(felder.getByRole("listitem").filter({ hasText: feld })).toContainText("Betrag (EUR)");
 
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByRole("link", { name }).click();
   const ordnung = page.locator("section", { has: page.getByRole("heading", { name: "Ordnung", exact: true }) });
   const eingabe = ordnung.getByLabel(`${feld} (EUR)`);

@@ -41,7 +41,7 @@ test("Regel anlegen, Mail mit Anhang importieren, Vorschlag übernehmen", async 
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations,
   ).toEqual([]);
 
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("mail-import")
     .setInputFiles({ name: "rechnung.eml", mimeType: "message/rfc822", buffer: rechnungsmail(info.project.name) });
@@ -65,7 +65,7 @@ test("Regel anlegen, Mail mit Anhang importieren, Vorschlag übernehmen", async 
   await expect(page.getByRole("heading", { level: 1, name: "Rechnung.pdf" })).toBeVisible();
   await expect(page.getByText("Anhang der Mail")).toBeVisible();
 
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("mail-import")
     .setInputFiles({ name: "rechnung.eml", mimeType: "message/rfc822", buffer: rechnungsmail(info.project.name) });
@@ -100,7 +100,7 @@ test("Regel ohne Art: schlägt Tag und zwei Feldwerte vor, die Einordnung bleibt
     "Keine Art, nur Ordnung",
   );
 
-  await page.goto("/");
+  await page.goto("/eingang");
   const eml = [
     `From: Bahn <ticket@bahn-${projekt}.example>`,
     "To: anna@example.org",

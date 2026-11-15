@@ -19,7 +19,7 @@ setup("Belegt über die Oberfläche einrichten, das erste Konto ist der Inhaber"
   await page.getByLabel("Einrichtungscode").fill("e2e-einrichtungscode");
   await page.getByLabel("Passwort").fill(INHABER_PASSWORT);
   await page.getByRole("button", { name: "Einrichten" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
   await expect(page.getByText(INHABER_EMAIL)).toBeVisible();
   await page.context().storageState({ path: INHABER });
 });

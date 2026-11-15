@@ -4,7 +4,7 @@ import { expect, request, test } from "@playwright/test";
 test("Teilen per Link: Link anlegen, ohne Anmeldung herunterladen, Abruf sehen, widerrufen", async ({ page }, info) => {
   const name = `kaufvertrag-${info.project.name}.pdf`;
   const inhalt = Buffer.from("%PDF-1.4\n%Kaufvertrag\n");
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: inhalt });
   await page.getByRole("link", { name }).click();
 

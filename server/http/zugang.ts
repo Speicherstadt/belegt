@@ -69,8 +69,9 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       nutzer.role === "steuerberatung" &&
       c.req.method === "POST" &&
       /^\/api\/dokumente\/[^/]+\/notizen(\/[^/]+\/zurueckziehen)?$/.test(c.req.path);
-    // Eigene gespeicherte Ansichten des Archivs legt jede Rolle an: eine Einstellung, keine Änderung an Dokumenten
-    const ansicht = /^\/api\/ansichten(\/[^/]+)?$/.test(c.req.path);
+    // Eigene gespeicherte Ansichten und Kacheln der Startseite legt jede Rolle an: Einstellungen, keine Änderung an
+    // Dokumenten
+    const ansicht = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/.test(c.req.path);
     if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson && !kopie && !notiz && !ansicht)
       return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
     if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {

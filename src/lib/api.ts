@@ -7,7 +7,7 @@ import { zugangApi } from "./api-zugang.ts";
 
 /* Alle Aufrufe der Schnittstelle in einem Objekt; die Bereiche stehen in den Dateien api-*.ts */
 
-export type { GespeicherteAnsicht } from "./api-alltag.ts";
+export type { GespeicherteAnsicht, Start } from "./api-alltag.ts";
 export { ApiFehler } from "./api-aufruf.ts";
 export type {
   Befund,

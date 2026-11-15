@@ -37,7 +37,7 @@ export function SharePage() {
       {hochladen.isSuccess && (
         <p role="status" className="m-0 flex flex-wrap items-center gap-3 text-sm">
           {m.share_done({ anzahl: String(hochladen.data) })}
-          <Link to="/" className="font-medium underline underline-offset-2">
+          <Link to="/eingang" className="font-medium underline underline-offset-2">
             {m.share_to_inbox()}
           </Link>
         </p>

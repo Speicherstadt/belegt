@@ -9,6 +9,7 @@ import type { Zeitraum } from "./einladungen.ts";
 
 const ERLAUBT = [
   /^\/api\/ich$/,
+  /^\/api\/start$/,
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf|vorschaubild|ableitungen|aehnliche))?$/,
   /^\/api\/(tags|dokumenttypen|felder)$/,
@@ -17,8 +18,11 @@ const ERLAUBT = [
   /^\/api\/zeitstempel(\/[^/]+\/token)?$/,
 ];
 
-/** Seine eigenen gespeicherten Ansichten pflegt auch der Prüfer; sie zeigen nur, was er ohnehin sieht */
-const EIGENE_ANSICHTEN = /^\/api\/ansichten(\/[^/]+)?$/;
+/**
+ * Seine eigenen gespeicherten Ansichten und die Kacheln seiner Startseite pflegt auch der Prüfer; sie zeigen nur, was er
+ * ohnehin sieht
+ */
+const EIGENE_ANSICHTEN = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/;
 
 export const prueferDarf = (methode: string, pfad: string): boolean =>
   EIGENE_ANSICHTEN.test(pfad) || ((methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad)));

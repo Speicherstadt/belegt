@@ -9,6 +9,20 @@ description: >-
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art
 bestimmt die Frist ([Fristen](fristen.md)).
 
+## Startseite
+
+Nach dem Anmelden zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
+wie viele in diesem Jahr eingingen, offene Löschanträge, aktive Sperren mit der Zahl der Dokumente darunter, die Größe
+der Originale (jede Datei einmal) und die Fristen, die in den nächsten 90 Tagen enden, mit dem Tag, ab dem das
+Dokument löschbar ist. Daneben der Zustand der Quellen (letzter Abruf oder Fehler jedes Postfachs, das letzte Dokument
+aus dem Eingangsordner, der letzte Umzug aus Paperless-ngx) und der Unveränderbarkeit: das Ergebnis der Prüfung von
+Hash-Kette und Siegeln und der letzte Zeitstempel. Gelöschte Dokumente zählen nirgends mit.
+
+Unter „Kacheln wählen“ zeigst du [gespeicherte Ansichten](ordnung.md#gespeicherte-ansichten) als Kacheln, jede mit der
+Zahl der Treffer und den ersten fünf in ihrer Sortierung. Die Auswahl gilt für deinen Zugang. Die Steuerberatung sieht
+dieselbe Startseite; der Prüfer nur die Zahlen seines Zeitraums und die Kette, nichts zu Löschanträgen, Sperren,
+Quellen und Speicher. Der Eingang selbst liegt unter `/eingang`.
+
 ## Archivnummer
 
 Jedes Dokument bekommt beim Eingang eine Archivnummer (ASN), fortlaufend in der Reihenfolge des Eingangs: 1, 2, 3 …

@@ -80,7 +80,7 @@ test("Paperless-ngx über die API und aus einem Export übernehmen", async ({ pa
   await expect(ausExport).toContainText("fertig");
   await hellUndDunkel(page);
 
-  await page.goto("/");
+  await page.goto("/eingang");
   const exportZeile = page
     .getByRole("row")
     .filter({ has: page.getByRole("link", { name: `paperless-export-${projekt}.bin` }) });

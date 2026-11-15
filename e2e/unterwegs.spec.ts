@@ -72,7 +72,7 @@ test("Manifest mit Symbolen, Farben für hell und dunkel und Ziel zum Teilen", a
 });
 
 test("der Service Worker cacht nur die Hinweisseite und zeigt sie ohne Verbindung", async ({ page, context }, info) => {
-  await page.goto("/");
+  await page.goto("/eingang");
   await workerBereit(page);
   // Seiten und Schnittstelle benutzen, auch ein Original
   await page.getByTestId("upload").setInputFiles({
@@ -184,7 +184,7 @@ test.describe("ohne Sitzung", () => {
 });
 
 test("Foto aufnehmen lädt jedes Bild sofort in den Eingang, eines nach dem anderen", async ({ page }, info) => {
-  await page.goto("/");
+  await page.goto("/eingang");
   const foto = page.getByTestId("foto");
   await expect(foto).toHaveAttribute("capture", "environment");
   await expect(foto).toHaveAttribute("accept", "image/*");

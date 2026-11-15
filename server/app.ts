@@ -14,6 +14,7 @@ import { EXPORT_PFAD, paperlessRouten } from "./http/paperless.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { seitenRouten } from "./http/seiten.ts";
+import { startRouten } from "./http/start.ts";
 import { statischRouten } from "./http/statisch.ts";
 import { teilenRouten } from "./http/teilen.ts";
 import { zugangRouten } from "./http/zugang.ts";
@@ -68,6 +69,7 @@ export function createApp(umgebung?: AppUmgebung) {
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
     archivansichtenRouten(app, umgebung);
+    startRouten(app, umgebung);
     seitenRouten(app, umgebung);
     notizenRouten(app, umgebung);
     ordnungRouten(app, umgebung);

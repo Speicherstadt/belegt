@@ -6,7 +6,7 @@ const UBL = readFileSync(new URL("../server/inhalt/beispiele/ubl.xml", import.me
 test("eine XRechnung zeigt ihre Kopfdaten und füllt die Einordnung vor", async ({ page }, info) => {
   const name = `xrechnung-${info.project.name}.xml`;
   const nummer = `2026/E2E-${info.project.name}`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByTestId("upload").setInputFiles({
     name,
     mimeType: "application/xml",

@@ -13,6 +13,7 @@ import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
 import { SharePage } from "./pages/SharePage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
+import { StartPage } from "./pages/StartPage.tsx";
 
 // Die Brücke zur einbettenden Seite läuft auf jeder Seite, auch beim Anmelden
 const root = createRootRoute({
@@ -39,7 +40,8 @@ const app = createRoute({
 });
 
 const seiten = [
-  createRoute({ getParentRoute: () => app, path: "/", component: InboxPage }),
+  createRoute({ getParentRoute: () => app, path: "/", component: StartPage }),
+  createRoute({ getParentRoute: () => app, path: "/eingang", component: InboxPage }),
   createRoute({ getParentRoute: () => app, path: "/archiv", component: ArchivePage }),
   createRoute({ getParentRoute: () => app, path: "/dokumente/$id", component: DocumentPage }),
   createRoute({ getParentRoute: () => app, path: "/ordnung", component: OrderPage }),

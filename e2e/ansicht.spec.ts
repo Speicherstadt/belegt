@@ -16,7 +16,7 @@ test("eine Word-Datei zeigt ihre Ansicht als PDF und sagt, dass das Original ma�
   page,
 }, info) => {
   const name = `angebot-${info.project.name}.docx`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/octet-stream", buffer: docx() });
   const link = page.getByRole("link", { name });
   const id = (await link.getAttribute("href"))!.split("/").pop()!;
@@ -45,7 +45,7 @@ test("„Öffnen mit …“ öffnet die App in einem neuen Tab mit einem Link au
   await context.route("https://office.example/**", (route) =>
     route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Office</title><p>Office</p>" }),
   );
-  await page.goto("/");
+  await page.goto("/eingang");
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/octet-stream", buffer: original });
   await page.getByRole("link", { name }).click();
 

@@ -2,7 +2,8 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const SEITEN = [
-  { pfad: "/", titel: "Eingang" },
+  { pfad: "/", titel: "Start" },
+  { pfad: "/eingang", titel: "Eingang" },
   { pfad: "/archiv", titel: "Archiv" },
   { pfad: "/ordnung", titel: "Ordnung" },
   { pfad: "/fristen", titel: "Fristen" },
@@ -12,10 +13,11 @@ const SEITEN = [
 ];
 
 test("der Eingang zeigt Überschrift und Navigation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/eingang");
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
   await expect(nav.getByRole("link", { name: "Eingang" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Start" })).not.toHaveAttribute("aria-current", "page");
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
@@ -26,7 +28,7 @@ test("die Navigation führt zu jeder Seite und markiert sie", async ({ page }) =
   await expect(page).toHaveURL(/\/fristen$/);
   await expect(page.getByRole("heading", { level: 1, name: "Fristen" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Fristen" })).toHaveAttribute("aria-current", "page");
-  await expect(nav.getByRole("link", { name: "Eingang" })).not.toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Start" })).not.toHaveAttribute("aria-current", "page");
 });
 
 test("die Fristen nennen Jahre und Grundlage nach § 147 AO", async ({ page }) => {

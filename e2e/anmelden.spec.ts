@@ -16,7 +16,7 @@ test.describe("ohne Sitzung", () => {
 
     await page.getByLabel("Passwort").fill(INHABER_PASSWORT);
     await page.getByRole("button", { name: "Anmelden" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
 
     await page.getByRole("button", { name: "Abmelden" }).click();
     await expect(page).toHaveURL(/\/anmelden$/);

@@ -20,7 +20,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
     });
     expect(res.status()).toBe(201);
 
-    await page.goto("/");
+    await page.goto("/eingang");
     await expect(page.getByRole("link", { name: datei })).toBeVisible();
 
     await page.goto("/quellen");

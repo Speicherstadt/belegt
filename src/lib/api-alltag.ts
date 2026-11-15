@@ -1,6 +1,6 @@
 import { aufruf, json } from "./api-aufruf.ts";
 
-/* Gespeicherte Ansichten des Archivs (docs/api.md) */
+/* Gespeicherte Ansichten des Archivs und die Startseite (docs/api.md) */
 
 export interface GespeicherteAnsicht {
   id: string;
@@ -13,7 +13,37 @@ export interface GespeicherteAnsicht {
   eigene: boolean;
 }
 
+/** Zahlen der Startseite; ohne die optionalen Teile für den Prüfer (server/start/start.ts) */
+export interface Start {
+  eingang: number;
+  gesamt: number;
+  diesesJahr: number;
+  fristen?: {
+    anzahl: number;
+    naechste: { id: string; asn: number; titel: string | null; dateiname: string | null; fristBis: string }[];
+  };
+  loeschantraege?: number;
+  sperren?: { aktiv: number; dokumente: number };
+  quellen?: {
+    postfaecher: {
+      id: string;
+      name: string;
+      art: string;
+      aktiv: boolean;
+      letzterAbruf: string | null;
+      letzterFehler: string | null;
+    }[];
+    ordner: { letzterEingang: string | null } | null;
+    paperless: { status: string; fehler: number; uebernommen: number; zeitpunkt: string } | null;
+  };
+  speicher?: { bytes: number; dateien: number };
+}
+
 export const alltagApi = {
+  start: () => aufruf<Start>("/api/start"),
+  startKacheln: () => aufruf<{ ansichten: string[] }>("/api/start/kacheln"),
+  startKachelnSetzen: (ansichten: string[]) =>
+    aufruf<{ ansichten: string[] }>("/api/start/kacheln", { ...json({ ansichten }), method: "PUT" }),
   ansichten: () => aufruf<GespeicherteAnsicht[]>("/api/ansichten"),
   ansichtAnlegen: (a: { name: string; parameter: Record<string, string>; fuerAlle: boolean }) =>
     aufruf<GespeicherteAnsicht>("/api/ansichten", json(a)),

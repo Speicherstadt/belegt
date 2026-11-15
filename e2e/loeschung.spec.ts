@@ -6,7 +6,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   browser,
 }, info) => {
   const name = `Beleg-2017-${info.project.name}.pdf`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
@@ -35,7 +35,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
     await kanzlei.getByLabel("E-Mail-Adresse").fill(`zweite-${info.project.name}@example.org`);
     await kanzlei.getByLabel("Passwort").fill("ein-langes-kanzlei-passwort");
     await kanzlei.getByRole("button", { name: "Konto anlegen" }).click();
-    await expect(kanzlei.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+    await expect(kanzlei.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
     await kanzlei.goto("/fristen");
     const offen = kanzlei.locator("section", { has: kanzlei.getByRole("heading", { name: "Offene Löschungen" }) });
     const antrag = offen.getByRole("listitem").filter({ hasText: name });

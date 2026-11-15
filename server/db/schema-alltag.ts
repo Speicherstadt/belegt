@@ -6,6 +6,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -13,8 +14,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 /*
- * Für den Alltag: gespeicherte Ansichten des Archivs. Einstellungen, keine Unterlage: änderbar und löschbar, jede
- * Änderung mit Akteur im Audit-Log.
+ * Für den Alltag: gespeicherte Ansichten des Archivs und die Kacheln der Startseite. Einstellungen, keine Unterlage:
+ * änderbar und löschbar, jede Änderung mit Akteur im Audit-Log.
  */
 
 /**
@@ -40,4 +41,20 @@ export const gespeicherteAnsichten = pgTable(
     check("gespeicherte_ansichten_name_laenge", sql`length(trim(${t.name})) between 1 and 100`),
     check("gespeicherte_ansichten_parameter", sql`jsonb_typeof(${t.parameter}) = 'object'`),
   ],
+);
+
+/**
+ * Kacheln der Startseite aus gespeicherten Ansichten, je Zugang in Reihenfolge. Wird eine Ansicht gelöscht, gehen ihre
+ * Kacheln mit (bei allen Zugängen, auch im Audit-Log).
+ */
+export const startKacheln = pgTable(
+  "start_kacheln",
+  {
+    besitzer: text("besitzer").notNull(),
+    ansichtId: uuid("ansicht_id")
+      .notNull()
+      .references(() => gespeicherteAnsichten.id, { onDelete: "cascade" }),
+    reihenfolge: integer("reihenfolge").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.besitzer, t.ansichtId] }), index("start_kacheln_ansicht").on(t.ansichtId)],
 );

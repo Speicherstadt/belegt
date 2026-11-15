@@ -111,7 +111,7 @@ test("Bilder für README und Doku", async ({ page }) => {
   await bild(page, "archiv");
 
   // Eingang mit Mehrfachauswahl: zwei Scans gewählt, darüber die Sammelbearbeitung; daneben „Foto aufnehmen“
-  await page.goto("/");
+  await page.goto("/eingang");
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Foto aufnehmen" })).toBeVisible();
   for (const name of ["Scan-Tankquittung.pdf", "Scan-Bewirtung.pdf"])
@@ -119,7 +119,7 @@ test("Bilder für README und Doku", async ({ page }) => {
   await bild(page, "eingang");
 
   const x = page.getByRole("link", { name: "xrechnung-2026-77.xml" });
-  await page.goto("/");
+  await page.goto("/eingang");
   await x.click();
   await expect(page.getByRole("region", { name: "E-Rechnung" })).toBeVisible();
   await bild(page, "dokument");

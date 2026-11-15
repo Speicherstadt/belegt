@@ -9,7 +9,7 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
 }, info) => {
   const name = `Telefon-${info.project.name}.pdf`;
   const titel = `Telefon März (${info.project.name})`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
@@ -29,7 +29,7 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
     "Eingeordnet",
   );
 
-  await page.goto("/");
+  await page.goto("/eingang");
   await expect(page.getByRole("link", { name: titel })).toHaveCount(0);
 
   await page.goto("/archiv");
@@ -60,7 +60,7 @@ test("der Vorschlag des Sprachmodells füllt die Einordnung vor, eingeordnet wir
   page,
 }, info) => {
   const name = `ki-angebot-${info.project.name}.txt`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "text/plain", buffer: Buffer.from("Unser Angebot") });

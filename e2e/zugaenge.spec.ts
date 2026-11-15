@@ -19,6 +19,10 @@ test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoc
     await kanzlei.getByLabel("E-Mail-Adresse").fill(`kanzlei-${info.project.name}@example.org`);
     await kanzlei.getByLabel("Passwort").fill("ein-langes-kanzlei-passwort");
     await kanzlei.getByRole("button", { name: "Konto anlegen" }).click();
+    await expect(kanzlei.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
+    // Die Steuerberatung sieht die Startseite mit Löschanträgen und Quellen, lädt aber nichts hoch
+    await expect(kanzlei.getByText("Offene Löschanträge")).toBeVisible();
+    await kanzlei.goto("/eingang");
     await expect(kanzlei.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
     await expect(kanzlei.getByRole("button", { name: "Hochladen" })).toHaveCount(0);
     await expect(kanzlei.getByRole("link", { name: "Zugänge" })).toHaveCount(0);
@@ -56,10 +60,16 @@ test("ein Prüfer sieht nur Archiv und Prüfung und nur Dokumente seines Zeitrau
     await pruefer.getByLabel("E-Mail-Adresse").fill(`pruefer-${info.project.name}@example.org`);
     await pruefer.getByLabel("Passwort").fill("ein-langes-pruefer-passwort");
     await pruefer.getByRole("button", { name: "Konto anlegen" }).click();
-    await expect(pruefer.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+    await expect(pruefer.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
+    // Auf der Startseite nur Zahlen seines Zeitraums und die Kette, nichts zu Löschanträgen, Sperren und Quellen
+    const ueberblick = pruefer.getByRole("region", { name: "Überblick" });
+    await expect(ueberblick).toContainText("Dokumente im Archiv");
+    await expect(pruefer.getByText("Offene Löschanträge")).toHaveCount(0);
+    await expect(pruefer.getByRole("heading", { name: "Quellen" })).toHaveCount(0);
+    await expect(pruefer.getByRole("heading", { name: "Unveränderbarkeit" })).toBeVisible();
 
     const nav = pruefer.getByRole("navigation", { name: "Hauptnavigation" });
-    await expect(nav.getByRole("link")).toHaveText(["Eingang", "Archiv", "Prüfung"]);
+    await expect(nav.getByRole("link")).toHaveText(["Start", "Eingang", "Archiv", "Prüfung"]);
 
     await nav.getByRole("link", { name: "Archiv" }).click();
     await expect(pruefer.getByRole("link", { name })).toBeVisible();

@@ -7,7 +7,7 @@ const axe = (page: import("@playwright/test").Page) =>
 test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder öffnen", async ({ page }, info) => {
   const name = `Ansicht-${info.project.name}.pdf`;
   const ansicht = `Meine Suche ${info.project.name}`;
-  await page.goto("/");
+  await page.goto("/eingang");
   await page
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });

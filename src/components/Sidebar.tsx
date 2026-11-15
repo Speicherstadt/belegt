@@ -6,7 +6,8 @@ import { m } from "../paraglide/messages.js";
 import { Darstellung } from "./Darstellung.tsx";
 
 const ITEMS = [
-  { to: "/", label: () => m.nav_inbox() },
+  { to: "/", label: () => m.nav_start() },
+  { to: "/eingang", label: () => m.nav_inbox() },
   { to: "/archiv", label: () => m.nav_archive() },
   { to: "/ordnung", label: () => m.nav_order() },
   { to: "/fristen", label: () => m.nav_retention() },
@@ -19,7 +20,7 @@ const eintrag =
   "flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
 
 /** Der Prüfer sieht nur, was er für die Prüfung braucht; die übrigen Schnittstellen lehnt der Server für ihn ab */
-const PRUEFER = new Set(["/", "/archiv", "/pruefung"]);
+const PRUEFER = new Set(["/", "/eingang", "/archiv", "/pruefung"]);
 
 export function Sidebar({
   ich,
