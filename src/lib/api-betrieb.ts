@@ -30,6 +30,40 @@ export interface Quelle {
   letzterAbruf: string | null;
   letzterFehler: string | null;
   aktiv: boolean;
+  aktion: PostfachAktion;
+  aktionZiel: string | null;
+  loeschenWarteStunden: number;
+  loeschenNachSperre: boolean;
+  loeschenBestaetigtVon: string | null;
+  loeschenBestaetigtAm: string | null;
+}
+
+/** Aktion im Postfach nach dem Abholen (docs/eingang.md#nach-dem-abholen) */
+export type PostfachAktion = "keine" | "gelesen" | "markieren" | "verschieben" | "loeschen";
+
+export interface AktionEingabe {
+  aktion: PostfachAktion;
+  ziel: string | null;
+  warteStunden: number;
+  nachSperre: boolean;
+  loeschenBestaetigt: boolean;
+}
+
+export interface AktionenProtokoll {
+  stand: { offen: number; erledigt: number; entfallen: number; fehlgeschlagen: number };
+  eintraege: {
+    id: string;
+    aktion: PostfachAktion;
+    ziel: string | null;
+    ordner: string;
+    uid: number | null;
+    jmapId: string | null;
+    ergebnis: "ausgefuehrt" | "entfallen" | "fehler";
+    meldung: string | null;
+    zeit: string;
+  }[];
+  /** Dateien liegen in S3 mit Object Lock: „erst nach Sperre“ ist möglich */
+  objektsperre: boolean;
 }
 
 export const EREIGNISSE = [
@@ -129,6 +163,9 @@ export const betriebApi = {
   }) => aufruf<Quelle>("/api/quellen", json(q)),
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
+  quelleAktion: ({ id, ...e }: AktionEingabe & { id: string }) => aufruf<Quelle>(`/api/quellen/${id}/aktion`, json(e)),
+  quelleOrdner: (id: string) => aufruf<{ ordner: string[] }>(`/api/quellen/${id}/ordner`),
+  quelleAktionen: (id: string) => aufruf<AktionenProtokoll>(`/api/quellen/${id}/aktionen`),
   oauthAnbieter: () => aufruf<{ anbieter: ("microsoft" | "google")[] }>("/api/oauth"),
   webhooks: () => aufruf<Webhook[]>("/api/webhooks"),
   webhookAnlegen: (w: { name: string; url: string; arten: Ereignisart[] }) =>

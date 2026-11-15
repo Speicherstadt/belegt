@@ -11,10 +11,12 @@ import { zugangApi } from "./api-zugang.ts";
 export type { GespeicherteAnsicht, Start } from "./api-alltag.ts";
 export { ApiFehler } from "./api-aufruf.ts";
 export type {
+  AktionenProtokoll,
   Befund,
   Bericht,
   Einstellungen,
   Ereignisart,
+  PostfachAktion,
   Quelle,
   Regel,
   Sperre,

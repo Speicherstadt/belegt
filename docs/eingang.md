@@ -104,8 +104,8 @@ Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 ## Postfächer
 
 Unter Quellen trägst du Postfächer ein (IMAP: Server, Port, TLS, Benutzer, Passwort, Ordner). Der Worker
-(`bun server/worker.ts`, eigener Prozess) holt alle `ABRUF_MINUTEN` neue Mails ab, nur lesend: Belegt markiert nichts
-als gelesen und löscht nichts. Er merkt sich je Postfach die letzte UID; nummeriert der Server das Postfach neu
+(`bun server/worker.ts`, eigener Prozess) holt alle `ABRUF_MINUTEN` neue Mails ab, nur lesend; im Postfach ändert
+Belegt nur, was du als [Aktion nach dem Abholen](#nach-dem-abholen) einstellst. Er merkt sich je Postfach die letzte UID; nummeriert der Server das Postfach neu
 (UIDVALIDITY), beginnt er von vorn, und doppelte Mails erkennt der Import. „Jetzt abrufen“ startet einen Abruf sofort.
 Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
 `BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
@@ -131,6 +131,31 @@ eine App beim Anbieter, mit `<BELEGT_URL>/api/oauth/rueckkehr` als Weiterleitung
 Unter Quellen erscheint dann „Mit Microsoft 365 verbinden“ oder „Mit Google verbinden“. Nach der Anmeldung beim
 Anbieter legt Belegt das Postfach mit der Adresse des Kontos an. Gespeichert ist nur das Refresh-Token, verschlüsselt
 wie ein Passwort; vor jedem Abruf holt Belegt damit ein Access-Token.
+
+### Nach dem Abholen
+
+Je Postfach stellst du unter Quellen mit „Aktion ändern“ ein, was mit einer Mail im Postfach geschieht, sobald sie im
+Archiv liegt: keine Aktion (Vorgabe), als gelesen markieren, markieren (Flagge, in Gmail ein Stern), in einen Ordner
+verschieben oder löschen. Das geht bei IMAP, JMAP, Microsoft 365 und Google gleich; einstellen darf das nur der
+Inhaber. Den Zielordner zum Verschieben wählst du aus den Ordnern des Postfachs; einen, den es nicht gibt, nimmt Belegt
+nicht an.
+
+Die Aktion läuft im Worker nach dem Abruf, und nur für eine Mail, die nachweislich im Archiv liegt: Die Aufnahme ist in
+der Datenbank festgeschrieben, und vor der Aktion liest Belegt das Original aus dem Speicher und vergleicht seinen
+SHA-256. Scheitert das, bleibt die Mail im Postfach unberührt. Eine Mail, die schon vorher im Archiv lag (doppelt), gilt
+als archiviert und bekommt die Aktion auch. Jede Mail bekommt die Aktion einmal: Ist sie inzwischen weg oder hat der
+Server den Ordner neu nummeriert (UIDVALIDITY), entfällt sie, und der nächste Abruf ordnet die Mail neu zu. Einen
+Fehler (Zielordner fehlt, Verbindung bricht ab) hält Belegt fest und versucht es höchstens fünfmal, nach 15, 30, 60 und
+120 Minuten. Schaltest du die Aktion ab, entfällt, was noch offen war. Jedes Ergebnis steht unter „Protokoll der
+Aktionen“ am Postfach, in einem Protokoll, das sich nicht ändern lässt, und im Audit-Log.
+
+**Löschen** musst du beim Einstellen ausdrücklich bestätigen; wer und wann, steht am Postfach und in der
+Verfahrensdokumentation. Gelöscht wird frühestens nach einer Wartezeit ab der Archivierung (Vorgabe 24 Stunden, 1 bis
+2160), damit eine [Sicherung](betrieb.md#sichern) des Archivs dazwischen liegt, und nur, wenn die Mail im Postfach Byte
+für Byte dem Original im Archiv gleicht. Mit [S3 und Object Lock](betrieb.md#dateien-in-s3-mit-object-lock) kannst du
+zusätzlich verlangen, dass die Datei im Bucket bis zum Fristende gesperrt ist; das ist sie erst, wenn die Mail
+eingeordnet ist. Gmail behandelt Löschen über IMAP nach seinen eigenen Einstellungen (oft nur Archivieren); bei IMAP
+ohne UIDPLUS entfernt das Löschen auch andere Mails im Ordner, die schon als gelöscht markiert waren.
 
 ## Regeln
 

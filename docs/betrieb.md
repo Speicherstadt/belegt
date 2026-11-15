@@ -58,6 +58,9 @@ mit Replikation in einen zweiten), dazu `.env`: Ohne
 docker compose exec -T postgres pg_dump -U belegt -Fc belegt > belegt.dump
 ```
 
+Löscht Belegt Mails in einem Postfach ([Nach dem Abholen](eingang.md#nach-dem-abholen)), wähle die Wartezeit dort
+länger als den Abstand zwischen zwei Sicherungen.
+
 Nach einer Wiederherstellung prüft „Prüfung“ mit „Auch alle Dateien prüfen“, ob Kette, Siegel und Dateien stimmen.
 Beschreibe die Sicherung unter „Verfahrensdoku“; sie gehört in die Verfahrensdokumentation.
 

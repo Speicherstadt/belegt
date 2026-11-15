@@ -4,6 +4,7 @@ import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { MailboxAction } from "./MailboxAction.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
@@ -79,6 +80,7 @@ export function Mailboxes() {
                 {m.mailboxes_fetch()}
               </button>
             )}
+            <MailboxAction quelle={q} inhaber={ich.data?.role === "inhaber"} />
           </li>
         ))}
       </ul>
