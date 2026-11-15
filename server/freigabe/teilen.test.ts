@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
+import { geteiltZahlen } from "./teilen.ts";
 
 describe.skipIf(!testDatenbankUrl)("Teilen per Link gegen Postgres", () => {
   let t: Awaited<ReturnType<typeof testApp>>;
@@ -154,9 +155,13 @@ describe.skipIf(!testDatenbankUrl)("Teilen per Link gegen Postgres", () => {
   it("antwortet nach der Löschung des Dokuments mit 410", async () => {
     const d = await hoch("weg", "f.pdf");
     const link = await teilen(d.id, 7);
+    const vorher = await geteiltZahlen(t.db);
     await als(inhaber)(`/api/dokumente/${d.id}/einordnung`, json({ art: "frei", entstanden: "2026-01-02" }));
     expect((await als(inhaber)(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).status).toBe(201);
     expect((await abrufen(link.url)).status).toBe(410);
+    // Die Verfahrensdokumentation zählt den Link nicht mehr als gültig, und die Liste zeigt ihn nicht mehr
+    expect(await geteiltZahlen(t.db)).toEqual({ jemals: vorher.jemals, aktiv: vorher.aktiv - 1 });
+    expect(await links(d.id)).toEqual([]);
     expect((await als(inhaber)(`/api/dokumente/${d.id}/links`, json({ tage: 1 }))).status).toBe(410);
   });
 

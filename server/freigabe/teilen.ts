@@ -35,6 +35,13 @@ const gilt = () =>
     gt(freigaben.gueltigBis, sql`now()`),
     sql`not exists (select 1 from ${freigabeWiderrufe} w where w.freigabe_id = "freigaben"."id")`,
   );
+/** Gilt und das Dokument ist nicht gelöscht: für Liste und Zahlen (der Abruf antwortet bei Löschung mit 410) */
+const giltNochImArchiv = () =>
+  and(
+    gilt(),
+    sql`not exists (select 1 from loeschungen l
+                     where l.dokument_id = "freigaben"."dokument_id" and l.bestaetigt_am is not null)`,
+  );
 
 /** Link und Dokument eines gültigen, nicht widerrufenen geteilten Links oder null */
 export async function einloesenGeteilt(
@@ -73,7 +80,7 @@ export async function geteilteListen(db: Datenbank, dokumentId: string): Promise
       >`(select max(a.abgerufen_am) from ${freigabeAbrufe} a where a.freigabe_id = "freigaben"."id")`,
     })
     .from(freigaben)
-    .where(and(eq(freigaben.dokumentId, dokumentId), gilt()))
+    .where(and(eq(freigaben.dokumentId, dokumentId), giltNochImArchiv()))
     .orderBy(desc(freigaben.erstelltAm));
   return zeilen.map((z) => ({ ...z, letzterAbruf: z.letzterAbruf ? new Date(z.letzterAbruf) : null }));
 }
@@ -111,7 +118,7 @@ export async function geteiltZahlen(db: Datenbank): Promise<{ jemals: number; ak
   const [z] = await db
     .select({
       jemals: sql<number>`count(*)::int`,
-      aktiv: sql<number>`(count(*) filter (where ${gilt()}))::int`,
+      aktiv: sql<number>`(count(*) filter (where ${giltNochImArchiv()}))::int`,
     })
     .from(freigaben)
     .where(eq(freigaben.zweck, "teilen"));
