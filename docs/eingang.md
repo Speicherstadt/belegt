@@ -42,7 +42,9 @@ Mit `EINGANG_ORDNER` überwacht der Worker einen Ordner, etwa das Ziel eines Sca
 ([Betrieb](betrieb.md#eingangsordner)). Alle 5 Sekunden schaut er hinein und nimmt jede Datei auf, die sich seit dem
 letzten Blick nicht verändert hat; was der Scanner noch schreibt, wartet bis zum nächsten Blick. Die Quelle des
 Dokuments ist dann „Ordner“. Erst wenn die Datei im Archiv liegt, entfernt Belegt sie aus dem Ordner; eine Datei, die
-schon im Archiv liegt, entfernt es nur.
+schon im Archiv liegt, entfernt es nur. Schreibt der Scanner nach einer Pause weiter, während Belegt die Datei aufnimmt,
+bleibt sie liegen und kommt vollständig ins Archiv, sobald sie sich nicht mehr ändert; der zuerst aufgenommene Teil
+bleibt als eigenes Dokument.
 
 Unterordner liest der Worker mit, versteckte Dateien (mit Punkt am Anfang) und temporäre (`.tmp`, `.part`, `~$…`)
 lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht. Leere Dateien und solche über 100 MB verschiebt er nach

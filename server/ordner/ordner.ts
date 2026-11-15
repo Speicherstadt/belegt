@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { constants } from "node:fs";
-import { mkdir, open, readdir, realpath, rename, stat, unlink } from "node:fs/promises";
+import { lstat, mkdir, open, readdir, realpath, rename, stat, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, sep } from "node:path";
 import { sql } from "drizzle-orm";
 import { aufnehmen, type Umgebung } from "../dokumente/dokumente.ts";
@@ -81,6 +81,16 @@ async function lesenOhneSymlink(wurzel: string, rel: string): Promise<Uint8Array
   } finally {
     await datei.close();
   }
+}
+
+/**
+ * Wirft, wenn die Datei seit dem stabilen Blick gewachsen oder geändert ist: Der Scanner schreibt nach einer Pause
+ * weiter. Dann bleibt sie liegen und kommt, sobald sie wieder stabil ist, vollständig ins Archiv
+ */
+async function unveraendert(pfad: string, vorher: { groesse: number; mtimeMs: number }): Promise<void> {
+  const s = await lstat(pfad);
+  if (s.size !== vorher.groesse || s.mtimeMs !== vorher.mtimeMs)
+    throw new Error("Datei hat sich während der Aufnahme geändert");
 }
 
 /** Verschiebt nach fehler/ mit demselben Unterpfad; gibt es den Namen dort schon, mit Zähler */
@@ -202,6 +212,7 @@ export async function ordnerEinlesen(
     }
     // Erst jetzt liegt alles im Archiv. Lässt sich die Datei nicht entfernen, nimmt der nächste Blick sie als doppelt
     await imOrdner(ordner, rel)
+      .then(() => unveraendert(pfad, zustand.get(rel)!))
       .then(() => unlink(pfad))
       .catch((err) => ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) }));
   }

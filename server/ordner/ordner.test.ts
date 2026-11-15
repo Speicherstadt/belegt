@@ -1,5 +1,17 @@
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readdir, readFile, rename, rm, symlink, truncate, utimes, writeFile } from "node:fs/promises";
+import {
+  appendFile,
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  symlink,
+  truncate,
+  utimes,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -169,6 +181,23 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
       const sha = createHash("sha256").update(`%PDF-1.7\n% geheim ${u}\n`).digest("hex");
       expect(shas, `geheim ${u} nicht im Archiv`).not.toContain(sha);
     }
+  });
+
+  it("entfernt eine Datei nicht, die während der Aufnahme weiter geschrieben wird", async () => {
+    const pfad = join(ordner, "langsam.pdf");
+    await writeFile(pfad, "%PDF-1.7\n% Seite 1\n");
+    await blick();
+    // Der Scanner schreibt nach einer Pause weiter, während Belegt die ersten Seiten aufnimmt
+    const weiterSchreiben = async () => {
+      await appendFile(pfad, "% Seite 2\n");
+      return null;
+    };
+    expect(await blick(weiterSchreiben)).toMatchObject({ neu: 1, spaeter: [{ datei: "langsam.pdf" }] });
+    expect(await readFile(pfad, "utf8")).toContain("Seite 2");
+    // Wieder stabil: die vollständige Datei kommt ins Archiv
+    await blick();
+    expect(await blick()).toMatchObject({ neu: 1, spaeter: [] });
+    expect(await readdir(ordner)).toEqual([]);
   });
 
   const tagsVon = async (dateiname: string) =>
