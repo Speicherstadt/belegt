@@ -44,6 +44,11 @@ seine Adresse (`404`), Zahlen bei Tags, Typen und Korrespondenten zählen nur se
 Ableitungen und Mails zeigen nur, was in seinem Sichtbereich liegt. Von Tags, Typen und Korrespondenten sieht er die
 erlaubten, oder alle außer den ausgeschlossenen Tags, wenn für die Art nichts gewählt ist; Vorschläge nennen nur diese.
 
+Mail und Anhänge gibt es nur gemeinsam: Die Datei einer Mail (`.eml`) enthält ihre Anhänge, deshalb sieht er eine Mail
+nur, wenn auch jeder ihrer Anhänge in seinem Sichtbereich liegt. Einen sichtbaren Anhang einer Mail außerhalb findet die
+Suche nur über seinen eigenen Text, nicht über Absender und Betreff der Mail. Für Prüfer gilt dasselbe mit ihrem
+Zeitraum.
+
 Mit dem Recht **lesen** öffnet und lädt er Dokumente herunter und liest Notizen. Mit **bearbeiten** nimmt er
 zusätzlich Dokumente auf, ordnet sie ein, setzt Tags, Typ, Korrespondent und Felder (auch für mehrere zugleich) und
 schreibt Notizen. Eine Änderung, nach der das Dokument außerhalb seines Sichtbereichs läge, lehnt Belegt ab und ändert

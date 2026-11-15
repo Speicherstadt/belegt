@@ -422,6 +422,80 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     expect((await als(m)(`/api/dokumente/${neu[0]}/notizen`)).status).toBe(404);
   });
 
+  it("zeigt Mail und Anhänge nur gemeinsam: keine .eml mit unsichtbarem Anhang, kein Mailtext in der Suche", async () => {
+    const mailMit = async (betreff: string, id: string, anhang: string) => {
+      const eml = [
+        "From: Absender <a@example.org>",
+        "To: anna@example.org",
+        `Subject: ${betreff}`,
+        `Message-ID: <${id}@example.org>`,
+        'Content-Type: multipart/mixed; boundary="g"',
+        "",
+        "--g",
+        "Content-Type: text/plain; charset=utf-8",
+        "",
+        "Text.",
+        "--g",
+        `Content-Type: application/pdf; name="${anhang}.pdf"`,
+        `Content-Disposition: attachment; filename="${anhang}.pdf"`,
+        "Content-Transfer-Encoding: base64",
+        "",
+        Buffer.from(`%PDF-1.7\n% ${anhang}\n`).toString("base64"),
+        "--g--",
+        "",
+      ].join("\r\n");
+      const form = new FormData();
+      form.append("datei", new File([eml], `${id}.eml`));
+      const { neu } = await (await als(inhaber)("/api/mails", { method: "POST", body: form })).json();
+      const m = await (await als(inhaber)(`/api/dokumente/${neu[0]}/mail`)).json();
+      return { mail: neu[0] as string, anhang: m.anhaenge[0].dokumentId as string };
+    };
+    const suche = async (cookie: string, wort: string) =>
+      ids(cookie, `/api/dokumente?suche=${encodeURIComponent(wort)}`);
+
+    // Mail sichtbar, Anhang ausgeschlossen: die .eml enthielte den Anhang, also gibt es die Mail nicht
+    const a = await mailMit("Projektbesprechung", "projekt-mail", "Lohnzettel");
+    await ordnen(a.mail, { tagsHinzu: [projekt] });
+    await ordnen(a.anhang, { tagsHinzu: [projekt, personal] });
+    const m = await zugangAnlegen(t, inhaber, "mail-gemeinsam@example.org", {
+      rolle: "mitarbeiter",
+      recht: "lesen",
+      sichtbereich: { tags: [projekt], ohneTags: [personal] },
+    });
+    for (const pfad of [`/api/dokumente/${a.mail}`, `/api/dokumente/${a.mail}/datei`, `/api/dokumente/${a.mail}/mail`])
+      expect((await als(m)(pfad)).status).toBe(404);
+    expect(await suche(m, "Projektbesprechung")).toEqual([]);
+
+    // Anhang sichtbar, Mail ausgeschlossen: Betreff und Absender der Mail finden den Anhang nicht, sein Name schon
+    const b = await mailMit("Kuendigungsschreiben", "kuendigung-mail", "Bauplan");
+    await ordnen(b.mail, { tagsHinzu: [projekt, personal] });
+    await ordnen(b.anhang, { tagsHinzu: [projekt] });
+    expect((await als(m)(`/api/dokumente/${b.anhang}`)).status).toBe(200);
+    expect(await suche(m, "Kuendigungsschreiben")).toEqual([]);
+    expect(await suche(m, "Bauplan")).toEqual([b.anhang]);
+    // Der Inhaber findet beides wie bisher
+    expect(await suche(inhaber, "Kuendigungsschreiben")).toEqual([b.mail, b.anhang].sort());
+
+    // Prüfer: dieselbe Regel mit dem Zeitraum
+    const einordnen = (id: string, entstanden: string) =>
+      als(inhaber)(`/api/dokumente/${id}/einordnung`, json({ art: "beleg", entstanden }));
+    const c = await mailMit("Jahresabschluss", "abschluss-mail", "Bilanz");
+    await einordnen(c.mail, "2024-03-01");
+    await einordnen(c.anhang, "2025-03-01");
+    const p2025 = await zugangAnlegen(t, inhaber, "pruefer-2025@example.org", {
+      rolle: "pruefer",
+      zeitraum: { von: "2025-01-01", bis: "2025-12-31" },
+    });
+    const p2024 = await zugangAnlegen(t, inhaber, "pruefer-2024@example.org", {
+      rolle: "pruefer",
+      zeitraum: { von: "2024-01-01", bis: "2024-12-31" },
+    });
+    expect(await suche(p2025, "Jahresabschluss")).toEqual([]);
+    expect(await suche(p2025, "Bilanz")).toEqual([c.anhang]);
+    expect((await als(p2024)(`/api/dokumente/${c.mail}/datei`)).status).toBe(404);
+    expect(await suche(p2024, "Jahresabschluss")).toEqual([]);
+  });
+
   it("führt Mitarbeiter mit Recht und Sichtbereich in der Verfahrensdokumentation", async () => {
     const doku = await (await als(inhaber)("/api/verfahrensdoku")).json();
     const zugriff = doku.abschnitte.find((a: { titel: string }) => a.titel.startsWith("6.")) as { liste: string[] };

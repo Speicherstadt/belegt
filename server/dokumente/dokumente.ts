@@ -8,7 +8,7 @@ import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
 import { notizPasst } from "../notizen/notizen.ts";
 import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
 import { tagMitNamen } from "../ordnung/ordnung.ts";
-import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
+import { fremdeMail, type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
@@ -108,6 +108,28 @@ export interface ListenAbfrage {
 }
 
 /**
+ * Text eines Dokuments wie belegt_suchtext, aber ohne Absender und Betreff der Mail, zu der es als Anhang gehört; für
+ * Anhänge, deren Mail die Sicht nicht sieht (Mail und Anhänge nur gemeinsam, server/zugang/sicht.ts)
+ */
+const eigenerText = sql`(select concat_ws(' ', d.dateiname, e.titel, e.korrespondent, m.von, m.betreff, m.text,
+         i.erechnung ->> 'nummer', i.erechnung ->> 'verkaeufer', i.text,
+         (select string_agg(t.name, ' ') from dokument_tags dt join tags t on t.id = dt.tag_id where dt.dokument_id = d.id),
+         (select ty.name from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
+           where dd.dokument_id = d.id),
+         (select k.name from dokument_korrespondenten dk join korrespondenten k on k.id = dk.korrespondent_id
+           where dk.dokument_id = d.id),
+         (select string_agg(fw.wert_text, ' ') from feldwerte fw where fw.dokument_id = d.id))
+    from (select 1) eins left join mails m on m.dokument_id = d.id left join inhalte i on i.dokument_id = d.id)`;
+
+/** Volltext; mit eingeschränkter Sicht trifft ein Anhang einer unsichtbaren Mail nur über seinen eigenen Text */
+function volltext(suche: string, sicht?: Sicht) {
+  const frage = sql`websearch_to_tsquery('german', ${suche})`;
+  if (!sicht) return sql`st.vektor @@ ${frage}`;
+  return sql`(st.vektor @@ ${frage}
+    and (not ${fremdeMail("d.id", sicht)} or to_tsvector('german', ${eigenerText}) @@ ${frage}))`;
+}
+
+/**
  * FROM und WHERE der Liste. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus
  * Dateiname, Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch
  * „_100%“ oder Teilwörter), über die Archivnummer („ASN 123“) und auf Wunsch über Notizen.
@@ -123,7 +145,7 @@ function listenQuelle({ suche, gruppe = "alle", heute, sicht, ordnung, notizen =
        and ${filterBedingung(ordnung)}
        and ${sichtBedingung("d.id", sicht)}
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
-            or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
+            or ${volltext(suche?.trim() ?? "", sicht)}
             or a.nummer = ${archivnummerAus(suche)}
             or (${notizen && !!suche?.trim()} and ${notizPasst(suche?.trim() ?? "")}))`;
 }

@@ -46,6 +46,25 @@ const uuids = (ids: string[]) => {
  */
 export function sichtBedingung(spalte: string, sicht?: Sicht): SQL {
   if (!sicht) return sql`true`;
+  // Mail und Anhänge nur gemeinsam: Die Datei einer Mail (.eml) enthält ihre Anhänge, also sieht eine eingeschränkte
+  // Sicht die Mail nur, wenn sie jeden ihrer Anhänge sieht (docs/zugaenge.md)
+  return sql`(${basisBedingung(spalte, sicht)}
+    and not exists (select 1 from mail_anhaenge sb_ma where sb_ma.mail_dokument_id = ${sql.raw(spalte)}
+                     and not ${basisBedingung("sb_ma.anhang_dokument_id", sicht)}))`;
+}
+
+/**
+ * Wahr für einen Anhang, dessen Mail die Sicht nicht sieht: Sein Suchtext enthält Absender und Betreff der Mail
+ * (belegt_suchtext), die Suche darf ihn darüber nicht finden (server/dokumente/dokumente.ts)
+ */
+export function fremdeMail(spalte: string, sicht?: Sicht): SQL {
+  if (!sicht) return sql`false`;
+  return sql`exists (select 1 from mail_anhaenge sb_pm where sb_pm.anhang_dokument_id = ${sql.raw(spalte)}
+                      and not ${sichtBedingung("sb_pm.mail_dokument_id", sicht)})`;
+}
+
+/** Die Bedingung für ein einzelnes Dokument, ohne Mail und Anhänge */
+function basisBedingung(spalte: string, sicht: Sicht): SQL {
   const d = sql.raw(spalte);
   if (sicht.zeitraum)
     return sql`(belegt_dokument_tag(${d}) between ${sicht.zeitraum.von}::date and ${sicht.zeitraum.bis}::date)`;

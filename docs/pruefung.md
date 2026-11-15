@@ -15,7 +15,9 @@ diesem Eintrag nichts verändert wurde. „Drucken oder als PDF sichern“ gibt 
 
 Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
 Der Prüfer liest nur: Eingang, Archiv und Prüfung, und von den Dokumenten nur die, deren Tag (Entstanden, sonst
-Eingang) im Zeitraum liegt; die Mail zu einem Anhang nur, wenn auch sie darin liegt. Seinen Z3-Export schneidet
+Eingang) im Zeitraum liegt. Mail und Anhänge sieht er nur gemeinsam: die Mail nur, wenn auch jeder Anhang darin liegt
+(ihre Datei enthält die Anhänge), und einen Anhang findet die Suche nicht über Absender und Betreff einer Mail außerhalb
+(Regel wie bei [Mitarbeitern](zugaenge.md#mitarbeiter)). Seinen Z3-Export schneidet
 Belegt auf diesen Zeitraum zu, im Protokoll stehen nur die Einträge zu diesen Dokumenten. Fristen, Sperren, Löschungen,
 Regeln, Postfächer und Notizen sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein und entziehst den alten Zugang.
 
