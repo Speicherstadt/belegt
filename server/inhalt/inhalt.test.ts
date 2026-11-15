@@ -62,7 +62,8 @@ describe("Lesen im eigenen Prozess", () => {
   });
 });
 
-describe.skipIf(!testDatenbankUrl)("Inhalte gegen Postgres", () => {
+// Jedes Dokument liest ein eigener Prozess (lesenImKind); unter paralleler Last dauert das länger als 5 s
+describe.skipIf(!testDatenbankUrl)("Inhalte gegen Postgres", { timeout: 30_000 }, () => {
   let t: Awaited<ReturnType<typeof testApp>>;
   let inhaber: string;
   const als = (pfad: string, init: RequestInit = {}) => t.anfrage(pfad, init, inhaber);
