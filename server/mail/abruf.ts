@@ -5,6 +5,8 @@ import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { type Adresse, vormerken } from "./aktionen.ts";
+import { type AktionenErgebnis, aktionenAusfuehren } from "./aktionen-ausfuehren.ts";
 import { mailAufnehmen } from "./import.ts";
 import { type Abfragen, jmapHolen } from "./jmap.ts";
 import { accessToken, type OAuthKonfig } from "./oauth.ts";
@@ -15,6 +17,20 @@ export interface Postfach {
   /** Nachrichten mit UID größer als seitUid, aufsteigend */
   neue(seitUid: number): AsyncIterable<{ uid: number; roh: Uint8Array }>;
   schliessen(): Promise<void>;
+  /** Alle Ordner des Kontos (Pfade), für die Wahl des Zielordners */
+  ordner?(): Promise<string[]>;
+  /** Nur mit schreiben geöffnet: Aktionen nach dem Abholen (server/mail/aktionen-ausfuehren.ts), je Mail über die UID */
+  bearbeiten?: Bearbeiten;
+}
+
+/** Aktionen an einer Mail im geöffneten Ordner; jede wirft, wenn der Server sie ablehnt */
+export interface Bearbeiten {
+  gibtEs(uid: number): Promise<boolean>;
+  /** Rohdaten der Mail, null, wenn es die UID im Ordner nicht mehr gibt */
+  roh(uid: number): Promise<Uint8Array | null>;
+  flagge(uid: number, flagge: "\\Seen" | "\\Flagged"): Promise<void>;
+  verschieben(uid: number, ziel: string): Promise<void>;
+  loeschen(uid: number): Promise<void>;
 }
 
 export interface Zugang {
@@ -26,6 +42,8 @@ export interface Zugang {
   ordner: string;
   /** IMAP mit OAuth (XOAUTH2) statt Passwort */
   accessToken?: string;
+  /** Ordner zum Schreiben öffnen (Aktionen nach dem Abholen); sonst nur lesend */
+  schreiben?: boolean;
 }
 
 /** Was ein Abruf neben dem Postfach braucht: HTTP für JMAP und OAuth (Tests geben eigenes), die OAuth-Apps */
@@ -118,74 +136,85 @@ export interface AbrufErgebnis {
   fehler: string | null;
 }
 
+type QuelleZeile = typeof quellen.$inferSelect;
+
+/**
+ * Zugang zu einer Quelle mit entschlüsseltem Passwort; bei OAuth mit frischem Access-Token. Microsoft gibt dabei ein
+ * neues Refresh-Token, das alte verfällt irgendwann; es wird gleich wieder verschlüsselt gespeichert.
+ */
+export async function zugangZu(
+  db: Datenbank,
+  schluessel: Buffer,
+  q: QuelleZeile,
+  akteur: string,
+  { abfragen, oauth }: AbrufOptionen = {},
+): Promise<Zugang> {
+  const geheimnis = entschluesseln(schluessel, q.ciphertext).toString();
+  const zugang = { host: q.host, port: q.port, tls: q.tls, benutzer: q.benutzer, ordner: q.ordner };
+  if (!q.oauth) return { ...zugang, passwort: geheimnis };
+  const app = oauth?.[q.oauth];
+  if (!app) throw new Error(`OAuth für ${q.oauth} ist auf dem Server nicht eingerichtet`);
+  const t = await accessToken(q.oauth, app, geheimnis, abfragen);
+  if (t.refreshToken)
+    await mitAkteur(db, akteur, (tx) =>
+      tx
+        .update(quellen)
+        .set({ ciphertext: verschluesseln(schluessel, Buffer.from(t.refreshToken!)) })
+        .where(eq(quellen.id, q.id)),
+    );
+  return { ...zugang, passwort: "", accessToken: t.accessToken };
+}
+
+/** Akteur im Audit-Log für Abruf und Aktionen einer Quelle */
+export const quellenAkteur = (q: Pick<QuelleZeile, "art" | "name">) => `system:${q.art}:${q.name}`;
+
 /**
  * Holt neue Mails einer Quelle: jede für sich aufgenommen, letzte_uid nach jeder Mail fortgeschrieben, damit ein Abbruch
  * nichts doppelt holt und nichts auslässt. Ein Fehler steht in letzter_fehler; das Passwort steht nirgends im Klartext.
+ * Ist eine Aktion eingestellt, kommt jede Mail erst nach ihrer Aufnahme in die Warteschlange (vormerken).
  */
 export async function abrufen(
   umgebung: Umgebung,
   schluessel: Buffer,
   quelleId: string,
   oeffnen: Oeffnen,
-  { abfragen, oauth }: AbrufOptionen = {},
+  optionen: AbrufOptionen = {},
 ): Promise<AbrufErgebnis> {
   const { db } = umgebung;
   const [q] = await db.select().from(quellen).where(eq(quellen.id, quelleId));
   if (!q) throw new Error("Quelle nicht gefunden");
-  const akteur = `system:${q.art}:${q.name}`;
+  const akteur = quellenAkteur(q);
   const ergebnis: AbrufErgebnis = { neu: 0, doppelt: 0, fehler: null };
+  // Erst nach der Aufnahme (Transaktion festgeschrieben) vorgemerkt; scheitert die Aufnahme, gibt es keine Aktion
+  const aufnehmen = async (roh: Uint8Array, adresse: Adresse) => {
+    const { id, neu } = await mailAufnehmen(umgebung, roh, "mail", akteur);
+    if (neu) ergebnis.neu++;
+    else ergebnis.doppelt++;
+    if (q.aktion !== "keine") await vormerken(db, akteur, { quelleId: q.id, dokumentId: id, roh, ...adresse });
+  };
   let postfach: Postfach | null = null;
   try {
+    const zugang = await zugangZu(db, schluessel, q, akteur, optionen);
     if (q.art === "jmap") {
-      const zugang = { host: q.host, port: q.port, tls: q.tls, benutzer: q.benutzer, ordner: q.ordner };
-      const passwort = entschluesseln(schluessel, q.ciphertext).toString();
       const stand = await jmapHolen(
-        { ...zugang, passwort },
+        zugang,
         q.jmapStand,
-        async (roh) => {
-          const { neu } = await mailAufnehmen(umgebung, roh, "mail", akteur);
-          if (neu) ergebnis.neu++;
-          else ergebnis.doppelt++;
-        },
-        abfragen,
+        (roh, jmapId) => aufnehmen(roh, { ordner: q.ordner, jmapId }),
+        optionen.abfragen,
       );
       await mitAkteur(db, akteur, (tx) => tx.update(quellen).set({ jmapStand: stand }).where(eq(quellen.id, q.id)));
       return ergebnis;
     }
-    const geheimnis = entschluesseln(schluessel, q.ciphertext).toString();
-    let anmeldung: { passwort: string; accessToken?: string } = { passwort: geheimnis };
-    if (q.oauth) {
-      const app = oauth?.[q.oauth];
-      if (!app) throw new Error(`OAuth für ${q.oauth} ist auf dem Server nicht eingerichtet`);
-      const t = await accessToken(q.oauth, app, geheimnis, abfragen);
-      // Microsoft gibt bei jedem Abruf ein neues Refresh-Token; das alte verfällt irgendwann
-      if (t.refreshToken)
-        await mitAkteur(db, akteur, (tx) =>
-          tx
-            .update(quellen)
-            .set({ ciphertext: verschluesseln(schluessel, Buffer.from(t.refreshToken!)) })
-            .where(eq(quellen.id, q.id)),
-        );
-      anmeldung = { passwort: "", accessToken: t.accessToken };
-    }
-    postfach = await oeffnen({
-      host: q.host,
-      port: q.port,
-      tls: q.tls,
-      benutzer: q.benutzer,
-      ordner: q.ordner,
-      ...anmeldung,
-    });
-    let seit = q.uidValidity === postfach.uidValidity ? q.letzteUid : 0;
-    if (seit !== q.letzteUid || q.uidValidity !== postfach.uidValidity) {
+    postfach = await oeffnen(zugang);
+    const uidValidity = postfach.uidValidity;
+    let seit = q.uidValidity === uidValidity ? q.letzteUid : 0;
+    if (seit !== q.letzteUid || q.uidValidity !== uidValidity) {
       await mitAkteur(db, akteur, (tx) =>
-        tx.update(quellen).set({ letzteUid: 0, uidValidity: postfach!.uidValidity }).where(eq(quellen.id, q.id)),
+        tx.update(quellen).set({ letzteUid: 0, uidValidity }).where(eq(quellen.id, q.id)),
       );
     }
     for await (const nachricht of postfach.neue(seit)) {
-      const { neu } = await mailAufnehmen(umgebung, nachricht.roh, "mail", akteur);
-      if (neu) ergebnis.neu++;
-      else ergebnis.doppelt++;
+      await aufnehmen(nachricht.roh, { ordner: q.ordner, uidValidity, uid: nachricht.uid });
       seit = Math.max(seit, nachricht.uid);
       await mitAkteur(db, akteur, (tx) => tx.update(quellen).set({ letzteUid: seit }).where(eq(quellen.id, q.id)));
     }
@@ -201,7 +230,7 @@ export async function abrufen(
   return ergebnis;
 }
 
-/** Ruft alle aktiven Quellen nacheinander ab */
+/** Ruft alle aktiven Quellen nacheinander ab; danach die fälligen Aktionen im Postfach */
 export async function alleAbrufen(
   umgebung: Umgebung,
   schluessel: Buffer,
@@ -209,7 +238,11 @@ export async function alleAbrufen(
   optionen: AbrufOptionen = {},
 ) {
   const aktive = (await listen(umgebung.db)).filter((q) => q.aktiv);
-  const ergebnisse: Record<string, AbrufErgebnis> = {};
-  for (const q of aktive) ergebnisse[q.name] = await abrufen(umgebung, schluessel, q.id, oeffnen, optionen);
+  const ergebnisse: Record<string, AbrufErgebnis & { aktionen: AktionenErgebnis }> = {};
+  for (const q of aktive) {
+    const abruf = await abrufen(umgebung, schluessel, q.id, oeffnen, optionen);
+    const aktionen = await aktionenAusfuehren(umgebung, schluessel, q.id, oeffnen, optionen);
+    ergebnisse[q.name] = { ...abruf, aktionen };
+  }
   return ergebnisse;
 }

@@ -1,7 +1,12 @@
 import { ImapFlow } from "imapflow";
-import type { Oeffnen } from "./abruf.ts";
+import type { Bearbeiten, Oeffnen } from "./abruf.ts";
 
-/** Öffnet ein Postfach mit imapflow (wie Kontext); nur lesend, nichts wird als gelesen markiert oder gelöscht */
+/**
+ * Öffnet ein Postfach mit imapflow (wie Kontext). Zum Abholen nur lesend (EXAMINE): nichts wird als gelesen markiert
+ * oder gelöscht. Mit schreiben (SELECT) für die Aktionen nach dem Abholen; jede läuft über die UID (imapflow-Doku:
+ * messageFlagsAdd, messageMove, messageDelete mit `{ uid: true }`). Die Methoden geben bei Ablehnung false zurück, statt
+ * zu werfen; das wird hier zum Fehler.
+ */
 export const imapOeffnen: Oeffnen = async (zugang) => {
   const client = new ImapFlow({
     host: zugang.host,
@@ -13,7 +18,30 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
     logger: false,
   });
   await client.connect();
-  const postfach = await client.mailboxOpen(zugang.ordner, { readOnly: true });
+  const postfach = await client.mailboxOpen(zugang.ordner, { readOnly: !zugang.schreiben });
+  const pruefen = (ok: unknown, was: string) => {
+    if (!ok) throw new Error(`IMAP: ${was} abgelehnt`);
+  };
+  const bearbeiten: Bearbeiten = {
+    async gibtEs(uid) {
+      const treffer = await client.search({ uid: String(uid) }, { uid: true });
+      return Array.isArray(treffer) && treffer.includes(uid);
+    },
+    async roh(uid) {
+      const n = await client.fetchOne(String(uid), { uid: true, source: true }, { uid: true });
+      return n && n.uid === uid && n.source ? new Uint8Array(n.source) : null;
+    },
+    async flagge(uid, flagge) {
+      pruefen(await client.messageFlagsAdd(String(uid), [flagge], { uid: true }), "Markieren");
+    },
+    async verschieben(uid, ziel) {
+      pruefen(await client.messageMove(String(uid), ziel, { uid: true }), "Verschieben");
+    },
+    // \Deleted und EXPUNGE; mit UIDPLUS (RFC 4315) nur diese UID, sonst alle als gelöscht markierten im Ordner
+    async loeschen(uid) {
+      pruefen(await client.messageDelete(String(uid), { uid: true }), "Löschen");
+    },
+  };
   return {
     uidValidity: Number(postfach.uidValidity),
     async *neue(seitUid: number) {
@@ -22,6 +50,10 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
         if (n.uid > seitUid && n.source) yield { uid: n.uid, roh: new Uint8Array(n.source) };
       }
     },
+    async ordner() {
+      return (await client.list()).map((o) => o.path);
+    },
+    ...(zugang.schreiben ? { bearbeiten } : {}),
     async schliessen() {
       await client.logout();
     },

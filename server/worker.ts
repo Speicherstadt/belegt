@@ -25,7 +25,7 @@ import { workflowsAusfuehren } from "./workflows/ausfuehren.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
- * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
+ * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab und führt danach fällige Aktionen dort aus, stellt alle 15 Sekunden Webhooks zu, liest
  * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, wertet Zuordnungsregeln aus, lernt aus den Einordnungen, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
  * und erzeugt Vorschaubilder und durchsuchbare PDFs von Scans. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
  * aufhält. Migrationen wendet der Server an, nicht der Worker.
@@ -41,6 +41,11 @@ async function runde() {
   const ergebnisse = await alleAbrufen({ db, speicher }, schluessel, imapOeffnen, { oauth: oauthAusEnv(env) });
   for (const [name, e] of Object.entries(ergebnisse)) {
     console.log(`Abruf ${name}: ${e.neu} neu, ${e.doppelt} doppelt${e.fehler ? `, Fehler: ${e.fehler}` : ""}`);
+    const a = e.aktionen;
+    if (a.ausgefuehrt || a.entfallen || a.fehler)
+      console.log(
+        `Aktionen im Postfach ${name}: ${a.ausgefuehrt} ausgeführt, ${a.entfallen} entfallen, ${a.fehler} Fehler`,
+      );
   }
 }
 

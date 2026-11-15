@@ -13,6 +13,7 @@ import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
 import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
+import { postfachAktion, postfachAktionenAbsatz } from "./postfach.ts";
 import { zugaengeBeschreiben } from "./zugaenge.ts";
 
 /**
@@ -146,8 +147,9 @@ export async function verfahrensdoku(
         "Jede Datei wird unverändert übernommen. Belegt berechnet beim Eingang den SHA-256 und speichert die Datei unter diesem Wert; den Dateityp erkennt es am Inhalt. Jedes Dokument bekommt dabei eine fortlaufende Archivnummer, die die Datenbank vergibt und versiegelt. Eine zweite Aufnahme derselben Datei legt ein weiteres Dokument an, schreibt die Datei aber nicht neu.",
         "E-Mails werden als Original (.eml) archiviert, jeder Anhang zusätzlich als eigenes Dokument mit Verweis auf seine Mail. Eine Mail, deren Inhalt schon archiviert ist, wird nicht doppelt aufgenommen.",
         quellen.length
-          ? `Postfächer werden alle ${abrufMinuten} Minuten nur lesend abgerufen (IMAP); Belegt löscht und verschiebt dort nichts. Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
+          ? `Postfächer werden alle ${abrufMinuten} Minuten abgerufen (IMAP oder JMAP). Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
           : "Es ist kein Postfach für den automatischen Abruf eingerichtet.",
+        quellen.length ? postfachAktionenAbsatz(quellen) : "",
         eingangsordner
           ? "Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht. Belegt nimmt eine Datei erst auf, wenn sie sich zwischen zwei Blicken nicht mehr ändert, und entfernt sie aus dem Ordner erst, nachdem sie im Archiv liegt. Dateien, die sich nicht aufnehmen lassen (größer als 100 MB oder 10 Minuten lang leer), verschiebt es in den Unterordner „fehler“; dort bleiben sie zur Klärung liegen."
           : "",
@@ -161,7 +163,7 @@ export async function verfahrensdoku(
       liste: [
         ...quellen.map(
           (q) =>
-            `Postfach „${q.name}“: ${q.benutzer} auf ${q.host}, Ordner ${q.ordner}${q.aktiv ? "" : " (deaktiviert)"}`,
+            `Postfach „${q.name}“: ${q.benutzer} auf ${q.host}, Ordner ${q.ordner}${q.aktiv ? "" : " (deaktiviert)"}; nach dem Abholen: ${postfachAktion(q)}`,
         ),
         ...importe.map(
           (l) =>

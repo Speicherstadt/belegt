@@ -24,6 +24,7 @@ export * from "./schema-alltag.ts";
 export * from "./schema-archivfassung.ts";
 export * from "./schema-import.ts";
 export * from "./schema-ordnung.ts";
+export * from "./schema-postfach.ts";
 
 /*
  * Tabellen von Belegt. Audit-Log, Kopf der Kette, Siegel und sealed_tables legt die erste Migration aus der Vorlage
@@ -239,11 +240,31 @@ export const quellen = pgTable(
     jmapStand: text("jmap_stand"),
     /** IMAP mit OAuth: microsoft oder google; ciphertext hält dann das Refresh-Token statt eines Passworts */
     oauth: text("oauth", { enum: ["microsoft", "google"] }),
+    /** Aktion im Postfach, nachdem eine Mail archiviert ist (server/mail/aktionen.ts); keine ist die Vorgabe */
+    aktion: text("aktion", { enum: ["keine", "gelesen", "markieren", "verschieben", "loeschen"] })
+      .notNull()
+      .default("keine"),
+    /** Zielordner für verschieben */
+    aktionZiel: text("aktion_ziel"),
+    /** Löschen frühestens so viele Stunden nach der Archivierung, damit eine Sicherung dazwischen liegt */
+    loeschenWarteStunden: integer("loeschen_warte_stunden").notNull().default(24),
+    /** Löschen erst, wenn die Datei im S3-Bucket bis zum Fristende gesperrt ist (objektsperren) */
+    loeschenNachSperre: boolean("loeschen_nach_sperre").notNull().default(false),
+    /** Wer das Löschen im Postfach ausdrücklich bestätigt hat, und wann; ohne Bestätigung kein Löschen */
+    loeschenBestaetigtVon: text("loeschen_bestaetigt_von"),
+    loeschenBestaetigtAm: timestamp("loeschen_bestaetigt_am", { withTimezone: true }),
   },
   (t) => [
     check("quellen_port", sql`${t.port} between 1 and 65535`),
     check("quellen_art", sql`${t.art} in ('imap', 'jmap')`),
     check("quellen_oauth", sql`${t.oauth} is null or (${t.oauth} in ('microsoft', 'google') and ${t.art} = 'imap')`),
+    check("quellen_aktion", sql`${t.aktion} in ('keine', 'gelesen', 'markieren', 'verschieben', 'loeschen')`),
+    check("quellen_aktion_ziel", sql`(${t.aktion} = 'verschieben') = (${t.aktionZiel} is not null)`),
+    check(
+      "quellen_loeschen_bestaetigt",
+      sql`${t.aktion} <> 'loeschen' or (${t.loeschenBestaetigtVon} is not null and ${t.loeschenBestaetigtAm} is not null)`,
+    ),
+    check("quellen_loeschen_warten", sql`${t.loeschenWarteStunden} between 1 and 2160`),
   ],
 );
 
