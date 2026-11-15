@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { constants } from "node:fs";
-import { mkdir, open, readdir, rename, stat, unlink } from "node:fs/promises";
+import { mkdir, open, readdir, realpath, rename, stat, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, sep } from "node:path";
 import { sql } from "drizzle-orm";
 import { aufnehmen, type Umgebung } from "../dokumente/dokumente.ts";
@@ -63,10 +63,20 @@ export async function auflisten(wurzel: string): Promise<Zustand> {
   return zustand;
 }
 
+/**
+ * Wirft, wenn der Ordner einer Datei nicht mehr im Eingangsordner liegt: Ein Unterordner kann zwischen Blick und Lesen
+ * (oder Entfernen) durch einen Symlink nach außen ersetzt worden sein, und O_NOFOLLOW schützt nur den Dateinamen selbst
+ */
+async function imOrdner(wurzel: string, rel: string): Promise<void> {
+  const erwartet = join(await realpath(wurzel), dirname(rel));
+  if ((await realpath(dirname(join(wurzel, rel)))) !== erwartet) throw new Error("Ordner liegt nicht mehr im Eingang");
+}
+
 /** Liest eine Datei, ohne einem Symlink zu folgen, der zwischen Blick und Lesen an ihre Stelle getreten ist */
-async function lesenOhneSymlink(pfad: string): Promise<Uint8Array> {
-  const datei = await open(pfad, constants.O_RDONLY | constants.O_NOFOLLOW);
+async function lesenOhneSymlink(wurzel: string, rel: string): Promise<Uint8Array> {
+  const datei = await open(join(wurzel, rel), constants.O_RDONLY | constants.O_NOFOLLOW);
   try {
+    await imOrdner(wurzel, rel);
     return new Uint8Array(await datei.readFile());
   } finally {
     await datei.close();
@@ -75,6 +85,7 @@ async function lesenOhneSymlink(pfad: string): Promise<Uint8Array> {
 
 /** Verschiebt nach fehler/ mit demselben Unterpfad; gibt es den Namen dort schon, mit Zähler */
 async function nachFehler(wurzel: string, rel: string): Promise<void> {
+  await imOrdner(wurzel, rel);
   const ziel = join(wurzel, FEHLER, rel);
   await mkdir(dirname(ziel), { recursive: true });
   const endung = extname(ziel);
@@ -122,10 +133,10 @@ const meldung = (err: unknown) => (err instanceof Error ? err.message : String(e
 const anzeige = (rel: string) => rel.split(sep).join("/");
 
 /** Liest eine Datei, die sich aufnehmen lässt; sonst ein Fehler, der sie nach fehler/ bringt */
-async function pruefenUndLesen(pfad: string, groesse: number): Promise<Uint8Array> {
+async function pruefenUndLesen(wurzel: string, rel: string, groesse: number): Promise<Uint8Array> {
   if (groesse === 0) throw new Error("Datei ist leer");
   if (groesse > MAX_DATEI) throw new Error("Datei zu groß (höchstens 100 MB)");
-  return lesenOhneSymlink(pfad);
+  return lesenOhneSymlink(wurzel, rel);
 }
 
 /** Die Unterordner einer Datei relativ zum Eingangsordner, je Ebene ein Name: „Steuer/2026/a.pdf“ → Steuer, 2026 */
@@ -172,7 +183,7 @@ export async function ordnerEinlesen(
     jetzt.delete(rel);
     let bytes: Uint8Array;
     try {
-      bytes = await pruefenUndLesen(pfad, zustand.get(rel)!.groesse);
+      bytes = await pruefenUndLesen(ordner, rel, zustand.get(rel)!.groesse);
     } catch (err) {
       ergebnis.fehler.push({ datei: anzeige(rel), meldung: meldung(err) });
       await nachFehler(ordner, rel).catch(() => {});
@@ -190,7 +201,9 @@ export async function ordnerEinlesen(
       continue;
     }
     // Erst jetzt liegt alles im Archiv. Lässt sich die Datei nicht entfernen, nimmt der nächste Blick sie als doppelt
-    await unlink(pfad).catch((err) => ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) }));
+    await imOrdner(ordner, rel)
+      .then(() => unlink(pfad))
+      .catch((err) => ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) }));
   }
   return { zustand: jetzt, ergebnis };
 }

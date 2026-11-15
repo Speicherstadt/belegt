@@ -1,4 +1,5 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, symlink, truncate, utimes, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, readdir, readFile, rename, rm, symlink, truncate, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -137,6 +138,37 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     expect(await dokumente("link.pdf")).toHaveLength(0);
     expect((await readdir(ordner)).sort()).toEqual([".versteckt.pdf", "Rechnungen", "link-ordner", "link.pdf"]);
     expect(await readFile(join(draussen, "geheim.pdf"), "utf8")).toContain("geheim");
+  });
+
+  it("folgt keinem Unterordner, der während des Blicks durch einen Symlink nach außen ersetzt wird", async () => {
+    for (const u of ["a", "b"]) {
+      await mkdir(join(ordner, u));
+      await writeFile(join(ordner, u, `${u}.pdf`), `%PDF-1.7\n% innen ${u}\n`);
+    }
+    await blick();
+    const draussen = join(wurzel, `draussen-tausch-${n}`);
+    let getauscht = false;
+    // Während der erste Teil aufgenommen wird, tauscht jemand beide Unterordner gegen Symlinks nach draußen
+    const tauschen = async () => {
+      if (!getauscht) {
+        getauscht = true;
+        for (const u of ["a", "b"]) {
+          await mkdir(join(draussen, u), { recursive: true });
+          await writeFile(join(draussen, u, `${u}.pdf`), `%PDF-1.7\n% geheim ${u}\n`);
+          await rename(join(ordner, u), join(ordner, `${u}-alt`));
+          await symlink(join(draussen, u), join(ordner, u));
+        }
+      }
+      return null;
+    };
+    await blick(tauschen);
+    for (const u of ["a", "b"])
+      expect(await readFile(join(draussen, u, `${u}.pdf`), "utf8"), `${u}.pdf draußen`).toContain("geheim");
+    const shas = (await t.sql<{ sha256: string }[]>`select sha256 from dokumente`).map((z) => z.sha256);
+    for (const u of ["a", "b"]) {
+      const sha = createHash("sha256").update(`%PDF-1.7\n% geheim ${u}\n`).digest("hex");
+      expect(shas, `geheim ${u} nicht im Archiv`).not.toContain(sha);
+    }
   });
 
   const tagsVon = async (dateiname: string) =>
