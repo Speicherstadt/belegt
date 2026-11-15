@@ -90,6 +90,23 @@ Stand im November 2026:
 
 Vorlage für Einbetten und Anmeldung ist Schreibzeug (`docs/kontext.de.md` dort).
 
+## Noch offen gegenüber Paperless-ngx
+
+Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug und Alltag. In Arbeit sind die ersten drei.
+
+| Funktion | Wichtig | Stand |
+| --- | --- | --- |
+| Durchsuchbares PDF/A als abgeleitete Fassung (Textebene aus der Texterkennung) | hoch | in Arbeit |
+| Korrespondenten als Liste mit Zuordnungsregeln (Wort, alle Wörter, exakt, regulärer Ausdruck, unscharf) und Vorschläge, die aus den eigenen Einordnungen lernen | mittel | in Arbeit |
+| Benutzer mit eingeschränkten Rechten (Mitarbeiter sehen nur bestimmte Tags oder Typen) | mittel | in Arbeit |
+| Aktionen im Postfach nach dem Abholen (verschieben, markieren, löschen) | niedrig bis mittel | offen |
+| Mehrere Dokumente als ZIP herunterladen oder per Mail verschicken | niedrig | offen |
+| Ablage mit lesbaren Namen und Ordnern (storage paths) | niedrig | offen |
+| Workflow-Auslöser „geändert“ und „Zeitplan“; Workflows bearbeiten | niedrig | offen |
+| Weitere Sprachen der Oberfläche (heute Deutsch und Englisch) | niedrig | offen |
+| Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
+| Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf | niedrig | offen |
+
 ## Offene Entscheidungen
 
 - [ ] Lizenz: AGPL wie Haben, Kontext und Schreibzeug?
