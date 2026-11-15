@@ -466,6 +466,7 @@
   "share_link_fetched": "{anzahl}-mal abgerufen, zuletzt {zeit}",
   "share_link_not_fetched": "Noch nicht abgerufen",
   "share_link_revoke": "Widerrufen",
+  "share_link_revoke_label": "Link gültig bis {datum} widerrufen",
   "share_link_failed": "Das hat nicht geklappt: {meldung}",
   "pages_label": "Seiten",
   "pages_range": "{von}–{bis} von {gesamt}",

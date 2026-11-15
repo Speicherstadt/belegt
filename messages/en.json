@@ -466,6 +466,7 @@
   "share_link_fetched": "Downloaded {anzahl} times, last {zeit}",
   "share_link_not_fetched": "Not downloaded yet",
   "share_link_revoke": "Revoke",
+  "share_link_revoke_label": "Revoke link valid until {datum}",
   "share_link_failed": "That did not work: {meldung}",
   "pages_label": "Pages",
   "pages_range": "{von}–{bis} of {gesamt}",

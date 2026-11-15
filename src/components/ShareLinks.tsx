@@ -109,6 +109,7 @@ export function ShareLinks({ dokumentId }: { dokumentId: string }) {
               <button
                 type="button"
                 onClick={() => widerrufen.mutate(l.id)}
+                aria-label={m.share_link_revoke_label({ datum: zeitpunkt(l.gueltigBis) })}
                 disabled={widerrufen.isPending}
                 className="h-8 rounded-md border border-border px-3 font-medium hover:bg-subtle disabled:opacity-60"
               >
