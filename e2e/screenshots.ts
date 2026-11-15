@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 
 /*
- * Bilder für README und Doku: erfundene Dokumente, Mails und Einordnungen, dann je Seite hell und dunkel nach
- * docs/assets/. Läuft nur mit DOKU_SCREENSHOTS=1 (bun run screenshots), nicht in der CI.
+ * Bilder für README und Doku: erfundene Dokumente, Mails, Einordnungen, Tags, Dokumenttypen und Felder, dann je Seite
+ * hell und dunkel nach docs/assets/. Läuft nur mit DOKU_SCREENSHOTS=1 (bun run screenshots), nicht in der CI.
  */
 
 const UBL = readFileSync(new URL("../server/inhalt/beispiele/ubl.xml", import.meta.url), "utf8");
@@ -40,7 +40,28 @@ async function vorbereiten(page: Page) {
     titel: "Angebot Werkstattausstattung",
     korrespondent: "Werkstatt Beispiel GmbH",
   });
-  await hoch("xrechnung-2026-77.xml", Buffer.from(UBL), "application/xml");
+  const xrechnung = await hoch("xrechnung-2026-77.xml", Buffer.from(UBL), "application/xml");
+  await hoch("Scan-Tankquittung.pdf", pdf("Tankquittung"));
+  await hoch("Scan-Bewirtung.pdf", pdf("Bewirtungsbeleg"));
+
+  // Ordnung: Tags, Dokumenttypen und ein Betragsfeld, damit Liste und Dokument sie zeigen
+  const anlegen = async (pfad: string, body: object) =>
+    ((await (await r.post(pfad, json(body))).json()) as { id: string }).id;
+  const steuer = await anlegen("/api/tags", { name: "Steuer 2026", farbe: "blau" });
+  const fix = await anlegen("/api/tags", { name: "Fixkosten", farbe: "gruen" });
+  const buero = await anlegen("/api/tags", { name: "Büro", farbe: "violett" });
+  const rechnung = await anlegen("/api/dokumenttypen", { name: "Rechnung", vorgabeArt: "beleg" });
+  const vertrag = await anlegen("/api/dokumenttypen", { name: "Vertrag", vorgabeArt: null });
+  const betrag = await anlegen("/api/felder", { name: "Betrag", typ: "betrag" });
+  const ordnen = (id: string, a: object) => r.post(`/api/dokumente/${id}/ordnung`, json(a));
+  await ordnen(strom.id, {
+    tagsHinzu: [steuer, fix],
+    dokumenttyp: rechnung,
+    felder: [{ feldId: betrag, wert: "84,20" }],
+  });
+  await ordnen(miete.id, { tagsHinzu: [fix, buero], dokumenttyp: vertrag });
+  await ordnen(brief.id, { tagsHinzu: [buero] });
+  await ordnen(xrechnung.id, { tagsHinzu: [steuer], dokumenttyp: rechnung });
   const eml = [
     "From: Buchhaltung <rechnung@lieferant.example>",
     "To: anna@example.org",
@@ -89,8 +110,12 @@ test("Bilder für README und Doku", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Strom Oktober" })).toBeVisible();
   await bild(page, "archiv");
 
+  // Eingang mit Mehrfachauswahl: zwei Scans gewählt, darüber die Sammelbearbeitung; daneben „Foto aufnehmen“
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Foto aufnehmen" })).toBeVisible();
+  for (const name of ["Scan-Tankquittung.pdf", "Scan-Bewirtung.pdf"])
+    await page.getByRole("checkbox", { name: `${name} auswählen` }).check();
   await bild(page, "eingang");
 
   const x = page.getByRole("link", { name: "xrechnung-2026-77.xml" });

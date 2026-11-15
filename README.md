@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-archiv-dunkel.png">
-  <img src="docs/assets/screenshot-archiv.png" alt="Archiv in Belegt: Strom Oktober als Buchungsbeleg bis 31.12.2034, Mietvertrag freiwillig bis 28.02.2034, Angebot als Geschäftsbrief bis 31.12.2032, eine Mail und eine XRechnung im Eingang" width="900">
+  <img src="docs/assets/screenshot-archiv.png" alt="Archiv in Belegt mit Archivnummer, Tags und Dokumenttyp: Mietvertrag freiwillig bis 28.02.2034, Angebot als Geschäftsbrief bis 31.12.2032, eine Mail, zwei Scans und eine XRechnung im Eingang; darüber Filter nach Tags, Dokumenttyp und Feld" width="900">
 </picture>
 
 **Belegt ist, was du beweisen kannst.**<br>
@@ -87,7 +87,7 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
   </tr>
   <tr>
     <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-fristen-dunkel.png"><img src="docs/assets/screenshot-fristen.png" alt="Fristen nach § 147 AO mit Jahren und Grundlage, Sperren und Übersicht"></picture><br><sub><b>Fristen</b>: nach § 147 AO, mit Sperren</sub></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-eingang-dunkel.png"><img src="docs/assets/screenshot-eingang.png" alt="Eingang mit einer Mail und einer XRechnung, die noch eingeordnet werden"></picture><br><sub><b>Eingang</b>: was noch eingeordnet werden muss</sub></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-eingang-dunkel.png"><img src="docs/assets/screenshot-eingang.png" alt="Eingang mit Foto aufnehmen und Mehrfachauswahl: zwei Scans gewählt, darüber die Sammelbearbeitung"></picture><br><sub><b>Eingang</b>: was noch eingeordnet werden muss</sub></td>
   </tr>
 </table>
 
