@@ -148,7 +148,9 @@ Dokuments an das Modell; deshalb gehört es auf einen eigenen Server, etwa Ollam
 `--profile ki`, dann einmal `docker compose exec ollama ollama pull <Modell>`). Ein Vorschlag ist nur ein Vorschlag: Auf
 der Seite des Dokuments übernimmt „Übernehmen“ die Felder ins Formular, eingeordnet wird erst mit „Einordnen“. Belegt
 prüft jede Antwort (nur die bekannten Arten, nur Tage, die es gibt); Anweisungen im Text eines Dokuments ändern daran
-nichts. Die Verfahrensdokumentation nennt Modell und Server.
+nichts. Gefragt wird, sobald der Text gelesen ist; bei `.doc`, `.xls`, `.ppt` und `.rtf` wartet der Worker mit
+`VORSCHAU_URL` auf den Text aus der [Ansicht](#ansicht-von-office-dateien), ohne fragt er gleich. Der Vorschlag ist aus
+dem Inhalt abgeleitet und geht mit der Löschung mit. Die Verfahrensdokumentation nennt Modell und Server.
 
 ## SMTP-Journal
 

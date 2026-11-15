@@ -1,6 +1,10 @@
+import { readFileSync } from "node:fs";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { ansichtenErzeugen } from "../ansicht/ansicht.ts";
 import { inhalteErzeugen } from "../inhalt/inhalt.ts";
 import { testApp } from "../test-app.ts";
+import { cfbDatei } from "../test-cfb.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { type KiKontext, kiFragen } from "./ki.ts";
 import { kiVorschlaegeErzeugen } from "./vorschlaege.ts";
@@ -149,5 +153,93 @@ describe.skipIf(!testDatenbankUrl)("Vorschläge im Eingang gegen Postgres", () =
     expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: kaputt.abfragen })).toEqual({ erzeugt: 0, fehler: 1 });
     expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: kaputt.abfragen })).toEqual({ erzeugt: 0, fehler: 0 });
     expect((await (await anfrage(`/api/dokumente/${d.id}/vorschlag`)).json()).ki).toBeNull();
+  });
+
+  it("wartet bei alten Office-Formaten auf den Text aus der Ansicht, aber nur mit Vorschau-Dienst", async () => {
+    const hoch = async (name: string) => {
+      const f = new FormData();
+      f.append("datei", new File([new Uint8Array(cfbDatei([{ name: "WordDocument", typ: 2 }]))], name));
+      return (await (await anfrage("/api/dokumente", { method: "POST", body: f })).json()).id as string;
+    };
+    // Nachgebauter Vorschau-Dienst: ein PDF mit Text, für „kaputt.doc“ ein Fehler der Datei
+    const vorschau = async (_url: string, init: RequestInit) => {
+      const pdf = await PDFDocument.create();
+      const schrift = await pdf.embedFont(StandardFonts.Helvetica);
+      pdf.addPage().drawText("Mietvertrag Gewerberaum", { x: 50, y: 700, font: schrift });
+      return init.method === "GET" ? new Response("ok") : new Response(new Uint8Array(await pdf.save()));
+    };
+    const id = await hoch("miete.doc");
+    const o = ollama(() => gut);
+    expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: o.abfragen, vorschau: true })).toEqual({
+      erzeugt: 0,
+      fehler: 0,
+    });
+    await ansichtenErzeugen(t, "http://vorschau:3000/", { abfragen: vorschau });
+    expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: o.abfragen, vorschau: true })).toEqual({
+      erzeugt: 1,
+      fehler: 0,
+    });
+    expect(JSON.stringify(o.anfragen.at(-1)!.body)).toContain("Mietvertrag Gewerberaum");
+    expect((await (await anfrage(`/api/dokumente/${id}/vorschlag`)).json()).ki).toMatchObject({ art: "beleg" });
+
+    // Lässt sich die Datei nicht umwandeln, kommt kein Text mehr: nicht weiter warten
+    await hoch("kaputt.doc");
+    await ansichtenErzeugen(t, "http://vorschau:3000/", {
+      abfragen: async (_url, init) =>
+        init.method === "GET" ? new Response("ok") : new Response(null, { status: 400 }),
+    });
+    expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: o.abfragen, vorschau: true })).toEqual({
+      erzeugt: 1,
+      fehler: 0,
+    });
+
+    // Ohne Vorschau-Dienst käme der Text nie: gleich vorschlagen
+    await hoch("ohne-vorschau.doc");
+    expect(await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: o.abfragen })).toEqual({ erzeugt: 1, fehler: 0 });
+  });
+
+  it("entfernt den Vorschlag mit der bestätigten Löschung; danach kommt keiner mehr hinein", async () => {
+    const f = new FormData();
+    f.append("datei", new File(["Quittung Parkhaus"], "parken.txt"));
+    const d = await (await anfrage("/api/dokumente", { method: "POST", body: f })).json();
+    await inhalteErzeugen(t);
+    await kiVorschlaegeErzeugen(t.db, konfig, { abfragen: ollama(() => gut).abfragen });
+    expect(await t.sql`select 1 from ki_vorschlaege where dokument_id = ${d.id}`).toHaveLength(1);
+    await anfrage(`/api/dokumente/${d.id}/einordnung`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ art: "frei", entstanden: "2026-11-01" }),
+    });
+    // Frei Abgelegtes ist mit dem Antrag gelöscht
+    expect((await anfrage(`/api/dokumente/${d.id}/loeschung`, { method: "POST" })).status).toBe(201);
+    expect(await t.sql`select 1 from ki_vorschlaege where dokument_id = ${d.id}`).toHaveLength(0);
+    // Ein Worker, der gerade fragt, bringt ihn nicht zurück
+    await t.sql`insert into ki_vorschlaege (dokument_id, modell, vorschlag) values (${d.id}, 'm', ${JSON.stringify(gut)}::jsonb)`;
+    expect(await t.sql`select 1 from ki_vorschlaege where dokument_id = ${d.id}`).toHaveLength(0);
+    expect((await (await anfrage(`/api/dokumente/${d.id}/vorschlag`)).json()).ki).toBeNull();
+  });
+
+  it("die Migration entfernt Vorschläge schon gelöschter Dokumente", async () => {
+    const f = new FormData();
+    f.append("datei", new File(["Alte Quittung"], "alt.txt"));
+    const d = await (await anfrage("/api/dokumente", { method: "POST", body: f })).json();
+    await anfrage(`/api/dokumente/${d.id}/einordnung`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ art: "frei", entstanden: "2026-11-01" }),
+    });
+    await anfrage(`/api/dokumente/${d.id}/loeschung`, { method: "POST" });
+    // Wie vor der Migration: ein Vorschlag, der die Löschung überlebt hat (an den Triggern vorbei)
+    await t.sql.begin(async (tx) => {
+      await tx`set local session_replication_role = replica`;
+      await tx`insert into ki_vorschlaege (dokument_id, modell, fehler) values (${d.id}, 'm', 'alt')`;
+    });
+    expect(await t.sql`select 1 from ki_vorschlaege where dokument_id = ${d.id}`).toHaveLength(1);
+    const migration = readFileSync(new URL("../../drizzle/0031_ki_vorschlag_loeschung.sql", import.meta.url), "utf8");
+    const aufraeumen = migration
+      .split("--> statement-breakpoint")
+      .find((s) => /^DELETE FROM ki_vorschlaege k/m.test(s));
+    await t.sql.unsafe(aufraeumen!);
+    expect(await t.sql`select 1 from ki_vorschlaege where dokument_id = ${d.id}`).toHaveLength(0);
   });
 });

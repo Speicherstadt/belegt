@@ -119,14 +119,18 @@ export async function ansichtenErzeugen(
       fehler++;
       continue;
     }
-    await db
-      .insert(ansichten)
-      .values({ dokumentId: d.id, pdf: Buffer.from(pdf) })
-      .onConflictDoNothing();
-    if (ALT.includes(d.mime_type)) {
-      const g = await lesenImKind(pdf, "application/pdf").catch(() => null);
-      if (g) await db.insert(inhalte).values({ dokumentId: d.id, text: g.text }).onConflictDoNothing();
-    }
+    // Den Text erst lesen, dann Ansicht und Text zusammen speichern: Wer auf die Ansicht wartet (die Vorschläge des
+    // Sprachmodells), findet dann auch den Text
+    const text = ALT.includes(d.mime_type)
+      ? ((await lesenImKind(pdf, "application/pdf").catch(() => null))?.text ?? null)
+      : null;
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(ansichten)
+        .values({ dokumentId: d.id, pdf: Buffer.from(pdf) })
+        .onConflictDoNothing();
+      if (text !== null) await tx.insert(inhalte).values({ dokumentId: d.id, text }).onConflictDoNothing();
+    });
     erzeugt++;
   }
   return { erzeugt, fehler };

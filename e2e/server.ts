@@ -95,9 +95,12 @@ const kiAbfragen = async (_url: string, init: RequestInit) => {
 };
 setInterval(
   () =>
-    void kiVorschlaegeErzeugen(db, { url: "http://ki.invalid", modell: "e2e-modell" }, { abfragen: kiAbfragen }).catch(
-      () => {},
-    ),
+    void kiVorschlaegeErzeugen(
+      db,
+      { url: "http://ki.invalid", modell: "e2e-modell" },
+      // Der nachgebaute Vorschau-Dienst oben läuft: alte Office-Formate warten auf ihre Ansicht
+      { abfragen: kiAbfragen, vorschau: true },
+    ).catch(() => {}),
   1000,
 );
 console.log(`E2E-Server auf Port ${port}`);

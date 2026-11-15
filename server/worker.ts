@@ -94,10 +94,13 @@ async function zeitstempel(dienst: string) {
   }
 }
 
-/** Mit KI_URL und KI_MODELL: Vorschläge zur Einordnung für den Eingang, alle 30 Sekunden */
+/**
+ * Mit KI_URL und KI_MODELL: Vorschläge zur Einordnung für den Eingang, alle 30 Sekunden; mit VORSCHAU_URL warten alte
+ * Office-Formate auf ihren Text aus der Ansicht
+ */
 async function kiVorschlaege(konfig: { url: string; modell: string }) {
   for (;;) {
-    const r = await kiVorschlaegeErzeugen(db, konfig).catch((err) => ({
+    const r = await kiVorschlaegeErzeugen(db, konfig, { vorschau: Boolean(env.VORSCHAU_URL) }).catch((err) => ({
       erzeugt: 0,
       fehler: 1,
       meldung: meldung(err),

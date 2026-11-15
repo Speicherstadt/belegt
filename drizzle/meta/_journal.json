@@ -218,6 +218,13 @@
       "when": 1794716730183,
       "tag": "0030_regeln_ohne_art",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794719012205,
+      "tag": "0031_ki_vorschlag_loeschung",
+      "breakpoints": true
     }
   ]
 }

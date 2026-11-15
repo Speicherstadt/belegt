@@ -380,7 +380,8 @@ export const zeitstempel = pgTable("zeitstempel", {
 
 /**
  * Vorschläge eines Sprachmodells zur Einordnung (lokal, KI_URL); nur ein Vorschlag, eingeordnet wird erst, wenn ein
- * Mensch ihn übernimmt. Abgeleitet und neu erzeugbar, deshalb ohne Siegel und Audit-Log.
+ * Mensch ihn übernimmt. Abgeleitet und neu erzeugbar, deshalb ohne Siegel und Audit-Log; mit der bestätigten Löschung
+ * geht er mit (belegt_inhalt_loeschen, drizzle/0031_ki_vorschlag_loeschung.sql).
  */
 export const kiVorschlaege = pgTable("ki_vorschlaege", {
   dokumentId: uuid("dokument_id")

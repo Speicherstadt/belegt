@@ -1,18 +1,26 @@
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
 import { dokumenttypen, kiVorschlaege, tags } from "../db/schema.ts";
+import { ALTE_OFFICE_TYPEN } from "../dokumente/dateityp.ts";
 import { inhaltZu, LESBAR, textZu } from "../inhalt/inhalt.ts";
 import { mailZuDokument } from "../mail/import.ts";
 import { type Abfragen, type KiKonfig, KiVorschlag, kiFragen } from "./ki.ts";
 
+const ALTE_TYPEN = sql`array[${sql.join(
+  Object.values(ALTE_OFFICE_TYPEN).map((m) => sql`${m}`),
+  sql`, `,
+)}]::text[]`;
+
 /**
  * Erzeugt Vorschläge für Dokumente im Eingang (nicht eingeordnet, nicht gelöscht), sobald ihr Inhalt gelesen ist. Läuft
- * im Worker; ein Fehler wird festgehalten, damit dasselbe Dokument nicht in jedem Lauf wieder scheitert.
+ * im Worker; ein Fehler wird festgehalten, damit dasselbe Dokument nicht in jedem Lauf wieder scheitert. Den Text alter
+ * Office-Formate (.doc, .xls, .ppt, .rtf) gibt es nur aus der Ansicht: Mit vorschau (VORSCHAU_URL gesetzt) wartet der
+ * Vorschlag auf sie, ohne käme er nie.
  */
 export async function kiVorschlaegeErzeugen(
   db: Datenbank,
   konfig: KiKonfig,
-  { stapel = 5, abfragen }: { stapel?: number; abfragen?: Abfragen } = {},
+  { stapel = 5, abfragen, vorschau = false }: { stapel?: number; abfragen?: Abfragen; vorschau?: boolean } = {},
 ) {
   const offen = await db.execute<{ id: string; dateiname: string | null; mime_type: string; eingegangen_am: Date }>(sql`
     select d.id, d.dateiname, d.mime_type, d.eingegangen_am from dokumente d
@@ -25,6 +33,9 @@ export async function kiVorschlaegeErzeugen(
          sql`, `,
        )}]::text[]`})
             or exists (select 1 from inhalte i where i.dokument_id = d.id))
+       -- Alte Office-Formate mit Vorschau-Dienst, erst wenn die Ansicht da ist (mit Text) oder scheiterte
+       and (not ${vorschau} or not d.mime_type = any(${ALTE_TYPEN})
+            or exists (select 1 from ansichten a where a.dokument_id = d.id))
      order by d.eingegangen_am limit ${stapel}`);
   let erzeugt = 0;
   let fehler = 0;
