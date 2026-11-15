@@ -1,6 +1,12 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { ALGORITHMEN, MAX_ABGLEICH_TEXT, regexGueltig } from "../../shared/abgleich.ts";
+import {
+  ALGORITHMEN,
+  MAX_ABGLEICH_TEXT,
+  MAX_UNSCHARF_TEXT,
+  regexGueltig,
+  unscharfKurzGenug,
+} from "../../shared/abgleich.ts";
 import { betragAusText, FARBNAMEN, type Farbe, FELDTYPEN, type Feldtyp, GRENZE } from "../../shared/ordnung.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
@@ -26,29 +32,37 @@ export const Abgleich = z.object({
 const abgleichGueltig = (a: z.infer<typeof Abgleich>) =>
   a.abgleich !== "regex" || (a.abgleichText !== undefined && regexGueltig(a.abgleichText.trim()));
 const REGEX_UNGUELTIG = { message: "Kein gültiger regulärer Ausdruck", path: ["abgleichText"] };
+export const UNSCHARF_ZU_LANG = {
+  message: `Für „unscharf“ höchstens ${MAX_UNSCHARF_TEXT} Zeichen`,
+  path: ["abgleichText"],
+};
 /** Ob eine Änderung etwas an der Zuordnungsregel ändert */
 export const aendertAbgleich = (a: z.infer<typeof Abgleich>) =>
   a.abgleich !== undefined || a.abgleichText !== undefined || a.grossKleinEgal !== undefined;
 
 export const TagEingabe = z
   .object({ name: Name, farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).default("grau"), ...Abgleich.shape })
-  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+  .refine(abgleichGueltig, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 export const TagAenderung = z
   .object({ name: Name.optional(), farbe: z.enum(FARBNAMEN as [Farbe, ...Farbe[]]).optional(), ...Abgleich.shape })
   .refine((t) => t.name !== undefined || t.farbe !== undefined || aendertAbgleich(t), {
     message: "Name, Farbe oder Zuordnung",
   })
-  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+  .refine(abgleichGueltig, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 
 export const DokumenttypEingabe = z
   .object({ name: Name, vorgabeArt: z.enum(ARTEN).nullable().default(null), ...Abgleich.shape })
-  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+  .refine(abgleichGueltig, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 export const DokumenttypAenderung = z
   .object({ name: Name.optional(), vorgabeArt: z.enum(ARTEN).nullable().optional(), ...Abgleich.shape })
   .refine((t) => t.name !== undefined || t.vorgabeArt !== undefined || aendertAbgleich(t), {
     message: "Name, Vorgabe-Art oder Zuordnung",
   })
-  .refine(abgleichGueltig, REGEX_UNGUELTIG);
+  .refine(abgleichGueltig, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 
 const Optionen = z
   .array(z.string().trim().min(1).max(100))

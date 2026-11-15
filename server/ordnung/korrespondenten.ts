@@ -1,12 +1,20 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { regexGueltig } from "../../shared/abgleich.ts";
+import { regexGueltig, unscharfKurzGenug } from "../../shared/abgleich.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumentKorrespondenten, korrespondenten, regeln, workflows } from "../db/schema.ts";
 import type { Sicht } from "../zugang/sicht.ts";
 import type { Korrespondent } from "./korrespondent-setzen.ts";
-import { Abgleich, aendertAbgleich, eindeutig, imSichtbereich, inSicht, konflikt } from "./ordnung.ts";
+import {
+  Abgleich,
+  aendertAbgleich,
+  eindeutig,
+  imSichtbereich,
+  inSicht,
+  konflikt,
+  UNSCHARF_ZU_LANG,
+} from "./ordnung.ts";
 
 export { korrespondentMitNamen, korrespondentSetzen } from "./korrespondent-setzen.ts";
 
@@ -22,11 +30,15 @@ const regexPasst = (a: z.infer<typeof Abgleich>) =>
   a.abgleich !== "regex" || (a.abgleichText !== undefined && regexGueltig(a.abgleichText.trim()));
 const REGEX_UNGUELTIG = { message: "Kein gültiger regulärer Ausdruck", path: ["abgleichText"] };
 
-export const KorrespondentEingabe = z.object({ name: Name, ...Abgleich.shape }).refine(regexPasst, REGEX_UNGUELTIG);
+export const KorrespondentEingabe = z
+  .object({ name: Name, ...Abgleich.shape })
+  .refine(regexPasst, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 export const KorrespondentAenderung = z
   .object({ name: Name.optional(), ...Abgleich.shape })
   .refine((k) => k.name !== undefined || aendertAbgleich(k), { message: "Name oder Zuordnung" })
-  .refine(regexPasst, REGEX_UNGUELTIG);
+  .refine(regexPasst, REGEX_UNGUELTIG)
+  .refine(unscharfKurzGenug, UNSCHARF_ZU_LANG);
 export const Zusammenfuehrung = z.object({ ziel: z.uuid() });
 
 export type { Korrespondent };

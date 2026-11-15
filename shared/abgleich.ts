@@ -29,6 +29,16 @@ export interface Abgleich {
 /** Längster Text einer Regel; bei einem regulären Ausdruck begrenzt das auch, wie viel er sich vornehmen kann */
 export const MAX_ABGLEICH_TEXT = 500;
 
+/**
+ * Längstes Muster für „unscharf“: Jedes Stück des Texts wird mit dem ganzen Muster verglichen (Aufwand Länge²), bei 500
+ * Zeichen dauerte ein langer Text sonst Sekunden je Regel und Dokument
+ */
+export const MAX_UNSCHARF_TEXT = 100;
+
+/** Ob die Länge des Texts zum Algorithmus passt (für die Prüfung beim Anlegen) */
+export const unscharfKurzGenug = (a: { abgleich?: Algorithmus; abgleichText?: string }) =>
+  a.abgleich !== "unscharf" || (a.abgleichText ?? "").trim().length <= MAX_UNSCHARF_TEXT;
+
 /** Schwelle für „unscharf“ wie bei Paperless-ngx: rapidfuzz partial_ratio mit score_cutoff=90 */
 export const UNSCHARF_SCHWELLE = 90;
 
@@ -66,8 +76,11 @@ export function aehnlichkeit(a: string, b: string): number {
   return (200 * vorher[y.length]!) / (x.length + y.length);
 }
 
-/** Höchstens so viele Zeichen des Dokuments prüft „unscharf“; danach würde der Vergleich zu teuer */
-const UNSCHARF_MAX_TEXT = 50_000;
+/**
+ * Höchstens so viele Zeichen des Dokuments prüft „unscharf“; mit MAX_UNSCHARF_TEXT bleibt eine Regel so unter einer
+ * Viertelsekunde je Dokument. Absender, Firmen und Betreff stehen vorn (Dateiname, Mailkopf, Briefkopf).
+ */
+const UNSCHARF_MAX_TEXT = 10_000;
 
 /**
  * Teilähnlichkeit wie rapidfuzz partial_ratio: das Muster gegen jedes gleich lange Stück des Texts, das an einem
@@ -110,8 +123,10 @@ export function trifft(regel: Abgleich, text: string): boolean | null {
     case "unscharf": {
       const klein = (t: string) => (regel.grossKleinEgal ? t.toLowerCase() : t);
       return (
-        teilAehnlichkeit(klein(ohneSatzzeichen(muster)), klein(ohneSatzzeichen(text).replace(/\s+/g, " "))) >=
-        UNSCHARF_SCHWELLE
+        teilAehnlichkeit(
+          klein(ohneSatzzeichen(muster.slice(0, MAX_UNSCHARF_TEXT))),
+          klein(ohneSatzzeichen(text.slice(0, UNSCHARF_MAX_TEXT)).replace(/\s+/g, " ")),
+        ) >= UNSCHARF_SCHWELLE
       );
     }
   }

@@ -85,4 +85,13 @@ describe("Zuordnungsregeln", () => {
     expect(trifft(regel("unscharf", "Müller Bäckerei"), "Mueller Baeckerei")).toBe(false);
     expect(trifft(regel("unscharf", "Müller Bäckerei"), "Mülller Bäckerei")).toBe(true);
   });
+
+  it("unscharf: bleibt schnell bei langem Muster und langem Text, und trifft am Anfang des Texts", () => {
+    // Ein Muster aus der Zeit vor der Grenze (500 Zeichen) gegen einen Text mit 25 000 Wortanfängen
+    const lang = regel("unscharf", "ab ".repeat(166));
+    const start = performance.now();
+    expect(trifft(lang, "x ".repeat(25_000))).toBe(false);
+    expect(performance.now() - start).toBeLessThan(2000);
+    expect(trifft(regel("unscharf", "Telekom Deutschland"), `Telekon Deutschland ${"x ".repeat(25_000)}`)).toBe(true);
+  });
 });

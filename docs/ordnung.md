@@ -75,7 +75,7 @@ Belegt die Dokumente im Eingang neu.
 | Alle Wörter | jedes der Wörter enthält, in beliebiger Reihenfolge |
 | Exakt | genau diese Zeichenfolge als ganze Wörter enthält |
 | Regulärer Ausdruck | auf den Ausdruck passt (JavaScript, Unicode); nach 0,1 Sekunden bricht Belegt ab, die Regel trifft dann nicht und der Vorschlag nennt sie |
-| Unscharf | dem Text an einer Stelle zu mindestens 90 % gleicht, Satzzeichen nicht gezählt (Tippfehler, „Telekon“ statt „Telekom“) |
+| Unscharf | dem Text an einer Stelle zu mindestens 90 % gleicht, Satzzeichen nicht gezählt (Tippfehler, „Telekon“ statt „Telekom“); höchstens 100 Zeichen, geprüft in den ersten 10 000 Zeichen des Dokuments |
 | Automatisch | Vorgabe: kein Text, Belegt lernt aus deinen Einordnungen (unten) |
 
 „Groß- und Kleinschreibung ignorieren“ ist vorgegeben. Wortgrenzen und Groß- und Kleinschreibung gelten auch für

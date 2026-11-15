@@ -85,6 +85,10 @@ describe.skipIf(!testDatenbankUrl)("Korrespondenten als Liste gegen Postgres", (
     ).toBe(400);
     expect((await als(inhaber)("/api/korrespondenten", json({ name: "Y", abgleich: "regex" }))).status).toBe(400);
     expect((await als(inhaber)("/api/korrespondenten", json({ name: "Z", abgleich: "magisch" }))).status).toBe(400);
+    // Unscharf vergleicht jedes Stück des Texts mit dem ganzen Muster; ein langes Muster wäre zu teuer
+    const unscharf = (abgleichText: string) => json({ name: "Unscharf", abgleich: "unscharf", abgleichText });
+    expect((await als(inhaber)("/api/korrespondenten", unscharf("a".repeat(101)))).status).toBe(400);
+    expect((await als(inhaber)("/api/tags", unscharf("a".repeat(101)))).status).toBe(400);
     for (const cookie of [kanzlei, pruefer])
       expect((await als(cookie)("/api/korrespondenten", json({ name: "Fremd" }))).status).toBe(403);
     const [eintrag] = await t.sql`select actor from audit_log where table_name = 'korrespondenten'
