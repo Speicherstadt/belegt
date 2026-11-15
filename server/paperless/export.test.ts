@@ -214,6 +214,38 @@ describe.skipIf(!testDatenbankUrl)("Import aus einem Export von Paperless-ngx", 
     expect(n!.text).toMatch(/^Notiz\n/);
   });
 
+  it("zeigt den Vorschlag aus Paperless-ngx nach der Löschung des Dokuments nicht mehr", async () => {
+    const original = text("%PDF-1.4\n% Wird geloescht\n");
+    const manifest = [
+      {
+        model: "documents.document",
+        pk: 41,
+        fields: { title: "Privates Schreiben", tags: [], checksum: sha(original), created: "2026-02-03" },
+        __exported_file_name__: "originals/weg.pdf",
+      },
+    ];
+    const zip = zipSync({ "manifest.json": text(JSON.stringify(manifest)), "originals/weg.pdf": original });
+    const l = (await (await hochladen(zip)).json()) as { id: string };
+    expect(await lauf()).toMatchObject({ id: l.id, status: "fertig" });
+    const [e] = await t.sql<
+      { dokument_id: string }[]
+    >`select dokument_id from import_eintraege where import_id = ${l.id}`;
+    const id = e!.dokument_id;
+    const vorschlag = async () => (await t.anfrage(`/api/dokumente/${id}/vorschlag`, {}, inhaber)).json();
+    expect((await vorschlag()).import).toMatchObject({ titel: "Privates Schreiben" });
+    const post = (pfad: string, body?: unknown) =>
+      t.anfrage(
+        pfad,
+        { method: "POST", headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : null },
+        inhaber,
+      );
+    expect((await post(`/api/dokumente/${id}/einordnung`, { art: "frei", entstanden: "2026-02-03" })).status).toBe(201);
+    expect((await post(`/api/dokumente/${id}/loeschung`)).status).toBe(201);
+    // Das Ergebnis des Imports bleibt versiegelt; als Vorschlag zeigt es Belegt nach der Löschung nicht mehr, wie den
+    // Vorschlag des Sprachmodells, der mit der Löschung geht
+    expect((await vorschlag()).import).toBeNull();
+  });
+
   it("beendet den Lauf mit Fehler, wenn das Manifest fehlt, und bricht einen wartenden sofort ab", async () => {
     const ohne = (await (await hochladen(zipSync({ "a.pdf": text("a") }))).json()) as { id: string };
     const r = await lauf();

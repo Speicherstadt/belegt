@@ -56,7 +56,7 @@ Belegt nicht. Einen abgebrochenen Export lädst du neu hoch; was schon übernomm
 
 Paperless-ngx kennt keine Aufbewahrungsfrist. Deshalb landet jedes Dokument zuerst im [Eingang](eingang.md). Titel,
 Korrespondent und Datum (`created`) aus Paperless-ngx stehen dort als Vorschlag; „Übernehmen“ trägt sie ins Formular,
-eingeordnet wird erst mit „Einordnen“.
+eingeordnet wird erst mit „Einordnen“. Nach der Löschung des Dokuments zeigt Belegt den Vorschlag nicht mehr.
 
 Unter **Zuordnung zur Art** legst du fest, welche Dokumenttypen oder Tags aus Paperless-ngx schon eine Art bestimmen,
 etwa Dokumenttyp „Rechnung“ → Buchungsbelege. Passt eine Zuordnung, ordnet der Import das Dokument gleich ein, mit

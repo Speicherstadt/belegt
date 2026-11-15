@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import type { Feldtyp } from "../../shared/ordnung.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
@@ -302,7 +302,13 @@ export async function importVorschlagZu(db: Datenbank, dokumentId: string) {
       entstanden: importEintraege.entstanden,
     })
     .from(importEintraege)
-    .where(eq(importEintraege.dokumentId, dokumentId))
+    // Nach der bestätigten Löschung kein Vorschlag mehr: Titel und Korrespondent bleiben nur im versiegelten Ergebnis
+    .where(
+      and(
+        eq(importEintraege.dokumentId, dokumentId),
+        sql`not exists (select 1 from loeschungen l where l.dokument_id = ${dokumentId} and l.bestaetigt_am is not null)`,
+      ),
+    )
     .orderBy(sql`${importEintraege.erstelltAm} desc`)
     .limit(1);
   return e && (e.titel || e.korrespondent || e.entstanden) ? { ...e, herkunft: "Paperless-ngx" as const } : null;
