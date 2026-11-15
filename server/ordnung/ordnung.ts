@@ -6,6 +6,7 @@ import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumentDokumenttypen, dokumentTags, dokumenttypen, felder, feldwerte, tags } from "../db/schema.ts";
 import { ARTEN } from "../einordnung/einordnung.ts";
+import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 
 /*
  * Tags, Dokumenttypen und eigene Felder anlegen, ändern und löschen. Löschen entfernt erst die Zuordnungen, Zeile für
@@ -84,28 +85,41 @@ export async function eindeutig<T>(arbeit: Promise<T>): Promise<T> {
 }
 
 /**
- * Nur Dokumente im Zeitraum eines Prüfers zählen (belegt_dokument_tag wie in der Liste). Die Spalte der äußeren Tabelle
- * ist ausgeschrieben: Drizzle ließe den Tabellennamen weg, und "id" träfe dann die innere Tabelle
+ * Nur Dokumente zählen, die der Zugang sieht (server/zugang/sicht.ts). Die Spalte der äußeren Tabelle ist
+ * ausgeschrieben: Drizzle ließe den Tabellennamen weg, und "id" träfe dann die innere Tabelle
  */
-export const imZeitraum = (spalte: string, zeitraum?: { von: string; bis: string }) =>
-  zeitraum
-    ? sql` and belegt_dokument_tag(${sql.raw(spalte)}) between ${zeitraum.von}::date and ${zeitraum.bis}::date`
-    : sql``;
+export const inSicht = (spalte: string, sicht?: Sicht) => (sicht ? sql` and ${sichtBedingung(spalte, sicht)}` : sql``);
 
-/** Tags mit der Zahl ihrer Dokumente; mit zeitraum (Prüfer) nur der Dokumente darin */
-export async function tagsListen(
-  db: Datenbank,
-  zeitraum?: { von: string; bis: string },
-): Promise<(Tag & { anzahl: number })[]> {
+/**
+ * Was ein Mitarbeiter von einer Liste sieht: hat sein Sichtbereich für diese Art Einträge, nur diese, sonst alle außer
+ * den ausgeschlossenen Tags. Gezählt werden in jedem Fall nur Dokumente in seiner Sicht.
+ */
+export function imSichtbereich<T extends { id: string }>(
+  liste: T[],
+  sicht: Sicht | undefined,
+  art: "tags" | "dokumenttypen" | "korrespondenten",
+): T[] {
+  const b = sicht?.bereich;
+  if (!b) return liste;
+  const erlaubt = b[art];
+  return liste.filter((e) => (erlaubt.length ? erlaubt.includes(e.id) : art !== "tags" || !b.ohneTags.includes(e.id)));
+}
+
+/** Tags mit der Zahl ihrer Dokumente; mit Sicht (Prüfer, Mitarbeiter) nur der Dokumente darin */
+export async function tagsListen(db: Datenbank, sicht?: Sicht): Promise<(Tag & { anzahl: number })[]> {
   const zeilen = await db
     .select({
       tag: tags,
       anzahl: sql<string>`(select count(*) from dokument_tags dt
-                            where dt.tag_id = "tags"."id"${imZeitraum("dt.dokument_id", zeitraum)})`,
+                            where dt.tag_id = "tags"."id"${inSicht("dt.dokument_id", sicht)})`,
     })
     .from(tags)
     .orderBy(asc(sql`lower(${tags.name})`));
-  return zeilen.map((z) => ({ ...z.tag, anzahl: Number(z.anzahl) }));
+  return imSichtbereich(
+    zeilen.map((z) => ({ ...z.tag, anzahl: Number(z.anzahl) })),
+    sicht,
+    "tags",
+  );
 }
 
 export async function tagAnlegen(db: Datenbank, eingabe: z.infer<typeof TagEingabe>, akteur: string): Promise<Tag> {
@@ -149,20 +163,21 @@ export async function dokumenttypMitNamen(tx: Tx, name: string): Promise<Dokumen
   return t!;
 }
 
-/** Dokumenttypen mit der Zahl ihrer Dokumente; mit zeitraum (Prüfer) nur der Dokumente darin */
-export async function dokumenttypenListen(
-  db: Datenbank,
-  zeitraum?: { von: string; bis: string },
-): Promise<(Dokumenttyp & { anzahl: number })[]> {
+/** Dokumenttypen mit der Zahl ihrer Dokumente; mit Sicht (Prüfer, Mitarbeiter) nur der Dokumente darin */
+export async function dokumenttypenListen(db: Datenbank, sicht?: Sicht): Promise<(Dokumenttyp & { anzahl: number })[]> {
   const zeilen = await db
     .select({
       typ: dokumenttypen,
       anzahl: sql<string>`(select count(*) from dokument_dokumenttypen dd
-                            where dd.dokumenttyp_id = "dokumenttypen"."id"${imZeitraum("dd.dokument_id", zeitraum)})`,
+                            where dd.dokumenttyp_id = "dokumenttypen"."id"${inSicht("dd.dokument_id", sicht)})`,
     })
     .from(dokumenttypen)
     .orderBy(asc(sql`lower(${dokumenttypen.name})`));
-  return zeilen.map((z) => ({ ...z.typ, anzahl: Number(z.anzahl) }));
+  return imSichtbereich(
+    zeilen.map((z) => ({ ...z.typ, anzahl: Number(z.anzahl) })),
+    sicht,
+    "dokumenttypen",
+  );
 }
 
 export async function dokumenttypAnlegen(

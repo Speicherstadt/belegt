@@ -44,7 +44,7 @@ export const openapi = {
     title: "Belegt",
     version: VERSION,
     description:
-      "Dokumentenarchiv mit GoBD-Modus. Programme melden sich mit `Authorization: Bearer belegt_…` an (API-Token mit dem Recht lesen oder schreiben). Webhooks melden `dokument.aufgenommen`, `dokument.eingeordnet`, `dokument.geloescht` und `dokument.workflow` (von einem Workflow, dann mit `workflow`: seinem Namen) als JSON `{id, art, dokumentId, zeitpunkt}`, signiert in `X-Belegt-Signatur: sha256=<HMAC-SHA256 des Rumpfs>`.",
+      "Dokumentenarchiv mit GoBD-Modus. Programme melden sich mit `Authorization: Bearer belegt_…` an (API-Token mit dem Recht lesen oder schreiben); Tokens legt nur der Inhaber an, sie sehen alle Dokumente. Mitarbeiter mit Sichtbereich bekommen keine Tokens und erreichen dieselben Pfade nur mit ihrer Sitzung, für Dokumente außerhalb ihres Sichtbereichs mit `404`. Webhooks melden `dokument.aufgenommen`, `dokument.eingeordnet`, `dokument.geloescht` und `dokument.workflow` (von einem Workflow, dann mit `workflow`: seinem Namen) als JSON `{id, art, dokumentId, zeitpunkt}`, signiert in `X-Belegt-Signatur: sha256=<HMAC-SHA256 des Rumpfs>`.",
   },
   components: {
     securitySchemes: { token: { type: "http", scheme: "bearer" } },
@@ -53,7 +53,11 @@ export const openapi = {
   security: [{ token: [] }],
   paths: {
     "/api/ich": {
-      get: { summary: "Wer angemeldet ist", responses: { "200": { description: "Zugang" }, "401": fehler } },
+      get: {
+        summary: "Wer angemeldet ist",
+        description: "id, email, role; beim Prüfer zeitraum, beim Mitarbeiter recht und sichtbereich",
+        responses: { "200": { description: "Zugang" }, "401": fehler },
+      },
     },
     "/api/dokumente": {
       get: {

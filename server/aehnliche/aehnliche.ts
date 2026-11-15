@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { Datenbank } from "../db/client.ts";
-import type { Zeitraum } from "../zugang/einladungen.ts";
+import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 
 /*
  * Ähnliche Dokumente aus dem Volltext, ohne Erweiterung wie pg_trgm: Aus dem Suchtext des Dokuments (suchtexte, deutsch
@@ -18,11 +18,11 @@ export interface Aehnliches {
   vorschaubild: boolean;
 }
 
-/** Bis zu limit ähnliche Dokumente, ohne gelöschte; mit Zeitraum (Prüfer) nur solche darin */
+/** Bis zu limit ähnliche Dokumente, ohne gelöschte; mit Sicht (Prüfer, Mitarbeiter) nur solche darin */
 export async function aehnliche(
   db: Datenbank,
   id: string,
-  { limit = 5, zeitraum }: { limit?: number; zeitraum?: Zeitraum } = {},
+  { limit = 5, sicht }: { limit?: number; sicht?: Sicht } = {},
 ): Promise<Aehnliches[]> {
   const zeilen = await db.execute<{
     id: string;
@@ -61,8 +61,7 @@ export async function aehnliche(
                           order by x.erstellt_am desc, x.id desc limit 1) e on true
      where d.id <> ${id}
        and not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
-       and (${zeitraum?.von ?? null}::date is null
-            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
+       and ${sichtBedingung("d.id", sicht)}
      order by ts_rank(st.vektor, f.q) desc, d.eingegangen_am desc, d.id
      limit ${limit}`);
   return [...zeilen].map((z) => ({

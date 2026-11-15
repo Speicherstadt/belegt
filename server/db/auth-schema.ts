@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
-import { ROLLEN } from "../../shared/rollen.ts";
+import { boolean, check, date, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { RECHTE, ROLLEN, type Sichtbereich } from "../../shared/rollen.ts";
 
 /* Tabellen für Better Auth (Kern), wie in Haben, mit der Rolle am Zugang */
 
@@ -19,15 +19,27 @@ export const user = pgTable(
     /** Nur für Prüfer: der freigegebene Zeitraum (Z1); außerhalb sieht der Zugang nichts */
     zeitraumVon: date("zeitraum_von"),
     zeitraumBis: date("zeitraum_bis"),
+    /** Nur für Mitarbeiter: lesen oder bearbeiten, und welche Dokumente (server/zugang/sicht.ts) */
+    recht: text("recht", { enum: RECHTE }),
+    sichtbereich: jsonb("sichtbereich").$type<Sichtbereich>(),
+    /** Der Inhaber hat den Zugang entzogen; danach meldet er sich nicht mehr an */
+    entzogenAm: timestamp("entzogen_am", { withTimezone: true }),
   },
   // Genau ein Inhaber, auch bei zwei gleichzeitigen Einrichtungen
   (t) => [
     uniqueIndex("user_inhaber_single").on(t.role).where(sql`${t.role} = 'inhaber'`),
-    check("user_role", sql`${t.role} in ('inhaber', 'steuerberatung', 'pruefer')`),
+    check("user_role", sql`${t.role} in ('inhaber', 'steuerberatung', 'pruefer', 'mitarbeiter')`),
     check(
       "user_zeitraum",
       sql`case when ${t.role} = 'pruefer' then ${t.zeitraumVon} is not null and ${t.zeitraumBis} is not null and ${t.zeitraumVon} <= ${t.zeitraumBis} else ${t.zeitraumVon} is null and ${t.zeitraumBis} is null end`,
     ),
+    // Ein Mitarbeiter hat immer Recht und Sichtbereich, alle anderen nie; coalesce, weil CHECK ein NULL durchließe
+    check(
+      "user_mitarbeiter",
+      sql`case when ${t.role} = 'mitarbeiter' then coalesce(${t.recht} in ('lesen', 'bearbeiten') and jsonb_typeof(${t.sichtbereich}) = 'object', false) else ${t.recht} is null and ${t.sichtbereich} is null end`,
+    ),
+    // Den Inhaber entzieht niemand
+    check("user_entzogen", sql`${t.entzogenAm} is null or ${t.role} <> 'inhaber'`),
   ],
 );
 
@@ -91,19 +103,25 @@ export const einladungen = pgTable(
     rolle: text("rolle", { enum: ROLLEN }).notNull(),
     zeitraumVon: date("zeitraum_von"),
     zeitraumBis: date("zeitraum_bis"),
+    recht: text("recht", { enum: RECHTE }),
+    sichtbereich: jsonb("sichtbereich").$type<Sichtbereich>(),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
     gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
     eingeloestAm: timestamp("eingeloest_am", { withTimezone: true }),
     eingeloestVon: text("eingeloest_von"),
     zurueckgezogenAm: timestamp("zurueckgezogen_am", { withTimezone: true }),
   },
-  // Einladen lässt sich nur in Rollen ohne Schreibrecht; Inhaber gibt es genau einen
+  // Einladen lässt sich nur in Rollen ohne volles Schreibrecht; Inhaber gibt es genau einen
   (t) => [
-    check("einladungen_rolle", sql`${t.rolle} in ('steuerberatung', 'pruefer')`),
+    check("einladungen_rolle", sql`${t.rolle} in ('steuerberatung', 'pruefer', 'mitarbeiter')`),
     // Ein Prüfer bekommt immer einen Zeitraum, die Steuerberatung nie
     check(
       "einladungen_zeitraum",
       sql`case when ${t.rolle} = 'pruefer' then ${t.zeitraumVon} is not null and ${t.zeitraumBis} is not null and ${t.zeitraumVon} <= ${t.zeitraumBis} else ${t.zeitraumVon} is null and ${t.zeitraumBis} is null end`,
+    ),
+    check(
+      "einladungen_mitarbeiter",
+      sql`case when ${t.rolle} = 'mitarbeiter' then coalesce(${t.recht} in ('lesen', 'bearbeiten') and jsonb_typeof(${t.sichtbereich}) = 'object', false) else ${t.recht} is null and ${t.sichtbereich} is null end`,
     ),
   ],
 );

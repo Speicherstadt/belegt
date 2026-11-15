@@ -21,7 +21,7 @@ import {
 } from "../mail/regeln.ts";
 import { istKonflikt } from "../ordnung/ordnung.ts";
 import { importVorschlagZu } from "../paperless/kern.ts";
-import { imZeitraum } from "../zugang/pruefer.ts";
+import { sichtbareIds, sichtVon } from "../zugang/sicht.ts";
 
 import { type App, type AppUmgebung, akteur, Id, MAX_UPLOAD } from "./gemeinsam.ts";
 
@@ -46,15 +46,15 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
     const id = Id.safeParse(c.req.param("id"));
     const mail = id.success ? await mailZuDokument(umgebung.db, id.data) : null;
     if (!mail) return c.json({ fehler: "Keine Mail" }, 404);
-    const zeitraum = c.get("nutzer").zeitraum;
-    if (!zeitraum) return c.json(mail);
-    // Der Prüfer sieht von Unterhaltung, Anhängen und Mail nur, was im Zeitraum liegt
-    const sichtbar = await imZeitraum(
+    const sicht = sichtVon(c.get("nutzer"));
+    if (!sicht) return c.json(mail);
+    // Prüfer und Mitarbeiter sehen von Unterhaltung, Anhängen und Mail nur, was in ihrer Sicht liegt
+    const sichtbar = await sichtbareIds(
       umgebung.db,
       [...mail.unterhaltung.map((u) => u.dokumentId), ...mail.anhaenge.map((a) => a.dokumentId), mail.ausMail ?? ""],
-      zeitraum,
+      sicht,
     );
-    // Kopf und Text gehören der Mail: Liegt sie zu einem Anhang außerhalb des Zeitraums, gibt es für ihn keine Mail
+    // Kopf und Text gehören der Mail: Liegt sie zu einem Anhang außerhalb der Sicht, gibt es für ihn keine Mail
     if (mail.ausMail && !sichtbar.has(mail.ausMail)) return c.json({ fehler: "Keine Mail" }, 404);
     return c.json({
       ...mail,

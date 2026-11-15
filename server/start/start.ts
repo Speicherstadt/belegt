@@ -5,6 +5,7 @@ import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { quellen, startKacheln } from "../db/schema.ts";
 import { laeufeListen } from "../paperless/laeufe.ts";
+import { sichtBedingung, sichtVon } from "../zugang/sicht.ts";
 
 /*
  * Zahlen für die Startseite (docs/eingang.md#startseite). Gelöschte Dokumente zählen nirgends als aktiv. Der Prüfer
@@ -53,18 +54,17 @@ const geloescht = sql`exists (select 1 from loeschungen l where l.dokument_id = 
 /** Die Zahlen der Startseite für einen Zugang; heute ist der Tag in Deutschland (JJJJ-MM-TT) */
 export async function startZahlen(
   db: Datenbank,
-  nutzer: Pick<Angemeldet, "role" | "zeitraum">,
+  nutzer: Pick<Angemeldet, "id" | "role" | "zeitraum" | "sichtbereich">,
   { heute, eingangsordner = false }: { heute: string; eingangsordner?: boolean },
 ): Promise<Start> {
-  const z = nutzer.zeitraum;
-  const imZeitraum = z ? sql`belegt_dokument_tag(d.id) between ${z.von}::date and ${z.bis}::date` : sql`true`;
+  const sicht = sichtVon(nutzer);
   const [zahlen] = await db.execute<{ gesamt: string; eingang: string; dieses_jahr: string; fristen: string }>(sql`
     with aktiv as (
       select d.id, d.eingegangen_am, e.id as einordnung, e.frist_bis
         from dokumente d
         left join lateral (select x.id, x.frist_bis from einordnungen x where x.dokument_id = d.id
                             order by x.erstellt_am desc, x.id desc limit 1) e on true
-       where not ${geloescht} and ${imZeitraum}
+       where not ${geloescht} and ${sichtBedingung("d.id", sicht)}
     )
     select count(*) as gesamt,
            count(*) filter (where einordnung is null) as eingang,
@@ -77,7 +77,7 @@ export async function startZahlen(
     gesamt: Number(zahlen?.gesamt ?? 0),
     diesesJahr: Number(zahlen?.dieses_jahr ?? 0),
   };
-  if (nutzer.role === "pruefer") return basis;
+  if (sicht) return basis;
   const [naechste, betrieb, postfaecher, ordner, laeufe] = await Promise.all([
     fristenNaechste(db, heute),
     betriebZahlen(db),

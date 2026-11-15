@@ -30,6 +30,7 @@ import { ordnungZu } from "../ordnung/zuordnung.ts";
 import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
 import { begrenzt, dateiTeilen } from "../trennen/trennen.ts";
 import { vorschaubildZu } from "../vorschaubild/vorschaubild.ts";
+import { istSichtbereichsFehler, sichtVon } from "../zugang/sicht.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
 
@@ -52,7 +53,13 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       const datei = form.get("datei");
       if (!(datei instanceof File)) return c.json({ fehler: "Feld „datei“ fehlt" }, 400);
       const bytes = new Uint8Array(await datei.arrayBuffer());
-      const eingang = { quelle: "upload" as const, akteur: akteur(c.get("nutzer")) };
+      const nutzer = c.get("nutzer");
+      // Was ein Mitarbeiter hochlädt, sieht er, bis es eine Ordnung hat (server/zugang/sicht.ts)
+      const eingang = {
+        quelle: "upload" as const,
+        akteur: akteur(nutzer),
+        einlieferer: nutzer.role === "mitarbeiter" ? nutzer.id : undefined,
+      };
       if (c.req.query("trennen") !== "1")
         return c.json(await aufnehmen(umgebung, { ...eingang, bytes, dateiname: datei.name || null }), 201);
       // Ein Stapel mit Trennblättern: jedes Teil ein eigenes Original. Geteilt wird in einem eigenen Prozess; scheitert
@@ -104,7 +111,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       suche: c.req.query("suche"),
       gruppe,
       heute: heute(),
-      zeitraum: c.get("nutzer").zeitraum,
+      sicht: sichtVon(c.get("nutzer")),
       ordnung,
       notizen: !c.get("nutzer").zeitraum,
     };
@@ -142,8 +149,10 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     const eingabe = EinordnungEingabe.safeParse(await c.req.json().catch(() => null));
     if (!eingabe.success) return c.json({ fehler: "Ungültige Einordnung", details: eingabe.error.issues }, 400);
     try {
-      return c.json(await einordnen(umgebung.db, dokument.id, eingabe.data, akteur(c.get("nutzer"))), 201);
+      const nutzer = c.get("nutzer");
+      return c.json(await einordnen(umgebung.db, dokument.id, eingabe.data, akteur(nutzer), sichtVon(nutzer)), 201);
     } catch (err) {
+      if (istSichtbereichsFehler(err)) return c.json({ fehler: err.message }, 409);
       // Ein Trigger lehnt ab (etwa: schon gelöscht); seine Meldung ist für Menschen geschrieben
       const meldung = regelVerletzt(err);
       if (meldung) return c.json({ fehler: meldung }, 409);

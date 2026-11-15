@@ -6,6 +6,7 @@ import { ableiten, ableitungenZu, istAbleitungsFehler } from "../seiten/ableiten
 import { SeitenOperation } from "../seiten/seiten.ts";
 import { begrenzt } from "../trennen/trennen.ts";
 import { rasterVerfuegbar, seiteAlsJpeg, seitenzahl } from "../vorschaubild/raster.ts";
+import { sichtVon } from "../zugang/sicht.ts";
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
 /*
@@ -109,13 +110,13 @@ export function seitenRouten(app: App, umgebung: AppUmgebung) {
     const id = Id.safeParse(c.req.param("id"));
     const dokument = id.success ? await laden(umgebung.db, id.data) : null;
     if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
-    return c.json(await aehnliche(umgebung.db, dokument.id, { zeitraum: c.get("nutzer").zeitraum }));
+    return c.json(await aehnliche(umgebung.db, dokument.id, { sicht: sichtVon(c.get("nutzer")) }));
   });
 
   app.get("/api/dokumente/:id/ableitungen", async (c) => {
     const id = Id.safeParse(c.req.param("id"));
     const dokument = id.success ? await laden(umgebung.db, id.data) : null;
     if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
-    return c.json(await ableitungenZu(umgebung.db, dokument.id, c.get("nutzer").zeitraum));
+    return c.json(await ableitungenZu(umgebung.db, dokument.id, sichtVon(c.get("nutzer"))));
   });
 }

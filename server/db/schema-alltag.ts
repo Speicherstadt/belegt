@@ -14,6 +14,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema.ts";
 import { dokumente } from "./schema.ts";
 
 /*
@@ -129,3 +130,17 @@ export const workflowLaeufe = pgTable(
     check("workflow_laeufe_fehler", sql`(${t.ergebnis} = 'fehler') = (${t.fehler} is not null)`),
   ],
 );
+
+/**
+ * Wer ein Dokument als Mitarbeiter hochgeladen hat: Solange es keine Ordnung hat, sieht er es, auch außerhalb seines
+ * Sichtbereichs (server/zugang/sicht.ts). Im Audit-Log.
+ */
+export const einlieferungen = pgTable("einlieferungen", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  nutzerId: text("nutzer_id")
+    .notNull()
+    .references(() => user.id),
+  erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+});

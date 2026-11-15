@@ -3,11 +3,11 @@ import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { genericOAuth } from "better-auth/plugins";
-import type { Rolle } from "../shared/rollen.ts";
+import type { Recht, Rolle, Sichtbereich } from "../shared/rollen.ts";
 import type { Datenbank } from "./db/client.ts";
 import * as schema from "./db/schema.ts";
 import { eingerichtet } from "./db/status.ts";
-import { EINLADUNG_HEADER, EINRICHTUNGSCODE_HEADER, einloesen, offen } from "./zugang/einladungen.ts";
+import { EINLADUNG_HEADER, EINRICHTUNGSCODE_HEADER, einloesen, offen, zugangLaden } from "./zugang/einladungen.ts";
 
 const verboten = (message: string) => new APIError("FORBIDDEN", { message });
 
@@ -109,6 +109,9 @@ export function createAuth({
         // Zeitraum eines Prüfers als JJJJ-MM-TT; nur der Hook setzt ihn aus der Einladung
         zeitraumVon: { type: "string", input: false, required: false },
         zeitraumBis: { type: "string", input: false, required: false },
+        // Recht und Sichtbereich eines Mitarbeiters, ebenso nur aus der Einladung
+        recht: { type: "string", input: false, required: false },
+        sichtbereich: { type: "json", input: false, required: false },
       },
     },
     hooks: {
@@ -133,6 +136,14 @@ export function createAuth({
         create: { before: async (account) => ({ data: ohneTokens(account) }) },
         update: { before: async (account) => ({ data: ohneTokens(account) }) },
       },
+      // Ein entzogener Zugang meldet sich nicht mehr an, auch nicht über den OIDC-Anbieter
+      session: {
+        create: {
+          before: async (sitzung) => {
+            if ((await zugangLaden(db, sitzung.userId))?.entzogenAm) throw verboten("Dieser Zugang ist entzogen.");
+          },
+        },
+      },
       user: {
         create: {
           before: async (user, ctx) => {
@@ -147,6 +158,8 @@ export function createAuth({
                   role: zugang.rolle satisfies Rolle,
                   zeitraumVon: zugang.zeitraum?.von ?? null,
                   zeitraumBis: zugang.zeitraum?.bis ?? null,
+                  recht: zugang.recht ?? null,
+                  sichtbereich: zugang.sichtbereich ?? null,
                 },
               };
             }
@@ -174,6 +187,9 @@ export interface Angemeldet {
   role: Rolle;
   /** Nur beim Prüfer: was er sehen darf */
   zeitraum?: { von: string; bis: string };
+  /** Nur beim Mitarbeiter: was er sehen darf und ob er darin bearbeitet (server/zugang/sicht.ts) */
+  sichtbereich?: Sichtbereich;
+  recht?: Recht;
   /** Nur bei einem Programm mit API-Token */
   token?: { name: string; recht: "lesen" | "schreiben" };
 }

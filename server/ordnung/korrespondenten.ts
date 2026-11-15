@@ -4,8 +4,9 @@ import { regexGueltig } from "../../shared/abgleich.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumentKorrespondenten, korrespondenten, regeln, workflows } from "../db/schema.ts";
+import type { Sicht } from "../zugang/sicht.ts";
 import type { Korrespondent } from "./korrespondent-setzen.ts";
-import { Abgleich, aendertAbgleich, eindeutig, imZeitraum, konflikt } from "./ordnung.ts";
+import { Abgleich, aendertAbgleich, eindeutig, imSichtbereich, inSicht, konflikt } from "./ordnung.ts";
 
 export { korrespondentMitNamen, korrespondentSetzen } from "./korrespondent-setzen.ts";
 
@@ -31,12 +32,12 @@ export const Zusammenfuehrung = z.object({ ziel: z.uuid() });
 export type { Korrespondent };
 
 /**
- * Korrespondenten mit der Zahl ihrer Dokumente (ohne gelöschte); mit zeitraum (Prüfer) nur die mit Dokumenten darin,
- * gezählt nur diese
+ * Korrespondenten mit der Zahl ihrer Dokumente (ohne gelöschte); mit Zeitraum (Prüfer) nur die mit Dokumenten darin,
+ * gezählt nur diese; mit Sichtbereich (Mitarbeiter) die seines Sichtbereichs (imSichtbereich)
  */
 export async function korrespondentenListen(
   db: Datenbank,
-  zeitraum?: { von: string; bis: string },
+  sicht?: Sicht,
 ): Promise<(Korrespondent & { anzahl: number })[]> {
   const zeilen = await db
     .select({
@@ -45,13 +46,13 @@ export async function korrespondentenListen(
                             where dk.korrespondent_id = "korrespondenten"."id"
                               and not exists (select 1 from loeschungen l
                                                where l.dokument_id = dk.dokument_id and l.bestaetigt_am is not null)
-                              ${imZeitraum("dk.dokument_id", zeitraum)})`,
+                              ${inSicht("dk.dokument_id", sicht)})`,
     })
     .from(korrespondenten)
     .orderBy(asc(sql`lower(${korrespondenten.name})`));
   const alle = zeilen.map((z) => ({ ...z.k, anzahl: Number(z.anzahl) }));
   // Namen von Geschäftspartnern außerhalb seines Zeitraums sieht der Prüfer nicht
-  return zeitraum ? alle.filter((k) => k.anzahl > 0) : alle;
+  return sicht?.zeitraum ? alle.filter((k) => k.anzahl > 0) : imSichtbereich(alle, sicht, "korrespondenten");
 }
 
 const sauber = <T extends { abgleichText?: string }>(e: T): T =>

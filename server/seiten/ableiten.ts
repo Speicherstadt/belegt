@@ -8,7 +8,7 @@ import { ableitungen } from "../db/schema.ts";
 import { type Dokument, laden, type Umgebung, zeileAnlegen } from "../dokumente/dokumente.ts";
 import { ausfuehren } from "../inhalt/ocr.ts";
 import { fuerDokument } from "../loeschung/loeschung.ts";
-import type { Zeitraum } from "../zugang/einladungen.ts";
+import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 import { neuerName, type Operation, type SeitenOperation } from "./seiten.ts";
 
 /*
@@ -121,13 +121,13 @@ export interface Verknuepfung {
 }
 
 /**
- * Woraus ein Dokument abgeleitet ist (aus) und was daraus abgeleitet wurde (daraus); mit Zeitraum (Prüfer) nur die
- * anderen Dokumente, die darin liegen
+ * Woraus ein Dokument abgeleitet ist (aus) und was daraus abgeleitet wurde (daraus); mit Sicht (Prüfer, Mitarbeiter) nur
+ * die anderen Dokumente, die darin liegen
  */
 export async function ableitungenZu(
   db: Umgebung["db"],
   id: string,
-  zeitraum?: Zeitraum,
+  sicht?: Sicht,
 ): Promise<{ aus: Verknuepfung[]; daraus: Verknuepfung[] }> {
   const zeilen = await db.execute<{
     richtung: "aus" | "daraus";
@@ -152,8 +152,7 @@ export async function ableitungenZu(
       join archivnummern n on n.dokument_id = d.id
       left join lateral (select titel from einordnungen y where y.dokument_id = d.id
                           order by y.erstellt_am desc, y.id desc limit 1) e on true
-     where (${zeitraum?.von ?? null}::date is null
-            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
+     where ${sichtBedingung("d.id", sicht)}
      order by x.erstellt_am, x.position, n.nummer`);
   const alle = [...zeilen].map((z) => ({
     richtung: z.richtung,

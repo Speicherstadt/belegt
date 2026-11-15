@@ -5,6 +5,7 @@ import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
 import { korrespondentMitNamen, korrespondentSetzen } from "../ordnung/korrespondent-setzen.ts";
+import { imSichtbereichBleiben, type Sicht } from "../zugang/sicht.ts";
 
 export const ARTEN = [
   "buecher",
@@ -42,8 +43,14 @@ export function einordnen(
   dokumentId: string,
   eingabe: EinordnungEingabe,
   akteur: string,
+  /** Die Sicht eines Mitarbeiters: Läge das Dokument danach außerhalb, wird nichts eingeordnet */
+  sicht?: Sicht,
 ): Promise<Einordnung> {
-  return mitAkteur(db, akteur, (tx) => einordnenIn(tx, dokumentId, eingabe));
+  return mitAkteur(db, akteur, async (tx) => {
+    const neu = await einordnenIn(tx, dokumentId, eingabe);
+    await imSichtbereichBleiben(tx, dokumentId, sicht);
+    return neu;
+  });
 }
 
 /** Wie einordnen, in einer laufenden Transaktion mit Akteur (Sammelbearbeitung) */

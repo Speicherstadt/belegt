@@ -3,11 +3,12 @@ import { eq, sql } from "drizzle-orm";
 import type { Sortierung } from "../../shared/archivansicht.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { archivnummern, dokumente, dokumentTags } from "../db/schema.ts";
+import { archivnummern, dokumente, dokumentTags, einlieferungen } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
 import { notizPasst } from "../notizen/notizen.ts";
 import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
 import { tagMitNamen } from "../ordnung/ordnung.ts";
+import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
@@ -32,6 +33,8 @@ export interface Eingang {
   quelle: Quelle;
   akteur: string;
   tags?: string[];
+  /** ID des Mitarbeiters, der es hochlädt (Tabelle einlieferungen, server/zugang/sicht.ts) */
+  einlieferer?: string;
 }
 
 /**
@@ -63,6 +66,8 @@ export async function zeileAnlegen(tx: Tx, sha256: string, eingang: Omit<Eingang
     .select({ nummer: archivnummern.nummer })
     .from(archivnummern)
     .where(eq(archivnummern.dokumentId, neu!.id));
+  if (eingang.einlieferer)
+    await tx.insert(einlieferungen).values({ dokumentId: neu!.id, nutzerId: eingang.einlieferer });
   for (const name of eingang.tags ?? []) {
     const tag = await tagMitNamen(tx, name);
     await tx.insert(dokumentTags).values({ dokumentId: neu!.id, tagId: tag.id }).onConflictDoNothing();
@@ -94,7 +99,8 @@ export interface ListenAbfrage {
   suche?: string;
   gruppe?: Gruppe;
   heute: string;
-  zeitraum?: { von: string; bis: string };
+  /** Was der Zugang sieht (server/zugang/sicht.ts) */
+  sicht?: Sicht;
   /** Tags, Dokumenttyp und eigene Felder (server/ordnung/filter.ts) */
   ordnung?: OrdnungFilter;
   /** Auch in Notizen suchen; nicht für Prüfer, die Notizen nicht sehen */
@@ -106,7 +112,7 @@ export interface ListenAbfrage {
  * Dateiname, Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch
  * „_100%“ oder Teilwörter), über die Archivnummer („ASN 123“) und auf Wunsch über Notizen.
  */
-function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung, notizen = false }: ListenAbfrage) {
+function listenQuelle({ suche, gruppe = "alle", heute, sicht, ordnung, notizen = false }: ListenAbfrage) {
   const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
   return sql`
       from dokumente d
@@ -115,8 +121,7 @@ function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung, notize
       left join suchtexte st on st.dokument_id = d.id
      where ${gruppenBedingung(gruppe, heute)}
        and ${filterBedingung(ordnung)}
-       and (${zeitraum?.von ?? null}::date is null
-            or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
+       and ${sichtBedingung("d.id", sicht)}
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
             or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
             or a.nummer = ${archivnummerAus(suche)}

@@ -32,6 +32,7 @@ import {
   tagsListen,
 } from "../ordnung/ordnung.ts";
 import { Aenderung, gibtEs, ordnungZu, Sammlung, sammeln } from "../ordnung/zuordnung.ts";
+import { type Sicht, sichtbareIds, sichtVon } from "../zugang/sicht.ts";
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
 type Ctx = Context<{ Variables: { nutzer: import("../auth.ts").Angemeldet } }>;
@@ -55,8 +56,8 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
   app: App,
   pfad: string,
   f: {
-    /** zeitraum: der eines Prüfers, der nur Dokumente darin zählen sieht */
-    listen: (zeitraum?: { von: string; bis: string }) => Promise<T[]>;
+    /** sicht: die eines Prüfers oder Mitarbeiters, der nur Dokumente darin zählen sieht */
+    listen: (sicht?: Sicht) => Promise<T[]>;
     Eingabe: E;
     Aenderung: A;
     anlegen: (e: z.infer<E>, akteur: string) => Promise<T>;
@@ -64,7 +65,7 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
     loeschen: (id: string, akteur: string) => Promise<boolean>;
   },
 ) {
-  app.get(pfad, async (c) => c.json(await f.listen(c.get("nutzer").zeitraum)));
+  app.get(pfad, async (c) => c.json(await f.listen(sichtVon(c.get("nutzer")))));
   app.post(pfad, async (c) => {
     const e = await eingabe(c, f.Eingabe);
     if (!e) return c.json({ fehler: "Ungültige Angaben" }, 400);
@@ -95,7 +96,7 @@ function verwalten<E extends z.ZodType, A extends z.ZodType, T>(
 
 export function ordnungRouten(app: App, { db }: AppUmgebung) {
   verwalten(app, "/api/tags", {
-    listen: (zeitraum) => tagsListen(db, zeitraum),
+    listen: (sicht) => tagsListen(db, sicht),
     Eingabe: TagEingabe,
     Aenderung: TagAenderung,
     anlegen: (e, a) => tagAnlegen(db, e, a),
@@ -103,7 +104,7 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     loeschen: (id, a) => tagLoeschen(db, id, a),
   });
   verwalten(app, "/api/dokumenttypen", {
-    listen: (zeitraum) => dokumenttypenListen(db, zeitraum),
+    listen: (sicht) => dokumenttypenListen(db, sicht),
     Eingabe: DokumenttypEingabe,
     Aenderung: DokumenttypAenderung,
     anlegen: (e, a) => dokumenttypAnlegen(db, e, a),
@@ -111,7 +112,7 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     loeschen: (id, a) => dokumenttypLoeschen(db, id, a),
   });
   verwalten(app, "/api/korrespondenten", {
-    listen: (zeitraum) => korrespondentenListen(db, zeitraum),
+    listen: (sicht) => korrespondentenListen(db, sicht),
     Eingabe: KorrespondentEingabe,
     Aenderung: KorrespondentAenderung,
     anlegen: (e, a) => korrespondentAnlegen(db, e, a),
@@ -146,7 +147,7 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     const e = await eingabe(c, Aenderung);
     if (!e) return c.json({ fehler: "Ungültige Änderung" }, 400);
     try {
-      const r = await sammeln(db, [id.data], e, akteur(c.get("nutzer")));
+      const r = await sammeln(db, [id.data], e, akteur(c.get("nutzer")), sichtVon(c.get("nutzer")));
       if (!r.ok)
         return c.json({ fehler: r.ergebnisse[0]?.ok === false ? r.ergebnisse[0].fehler : "Nicht möglich" }, 409);
       return c.json(await ordnungZu(db, id.data));
@@ -160,8 +161,14 @@ export function ordnungRouten(app: App, { db }: AppUmgebung) {
     const e = await eingabe(c, Sammlung);
     if (!e) return c.json({ fehler: "Ungültige Sammelbearbeitung" }, 400);
     const { ids, ...aenderung } = e;
+    // Dokumente außerhalb der Sicht gibt es für diesen Zugang nicht, auch nicht in einer Sammelbearbeitung
+    const sicht = sichtVon(c.get("nutzer"));
+    if (sicht) {
+      const sichtbar = await sichtbareIds(db, ids, sicht);
+      if (ids.some((id) => !sichtbar.has(id))) return c.json({ fehler: "Nicht gefunden" }, 404);
+    }
     try {
-      const r = await sammeln(db, ids, aenderung, akteur(c.get("nutzer")));
+      const r = await sammeln(db, ids, aenderung, akteur(c.get("nutzer")), sicht);
       return c.json(r, r.ok ? 200 : 409);
     } catch (err) {
       return konfliktAntwort(c, err);

@@ -14,6 +14,7 @@ import {
   tags,
 } from "../db/schema.ts";
 import { aktuelle, EinordnungEingabe, einordnenIn } from "../einordnung/einordnung.ts";
+import { imSichtbereichBleiben, type Sicht } from "../zugang/sicht.ts";
 import { korrespondentSetzen } from "./korrespondent-setzen.ts";
 import { type Feld, felderListen, feldwertAus, feldwertSpalten, konflikt } from "./ordnung.ts";
 
@@ -216,6 +217,8 @@ export async function sammeln(
   ids: string[],
   a: Aenderung,
   akteur: string,
+  /** Die Sicht eines Mitarbeiters: Jedes Dokument muss danach noch darin liegen (server/zugang/sicht.ts) */
+  sicht?: Sicht,
 ): Promise<{ ok: boolean; ergebnisse: Ergebnis[] }> {
   const ergebnisse: Ergebnis[] = [];
   const zurueck = Symbol("zurück");
@@ -224,7 +227,11 @@ export async function sammeln(
       const werte = await vorbereiten(tx, a);
       for (const id of [...new Set(ids)]) {
         try {
-          const r = await tx.transaction((sp) => anwenden(sp as Tx, id, a, werte));
+          const r = await tx.transaction(async (sp) => {
+            const r = await anwenden(sp as Tx, id, a, werte);
+            await imSichtbereichBleiben(sp as Tx, id, sicht);
+            return r;
+          });
           ergebnisse.push({ id, ok: true, eingeordnet: r.eingeordnet });
         } catch (err) {
           ergebnisse.push({ id, ok: false, fehler: meldung(err) });

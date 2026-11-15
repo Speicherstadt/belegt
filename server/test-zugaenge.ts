@@ -1,3 +1,4 @@
+import type { Sichtbereich } from "../shared/rollen.ts";
 import type { testApp } from "./test-app.ts";
 
 /*
@@ -8,7 +9,10 @@ export async function zugangAnlegen(
   t: Awaited<ReturnType<typeof testApp>>,
   inhaber: string,
   email: string,
-  zugang: { rolle: "steuerberatung" } | { rolle: "pruefer"; zeitraum: { von: string; bis: string } },
+  zugang:
+    | { rolle: "steuerberatung" }
+    | { rolle: "pruefer"; zeitraum: { von: string; bis: string } }
+    | { rolle: "mitarbeiter"; recht: "lesen" | "bearbeiten"; sichtbereich: Partial<Sichtbereich> },
 ): Promise<string> {
   const res = await t.anfrage(
     "/api/einladungen",

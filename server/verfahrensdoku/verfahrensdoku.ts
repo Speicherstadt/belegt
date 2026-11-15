@@ -12,8 +12,8 @@ import { listen as regelnListen } from "../mail/regeln.ts";
 import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
 import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
-import { listen as zugaengeListen } from "../zugang/einladungen.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
+import { zugaengeBeschreiben } from "./zugaenge.ts";
 
 /**
  * Verfahrensdokumentation (GoBD Rz. 151 ff.): allgemeine Beschreibung, Anwender-, System- und Betriebsdokumentation.
@@ -53,8 +53,6 @@ const STATUS: Record<string, string> = {
   fehler: "mit Fehler beendet",
   wartet: "wartet",
 };
-
-const ROLLE: Record<string, string> = { inhaber: "Inhaber", steuerberatung: "Steuerberatung", pruefer: "Prüfer" };
 
 const tag = (d: Date) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
 
@@ -111,7 +109,7 @@ export async function verfahrensdoku(
     lernstand,
   ] = await Promise.all([
     einstellungenLaden(db),
-    zugaengeListen(db),
+    zugaengeBeschreiben(db),
     tokensListen(db),
     quellenListen(db),
     regelnListen(db),
@@ -228,16 +226,14 @@ export async function verfahrensdoku(
       titel: "6. Zugriff",
       absaetze: [
         "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest, kann Löschungen als zweite Person bestätigen und Notizen zu Dokumenten schreiben, die sich nicht ändern lassen und mit der Löschung des Dokuments entfernt werden; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
+        "Mitarbeiter sehen nur die Dokumente ihres Sichtbereichs (Tags, Dokumenttypen, Korrespondenten, die der Inhaber festlegt). Mit dem Recht zu bearbeiten nehmen sie Dokumente auf, ordnen sie ein, setzen Tags, Typ, Korrespondent und Felder und schreiben Notizen, aber nur, solange das Dokument danach in ihrem Sichtbereich bleibt. Löschen, bestätigen, sperren, exportieren, teilen und Einstellungen, Zugänge, Tokens, Regeln, Workflows und Quellen ändern können sie nicht. Jede Änderung eines Sichtbereichs und jeder Entzug eines Zugangs stehen mit Akteur im Protokoll.",
         "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
         geteilt.jemals
           ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher wurden ${geteilt.jemals} Links angelegt, ${geteilt.aktiv} gelten derzeit.`
           : "",
       ].filter(Boolean),
       liste: [
-        ...zugaenge.zugaenge.map(
-          (u) =>
-            `${u.email}: ${ROLLE[u.rolle] ?? u.rolle}${u.zeitraumVon && u.zeitraumBis ? `, Zeitraum ${u.zeitraumVon} bis ${u.zeitraumBis}` : ""}, seit ${tag(new Date(u.erstelltAm))}`,
-        ),
+        ...zugaenge,
         ...tokens
           .filter((t) => !t.widerrufenAm)
           .map(

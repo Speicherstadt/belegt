@@ -1,6 +1,7 @@
 import type { Hono } from "hono";
 import { z } from "zod";
 import paket from "../../package.json" with { type: "json" };
+import { RECHTE } from "../../shared/rollen.ts";
 import type { Angemeldet, Auth } from "../auth.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import type { OeffnenMit } from "../freigabe/freigabe.ts";
@@ -50,9 +51,20 @@ export const Id = z.uuid();
 
 export const VERSION = paket.version;
 export const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
+/** Sichtbereich eines Mitarbeiters (shared/rollen.ts); fehlende Listen sind leer */
+const Ids = z.array(z.uuid()).max(200).default([]);
+export const SichtbereichEingabe = z.object({
+  tags: Ids,
+  dokumenttypen: Ids,
+  korrespondenten: Ids,
+  ohneTags: Ids,
+  ohneOrdnung: z.boolean().default(false),
+});
+export const MitarbeiterEingabe = z.object({ recht: z.enum(RECHTE), sichtbereich: SichtbereichEingabe });
 export const ZugangEingabe = z.discriminatedUnion("rolle", [
   z.object({ rolle: z.literal("steuerberatung") }),
   z.object({ rolle: z.literal("pruefer"), zeitraum: Zeitraum }),
+  z.object({ rolle: z.literal("mitarbeiter"), ...MitarbeiterEingabe.shape }),
 ]);
 
 /** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
