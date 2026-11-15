@@ -118,8 +118,9 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     expect(await dokumente("nochmal.pdf")).toHaveLength(0);
   });
 
-  it("verschiebt leere und zu große Dateien nach fehler/ und löscht sie nicht", async () => {
-    await writeFile(join(ordner, "leer.pdf"), "");
+  it("verschiebt zu große Dateien sofort nach fehler/, leere erst nach 10 Minuten, und löscht sie nicht", async () => {
+    const leer = join(ordner, "leer.pdf");
+    await writeFile(leer, "");
     const gross = join(ordner, "gross.pdf");
     await writeFile(gross, "");
     // Eine Datei mit Loch: groß im Verzeichnis, ohne 100 MB zu schreiben
@@ -127,7 +128,14 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     await blick();
     const e = await blick();
     expect(e.neu).toBe(0);
-    expect(e.fehler.map((f) => f.datei).sort()).toEqual(["gross.pdf", "leer.pdf"]);
+    expect(e.fehler.map((f) => f.datei)).toEqual(["gross.pdf"]);
+    // Eine leere Datei hat der Scanner vielleicht nur angelegt und schreibt gleich hinein
+    expect((await readdir(ordner)).sort()).toEqual(["fehler", "leer.pdf"]);
+    expect(await blick()).toMatchObject({ fehler: [] });
+    const alt = new Date(Date.now() - 11 * 60_000);
+    await utimes(leer, alt, alt);
+    await blick();
+    expect((await blick()).fehler.map((f) => f.datei)).toEqual(["leer.pdf"]);
     expect((await readdir(join(ordner, "fehler"))).sort()).toEqual(["gross.pdf", "leer.pdf"]);
     // fehler/ selbst wird nicht wieder eingelesen
     await blick();
@@ -198,6 +206,21 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     await blick();
     expect(await blick()).toMatchObject({ neu: 1, spaeter: [] });
     expect(await readdir(ordner)).toEqual([]);
+  });
+
+  it("überspringt einen Unterordner, der sich nicht lesen lässt, und nimmt den Rest auf", async () => {
+    await mkdir(join(ordner, "gesperrt"));
+    await writeFile(join(ordner, "gesperrt", "x.pdf"), "%PDF-1.7\n% gesperrt\n");
+    await writeFile(join(ordner, "frei.pdf"), "%PDF-1.7\n% frei\n");
+    // Als root greifen Rechte nicht; die Sperre stellt ein readdir nach, das an diesem Ordner scheitert
+    const lesen: typeof readdir = (async (pfad: string, optionen: unknown) => {
+      if (pfad.endsWith("gesperrt")) throw Object.assign(new Error("EACCES: permission denied"), { code: "EACCES" });
+      return readdir(pfad, optionen as { withFileTypes: true });
+    }) as typeof readdir;
+    let r = await ordnerEinlesen({ db: t.db, speicher: t.speicher }, { ordner, zustand, lesen });
+    r = await ordnerEinlesen({ db: t.db, speicher: t.speicher }, { ordner, zustand: r.zustand, lesen });
+    expect(r.ergebnis).toMatchObject({ neu: 1, uebersprungen: [{ ordner: "gesperrt" }] });
+    expect(r.ergebnis.uebersprungen[0]!.meldung).toContain("EACCES");
   });
 
   const tagsVon = async (dateiname: string) =>

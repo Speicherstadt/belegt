@@ -47,8 +47,10 @@ bleibt sie liegen und kommt vollständig ins Archiv, sobald sie sich nicht mehr 
 bleibt als eigenes Dokument.
 
 Unterordner liest der Worker mit, versteckte Dateien (mit Punkt am Anfang) und temporäre (`.tmp`, `.part`, `~$…`)
-lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht. Leere Dateien und solche über 100 MB verschiebt er nach
-`fehler/` im Ordner; dort bleiben sie liegen, bis du sie klärst. Ist die Datenbank oder der Speicher gerade nicht
+lässt er liegen, und Verknüpfungen (Symlinks) folgt er nicht; einen Unterordner, den er nicht lesen darf, überspringt er
+und meldet ihn einmal im Log. Dateien über 100 MB verschiebt er nach `fehler/` im Ordner, leere erst, wenn sie
+10 Minuten lang leer geblieben sind (mancher Scanner legt die Datei zuerst an); dort bleiben sie liegen, bis du sie
+klärst. Ist die Datenbank oder der Speicher gerade nicht
 erreichbar, bleibt die Datei im Ordner, und der Worker versucht es wieder.
 
 Mit `EINGANG_ORDNER_TAGS=true` bekommt jedes neue Dokument die Namen seiner Unterordner als [Tags](ordnung.md), jede

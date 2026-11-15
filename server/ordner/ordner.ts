@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { constants } from "node:fs";
+import { constants, type Dirent } from "node:fs";
 import { lstat, mkdir, open, readdir, realpath, rename, stat, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, sep } from "node:path";
 import { sql } from "drizzle-orm";
@@ -16,6 +16,8 @@ export const FEHLER = "fehler";
 /** Größte Datei, wie beim Upload */
 export const MAX_DATEI = 100 * 1024 * 1024;
 export const AKTEUR = "system:ordner";
+/** So lange muss eine leere Datei unverändert liegen, bevor sie nach fehler/ kommt: Mancher Scanner legt sie erst an */
+export const LEER_WARTEN_MS = 10 * 60_000;
 
 /** Größe und Änderungszeit beim letzten Blick, je Pfad relativ zum Ordner */
 export type Zustand = Map<string, { groesse: number; mtimeMs: number }>;
@@ -43,11 +45,35 @@ export function ignoriert(name: string): boolean {
   );
 }
 
-/** Alle Dateien unter dem Ordner, rekursiv, ohne fehler/, versteckte Ordner und Symlinks (die könnten hinausführen) */
-export async function auflisten(wurzel: string): Promise<Zustand> {
+const meldung = (err: unknown) => (err instanceof Error ? err.message : String(err)).split("\n")[0]!.slice(0, 300);
+const anzeige = (rel: string) => rel.split(sep).join("/");
+
+/** Ein Unterordner, der sich nicht lesen ließ (etwa fehlende Rechte); der Rest des Blicks läuft weiter */
+export interface Uebersprungen {
+  ordner: string;
+  meldung: string;
+}
+
+/**
+ * Alle Dateien unter dem Ordner, rekursiv, ohne fehler/, versteckte Ordner und Symlinks (die könnten hinausführen).
+ * Lässt sich ein Unterordner nicht lesen, steht er in uebersprungen; scheitert der Eingangsordner selbst, wirft es.
+ */
+export async function auflisten(
+  wurzel: string,
+  lesenOrdner: typeof readdir = readdir,
+): Promise<{ zustand: Zustand; uebersprungen: Uebersprungen[] }> {
   const zustand: Zustand = new Map();
+  const uebersprungen: Uebersprungen[] = [];
   async function lesen(ordner: string) {
-    for (const eintrag of await readdir(ordner, { withFileTypes: true })) {
+    let eintraege: Dirent[];
+    try {
+      eintraege = await lesenOrdner(ordner, { withFileTypes: true });
+    } catch (err) {
+      if (ordner === wurzel) throw err;
+      uebersprungen.push({ ordner: anzeige(relative(wurzel, ordner)), meldung: meldung(err) });
+      return;
+    }
+    for (const eintrag of eintraege) {
       if (eintrag.isSymbolicLink() || ignoriert(eintrag.name)) continue;
       const pfad = join(ordner, eintrag.name);
       if (eintrag.isDirectory()) {
@@ -60,7 +86,7 @@ export async function auflisten(wurzel: string): Promise<Zustand> {
     }
   }
   await lesen(wurzel);
-  return zustand;
+  return { zustand, uebersprungen };
 }
 
 /**
@@ -137,10 +163,9 @@ export interface Ergebnis {
   fehler: { datei: string; meldung: string }[];
   /** Liegt noch im Ordner, der nächste Blick versucht es wieder (Datenbank oder Speicher nicht erreichbar) */
   spaeter: { datei: string; meldung: string }[];
+  /** Unterordner, die sich nicht lesen ließen */
+  uebersprungen: Uebersprungen[];
 }
-
-const meldung = (err: unknown) => (err instanceof Error ? err.message : String(err)).split("\n")[0]!.slice(0, 300);
-const anzeige = (rel: string) => rel.split(sep).join("/");
 
 /** Liest eine Datei, die sich aufnehmen lässt; sonst ein Fehler, der sie nach fehler/ bringt */
 async function pruefenUndLesen(wurzel: string, rel: string, groesse: number): Promise<Uint8Array> {
@@ -183,13 +208,26 @@ export async function ordnerEinlesen(
     zustand,
     teilen,
     ordnerTags = false,
-  }: { ordner: string; zustand: Zustand; teilen?: Teilen; ordnerTags?: boolean },
+    lesen,
+    uhr = Date.now(),
+  }: {
+    ordner: string;
+    zustand: Zustand;
+    teilen?: Teilen;
+    ordnerTags?: boolean;
+    /** readdir; Tests stellen damit einen unlesbaren Unterordner nach */
+    lesen?: typeof readdir;
+    uhr?: number;
+  },
 ): Promise<{ zustand: Zustand; ergebnis: Ergebnis }> {
-  const jetzt = await auflisten(ordner);
-  const ergebnis: Ergebnis = { neu: 0, doppelt: 0, fehler: [], spaeter: [] };
+  const { zustand: jetzt, uebersprungen } = await auflisten(ordner, lesen);
+  const ergebnis: Ergebnis = { neu: 0, doppelt: 0, fehler: [], spaeter: [], uebersprungen };
   for (const rel of stabile(zustand, jetzt)) {
     const pfad = join(ordner, rel);
     const name = basename(rel);
+    const vorher = zustand.get(rel)!;
+    // Leer und noch jung: bleibt im Zustand und wartet, bis der Scanner schreibt oder die Wartezeit um ist
+    if (vorher.groesse === 0 && uhr - vorher.mtimeMs < LEER_WARTEN_MS) continue;
     jetzt.delete(rel);
     let bytes: Uint8Array;
     try {

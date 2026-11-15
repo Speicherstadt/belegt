@@ -148,6 +148,8 @@ async function vorschaubilder() {
 async function eingangsordner(ordner: string) {
   let zustand: Zustand = new Map();
   let letzterFehler = "";
+  // Ein unlesbarer Unterordner steht einmal im Log, nicht alle 5 Sekunden
+  let letzteUebersprungen = "";
   const teilen = (bytes: Uint8Array, name: string) =>
     dateiTeilen(bytes, name, { code: env.TRENNBLATT_CODE }).catch((err) => {
       console.error(`Eingangsordner: ${name} nicht geteilt, unverändert aufgenommen: ${meldung(err)}`);
@@ -165,6 +167,10 @@ async function eingangsordner(ordner: string) {
       if (neu || doppelt) console.log(`Eingangsordner: ${neu} aufgenommen, ${doppelt} schon im Archiv`);
       for (const f of fehler) console.error(`Eingangsordner: ${f.datei} nach fehler/ verschoben: ${f.meldung}`);
       for (const f of spaeter) console.error(`Eingangsordner: ${f.datei} später noch einmal: ${f.meldung}`);
+      const uebersprungen = r.ergebnis.uebersprungen.map((u) => `${u.ordner} (${u.meldung})`).join(", ");
+      if (uebersprungen && uebersprungen !== letzteUebersprungen)
+        console.error(`Eingangsordner: Unterordner übersprungen, nicht lesbar: ${uebersprungen}`);
+      letzteUebersprungen = uebersprungen;
     } catch (err) {
       // Fehlt der Ordner etwa, steht das einmal im Log, nicht alle 5 Sekunden
       if (meldung(err) !== letzterFehler) console.error(`Eingangsordner: ${meldung(err)}`);
