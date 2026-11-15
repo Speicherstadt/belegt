@@ -10,14 +10,14 @@ Alles unter `/api` außer `/api/auth`, `/api/status`, `/api/einladung/:token`, `
 Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
 Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
 Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
-lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst). Ein Prüfer liest nur Dokumente (mit Tags, Dokumenttypen und Feldern), Export und Prüfung, und nur in seinem Zeitraum (`404` für ein Dokument außerhalb, [`pruefung.md`](pruefung.md)). Schreibt ein
+lassen sich nicht über Better Auth ändern. Schreiben darf nur der Inhaber, Steuerberatung und Prüfer lesen (`403` sonst); Notizen schreibt auch die Steuerberatung. Ein Prüfer liest nur Dokumente (mit Tags, Dokumenttypen und Feldern), Export und Prüfung, und nur in seinem Zeitraum (`404` für ein Dokument außerhalb, [`pruefung.md`](pruefung.md)). Schreibt ein
 Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Site`), antwortet Belegt ebenfalls mit
 `403`. Das Audit-Log nennt als Akteur `nutzer:<E-Mail>`.
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`) und Tags, Dokumenttypen und Felder,
-mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein und setzt Tags, Dokumenttyp und Feldwerte; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
+mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein, setzt Tags, Dokumenttyp und Feldwerte und schreibt Notizen; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
 | Aufruf | Wirkung |
@@ -40,7 +40,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `POST /api/dokumente?trennen=1` | teilt ein PDF an Trennblättern ([`eingang.md`](eingang.md#trennblätter)) und antwortet mit `{dokumente: [...]}`, ohne Trennblatt mit dem einen Dokument darin |
 | `GET /api/trennblatt.pdf` | ein Trennblatt zum Ausdrucken |
-| `GET /api/dokumente?suche=…&seite=…&proSeite=…` | Dokumente, neueste zuerst, in Seiten: `seite` ab 1, `proSeite` 1 bis 200 (Vorgabe 50, `limit` geht auch); die Zahl aller Treffer steht in der Kopfzeile `X-Gesamt`; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail, über Teile von Dateiname und Titel und über die Archivnummer (`ASN 123` oder `123`) |
+| `GET /api/dokumente?suche=…&seite=…&proSeite=…` | Dokumente, neueste zuerst, in Seiten: `seite` ab 1, `proSeite` 1 bis 200 (Vorgabe 50, `limit` geht auch); die Zahl aller Treffer steht in der Kopfzeile `X-Gesamt`; `suche` geht über den Volltext (deutsch, mit Anführungszeichen und Minus wie bei einer Suchmaschine) aus Dateiname, Einordnung und Mail, über Teile von Dateiname und Titel, über die Archivnummer (`ASN 123` oder `123`) und, außer für Prüfer, über Notizen |
 | `GET /api/dokumente/:id` | ein Dokument; jedes Dokument hat das Feld `asn`, seine Archivnummer, dazu `tags`, `dokumenttyp` und `felder` (`feldId`, `name`, `typ`, `wert`) |
 | `GET /api/dokumente?tag=…&dokumenttyp=…&feld.<id>=gesetzt` | Filter ([`ordnung.md`](ordnung.md)): `tag` mehrfach (alle, mit `tagModus=einer` mindestens einer), `dokumenttyp` (ID oder `ohne`), je Feld `feld.<id>=gesetzt`, `feld.<id>.enthaelt=…` (Text, Auswahl, Link), `feld.<id>.von=…` und `.bis=…` (Betrag in Cent oder `1.234,56`, Zahl, Datum); `400` bei unpassendem Filter. Jeder Eintrag hat `tags` und `dokumenttyp` |
 | `GET /api/tags`, `POST /api/tags` (`name`, `farbe`), `PATCH /api/tags/:id`, `DELETE /api/tags/:id` | Tags; `farbe` eine von `grau`, `rot`, `orange`, `gelb`, `gruen`, `tuerkis`, `blau`, `violett`, `rosa`; `409` bei doppeltem Namen; löschen entfernt die Zuordnungen |
@@ -54,6 +54,8 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/seiten` (`operation`: `drehen` mit `drehungen`: `[{seite, grad: 90 \| 180 \| 270}]`, `entfernen` mit `seiten`, `teilen` mit `nach`) | legt aus einem PDF ein neues Dokument an, beim Teilen zwei ([`dokument.md`](dokument.md#seiten-bearbeiten)); das Original bleibt. Antwort `201` mit `{dokumente: [...]}`; `400` bei Seiten, die es nicht gibt, oder keinem PDF, `410` nach der Löschung, `422` bei einem PDF, das sich nicht bearbeiten lässt. Nur der Inhaber mit Sitzung |
 | `POST /api/dokumente/zusammenfuegen` (`ids`: 2 bis 20 PDFs in der gewünschten Reihenfolge) | fügt die PDFs zu einem neuen Dokument zusammen; Antwort `201` mit dem Dokument. Nur der Inhaber mit Sitzung |
 | `GET /api/dokumente/:id/ableitungen` | `aus` (woraus das Dokument abgeleitet ist) und `daraus` (was daraus abgeleitet wurde), je mit `dokumentId`, `asn`, `operation`, `parameter`, `position`, `akteur`, `erstelltAm`; ein Prüfer sieht nur Dokumente seines Zeitraums |
+| `GET /api/dokumente/:id/notizen`, `POST /api/dokumente/:id/notizen` (`text`: 1 bis 5000 Zeichen) | Notizen ([`dokument.md`](dokument.md#notizen)), älteste zuerst, ohne zurückgezogene; je `id`, `text`, `erstelltVon`, `erstelltAm`. Inhaber und Steuerberatung, nicht Prüfer; `409` nach der Löschung |
+| `POST /api/dokumente/:id/notizen/:notiz/zurueckziehen` | blendet eine Notiz aus; wer sie schrieb oder der Inhaber, sonst `404` |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
 | `GET /api/dokumente?gruppe=offen\|pflicht\|freiwillig\|frei\|loeschbar\|geloescht` | nur der Eingang, eine Art der Aufbewahrung, was gelöscht werden darf, oder die Löschnachweise; ohne `gruppe` keine gelöschten |

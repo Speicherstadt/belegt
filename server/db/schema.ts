@@ -505,3 +505,35 @@ export const ableitungen = pgTable(
     index("ableitungen_quelle").on(t.quelleId),
   ],
 );
+
+/**
+ * Notiz zu einem Dokument (server/notizen/): nur ergänzen. text_sha256 setzt ein Trigger; das Audit-Log hält die
+ * Notiz ohne Text, nur mit diesem Hash fest, denn mit der Löschung des Dokuments geht der Text mit.
+ */
+export const notizen = pgTable(
+  "notizen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dokumentId: uuid("dokument_id")
+      .notNull()
+      .references(() => dokumente.id),
+    text: text("text").notNull(),
+    textSha256: text("text_sha256").notNull().default(""),
+    erstelltVon: text("erstellt_von").notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("notizen_text", sql`length(trim(${t.text})) between 1 and 5000`),
+    index("notizen_dokument").on(t.dokumentId, t.erstelltAm),
+    index("notizen_volltext").using("gin", sql`to_tsvector('german', ${t.text})`),
+  ],
+);
+
+/** Eine zurückgezogene Notiz: ausgeblendet, aber im Nachweis; einmal je Notiz, nur ergänzen */
+export const notizWiderrufe = pgTable("notiz_widerrufe", {
+  notizId: uuid("notiz_id")
+    .primaryKey()
+    .references(() => notizen.id),
+  widerrufenVon: text("widerrufen_von").notNull(),
+  widerrufenAm: timestamp("widerrufen_am", { withTimezone: true }).notNull().defaultNow(),
+});

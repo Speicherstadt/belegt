@@ -39,8 +39,9 @@ bleibt unverändert.
 Unter `/api/mcp` spricht Belegt das Model Context Protocol (Streamable HTTP, ohne Sitzung), mit einem API-Token in
 derselben Kopfzeile. Ein Assistent kann damit suchen (`dokumente_suchen`), Angaben und Text lesen (`dokument_lesen`,
 `dokument_text`), jeweils mit Archivnummer, Tags, Dokumenttyp und Feldern, und die vorhandenen Tags, Dokumenttypen und
-Felder abfragen (`ordnung_listen`). Mit dem Recht **schreiben** nimmt er Dateien auf, ordnet ein und setzt Tags,
-Dokumenttyp und Feldwerte (`dokument_aufnehmen`, `dokument_einordnen`, `dokument_ordnen`). Neue Tags, Typen oder Felder
+Felder abfragen (`ordnung_listen`) und die Notizen eines Dokuments lesen (`notizen_lesen`). Mit dem Recht **schreiben**
+nimmt er Dateien auf, ordnet ein, setzt Tags, Dokumenttyp und Feldwerte und schreibt Notizen (`dokument_aufnehmen`,
+`dokument_einordnen`, `dokument_ordnen`, `notiz_schreiben`). Neue Tags, Typen oder Felder
 anlegen und löschen kann er nicht. In Claude Code etwa:
 
 ```bash

@@ -506,5 +506,14 @@
   "merge_up": "{name} nach oben",
   "merge_down": "{name} nach unten",
   "merge_button": "{anzahl} PDFs zusammenfügen",
-  "merge_done": "Zusammengefügt als neues Dokument „{name}“ im Eingang."
+  "merge_done": "Zusammengefügt als neues Dokument „{name}“ im Eingang.",
+  "notes_title": "Notizen",
+  "notes_empty": "Noch keine Notizen.",
+  "notes_new": "Neue Notiz",
+  "notes_hint": "Eine Notiz lässt sich nicht ändern, nur zurückziehen. Prüfer sehen keine Notizen.",
+  "notes_add": "Notiz hinzufügen",
+  "notes_withdraw": "Zurückziehen",
+  "event_note_added": "Notiz hinzugefügt",
+  "event_note_withdrawn": "Notiz zurückgezogen",
+  "event_note_removed": "Notiz mit der Löschung entfernt"
 }

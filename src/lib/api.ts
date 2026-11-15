@@ -31,6 +31,7 @@ export type {
   Gruppe,
   Loeschung,
   MailAnsicht,
+  Notiz,
   SeitenOperation,
   Verknuepfung,
 } from "./api-dokumente.ts";

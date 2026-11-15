@@ -239,6 +239,13 @@
       "when": 1794755776575,
       "tag": "0033_ableitungen",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794757776336,
+      "tag": "0034_notizen",
+      "breakpoints": true
     }
   ]
 }

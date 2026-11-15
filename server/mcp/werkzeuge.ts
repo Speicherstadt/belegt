@@ -6,13 +6,14 @@ import { akteur, heute, MAX_UPLOAD } from "../http/gemeinsam.ts";
 import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
 import { fuerDokument, regelVerletzt } from "../loeschung/loeschung.ts";
 import { mailZuDokument } from "../mail/import.ts";
+import { NotizEingabe, notizAnlegen, notizenZu } from "../notizen/notizen.ts";
 import { dokumenttypenListen, felderListen, istKonflikt, tagsListen } from "../ordnung/ordnung.ts";
 import { Aenderung, ordnungZu, sammeln } from "../ordnung/zuordnung.ts";
 
 /**
  * Werkzeuge für KI-Assistenten (MCP). Sie rufen dieselben Module wie die HTTP-Schnittstelle und haben dieselben
- * Rechte wie das Token: lesen sucht und liest, schreiben nimmt zusätzlich auf, ordnet ein und setzt Tags, Dokumenttyp
- * und Feldwerte. Tags, Dokumenttypen und Felder anlegen kann ein Token nicht, löschen auch nicht.
+ * Rechte wie das Token: lesen sucht und liest (auch Notizen), schreiben nimmt zusätzlich auf, ordnet ein, setzt Tags,
+ * Dokumenttyp und Feldwerte und schreibt Notizen. Tags, Dokumenttypen und Felder anlegen kann ein Token nicht, löschen auch nicht.
  */
 
 /** Fehler, den der Assistent sehen soll (isError im Ergebnis), statt eines Protokollfehlers */
@@ -66,18 +67,20 @@ export const WERKZEUGE: Werkzeug[] = [
       limit: z.number().int().min(1).max(100).default(20),
     }),
     ausfuehren: async ({ db }, _n, e: { suche?: string; gruppe?: z.infer<typeof Gruppe>; limit: number }) =>
-      (await listen(db, { suche: e.suche, gruppe: e.gruppe, limit: e.limit, heute: heute() })).map((d) => ({
-        id: d.id,
-        asn: d.asn,
-        dateiname: d.dateiname,
-        typ: d.mimeType,
-        eingang: d.eingegangenAm.toISOString(),
-        art: d.art,
-        titel: d.titel,
-        aufbewahrenBis: d.fristBis,
-        tags: d.tags.map((t) => t.name),
-        dokumenttyp: d.dokumenttyp?.name ?? null,
-      })),
+      (await listen(db, { suche: e.suche, gruppe: e.gruppe, limit: e.limit, heute: heute(), notizen: true })).map(
+        (d) => ({
+          id: d.id,
+          asn: d.asn,
+          dateiname: d.dateiname,
+          typ: d.mimeType,
+          eingang: d.eingegangenAm.toISOString(),
+          art: d.art,
+          titel: d.titel,
+          aufbewahrenBis: d.fristBis,
+          tags: d.tags.map((t) => t.name),
+          dokumenttyp: d.dokumenttyp?.name ?? null,
+        }),
+      ),
   },
   {
     name: "dokument_lesen",
@@ -148,6 +151,44 @@ export const WERKZEUGE: Werkzeug[] = [
           hinweis: "Noch nicht gelesen oder ohne Text",
         }
       );
+    },
+  },
+  {
+    name: "notizen_lesen",
+    title: "Notizen eines Dokuments",
+    description:
+      "Die Notizen zu einem Dokument (Text, wer, wann), älteste zuerst; zurückgezogene fehlen. Notizen sind Anmerkungen, keine Unterlage.",
+    inputSchema: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
+    annotations: lesend,
+    schreibt: false,
+    eingabe: z.object({ id: Id }),
+    ausfuehren: async (umgebung, _n, e: { id: string }) => {
+      const d = await dokumentOderFehler(umgebung, e.id);
+      return { notizen: await notizenZu(umgebung.db, d.id) };
+    },
+  },
+  {
+    name: "notiz_schreiben",
+    title: "Notiz schreiben",
+    description:
+      "Schreibt eine Notiz zu einem Dokument (1 bis 5000 Zeichen). Notizen lassen sich nicht ändern; zurückziehen geht nur in der Oberfläche. Braucht ein Token mit dem Recht schreiben.",
+    inputSchema: {
+      type: "object",
+      required: ["id", "text"],
+      properties: { id: { type: "string", format: "uuid" }, text: { type: "string", maxLength: 5000 } },
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    schreibt: true,
+    eingabe: NotizEingabe.extend({ id: Id }),
+    ausfuehren: async (umgebung, nutzer, e: { id: string; text: string }) => {
+      const d = await dokumentOderFehler(umgebung, e.id);
+      try {
+        return await notizAnlegen(umgebung.db, d.id, e.text, akteur(nutzer));
+      } catch (err) {
+        const meldung = regelVerletzt(err);
+        if (meldung) throw werkzeugFehler(meldung);
+        throw err;
+      }
     },
   },
   {

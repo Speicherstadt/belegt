@@ -127,7 +127,7 @@ die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument ein
 
 Die Suche im Archiv geht über den Volltext: Dateiname, Titel und Korrespondent der Einordnung, bei Mails Absender,
 Betreff und Text, bei Anhängen dazu Absender und Betreff ihrer Mail, dazu der Text aus PDFs, Office- und Textdateien
-Nummer und Verkäufer einer E-Rechnung und Tags, Dokumenttyp und Textfelder ([Ordnung](ordnung.md)). Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
+Nummer und Verkäufer einer E-Rechnung, Tags, Dokumenttyp und Textfelder ([Ordnung](ordnung.md)) und Notizen ([Dokument](dokument.md#notizen)). Sie versteht deutsche Wortformen („Rechnungen“ findet „Rechnung“), Wortgruppen in Anführungszeichen
 und Ausschlüsse mit Minus. `ASN 123` oder nur `123` findet das Dokument mit dieser Archivnummer.
 
 ## Outlook-Datendateien (PST, OST)

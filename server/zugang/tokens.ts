@@ -59,13 +59,13 @@ export async function listen(db: Datenbank): Promise<Token[]> {
 const LESEN = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
-  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf|vorschaubild|ableitungen))?$/,
+  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf|vorschaubild|ableitungen|notizen))?$/,
   /^\/api\/(tags|dokumenttypen|felder)$/,
 ];
 const SCHREIBEN = [
   /^\/api\/dokumente$/,
   /^\/api\/mails$/,
-  /^\/api\/dokumente\/[^/]+\/(einordnung|ordnung)$/,
+  /^\/api\/dokumente\/[^/]+\/(einordnung|ordnung|notizen)$/,
   /^\/api\/dokumente\/sammeln$/,
 ];
 

@@ -92,6 +92,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       heute: heute(),
       zeitraum: c.get("nutzer").zeitraum,
       ordnung,
+      notizen: !c.get("nutzer").zeitraum,
     };
     const [eintraege, gesamt] = await Promise.all([
       listen(umgebung.db, { ...abfrage, limit: proSeite, versatz: (seite.data - 1) * proSeite }),
@@ -248,6 +249,8 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
   app.get("/api/dokumente/:id/verlauf", async (c) => {
     const id = Id.safeParse(c.req.param("id"));
     const dokument = id.success ? await laden(umgebung.db, id.data) : null;
-    return dokument ? c.json(await verlauf(umgebung.db, dokument.id)) : c.json({ fehler: "Nicht gefunden" }, 404);
+    return dokument
+      ? c.json(await verlauf(umgebung.db, dokument.id, { notizen: !c.get("nutzer").zeitraum }))
+      : c.json({ fehler: "Nicht gefunden" }, 404);
   });
 }

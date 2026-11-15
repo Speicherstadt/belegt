@@ -182,7 +182,7 @@ export async function verfahrensdoku(
     {
       titel: "6. Zugriff",
       absaetze: [
-        "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest und kann Löschungen als zweite Person bestätigen; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
+        "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest, kann Löschungen als zweite Person bestätigen und Notizen zu Dokumenten schreiben, die sich nicht ändern lassen und mit der Löschung des Dokuments entfernt werden; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
         "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
         geteilt.jemals
           ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher wurden ${geteilt.jemals} Links angelegt, ${geteilt.aktiv} gelten derzeit.`

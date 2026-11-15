@@ -193,6 +193,26 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/notizen": {
+      get: {
+        summary: "Notizen zum Dokument, älteste zuerst, ohne zurückgezogene",
+        parameters: [idParam],
+        responses: { "200": { description: "Liste mit id, text, erstelltVon, erstelltAm" }, "404": fehler },
+      },
+      post: {
+        summary: "Notiz schreiben (Recht schreiben); lässt sich danach nicht ändern",
+        parameters: [idParam],
+        requestBody: {
+          required: true,
+          content: json({
+            type: "object",
+            required: ["text"],
+            properties: { text: { type: "string", minLength: 1, maxLength: 5000 } },
+          }),
+        },
+        responses: { "201": { description: "Notiz" }, "400": fehler, "404": fehler, "409": fehler },
+      },
+    },
     "/api/dokumente/{id}/freigabe": {
       post: {
         summary:

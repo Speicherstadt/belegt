@@ -58,7 +58,13 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
 
     const namen = async (token: string) =>
       (await rpc(token, "tools/list")).result.tools.map((w: { name: string }) => w.name).sort();
-    expect(await namen(lesen)).toEqual(["dokument_lesen", "dokument_text", "dokumente_suchen", "ordnung_listen"]);
+    expect(await namen(lesen)).toEqual([
+      "dokument_lesen",
+      "dokument_text",
+      "dokumente_suchen",
+      "notizen_lesen",
+      "ordnung_listen",
+    ]);
     expect(await namen(schreiben)).toEqual([
       "dokument_aufnehmen",
       "dokument_einordnen",
@@ -66,6 +72,8 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
       "dokument_ordnen",
       "dokument_text",
       "dokumente_suchen",
+      "notiz_schreiben",
+      "notizen_lesen",
       "ordnung_listen",
     ]);
   });
@@ -93,6 +101,20 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
     const d = await aufruf(lesen, "dokument_lesen", { id });
     expect(d.structuredContent).toMatchObject({ id, dateiname: "strom-oktober.pdf", einordnung: { art: "beleg" } });
     expect(JSON.parse(d.content[0].text).id).toBe(id);
+  });
+
+  it("schreibt Notizen mit dem Recht schreiben, liest und findet sie mit lesen", async () => {
+    const inhalt = Buffer.from("%PDF-1.7\n% Notizbeleg\n").toString("base64");
+    const id = (await aufruf(schreiben, "dokument_aufnehmen", { dateiname: "notiz.pdf", inhalt })).structuredContent
+      .id as string;
+    const verboten = await rpc(lesen, "tools/call", { name: "notiz_schreiben", arguments: { id, text: "x" } });
+    expect(verboten.error.code).toBe(-32602);
+    const n = await aufruf(schreiben, "notiz_schreiben", { id, text: "Skonto bis Freitag" });
+    expect(n.structuredContent).toMatchObject({ text: "Skonto bis Freitag", erstelltVon: "token:Ablage" });
+    const liste = await aufruf(lesen, "notizen_lesen", { id });
+    expect(liste.structuredContent.notizen.map((x: { text: string }) => x.text)).toEqual(["Skonto bis Freitag"]);
+    const treffer = await aufruf(lesen, "dokumente_suchen", { suche: "Skonto" });
+    expect(treffer.structuredContent.ergebnis.map((d: { id: string }) => d.id)).toEqual([id]);
   });
 
   it("kennt Tags, Dokumenttyp, Felder und ASN; ein schreibendes Token ordnet zu, legt aber nichts an", async () => {

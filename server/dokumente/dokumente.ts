@@ -4,6 +4,7 @@ import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { archivnummern, dokumente, dokumentTags } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
+import { notizPasst } from "../notizen/notizen.ts";
 import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
 import { tagMitNamen } from "../ordnung/ordnung.ts";
 import { dateityp } from "./dateityp.ts";
@@ -90,14 +91,16 @@ export interface ListenAbfrage {
   zeitraum?: { von: string; bis: string };
   /** Tags, Dokumenttyp und eigene Felder (server/ordnung/filter.ts) */
   ordnung?: OrdnungFilter;
+  /** Auch in Notizen suchen; nicht für Prüfer, die Notizen nicht sehen */
+  notizen?: boolean;
 }
 
 /**
  * FROM und WHERE der Liste. Die Suche geht über den Volltext (Postgres, deutsch: „Rechnungen“ findet „Rechnung“) aus
  * Dateiname, Einordnung, Mail, Tags, Dokumenttyp und Textfeldern, dazu über Teile von Dateiname und Titel (findet auch
- * „_100%“ oder Teilwörter) und über die Archivnummer („ASN 123“).
+ * „_100%“ oder Teilwörter), über die Archivnummer („ASN 123“) und auf Wunsch über Notizen.
  */
-function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung }: ListenAbfrage) {
+function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung, notizen = false }: ListenAbfrage) {
   const muster = suche?.trim() ? `%${suche.trim().replace(/[\\%_]/g, (z) => `\\${z}`)}%` : null;
   return sql`
       from dokumente d
@@ -110,7 +113,8 @@ function listenQuelle({ suche, gruppe = "alle", heute, zeitraum, ordnung }: List
             or belegt_dokument_tag(d.id) between ${zeitraum?.von ?? null}::date and ${zeitraum?.bis ?? null}::date)
        and (${muster}::text is null or d.dateiname ilike ${muster} or e.titel ilike ${muster}
             or st.vektor @@ websearch_to_tsquery('german', ${suche?.trim() ?? ""})
-            or a.nummer = ${archivnummerAus(suche)})`;
+            or a.nummer = ${archivnummerAus(suche)}
+            or (${notizen && !!suche?.trim()} and ${notizPasst(suche?.trim() ?? "")}))`;
 }
 
 /** Wie viele Dokumente die Liste mit dieser Suche und diesen Filtern hat, über alle Seiten */
@@ -212,9 +216,13 @@ export interface Ereignis {
 
 /**
  * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp und Feldwerte,
- * Ableitungen in beide Richtungen und sein Siegel, in der Reihenfolge der Kette
+ * Ableitungen in beide Richtungen, Notizen (ohne Text; nicht für Prüfer) und sein Siegel, in der Reihenfolge der Kette
  */
-export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
+export async function verlauf(
+  db: Datenbank,
+  id: string,
+  { notizen = true }: { notizen?: boolean } = {},
+): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
   const ereignisse = await db.execute<{
     seq: string;
     at: Date;
@@ -243,6 +251,10 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
             and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
         or (a.table_name = 'ableitungen'
             and (a.new_value ->> 'dokument_id' = ${id} or a.new_value ->> 'quelle_id' = ${id}))
+        or (${notizen} and a.table_name = 'notizen' and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
+        or (${notizen} and a.table_name = 'notiz_widerrufe'
+            and coalesce(a.new_value, a.old_value) ->> 'notiz_id' in (
+              select x.row_id from audit_log x where x.table_name = 'notizen' and x.new_value ->> 'dokument_id' = ${id}))
         or (a.table_name = 'seals' and a.new_value ->> 'row_id' in (
               select ${id} union all select x.id::text from einordnungen x where x.dokument_id = ${id}::uuid))
      order by a.seq`);

@@ -103,3 +103,23 @@ test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", asyn
   await expect(ableitungen.getByRole("link")).toHaveText([erstes, zweites]);
   await expect(page.getByRole("region", { name: "Seiten" }).getByRole("img")).toHaveCount(3);
 });
+
+test("Notiz anlegen und über die Suche finden", async ({ page }, info) => {
+  const name = `notiz-${info.project.name}.pdf`;
+  const wort = `Lieferschein${info.project.name}fehlt`;
+  await hochladen(page, name, await pdf("Notiz"));
+  await page.getByRole("link", { name, exact: true }).click();
+  const notizen = page.getByRole("region", { name: "Notizen" });
+  await expect(notizen).toContainText("Noch keine Notizen.");
+  await notizen.getByLabel("Neue Notiz").fill(`Beim Lieferanten nachgefragt: ${wort}`);
+  await notizen.getByRole("button", { name: "Notiz hinzufügen" }).click();
+  await expect(notizen.getByRole("listitem")).toContainText(wort);
+  await expect(notizen.getByRole("listitem")).toContainText("nutzer:");
+  await expect(page.getByRole("region", { name: "Verlauf" })).toContainText("Notiz hinzugefügt");
+  await axeHellUndDunkel(page);
+
+  await page.goto("/archiv");
+  await page.getByRole("searchbox").fill(wort);
+  await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("row")).toHaveCount(2);
+});

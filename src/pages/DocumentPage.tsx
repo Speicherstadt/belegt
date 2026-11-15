@@ -7,6 +7,7 @@ import { Derivations, operationLabel } from "../components/Derivations.tsx";
 import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
+import { Notes } from "../components/Notes.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
 import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
@@ -33,6 +34,8 @@ function ereignis(e: Ereignis): string {
     return e.aktion === "DELETE" ? m.event_doctype_removed({ name }) : m.event_doctype_set({ name });
   if (e.tabelle === "feldwerte")
     return e.aktion === "DELETE" ? m.event_field_removed({ name }) : m.event_field_set({ name });
+  if (e.tabelle === "notizen") return e.aktion === "DELETE" ? m.event_note_removed() : m.event_note_added();
+  if (e.tabelle === "notiz_widerrufe") return e.aktion === "DELETE" ? m.event_note_removed() : m.event_note_withdrawn();
   if (e.tabelle === "ableitungen")
     return e.richtung === "aus"
       ? m.event_derived_from({ operation: operationLabel(e.detail) })
@@ -113,6 +116,7 @@ export function DocumentPage() {
               dokumenttyp={d.dokumenttyp}
             />
           )}
+          {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
           <DocumentOrdnung
             dokumentId={d.id}
             ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, felder: d.felder }}

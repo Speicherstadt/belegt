@@ -77,6 +77,13 @@ export type SeitenOperation =
   | { operation: "teilen"; nach: number };
 export type Ableitungsart = SeitenOperation["operation"] | "zusammenfuegen";
 
+export interface Notiz {
+  id: string;
+  text: string;
+  erstelltVon: string;
+  erstelltAm: string;
+}
+
 /** Ein anderes Dokument, aus dem dieses abgeleitet ist oder das daraus abgeleitet wurde */
 export interface Verknuepfung {
   dokumentId: string;
@@ -184,6 +191,10 @@ export const dokumenteApi = {
   zusammenfuegen: (ids: string[]) => aufruf<Dokument>("/api/dokumente/zusammenfuegen", json({ ids })),
   ableitungen: (id: string) =>
     aufruf<{ aus: Verknuepfung[]; daraus: Verknuepfung[] }>(`/api/dokumente/${id}/ableitungen`),
+  notizen: (id: string) => aufruf<Notiz[]>(`/api/dokumente/${id}/notizen`),
+  notizAnlegen: (id: string, text: string) => aufruf<Notiz>(`/api/dokumente/${id}/notizen`, json({ text })),
+  notizZurueckziehen: (id: string, notiz: string) =>
+    aufruf<{ ok: true }>(`/api/dokumente/${id}/notizen/${notiz}/zurueckziehen`, { method: "POST" }),
   freigabe: (id: string) =>
     aufruf<{ url: string; gueltigBis: string }>(`/api/dokumente/${id}/freigabe`, { method: "POST" }),
 };

@@ -506,5 +506,14 @@
   "merge_up": "Move {name} up",
   "merge_down": "Move {name} down",
   "merge_button": "Merge {anzahl} PDFs",
-  "merge_done": "Merged into the new document “{name}” in the inbox."
+  "merge_done": "Merged into the new document “{name}” in the inbox.",
+  "notes_title": "Notes",
+  "notes_empty": "No notes yet.",
+  "notes_new": "New note",
+  "notes_hint": "A note cannot be changed, only withdrawn. Auditors do not see notes.",
+  "notes_add": "Add note",
+  "notes_withdraw": "Withdraw",
+  "event_note_added": "Note added",
+  "event_note_withdrawn": "Note withdrawn",
+  "event_note_removed": "Note removed with the deletion"
 }

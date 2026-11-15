@@ -1,7 +1,7 @@
 ---
-title: "Dokument: Vorschaubilder und Seiten"
+title: "Dokument: Vorschaubilder, Seiten, Notizen"
 description: >-
-  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder und Seiten bearbeiten, ohne das Original zu ändern.
+  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder, Seiten bearbeiten, ohne das Original zu ändern, und Notizen.
 ---
 
 # Dokument
@@ -34,3 +34,15 @@ Quelle verknüpft, auch wenn diese später gelöscht wird.
 
 Bearbeiten darf nur der Inhaber, und nur PDFs. Ein PDF, das sich nicht lesen lässt (kaputt, verschlüsselt, länger als
 zwei Minuten), bleibt, wie es ist, und Belegt sagt es. Die Seitenbilder brauchen `pdftoppm`.
+
+## Notizen
+
+Unter **Notizen** schreiben Inhaber und Steuerberatung Anmerkungen zu einem Dokument, etwa „Leistungsdatum fehlt,
+beim Lieferanten nachgefragt“. Jede Notiz steht mit Person und Zeitpunkt da; ändern lässt sie sich nicht. Wer sie
+geschrieben hat, und der Inhaber, kann sie **zurückziehen**: Sie verschwindet aus der Liste und der Suche, der
+Verlauf behält, dass es sie gab und wer sie zurückgezogen hat. Postgres lehnt Ändern und Löschen ab.
+
+Die Suche findet Notizen. Prüfer sehen keine, auch nicht über die Suche: Notizen sind Anmerkungen, keine Unterlage
+nach § 147 AO. Mit der Löschung des Dokuments gehen die Notizen mit. Das Audit-Log hält jede Notiz ohne ihren Text
+fest, nur mit dessen SHA-256; so lässt sich später zeigen, was stand, ohne dass der Text das Dokument überlebt.
+Programme lesen Notizen mit einem Token mit dem Recht lesen und schreiben sie mit schreiben, auch über MCP.

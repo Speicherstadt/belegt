@@ -4,6 +4,7 @@ import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
 import { type App, type AppUmgebung, VERSION } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
+import { notizenRouten } from "./http/notizen.ts";
 import { oauthRouten } from "./http/oauth.ts";
 import { openapi } from "./http/openapi.ts";
 import { ordnungRouten } from "./http/ordnung.ts";
@@ -56,6 +57,7 @@ export function createApp(umgebung?: AppUmgebung) {
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
     seitenRouten(app, umgebung);
+    notizenRouten(app, umgebung);
     ordnungRouten(app, umgebung);
     freigabeRouten(app, umgebung);
     teilenRouten(app, umgebung);

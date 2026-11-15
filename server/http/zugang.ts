@@ -64,7 +64,12 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       nutzer.role === "steuerberatung" &&
       c.req.method === "POST" &&
       /^\/api\/dokumente\/[^/]+\/freigabe$/.test(c.req.path);
-    if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson && !kopie)
+    // Notizen schreibt und zieht auch die Steuerberatung zurück: Anmerkungen zum Beleg, keine Änderung an ihm
+    const notiz =
+      nutzer.role === "steuerberatung" &&
+      c.req.method === "POST" &&
+      /^\/api\/dokumente\/[^/]+\/notizen(\/[^/]+\/zurueckziehen)?$/.test(c.req.path);
+    if (schreibt && !darfSchreiben(nutzer.role) && !zweitePerson && !kopie && !notiz)
       return c.json({ fehler: "Diese Rolle darf nur lesen" }, 403);
     if (schreibt && vonFremderSeite(c.req.raw.headers, eigeneHerkunft)) {
       return c.json({ fehler: "Anfrage von einer fremden Seite" }, 403);
