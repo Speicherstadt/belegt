@@ -1,0 +1,166 @@
+import { ApiFehler, antwort, aufruf, json } from "./api-aufruf.ts";
+import type { Ordnung, OrdnungsVorschlag, TagKurz } from "./api-ordnung.ts";
+
+/* Dokumente: Liste, Aufnahme, Einordnung, Löschung, Mails, Vorschläge, Verlauf und Links (docs/api.md) */
+
+export type Art = "buecher" | "zoll" | "beleg" | "geschaeftsbrief" | "sonstige" | "freiwillig" | "frei";
+export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei" | "loeschbar" | "geloescht";
+
+export interface Dokument {
+  id: string;
+  /** Archivnummer, fortlaufend in der Reihenfolge des Eingangs */
+  asn: number;
+  sha256: string;
+  groesse: number;
+  mimeType: string;
+  dateiname: string | null;
+  quelle: string;
+  eingegangenAm: string;
+}
+
+export interface Eintrag extends Dokument {
+  art: Art | null;
+  fristBis: string | null;
+  titel: string | null;
+  tags: TagKurz[];
+  dokumenttyp: { id: string; name: string } | null;
+}
+
+export interface Einordnung {
+  id: string;
+  art: Art;
+  entstanden: string;
+  fristBis: string | null;
+  titel: string | null;
+  korrespondent: string | null;
+  erstelltAm: string;
+}
+
+export interface Loeschung {
+  id: string;
+  dokumentId: string;
+  beantragtVon: string;
+  beantragtAm: string;
+  bestaetigtVon: string | null;
+  bestaetigtAm: string | null;
+  dateiname?: string | null;
+}
+
+export interface MailAnsicht {
+  messageId: string | null;
+  von: string | null;
+  an: string[];
+  betreff: string;
+  gesendetAm: string | null;
+  text: string;
+  anhaenge: { dokumentId: string; dateiname: string | null; mimeType: string; eingebettet: boolean }[];
+  unterhaltung: { dokumentId: string; betreff: string; von: string | null; gesendetAm: string | null }[];
+  ausMail: string | null;
+}
+
+export interface Ereignis {
+  seq: number;
+  at: string;
+  akteur: string | null;
+  aktion: string;
+  tabelle: string;
+  detail: string | null;
+}
+
+export interface ERechnung {
+  syntax: "cii" | "ubl";
+  nummer: string | null;
+  datum: string | null;
+  typ: string | null;
+  verkaeufer: string | null;
+  kaeufer: string | null;
+  bruttoCent: number | null;
+  waehrung: string | null;
+}
+
+/** Ein gültiger geteilter Link (docs/teilen.md); den Link selbst gibt es nur beim Anlegen */
+export interface GeteilterLink {
+  id: string;
+  erstelltVon: string;
+  erstelltAm: string;
+  gueltigBis: string;
+  abrufe: number;
+  letzterAbruf: string | null;
+}
+
+/** Einträge je Seite in Archiv und Eingang */
+export const PRO_SEITE = 50;
+
+export const dokumenteApi = {
+  /** Eine Seite der Liste (ab 1) und die Zahl aller Treffer aus X-Gesamt */
+  dokumente: async (suche: string, gruppe: Gruppe = "alle", filter = "", seite = 1, proSeite = PRO_SEITE) => {
+    const res = await antwort(
+      `/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}&seite=${seite}&proSeite=${proSeite}${filter}`,
+    );
+    const eintraege = (await res.json()) as Eintrag[];
+    return { eintraege, gesamt: Number(res.headers.get("x-gesamt") ?? eintraege.length) };
+  },
+  dokument: (id: string) =>
+    aufruf<Dokument & Ordnung & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
+      `/api/dokumente/${id}`,
+    ),
+  hochladen: (datei: File) => {
+    const form = new FormData();
+    form.append("datei", datei);
+    return aufruf<Dokument>("/api/dokumente", { method: "POST", body: form });
+  },
+  verlauf: (id: string) => aufruf<{ ereignisse: Ereignis[]; siegel: string | null }>(`/api/dokumente/${id}/verlauf`),
+  inhalt: (id: string) =>
+    aufruf<{ erechnung: ERechnung | null; fehler: string | null; ocr: boolean; textLaenge: number } | null>(
+      `/api/dokumente/${id}/inhalt`,
+    ),
+  einordnen: (
+    id: string,
+    eingabe: { art: Art; entstanden: string; freiwilligBis?: string; titel?: string; korrespondent?: string },
+  ) => aufruf<Einordnung>(`/api/dokumente/${id}/einordnung`, json(eingabe)),
+  loeschungBeantragen: (id: string) => aufruf<Loeschung>(`/api/dokumente/${id}/loeschung`, { method: "POST" }),
+  loeschungen: () => aufruf<Loeschung[]>("/api/loeschungen"),
+  loeschungBestaetigen: (id: string) => aufruf<Loeschung>(`/api/loeschungen/${id}/bestaetigen`, { method: "POST" }),
+  loeschungZurueckziehen: (id: string) => aufruf<unknown>(`/api/loeschungen/${id}`, { method: "DELETE" }),
+  mailsImportieren: (datei: File) => {
+    const form = new FormData();
+    form.append("datei", datei);
+    return aufruf<{ neu: string[]; doppelt: string[] }>("/api/mails", { method: "POST", body: form });
+  },
+  mail: async (id: string): Promise<MailAnsicht | null> => {
+    try {
+      return await aufruf<MailAnsicht>(`/api/dokumente/${id}/mail`);
+    } catch (err) {
+      if (err instanceof ApiFehler && err.status === 404) return null;
+      throw err;
+    }
+  },
+  vorschlag: (id: string) =>
+    aufruf<{
+      vorschlag: { art: Art | null; regel: { id: string; name: string }; ordnung: OrdnungsVorschlag | null } | null;
+      erechnung: ERechnung | null;
+      ki: {
+        art: Art;
+        entstanden: string | null;
+        titel: string | null;
+        korrespondent: string | null;
+        begruendung: string;
+        modell: string;
+        ordnung: OrdnungsVorschlag | null;
+      } | null;
+    }>(`/api/dokumente/${id}/vorschlag`),
+  links: (id: string) => aufruf<GeteilterLink[]>(`/api/dokumente/${id}/links`),
+  linkAnlegen: (id: string, tage: 1 | 7 | 30) =>
+    aufruf<{ id: string; url: string; gueltigBis: string }>(`/api/dokumente/${id}/links`, json({ tage })),
+  linkWiderrufen: (id: string, link: string) =>
+    aufruf<{ ok: true }>(`/api/dokumente/${id}/links/${link}/widerrufen`, { method: "POST" }),
+  freigabe: (id: string) =>
+    aufruf<{ url: string; gueltigBis: string }>(`/api/dokumente/${id}/freigabe`, { method: "POST" }),
+};
+
+export const exportUrl = (von: string, bis: string) =>
+  `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
+
+export const trennblattUrl = "/api/trennblatt.pdf";
+export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
+export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;
