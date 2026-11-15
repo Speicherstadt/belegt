@@ -7,6 +7,7 @@ import { PDFDocument, StandardFonts } from "pdf-lib";
 import postgres from "postgres";
 import { ansichtenErzeugen } from "../server/ansicht/ansicht.ts";
 import { createApp } from "../server/app.ts";
+import { archivfassungenErzeugen } from "../server/archivfassung/archivfassung.ts";
 import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrieren } from "../server/db/migrieren.ts";
@@ -89,6 +90,8 @@ immerWieder(() => inhalteErzeugen({ db, speicher }));
 immerWieder(() => workflowsAusfuehren(db));
 // Vorschaubilder
 immerWieder(() => vorschaubilderErzeugen({ db, speicher }));
+// Durchsuchbare PDFs von Scans (mit Tesseract), einer je Lauf
+immerWieder(() => archivfassungenErzeugen({ db, speicher }, { stapel: 1 }));
 // Ein nachgebauter Vorschau-Dienst: macht aus jeder Office-Datei ein PDF mit ihrem Namen beim Dienst
 const vorschauAbfragen = async (_url: string, init: RequestInit) => {
   const datei = (init.body as FormData).get("files") as File;

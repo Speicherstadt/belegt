@@ -13,7 +13,7 @@ import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
-import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
+import { ansichtUrl, api, archivfassungUrl, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
@@ -57,15 +57,18 @@ export function DocumentPage() {
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
   const d = dok.data;
   const geloescht = !!d.loeschung?.bestaetigtAm;
+  // Bei Scans die durchsuchbare Fassung: Text lässt sich darin suchen und markieren
   const vorschau = geloescht
     ? null
-    : d.mimeType === "application/pdf"
-      ? "pdf"
-      : d.mimeType.startsWith("image/") && d.mimeType !== "image/heic"
-        ? "bild"
-        : d.ansicht
-          ? "ansicht"
-          : null;
+    : d.archivfassung
+      ? "archivfassung"
+      : d.mimeType === "application/pdf"
+        ? "pdf"
+        : d.mimeType.startsWith("image/") && d.mimeType !== "image/heic"
+          ? "bild"
+          : d.ansicht
+            ? "ansicht"
+            : null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -81,6 +84,15 @@ export function DocumentPage() {
           >
             {m.doc_download()}
           </a>
+          {d.archivfassung && (
+            <a
+              href={archivfassungUrl(d.id)}
+              download
+              className="h-9 rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
+            >
+              {m.doc_download_searchable()}
+            </a>
+          )}
           <OpenWith dokumentId={d.id} mimeType={d.mimeType} />
         </div>
       )}
@@ -99,6 +111,16 @@ export function DocumentPage() {
             <>
               <p className="m-0 mb-3 text-muted text-sm">{m.doc_derived_view()}</p>
               <iframe title={m.doc_preview()} src={ansichtUrl(d.id)} className="h-[70vh] w-full rounded bg-white" />
+            </>
+          )}
+          {vorschau === "archivfassung" && (
+            <>
+              <p className="m-0 mb-3 text-muted text-sm">{m.doc_searchable_view()}</p>
+              <iframe
+                title={m.doc_preview()}
+                src={archivfassungUrl(d.id)}
+                className="h-[70vh] w-full rounded bg-white"
+              />
             </>
           )}
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}

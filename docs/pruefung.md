@@ -27,7 +27,7 @@ Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prü
 
 | Datei | Inhalt |
 | --- | --- |
-| `dokumente/<ID>/<Dateiname>` | die Originale, Byte für Byte |
+| `dokumente/<ID>/<Dateiname>` | die Originale, Byte für Byte; abgeleitete Fassungen (Ansicht, durchsuchbares PDF, Vorschaubild) nicht, sie sind keine Unterlagen |
 | `dokumente.csv` | je Dokument Typ, Größe, SHA-256, Eingang, Quelle, Einordnung, Frist, Pfad im ZIP, Archivnummer, Dokumenttyp und Tags |
 | `mails.csv` | Kopf der Mails (Message-ID, Antwort auf, Von, An, Betreff, Gesendet) |
 | `tags.csv` | je Dokument und Tag eine Zeile ([Ordnung](ordnung.md)) |

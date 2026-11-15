@@ -197,7 +197,8 @@ des Dokuments stehen dann Nummer, Datum, Verkäufer, Käufer und Gesamtbetrag (B
 Einordnen übernimmt „Übernehmen“ Datum, „Rechnung <Nummer>“ als Titel und den Verkäufer; die Art kommt aus einer
 passenden Regel, sonst „Buchungsbeleg“. Geprüft wird die Rechnung dabei nicht, und maßgeblich bleibt das Original.
 Bilder (JPEG, PNG, WebP) und PDFs ohne Textebene gehen durch die Texterkennung (Tesseract, Deutsch und Englisch);
-die Seite des Dokuments sagt dann „aus der Texterkennung“. HEIC liest sie nicht.
+die Seite des Dokuments sagt dann „aus der Texterkennung“, und es gibt ein [durchsuchbares
+PDF](dokument.md#durchsuchbares-pdf). HEIC liest sie nicht.
 
 Aus Word, Excel und PowerPoint (`.docx`, `.xlsx`, `.pptx`) und OpenDocument (`.odt`, `.ods`, `.odp`) kommt der Text
 von Absätzen, Kopf- und Fußzeilen, Zellen, Folien und Notizen, aus reinen Textdateien (`.txt`, `.csv`, `.md`, UTF-8)

@@ -15,6 +15,7 @@ describe("readEnv", () => {
       S3_SPERRE_TAGE: 0,
       TRENNBLATT_CODE: "BELEGT-TRENNER",
       EINGANG_ORDNER_TAGS: false,
+      ARCHIVFASSUNG: true,
       IMPORT_ORDNER: "data/import",
       IMPORT_MAX_GB: 20,
     });
@@ -34,6 +35,8 @@ describe("readEnv", () => {
     expect(readEnv({}).EINGANG_ORDNER_TAGS).toBe(false);
     expect(readEnv({ EINGANG_ORDNER_TAGS: "true" }).EINGANG_ORDNER_TAGS).toBe(true);
     expect(() => readEnv({ EINGANG_ORDNER_TAGS: "ja" })).toThrow(/EINGANG_ORDNER_TAGS/);
+    expect(readEnv({ ARCHIVFASSUNG: "false" }).ARCHIVFASSUNG).toBe(false);
+    expect(() => readEnv({ ARCHIVFASSUNG: "nein" })).toThrow(/ARCHIVFASSUNG/);
   });
 
   it("liest Port und Datenbank", () => {

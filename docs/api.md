@@ -16,7 +16,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/archivfassung`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
 mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein, setzt Tags, Dokumenttyp und Feldwerte und schreibt Notizen; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
@@ -61,6 +61,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/dokumente/:id/notizen`, `POST /api/dokumente/:id/notizen` (`text`: 1 bis 5000 Zeichen) | Notizen ([`dokument.md`](dokument.md#notizen)), älteste zuerst, ohne zurückgezogene; je `id`, `text`, `erstelltVon`, `erstelltAm`. Inhaber und Steuerberatung, nicht Prüfer; `409` nach der Löschung |
 | `POST /api/dokumente/:id/notizen/:notiz/zurueckziehen` | blendet eine Notiz aus; wer sie schrieb oder der Inhaber, sonst `404` |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |
+| `GET /api/dokumente/:id/archivfassung` | das durchsuchbare PDF eines Scans (PDF/A-2b, [`dokument.md`](dokument.md#durchsuchbares-pdf)), abgeleitet, als „… (durchsuchbar).pdf“; `404` ohne (`archivfassung: false` in `GET /api/dokumente/:id`), `410` nach der Löschung |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
 | `GET /api/dokumente?gruppe=offen\|pflicht\|freiwillig\|frei\|loeschbar\|geloescht` | nur der Eingang, eine Art der Aufbewahrung, was gelöscht werden darf, oder die Löschnachweise; ohne `gruppe` keine gelöschten |
 | `POST /api/mails` (multipart, Feld `datei`: `.eml`, MBOX, PST oder OST) | nimmt Mails samt Anhängen auf; Antwort `neu` und `doppelt` (Dokument-IDs), bei PST/OST dazu `pst` (das Dokument der Datei) |

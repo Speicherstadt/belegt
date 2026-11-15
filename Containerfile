@@ -15,7 +15,7 @@ RUN bun run build \
  && rm -rf node_modules/pst-extractor/example
 
 FROM docker.io/oven/bun:1.4.4-slim
-# tesseract-ocr mit Deutsch und Englisch: Texterkennung für Scans; poppler-utils: pdftoppm rastert gescannte PDFs für
+# tesseract-ocr mit Deutsch und Englisch: Texterkennung und durchsuchbare PDFs für Scans; poppler-utils: pdftoppm rastert gescannte PDFs für
 # die Texterkennung, die Suche nach Trennblättern und Vorschaubilder, pdfinfo zählt Seiten. Alles läuft als eigener
 # Prozess mit Zeitlimit (server/inhalt/ocr.ts).
 RUN apt-get update \

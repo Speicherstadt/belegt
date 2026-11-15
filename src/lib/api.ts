@@ -41,6 +41,7 @@ export type {
 } from "./api-dokumente.ts";
 export {
   ansichtUrl,
+  archivfassungUrl,
   dateiUrl,
   exportUrl,
   PRO_SEITE,

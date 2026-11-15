@@ -12,7 +12,7 @@ import { join } from "node:path";
 /** Sprachen für Tesseract, etwa „deu+eng“ */
 export const ocrSprachen = () => process.env.OCR_SPRACHEN || "deu+eng";
 /** Höchstens so viele Seiten eines gescannten PDFs */
-const MAX_SEITEN = 50;
+export const MAX_SEITEN = 50;
 const ZEITLIMIT = 120_000;
 
 const vorhanden = (programm: string, schalter: string) =>

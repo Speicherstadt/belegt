@@ -114,3 +114,7 @@ Uploads durchlassen, bei nginx etwa `client_max_body_size 20g;` für `/api/paper
 Das Image bringt Tesseract mit Deutsch und Englisch mit. Andere Sprachen: Paket `tesseract-ocr-<sprache>` im
 Containerfile ergänzen und `OCR_SPRACHEN` setzen (etwa `deu+eng+fra`). Ohne Tesseract (etwa bei `bun server/worker.ts`
 auf einem Rechner ohne das Programm) bleiben Scans ohne Text; kommt es später dazu, liest der Worker sie nach.
+
+Aus jedem Scan mit erkanntem Text erzeugt der Worker außerdem ein [durchsuchbares PDF](dokument.md#durchsuchbares-pdf)
+(PDF/A-2b). Das erkennt den Text ein zweites Mal und braucht etwa so viel Rechenzeit wie die Texterkennung selbst und in
+der Datenbank etwa so viel Platz wie der Scan. `ARCHIVFASSUNG=false` schaltet es ab; vorhandene Fassungen bleiben.

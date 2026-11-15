@@ -318,6 +318,8 @@
   "theme_dark": "Dark",
   "version": "Version {version}",
   "doc_derived_view": "PDF view generated from the original. The original, available for download, is authoritative.",
+  "doc_searchable_view": "Searchable PDF generated from the original. The original is authoritative.",
+  "doc_download_searchable": "Download searchable PDF",
   "open_with": "Open with {name}",
   "open_with_error": "Could not create the link for the other app. Please try again.",
   "nav_order": "Organize",

@@ -2,6 +2,7 @@ import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
 import { SORTIERUNGEN } from "../../shared/archivansicht.ts";
 import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
+import { archivfassungZu, hatArchivfassung } from "../archivfassung/archivfassung.ts";
 import { anzahl, aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
 import {
   aktuelle,
@@ -129,6 +130,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       einordnung: await aktuelle(umgebung.db, dokument.id),
       loeschung: await fuerDokument(umgebung.db, dokument.id),
       ansicht: await hatAnsicht(umgebung.db, dokument.id),
+      archivfassung: await hatArchivfassung(umgebung.db, dokument.id),
       ...(await ordnungZu(umgebung.db, dokument.id)),
     });
   });
@@ -232,6 +234,23 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     const pdf = await ansichtZu(umgebung.db, dokument.id);
     if (!pdf) return c.json({ fehler: "Keine Ansicht" }, 404);
     const name = `${(dokument.dateiname ?? dokument.sha256).replace(/\.[^.]*$/, "")} (Ansicht).pdf`;
+    return c.body(new Uint8Array(pdf), 200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename*=UTF-8''${dateinameKodiert(name)}`,
+      "X-Content-Type-Options": "nosniff",
+    });
+  });
+
+  /** Durchsuchbares PDF eines Scans (PDF/A-2b); abgeleitet, maßgeblich bleibt die Datei */
+  app.get("/api/dokumente/:id/archivfassung", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    if ((await fuerDokument(umgebung.db, dokument.id))?.bestaetigtAm)
+      return c.json({ fehler: "Das Dokument ist gelöscht" }, 410);
+    const pdf = await archivfassungZu(umgebung.db, dokument.id);
+    if (!pdf) return c.json({ fehler: "Keine Archivfassung" }, 404);
+    const name = `${(dokument.dateiname ?? dokument.sha256).replace(/\.[^.]*$/, "")} (durchsuchbar).pdf`;
     return c.body(new Uint8Array(pdf), 200, {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename*=UTF-8''${dateinameKodiert(name)}`,

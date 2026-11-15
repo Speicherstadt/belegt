@@ -52,6 +52,7 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     );
     expect(JSON.stringify(doku)).toContain("Buchungsbelege werden acht Jahre aufbewahrt");
     expect(JSON.stringify(doku)).toContain("im Dateisystem des Servers");
+    expect(JSON.stringify(doku)).toContain("ein durchsuchbares PDF (PDF/A-2b");
   });
 
   it("speichert Angaben nur durch den Inhaber, mit Eintrag im Audit-Log", async () => {

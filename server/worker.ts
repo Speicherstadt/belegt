@@ -1,8 +1,10 @@
 import { ansichtenErzeugen } from "./ansicht/ansicht.ts";
+import { archivfassungenErzeugen } from "./archivfassung/archivfassung.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { readEnv } from "./env.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
+import { ocrVerfuegbar } from "./inhalt/ocr.ts";
 import { kiVorschlaegeErzeugen } from "./ki/vorschlaege.ts";
 import { entfernenNachholen } from "./loeschung/loeschung.ts";
 import { alleAbrufen } from "./mail/abruf.ts";
@@ -23,7 +25,7 @@ import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
  * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
- * und erzeugt Vorschaubilder. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
+ * und erzeugt Vorschaubilder und durchsuchbare PDFs von Scans. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
  * aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
@@ -155,6 +157,20 @@ async function vorschaubilder() {
   }
 }
 
+/** Mit Tesseract und ARCHIVFASSUNG: durchsuchbare PDFs von Scans, alle 30 Sekunden; bei vollem Stapel gleich weiter */
+async function archivfassungen() {
+  for (;;) {
+    const r = await archivfassungenErzeugen({ db, speicher }).catch((err) => ({
+      erzeugt: 0,
+      fehler: 0,
+      meldung: meldung(err),
+    }));
+    if (r.erzeugt || r.fehler) console.log(`Archivfassungen: ${r.erzeugt} erzeugt, ${r.fehler} nicht möglich`);
+    if ("meldung" in r) console.error(`Archivfassungen: ${r.meldung}`);
+    if (r.erzeugt + r.fehler < 3) await Bun.sleep(30_000);
+  }
+}
+
 /**
  * Mit EINGANG_ORDNER: alle 5 Sekunden ein Blick in den Ordner; aufgenommen wird, was zwei Blicke lang gleich bleibt.
  * PDFs mit Trennblättern werden vorher geteilt; scheitert das, kommt der Stapel unverändert ins Archiv.
@@ -221,6 +237,7 @@ await Promise.all([
   workflows(),
   entfernungen(),
   ...(rasterVerfuegbar() ? [vorschaubilder()] : []),
+  ...(env.ARCHIVFASSUNG && ocrVerfuegbar() ? [archivfassungen()] : []),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.EINGANG_ORDNER ? [eingangsordner(env.EINGANG_ORDNER)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),

@@ -1,7 +1,7 @@
 ---
-title: "Dokument: Vorschaubilder, Seiten, Notizen, Ähnliches"
+title: "Dokument: Vorschaubilder, durchsuchbares PDF, Seiten, Notizen, Ähnliches"
 description: >-
-  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder, Seiten bearbeiten, ohne das Original zu ändern, Notizen und ähnliche Dokumente.
+  Was Belegt rund um ein einzelnes Dokument zeigt und anbietet: Vorschaubilder, durchsuchbare PDFs von Scans, Seiten bearbeiten, ohne das Original zu ändern, Notizen und ähnliche Dokumente.
 ---
 
 # Dokument
@@ -15,6 +15,25 @@ Der Worker erzeugt die Bilder kurz nach dem Eingang mit `pdftoppm` (Poppler, im 
 und PNG und bei Office-Dateien aus ihrer [Ansicht](eingang.md#ansicht-von-office-dateien). Mails, Textdateien, WebP,
 TIFF und HEIC bekommen keins, dort steht das Kürzel des Formats. Ein Vorschaubild ist wie die Ansicht aus dem Original
 abgeleitet, 300 Pixel breit und höchstens viermal so hoch (eine längere Seite zeigt ihren oberen Teil), und geht mit der Löschung mit; maßgeblich bleibt das Original.
+
+## Durchsuchbares PDF
+
+Für Scans, also Bilder (JPEG, PNG, WebP) und PDFs ohne Textebene, erzeugt der Worker nach der
+[Texterkennung](eingang.md#text-und-e-rechnungen) ein durchsuchbares PDF: jede Seite als Bild, der erkannte Text unsichtbar darüber,
+sodass er sich im PDF-Leser suchen und markieren lässt. Die Seite des Dokuments zeigt dann diese Fassung mit dem
+Hinweis, dass sie aus dem Original erzeugt ist, und bietet „Durchsuchbares PDF herunterladen“ neben „Original
+herunterladen“.
+
+Die Fassung ist ein PDF/A-2b (ISO 19005-2) mit sRGB-Farbprofil, XMP-Metadaten und eingebetteter Schrift (bei der
+Entwicklung mit veraPDF geprüft). Tesseract schreibt Bild und Text, gescannte PDFs rastert `pdftoppm` vorher mit 300 dpi; so kommt nichts
+aus dem Original hinein, was PDF/A verbietet. Das Original bleibt unverändert und maßgeblich, nur es steht im
+[Z3-Export](pruefung.md#datenträger-für-die-betriebsprüfung-z3). Wie Ansicht und Vorschaubild ist die Fassung
+abgeleitet, nicht versiegelt und geht mit der Löschung mit.
+
+Keine Fassung bekommen Scans ohne erkannten Text, Scans mit mehr als 50 Seiten oder einer Seite über 50 Millionen
+Bildpunkte (mit 300 dpi etwas größer als A2) und Fassungen über 50 MB; der Grund steht in der Datenbank, und der Worker
+versucht es nicht noch einmal. Ein Scan, an dem Tesseract länger als zehn Minuten rechnet, wird abgebrochen.
+`ARCHIVFASSUNG=false` schaltet die Fassungen ab ([`betrieb.md`](betrieb.md#texterkennung)).
 
 ## Seiten bearbeiten
 

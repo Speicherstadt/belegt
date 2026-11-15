@@ -140,9 +140,15 @@ export const dokumenteApi = {
     return { eintraege, gesamt: Number(res.headers.get("x-gesamt") ?? eintraege.length) };
   },
   dokument: (id: string) =>
-    aufruf<Dokument & Ordnung & { einordnung: Einordnung | null; loeschung: Loeschung | null; ansicht: boolean }>(
-      `/api/dokumente/${id}`,
-    ),
+    aufruf<
+      Dokument &
+        Ordnung & {
+          einordnung: Einordnung | null;
+          loeschung: Loeschung | null;
+          ansicht: boolean;
+          archivfassung: boolean;
+        }
+    >(`/api/dokumente/${id}`),
   hochladen: (datei: File) => {
     const form = new FormData();
     form.append("datei", datei);
@@ -232,4 +238,5 @@ export const trennblattUrl = "/api/trennblatt.pdf";
 export const seiteUrl = (id: string, nr: number) => `/api/dokumente/${id}/seiten/${nr}`;
 export const vorschaubildUrl = (id: string) => `/api/dokumente/${id}/vorschaubild`;
 export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
+export const archivfassungUrl = (id: string) => `/api/dokumente/${id}/archivfassung`;
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

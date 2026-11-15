@@ -318,6 +318,8 @@
   "theme_dark": "Dunkel",
   "version": "Version {version}",
   "doc_derived_view": "Ansicht als PDF, aus dem Original erzeugt. Maßgeblich ist das Original zum Herunterladen.",
+  "doc_searchable_view": "Durchsuchbares PDF, aus dem Original erzeugt. Maßgeblich ist das Original.",
+  "doc_download_searchable": "Durchsuchbares PDF herunterladen",
   "open_with": "Öffnen mit {name}",
   "open_with_error": "Der Link für die andere App ließ sich nicht anlegen. Bitte noch einmal versuchen.",
   "nav_order": "Ordnung",

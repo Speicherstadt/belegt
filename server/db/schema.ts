@@ -21,6 +21,7 @@ const bytea = customType<{ data: Buffer }>({ dataType: () => "bytea" });
 
 export * from "./auth-schema.ts";
 export * from "./schema-alltag.ts";
+export * from "./schema-archivfassung.ts";
 export * from "./schema-import.ts";
 export * from "./schema-ordnung.ts";
 

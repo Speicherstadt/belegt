@@ -176,6 +176,18 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/archivfassung": {
+      get: {
+        summary:
+          "Durchsuchbares PDF eines Scans (PDF/A-2b, Bild mit unsichtbarem Text aus der Texterkennung), aus dem Original abgeleitet; maßgeblich bleibt das Original",
+        parameters: [idParam],
+        responses: {
+          "200": { description: "PDF", content: { "application/pdf": {} } },
+          "404": fehler,
+          "410": fehler,
+        },
+      },
+    },
     "/api/dokumente/{id}/vorschaubild": {
       get: {
         summary: "Vorschaubild der ersten Seite (JPEG, 300 px breit), aus dem Original oder seiner Ansicht abgeleitet",

@@ -66,6 +66,7 @@ löschen sie wieder.
 | `IMPORT_ORDNER`, `IMPORT_MAX_GB` | Ordner für hochgeladene Exporte aus Paperless-ngx, den Server und Worker teilen, und ihre größte Größe in GB (docs/umzug.md) | `data/import`, `20` |
 | `TRENNBLATT_CODE` | Inhalt des Codes auf Trennblättern, an denen gescannte Stapel geteilt werden | `BELEGT-TRENNER` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
+| `ARCHIVFASSUNG` | Durchsuchbares PDF für Scans, wenn Tesseract da ist (`true` oder `false`, docs/dokument.md) | `true` |
 | `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Apps für IMAP mit OAuth (docs/eingang.md) | – (Mandant `common`) |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_NAME` | Anmelden über einen OpenID-Connect-Anbieter (docs/einbetten.md) | –, Name `Firmenkonto` |

@@ -63,6 +63,11 @@ const Schema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  /** Durchsuchbares PDF (PDF/A-2b) für Scans, wenn Tesseract installiert ist (docs/dokument.md) */
+  ARCHIVFASSUNG: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
   /** Ordner für hochgeladene Exporte aus Paperless-ngx, den Server und Worker teilen (docs/umzug.md) */
   IMPORT_ORDNER: z.string().min(1).default("data/import"),
   /** Größte Datei eines Exports aus Paperless-ngx in GB */

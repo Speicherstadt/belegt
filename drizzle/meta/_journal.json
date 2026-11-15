@@ -274,6 +274,13 @@
       "when": 1794763673197,
       "tag": "0038_workflows",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1794768829849,
+      "tag": "0039_archivfassungen",
+      "breakpoints": true
     }
   ]
 }
