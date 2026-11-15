@@ -5,7 +5,7 @@ import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
 import { groesse } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
-import { geteilteDateien, geteilteVerwerfen } from "../pwa/teilen.ts";
+import { geteilteDateien, geteilteVerwerfen, geteiltHochladen } from "../pwa/teilen.ts";
 
 /**
  * Was vom Handy an Belegt geteilt wurde: erst ansehen, dann mit einem Klick in den Eingang. Bis dahin liegt nichts auf
@@ -20,12 +20,10 @@ export function SharePage() {
     await queryClient.invalidateQueries({ queryKey: ["geteilt"] });
   };
   const hochladen = useMutation({
-    mutationFn: async (liste: File[]) => {
-      for (const datei of liste) await api.hochladen(datei);
-      return liste.length;
-    },
-    onSuccess: async () => {
-      await fertig();
+    // Jede angekommene Datei verschwindet sofort aus der Zwischenablage; ein zweiter Versuch lädt nur den Rest hoch
+    mutationFn: () => geteiltHochladen(api.hochladen),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["geteilt"] });
       await queryClient.invalidateQueries({ queryKey: ["dokumente"] });
     },
   });
@@ -68,7 +66,7 @@ export function SharePage() {
             {schreiben && (
               <button
                 type="button"
-                onClick={() => hochladen.mutate(liste)}
+                onClick={() => hochladen.mutate()}
                 disabled={hochladen.isPending}
                 className="h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
               >

@@ -27,7 +27,8 @@ Hinweisseite. Eingebettet in ein Portal ([Einbetten](einbetten.md)) gibt es die 
 
 **Teilen an Belegt.** Ist die App auf Android (Chrome, Edge, Samsung Internet) installiert, steht Belegt im Menü
 „Teilen“ anderer Apps, für PDFs, Bilder, Office-Dateien und Mails (`.eml`). Die Dateien landen zuerst nur auf dem
-Handy, auf der Seite **Geteilte Dateien**; erst **In den Eingang** lädt sie hoch, **Verwerfen** löscht sie. Bist du
+Handy, auf der Seite **Geteilte Dateien**; erst **In den Eingang** lädt sie hoch, **Verwerfen** löscht sie. Bricht das Hochladen ab, bleiben nur die
+Dateien stehen, die noch nicht angekommen sind; ein zweiter Versuch legt nichts doppelt an. Bist du
 nicht angemeldet, meldest du dich an und kommst danach zurück zu den Dateien. Beim Abmelden löscht Belegt geteilte
 Dateien, die noch nicht hochgeladen sind. Hochladen darf nur der Inhaber. Auf dem iPhone und in Firefox gibt es das
 Teilen an eine Web-App nicht; dort lädst du über **Hochladen** hoch.
