@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { inhalteErzeugen, lesen } from "./inhalt.ts";
-import { bildText, ocrVerfuegbar } from "./ocr.ts";
+import { bildText, ocrVerfuegbar, pdfScanText } from "./ocr.ts";
 
 const TEXT = "Stromrechnung Oktober Müller";
 
@@ -51,6 +51,15 @@ describe.skipIf(!ocrVerfuegbar())("Texterkennung (Tesseract)", { timeout: 60_000
     const g = await lesen(pdf, "application/pdf", { ocr: true });
     expect(g.ocr).toBe(true);
     expect(g.text).toContain(TEXT);
+  });
+
+  it("lehnt eine riesige Seite ab, bevor pdftoppm sie rastert", async () => {
+    // 1800 × 1800 pt sind mit 300 dpi 56 Millionen Bildpunkte, über MAX_BILDPUNKTE; 14400 pt wären 3,6 Milliarden
+    const doc = await PDFDocument.create();
+    doc.addPage([1800, 1800]);
+    const start = Date.now();
+    await expect(pdfScanText(new Uint8Array(await doc.save()))).rejects.toThrow("Seite 1 zu groß");
+    expect(Date.now() - start).toBeLessThan(5000);
   });
 
   describe.skipIf(!testDatenbankUrl)("im Archiv", () => {

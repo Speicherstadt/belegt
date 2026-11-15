@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PDFDocument } from "pdf-lib";
 import { dateityp } from "../dokumente/dateityp.ts";
-import { ausfuehren, MAX_SEITEN, ocrSprachen } from "../inhalt/ocr.ts";
+import { ausfuehren, DPI, MAX_BILDPUNKTE, ocrSprachen, seitenPruefen } from "../inhalt/ocr.ts";
 import { bildMasse } from "./bildmasse.ts";
 import { alsPdfA } from "./pdfa.ts";
 
@@ -16,29 +16,12 @@ import { alsPdfA } from "./pdfa.ts";
  * Seiten oder mehr als MAX_BILDPUNKTE Bildpunkte auf einer Seite.
  */
 
-/** Auflösung, mit der gescannte PDFs gerastert werden: wie für die Texterkennung (server/inhalt/ocr.ts) */
-const DPI = 300;
-/** Höchstens so viele Bildpunkte je Seite; A4 mit 300 dpi sind 8,7 Millionen, A2 35 Millionen */
-export const MAX_BILDPUNKTE = 50_000_000;
 /** Größer wird keine Archivfassung gespeichert */
 export const MAX_ARCHIVFASSUNG = 50 * 1024 * 1024;
 
 export interface Fassung {
   pdf: Uint8Array;
   seiten: number;
-}
-
-/** Seitengrößen in pt aus pdfinfo; mehr als MAX_SEITEN Seiten lehnt es ab, bevor etwas gerastert wird */
-async function seitenPruefen(datei: string, zeitlimit: number): Promise<number> {
-  const info = await ausfuehren("pdfinfo", ["-f", "1", "-l", String(MAX_SEITEN), datei], undefined, zeitlimit);
-  const seiten = Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
-  if (!Number.isInteger(seiten) || seiten < 1) throw new Error("Keine Seiten");
-  if (seiten > MAX_SEITEN) throw new Error(`Zu viele Seiten (${seiten}, höchstens ${MAX_SEITEN})`);
-  for (const [, nr, b, h] of info.matchAll(/^Page\s+(\d+) size:\s+([\d.]+) x ([\d.]+) pts/gm)) {
-    const punkte = ((Number(b) * DPI) / 72) * ((Number(h) * DPI) / 72);
-    if (!(punkte <= MAX_BILDPUNKTE)) throw new Error(`Seite ${nr} zu groß (${b} × ${h} pt)`);
-  }
-  return seiten;
 }
 
 function bildPruefen(bytes: Uint8Array) {
@@ -60,7 +43,7 @@ export async function archivPdf(bytes: Uint8Array, gespeichert: string, zeitlimi
     let erwartet = 1;
     if (mimeType === "application/pdf") {
       await writeFile(join(ordner, "scan.pdf"), bytes);
-      erwartet = await seitenPruefen(join(ordner, "scan.pdf"), zeitlimit);
+      erwartet = await seitenPruefen(join(ordner, "scan.pdf"), { zeitlimit, mehrAblehnen: true });
       // -cropbox: gerastert wird der Beschnitt, dessen Größe pdfinfo nennt, nicht ein größerer Medienrahmen
       const r = ["-r", String(DPI), "-cropbox", "-png", join(ordner, "scan.pdf"), join(ordner, "seite")];
       await ausfuehren("pdftoppm", r, undefined, zeitlimit);

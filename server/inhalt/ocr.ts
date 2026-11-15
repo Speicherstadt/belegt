@@ -14,6 +14,10 @@ export const ocrSprachen = () => process.env.OCR_SPRACHEN || "deu+eng";
 /** Höchstens so viele Seiten eines gescannten PDFs */
 export const MAX_SEITEN = 50;
 const ZEITLIMIT = 120_000;
+/** Auflösung, mit der gescannte PDFs gerastert werden (Texterkennung und Archivfassung) */
+export const DPI = 300;
+/** Höchstens so viele Bildpunkte je Seite; A4 mit 300 dpi sind 8,7 Millionen, A2 35 Millionen */
+export const MAX_BILDPUNKTE = 50_000_000;
 
 const vorhanden = (programm: string, schalter: string) =>
   spawnSync(programm, [schalter], { stdio: "ignore" }).status === 0;
@@ -75,14 +79,36 @@ export function ausfuehren(
 /** Text aus einem Bild (JPEG, PNG, WebP, TIFF) */
 export const bildText = (bytes: Uint8Array) => ausfuehren("tesseract", ["stdin", "stdout", "-l", ocrSprachen()], bytes);
 
+/**
+ * Prüft ein PDF mit pdfinfo, bevor pdftoppm es rastert: Jede der ersten MAX_SEITEN Seiten hat mit DPI höchstens
+ * MAX_BILDPUNKTE (pdfinfo nennt den Beschnitt, deshalb rastert pdftoppm mit -cropbox). Mit mehrAblehnen ist ein PDF mit
+ * mehr Seiten ein Fehler, sonst zählen nur die ersten. Ergebnis: die Zahl der Seiten, die gerastert werden.
+ */
+export async function seitenPruefen(
+  datei: string,
+  { zeitlimit = ZEITLIMIT, mehrAblehnen = false }: { zeitlimit?: number; mehrAblehnen?: boolean } = {},
+): Promise<number> {
+  const info = await ausfuehren("pdfinfo", ["-f", "1", "-l", String(MAX_SEITEN), datei], undefined, zeitlimit);
+  const seiten = Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
+  if (!Number.isInteger(seiten) || seiten < 1) throw new Error("Keine Seiten");
+  if (mehrAblehnen && seiten > MAX_SEITEN) throw new Error(`Zu viele Seiten (${seiten}, höchstens ${MAX_SEITEN})`);
+  for (const [, nr, b, h] of info.matchAll(/^Page\s+(\d+) size:\s+([\d.]+) x ([\d.]+) pts/gm)) {
+    const punkte = ((Number(b) * DPI) / 72) * ((Number(h) * DPI) / 72);
+    if (!(punkte <= MAX_BILDPUNKTE)) throw new Error(`Seite ${nr} zu groß (${b} × ${h} pt)`);
+  }
+  return Math.min(seiten, MAX_SEITEN);
+}
+
 /** Text aus einem gescannten PDF: jede Seite als Bild mit 300 dpi, dann Tesseract */
 export async function pdfScanText(bytes: Uint8Array): Promise<string> {
   const ordner = await mkdtemp(join(tmpdir(), "belegt-ocr-"));
   try {
     await writeFile(join(ordner, "scan.pdf"), bytes);
+    await seitenPruefen(join(ordner, "scan.pdf"));
     await ausfuehren("pdftoppm", [
       "-r",
-      "300",
+      String(DPI),
+      "-cropbox",
       "-gray",
       "-png",
       "-l",
