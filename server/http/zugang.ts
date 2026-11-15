@@ -23,8 +23,9 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       c.req.path === "/api/status" ||
       c.req.path === "/api/openapi.json" ||
       c.req.path.startsWith("/api/einladung/") ||
-      // Der Link selbst ist die Berechtigung („Öffnen mit …“, server/freigabe/freigabe.ts)
-      c.req.path.startsWith("/api/freigabe/")
+      // Der Link selbst ist die Berechtigung („Öffnen mit …“ und Teilen per Link, server/freigabe/)
+      c.req.path.startsWith("/api/freigabe/") ||
+      c.req.path.startsWith("/api/geteilt/")
     )
       return next();
     // Programme melden sich mit einem API-Token an, nicht mit dem Cookie; deshalb gilt für sie keine CSRF-Prüfung

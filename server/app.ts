@@ -10,6 +10,7 @@ import { ordnungRouten } from "./http/ordnung.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { statischRouten } from "./http/statisch.ts";
+import { teilenRouten } from "./http/teilen.ts";
 import { zugangRouten } from "./http/zugang.ts";
 import { offen as einladungOffen } from "./zugang/einladungen.ts";
 
@@ -55,6 +56,7 @@ export function createApp(umgebung?: AppUmgebung) {
     dokumenteRouten(app, umgebung);
     ordnungRouten(app, umgebung);
     freigabeRouten(app, umgebung);
+    teilenRouten(app, umgebung);
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);

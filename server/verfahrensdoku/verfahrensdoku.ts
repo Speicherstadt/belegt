@@ -4,6 +4,7 @@ import type { Datenbank } from "../db/client.ts";
 import { pruefen } from "../dokumente/dokumente.ts";
 import { sperrenListen } from "../einordnung/einordnung.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
+import { geteiltZahlen } from "../freigabe/teilen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
@@ -81,7 +82,7 @@ export async function verfahrensdoku(
     trennblattCode?: string;
   },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel] = await Promise.all([
+  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt] = await Promise.all([
     einstellungenLaden(db),
     zugaengeListen(db),
     tokensListen(db),
@@ -91,6 +92,7 @@ export async function verfahrensdoku(
     zahlen(db),
     pruefen(db),
     zeitstempelListen(db),
+    geteiltZahlen(db),
   ]);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
@@ -181,7 +183,10 @@ export async function verfahrensdoku(
       absaetze: [
         "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest und kann Löschungen als zweite Person bestätigen; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
         "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
-      ],
+        geteilt.jemals
+          ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher wurden ${geteilt.jemals} Links angelegt, ${geteilt.aktiv} gelten derzeit.`
+          : "",
+      ].filter(Boolean),
       liste: [
         ...zugaenge.zugaenge.map(
           (u) =>

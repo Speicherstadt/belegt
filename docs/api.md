@@ -6,7 +6,7 @@ description: >-
 
 # Schnittstelle
 
-Alles unter `/api` außer `/api/auth`, `/api/status`, `/api/einladung/:token` und `/api/freigabe/:token` verlangt eine Sitzung (Cookie von
+Alles unter `/api` außer `/api/auth`, `/api/status`, `/api/einladung/:token`, `/api/freigabe/:token` und `/api/geteilt/:token` verlangt eine Sitzung (Cookie von
 Better Auth). Das erste Konto (`POST /api/auth/sign-up/email`) ist der Inhaber und braucht den Einrichtungscode, den der
 Server beim Start ins Log schreibt (Kopfzeile `x-belegt-einrichtungscode`). Jedes weitere Konto entsteht nur mit einer
 Einladung (Kopfzeile `x-belegt-einladung` mit dem Token aus dem Link) und bekommt deren Rolle. Name, E-Mail und Rolle
@@ -33,6 +33,10 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/einladung/:token` | öffentlich: ob ein Link noch gilt und für welche Rolle |
 | `POST /api/dokumente/:id/freigabe` | Link für „Öffnen mit …“ ([`schnittstelle.md`](schnittstelle.md#öffnen-mit-einer-anderen-app)): `url` (Adresse der App mit Link), `gueltigBis`; auch die Steuerberatung |
 | `GET /api/freigabe/:token` | öffentlich, nur mit dem Link: das Original, zehn Minuten lang; `404` danach, `410` nach der Löschung |
+| `POST /api/dokumente/:id/links` | Teilen per Link ([`teilen.md`](teilen.md)), nur der Inhaber mit Sitzung: `{tage: 1 \| 7 \| 30}`, Antwort `id`, `url`, `gueltigBis`; den Link gibt es nur hier |
+| `GET /api/dokumente/:id/links` | die gültigen geteilten Links mit `abrufe` und `letzterAbruf`, nur der Inhaber |
+| `POST /api/dokumente/:id/links/:link/widerrufen` | widerruft einen geteilten Link, nur der Inhaber |
+| `GET /api/geteilt/:token` | öffentlich, nur mit dem geteilten Link: das Original als Download, jeder Abruf mit Zeitpunkt festgehalten; `404` nach Ablauf oder Widerruf, `410` nach der Löschung |
 | `POST /api/dokumente` (multipart, Feld `datei`, höchstens 100 MB) | nimmt ein Original auf und antwortet mit `201` und dem Dokument |
 | `POST /api/dokumente?trennen=1` | teilt ein PDF an Trennblättern ([`eingang.md`](eingang.md#trennblätter)) und antwortet mit `{dokumente: [...]}`, ohne Trennblatt mit dem einen Dokument darin |
 | `GET /api/trennblatt.pdf` | ein Trennblatt zum Ausdrucken |

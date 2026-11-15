@@ -75,6 +75,16 @@ export interface Ich {
   zeitraum?: { von: string; bis: string };
 }
 
+/** Ein gültiger geteilter Link (docs/teilen.md); den Link selbst gibt es nur beim Anlegen */
+export interface GeteilterLink {
+  id: string;
+  erstelltVon: string;
+  erstelltAm: string;
+  gueltigBis: string;
+  abrufe: number;
+  letzterAbruf: string | null;
+}
+
 export interface Dokument {
   id: string;
   /** Archivnummer, fortlaufend in der Reihenfolge des Eingangs */
@@ -318,6 +328,11 @@ export const api = {
   },
   konten: () => aufruf<{ providerId: string }[]>("/api/auth/list-accounts"),
   ich: () => aufruf<Ich>("/api/ich"),
+  links: (id: string) => aufruf<GeteilterLink[]>(`/api/dokumente/${id}/links`),
+  linkAnlegen: (id: string, tage: 1 | 7 | 30) =>
+    aufruf<{ id: string; url: string; gueltigBis: string }>(`/api/dokumente/${id}/links`, json({ tage })),
+  linkWiderrufen: (id: string, link: string) =>
+    aufruf<{ ok: true }>(`/api/dokumente/${id}/links/${link}/widerrufen`, { method: "POST" }),
   freigabe: (id: string) =>
     aufruf<{ url: string; gueltigBis: string }>(`/api/dokumente/${id}/freigabe`, { method: "POST" }),
   einrichten: (email: string, passwort: string, code: string) =>

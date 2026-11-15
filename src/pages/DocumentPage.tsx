@@ -7,6 +7,7 @@ import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
+import { ShareLinks } from "../components/ShareLinks.tsx";
 import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -37,6 +38,7 @@ export function DocumentPage() {
   const dok = useQuery({ queryKey: ["dokument", id], queryFn: () => api.dokument(id) });
   const verlauf = useQuery({ queryKey: ["verlauf", id], queryFn: () => api.verlauf(id) });
   const inhalt = useQuery({ queryKey: ["inhalt", id], queryFn: () => api.inhalt(id) });
+  const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
 
   if (dok.error) return <EmptyState title={m.doc_not_found()} text="" />;
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
@@ -92,6 +94,7 @@ export function DocumentPage() {
           <MailSection dokumentId={d.id} />
           <EInvoice dokumentId={d.id} />
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
+          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
           {!geloescht && (
             <Classification
               key={d.einordnung?.id ?? "neu"}

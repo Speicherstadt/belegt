@@ -19,25 +19,44 @@ export interface OeffnenMit {
   url: string;
 }
 
-const hash = (token: string) => createHash("sha256").update(token).digest("hex");
+export type Zweck = "oeffnen" | "teilen";
+
+export const tokenHash = (token: string) => createHash("sha256").update(token).digest("hex");
+/** Form eines Links: 32 Zufallsbytes als base64url */
+export const tokenGueltig = (token: string) => /^[A-Za-z0-9_-]{43}$/.test(token);
 
 /** Legt eine Freigabe an; den Klartext gibt es nur hier */
-export async function freigeben(db: Datenbank, dokumentId: string, akteur: string, minuten = GUELTIG_MINUTEN) {
+export async function freigeben(
+  db: Datenbank,
+  dokumentId: string,
+  akteur: string,
+  minuten = GUELTIG_MINUTEN,
+  zweck: Zweck = "oeffnen",
+) {
   const token = randomBytes(32).toString("base64url");
   const gueltigBis = new Date(Date.now() + minuten * 60_000);
-  await mitAkteur(db, akteur, (tx) =>
-    tx.insert(freigaben).values({ dokumentId, tokenHash: hash(token), erstelltVon: akteur, gueltigBis }),
+  const [f] = await mitAkteur(db, akteur, (tx) =>
+    tx
+      .insert(freigaben)
+      .values({ dokumentId, tokenHash: tokenHash(token), erstelltVon: akteur, gueltigBis, zweck })
+      .returning({ id: freigaben.id }),
   );
-  return { token, gueltigBis };
+  return { id: f!.id, token, gueltigBis };
 }
 
-/** Das Dokument einer gültigen Freigabe oder null */
+/** Das Dokument einer gültigen Freigabe für „Öffnen mit …“ oder null; ein geteilter Link gilt hier nicht */
 export async function einloesen(db: Datenbank, token: string): Promise<string | null> {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
+  if (!tokenGueltig(token)) return null;
   const [f] = await db
     .select({ dokumentId: freigaben.dokumentId })
     .from(freigaben)
-    .where(and(eq(freigaben.tokenHash, hash(token)), gt(freigaben.gueltigBis, sql`now()`)));
+    .where(
+      and(
+        eq(freigaben.tokenHash, tokenHash(token)),
+        eq(freigaben.zweck, "oeffnen"),
+        gt(freigaben.gueltigBis, sql`now()`),
+      ),
+    );
   return f?.dokumentId ?? null;
 }
 

@@ -441,5 +441,22 @@
   "share_empty_text": "Share a file with Belegt on your phone and it appears here. This works with the installed app in Chrome or Edge on Android.",
   "photo_take": "Take photo",
   "photo_busy": "Uploading photo …",
-  "photo_done": "Photos in the inbox: {anzahl}"
+  "photo_done": "Photos in the inbox: {anzahl}",
+  "share_link_title": "Share by link",
+  "share_link_intro": "Anyone with the link can download the original without signing in, nothing else. Every download is recorded.",
+  "share_link_valid": "Valid for",
+  "share_link_1": "1 day",
+  "share_link_7": "7 days",
+  "share_link_30": "30 days",
+  "share_link_create": "Create link",
+  "share_link_new": "New link",
+  "share_link_copy": "Copy",
+  "share_link_copied": "Copied.",
+  "share_link_once": "The link is shown only now; it is not stored.",
+  "share_link_active": "Valid links",
+  "share_link_until": "Valid until {datum}",
+  "share_link_fetched": "Downloaded {anzahl} times, last {zeit}",
+  "share_link_not_fetched": "Not downloaded yet",
+  "share_link_revoke": "Revoke",
+  "share_link_failed": "That did not work: {meldung}"
 }

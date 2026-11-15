@@ -398,17 +398,54 @@ export const ansichten = pgTable("ansichten", {
 });
 
 /**
- * Kurzlebige Links auf das Original für „Öffnen mit …“: Eine andere App holt darüber eine Kopie, ohne Anmeldung, nur
- * dieses eine Dokument und nur bis gueltig_bis. Den Link gibt es nur in der Antwort, hier nur seinen Hash; jede
- * Freigabe steht im Audit-Log.
+ * Links auf das Original, ohne Anmeldung, nur dieses eine Dokument und nur bis gueltig_bis: kurzlebig für „Öffnen mit …“
+ * (zweck oeffnen, eine andere App holt eine Kopie) oder vom Inhaber geteilt für 1 bis 30 Tage (zweck teilen). Den Link
+ * gibt es nur in der Antwort, hier nur seinen Hash; jede Freigabe steht im Audit-Log und lässt sich nicht ändern.
  */
-export const freigaben = pgTable("freigaben", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  dokumentId: uuid("dokument_id")
-    .notNull()
-    .references(() => dokumente.id),
-  tokenHash: text("token_hash").notNull().unique(),
-  erstelltVon: text("erstellt_von").notNull(),
-  erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
-  gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
+export const freigaben = pgTable(
+  "freigaben",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dokumentId: uuid("dokument_id")
+      .notNull()
+      .references(() => dokumente.id),
+    tokenHash: text("token_hash").notNull().unique(),
+    erstelltVon: text("erstellt_von").notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
+    zweck: text("zweck").notNull().default("oeffnen"),
+  },
+  (t) => [
+    check("freigaben_zweck", sql`${t.zweck} in ('oeffnen', 'teilen')`),
+    // Geteilt wird höchstens 30 Tage; ein Tag Spielraum für die Uhr des Servers
+    check(
+      "freigaben_teilen_dauer",
+      sql`${t.zweck} <> 'teilen' or ${t.gueltigBis} <= ${t.erstelltAm} + interval '31 days'`,
+    ),
+  ],
+);
+
+/** Widerruf eines geteilten Links, einmal je Link; ergänzt statt freigaben zu ändern, die nur anwächst */
+export const freigabeWiderrufe = pgTable("freigabe_widerrufe", {
+  freigabeId: uuid("freigabe_id")
+    .primaryKey()
+    .references(() => freigaben.id),
+  widerrufenVon: text("widerrufen_von").notNull(),
+  widerrufenAm: timestamp("widerrufen_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Jeder Abruf eines geteilten Links, nur mit dem Zeitpunkt: Wer abruft, ist nicht angemeldet, und eine IP-Adresse wäre
+ * ein personenbezogenes Datum, das sich aus dieser Tabelle, die nur anwächst, nie mehr löschen ließe.
+ */
+export const freigabeAbrufe = pgTable(
+  "freigabe_abrufe",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    freigabeId: uuid("freigabe_id")
+      .notNull()
+      .references(() => freigaben.id),
+    abgerufenAm: timestamp("abgerufen_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("freigabe_abrufe_freigabe").on(t.freigabeId)],
+);

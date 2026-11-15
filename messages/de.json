@@ -441,5 +441,22 @@
   "share_empty_text": "Teile auf dem Handy eine Datei an Belegt, dann erscheint sie hier. Das geht mit der installierten App in Chrome oder Edge auf Android.",
   "photo_take": "Foto aufnehmen",
   "photo_busy": "Foto wird hochgeladen …",
-  "photo_done": "Fotos im Eingang: {anzahl}"
+  "photo_done": "Fotos im Eingang: {anzahl}",
+  "share_link_title": "Teilen per Link",
+  "share_link_intro": "Wer den Link hat, lädt das Original ohne Anmeldung herunter, sonst nichts. Jeder Abruf wird festgehalten.",
+  "share_link_valid": "Gültig für",
+  "share_link_1": "1 Tag",
+  "share_link_7": "7 Tage",
+  "share_link_30": "30 Tage",
+  "share_link_create": "Link anlegen",
+  "share_link_new": "Neuer Link",
+  "share_link_copy": "Kopieren",
+  "share_link_copied": "Kopiert.",
+  "share_link_once": "Der Link erscheint nur jetzt; gespeichert ist er nicht.",
+  "share_link_active": "Gültige Links",
+  "share_link_until": "Gültig bis {datum}",
+  "share_link_fetched": "{anzahl}-mal abgerufen, zuletzt {zeit}",
+  "share_link_not_fetched": "Noch nicht abgerufen",
+  "share_link_revoke": "Widerrufen",
+  "share_link_failed": "Das hat nicht geklappt: {meldung}"
 }

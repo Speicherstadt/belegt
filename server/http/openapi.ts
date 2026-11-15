@@ -177,6 +177,51 @@ export const openapi = {
         },
       },
     },
+    "/api/dokumente/{id}/links": {
+      get: {
+        summary: "Nur der Inhaber mit Sitzung: gültige geteilte Links des Dokuments mit Zahl und Zeit der Abrufe",
+        parameters: [idParam],
+        responses: {
+          "200": { description: "id, erstelltVon, erstelltAm, gueltigBis, abrufe, letzterAbruf" },
+          "403": fehler,
+        },
+      },
+      post: {
+        summary: "Nur der Inhaber mit Sitzung: Link auf das Original für 1, 7 oder 30 Tage; den Link gibt es nur hier",
+        parameters: [idParam],
+        requestBody: {
+          required: true,
+          content: json({ type: "object", required: ["tage"], properties: { tage: { enum: [1, 7, 30] } } }),
+        },
+        responses: {
+          "201": { description: "id, url, gueltigBis" },
+          "400": fehler,
+          "403": fehler,
+          "404": fehler,
+          "410": fehler,
+        },
+      },
+    },
+    "/api/dokumente/{id}/links/{link}/widerrufen": {
+      post: {
+        summary: "Nur der Inhaber mit Sitzung: geteilten Link widerrufen",
+        parameters: [idParam, { name: "link", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: { "200": { description: "ok" }, "403": fehler, "404": fehler },
+      },
+    },
+    "/api/geteilt/{token}": {
+      get: {
+        summary: "Öffentlich, nur mit dem geteilten Link: das Original als Download; jeder Abruf wird festgehalten",
+        security: [],
+        parameters: [{ name: "token", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          "200": { description: "Datei", content: { "application/octet-stream": {} } },
+          "404": { description: "Link ungültig, abgelaufen oder widerrufen (Text)" },
+          "409": { description: "Datei fehlt oder verändert (Text)" },
+          "410": { description: "Dokument gelöscht (Text)" },
+        },
+      },
+    },
     "/api/dokumente/{id}/einordnung": {
       post: {
         summary: "Einordnen (Recht schreiben); die Frist rechnet Belegt nach § 147 AO",

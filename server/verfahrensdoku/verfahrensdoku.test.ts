@@ -144,4 +144,16 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(mit).toContain("„X-1“) aus dem Eingangsordner immer und beim Hochladen auf Wunsch");
     expect(mit).toContain("Jedes Teil wird als eigenes Original aufgenommen");
   });
+
+  it("erwähnt Teilen per Link erst, wenn es genutzt wurde, mit Zahl der gültigen Links", async () => {
+    expect(JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }))).not.toContain("per Link");
+    const f = new FormData();
+    f.append("datei", new File(["x"], "geteilt.pdf"));
+    const d = await (await als(inhaber)("/api/dokumente", { method: "POST", body: f })).json();
+    expect((await als(inhaber)(`/api/dokumente/${d.id}/links`, json({ tage: 7 }))).status).toBe(201);
+    const mit = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+    expect(mit).toContain("per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage");
+    expect(mit).toContain("ohne IP-Adresse");
+    expect(mit).toContain("Bisher wurden 1 Links angelegt, 1 gelten derzeit.");
+  });
 });
