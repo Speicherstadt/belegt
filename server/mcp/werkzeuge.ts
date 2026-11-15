@@ -6,10 +6,13 @@ import { akteur, heute, MAX_UPLOAD } from "../http/gemeinsam.ts";
 import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
 import { fuerDokument, regelVerletzt } from "../loeschung/loeschung.ts";
 import { mailZuDokument } from "../mail/import.ts";
+import { dokumenttypenListen, felderListen, istKonflikt, tagsListen } from "../ordnung/ordnung.ts";
+import { Aenderung, ordnungZu, sammeln } from "../ordnung/zuordnung.ts";
 
 /**
  * Werkzeuge für KI-Assistenten (MCP). Sie rufen dieselben Module wie die HTTP-Schnittstelle und haben dieselben
- * Rechte wie das Token: lesen sucht und liest, schreiben nimmt zusätzlich auf und ordnet ein. Löschen gibt es nicht.
+ * Rechte wie das Token: lesen sucht und liest, schreiben nimmt zusätzlich auf, ordnet ein und setzt Tags, Dokumenttyp
+ * und Feldwerte. Tags, Dokumenttypen und Felder anlegen kann ein Token nicht, löschen auch nicht.
  */
 
 /** Fehler, den der Assistent sehen soll (isError im Ergebnis), statt eines Protokollfehlers */
@@ -46,7 +49,7 @@ export const WERKZEUGE: Werkzeug[] = [
     name: "dokumente_suchen",
     title: "Dokumente suchen",
     description:
-      "Sucht im Archiv, neueste zuerst. suche geht über den Volltext (deutsch; Wortgruppen in Anführungszeichen, Ausschluss mit Minus) aus Dateiname, Einordnung, Mail, PDF-Text und E-Rechnung. gruppe: offen (noch nicht eingeordnet), pflicht, freiwillig, frei, loeschbar, geloescht.",
+      "Sucht im Archiv, neueste zuerst. suche geht über den Volltext (deutsch; Wortgruppen in Anführungszeichen, Ausschluss mit Minus) aus Dateiname, Einordnung, Mail, PDF-Text, E-Rechnung, Tags, Dokumenttyp und Textfeldern; „ASN 123“ findet die Archivnummer. gruppe: offen (noch nicht eingeordnet), pflicht, freiwillig, frei, loeschbar, geloescht. Jeder Treffer mit asn, tags (Namen) und dokumenttyp.",
     inputSchema: {
       type: "object",
       properties: {
@@ -65,35 +68,40 @@ export const WERKZEUGE: Werkzeug[] = [
     ausfuehren: async ({ db }, _n, e: { suche?: string; gruppe?: z.infer<typeof Gruppe>; limit: number }) =>
       (await listen(db, { suche: e.suche, gruppe: e.gruppe, limit: e.limit, heute: heute() })).map((d) => ({
         id: d.id,
+        asn: d.asn,
         dateiname: d.dateiname,
         typ: d.mimeType,
         eingang: d.eingegangenAm.toISOString(),
         art: d.art,
         titel: d.titel,
         aufbewahrenBis: d.fristBis,
+        tags: d.tags.map((t) => t.name),
+        dokumenttyp: d.dokumenttyp?.name ?? null,
       })),
   },
   {
     name: "dokument_lesen",
     title: "Dokument lesen",
     description:
-      "Angaben zu einem Dokument: Datei, Hash, Einordnung mit Frist, Löschung, Kopf der Mail und erkannte E-Rechnung (Beträge in Cent).",
+      "Angaben zu einem Dokument: Archivnummer (asn), Datei, Hash, Einordnung mit Frist, Löschung, Tags, Dokumenttyp, eigene Felder (felder; Betrag in Cent), Kopf der Mail und erkannte E-Rechnung (Beträge in Cent).",
     inputSchema: { type: "object", required: ["id"], properties: { id: { type: "string", format: "uuid" } } },
     annotations: lesend,
     schreibt: false,
     eingabe: z.object({ id: Id }),
     ausfuehren: async (umgebung, _n, e: { id: string }) => {
       const d = await dokumentOderFehler(umgebung, e.id);
-      const [einordnung, loeschung, mail, inhalt] = await Promise.all([
+      const [einordnung, loeschung, mail, inhalt, ordnung] = await Promise.all([
         aktuelle(umgebung.db, d.id),
         fuerDokument(umgebung.db, d.id),
         mailZuDokument(umgebung.db, d.id),
         inhaltZu(umgebung.db, d.id),
+        ordnungZu(umgebung.db, d.id),
       ]);
       return {
         ...d,
         einordnung,
         loeschung,
+        ...ordnung,
         mail: mail && {
           von: mail.von,
           an: mail.an,
@@ -203,6 +211,69 @@ export const WERKZEUGE: Werkzeug[] = [
           throw werkzeugFehler(err.message);
         throw err;
       }
+    },
+  },
+  {
+    name: "ordnung_listen",
+    title: "Tags, Dokumenttypen und Felder",
+    description:
+      "Alle Tags, Dokumenttypen und eigenen Felder mit ID, für dokument_ordnen. Felder mit typ (text, zahl, betrag in Cent, datum JJJJ-MM-TT, ja_nein, auswahl mit optionen, link).",
+    inputSchema: { type: "object", properties: {} },
+    annotations: lesend,
+    schreibt: false,
+    eingabe: z.object({}),
+    ausfuehren: async ({ db }) => {
+      const [t, typen, felder] = await Promise.all([tagsListen(db), dokumenttypenListen(db), felderListen(db)]);
+      return {
+        tags: t.map(({ id, name }) => ({ id, name })),
+        dokumenttypen: typen.map(({ id, name }) => ({ id, name })),
+        felder: felder.map(({ id, name, typ, optionen }) => ({ id, name, typ, optionen })),
+      };
+    },
+  },
+  {
+    name: "dokument_ordnen",
+    title: "Tags, Dokumenttyp und Feldwerte setzen",
+    description:
+      "Setzt an einem Dokument Tags (tagsHinzu, tagsWeg), den Dokumenttyp (ID, null entfernt) und Feldwerte (felder: feldId und wert; null entfernt, Betrag in Cent oder als „1.234,56“). Nur vorhandene Tags, Typen und Felder (ordnung_listen); anlegen kann das Werkzeug nichts. Jede Änderung steht im Audit-Log. Antwort: der neue Stand. Braucht ein Token mit dem Recht schreiben.",
+    inputSchema: {
+      type: "object",
+      required: ["id"],
+      properties: {
+        id: { type: "string", format: "uuid" },
+        tagsHinzu: { type: "array", items: { type: "string", format: "uuid" }, maxItems: 50 },
+        tagsWeg: { type: "array", items: { type: "string", format: "uuid" }, maxItems: 50 },
+        dokumenttyp: { type: ["string", "null"], format: "uuid" },
+        felder: {
+          type: "array",
+          maxItems: 50,
+          items: {
+            type: "object",
+            required: ["feldId", "wert"],
+            properties: {
+              feldId: { type: "string", format: "uuid" },
+              wert: { type: ["string", "integer", "boolean", "null"] },
+            },
+          },
+        },
+      },
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    schreibt: true,
+    // Wie POST /api/dokumente/:id/ordnung, ohne Einordnung (dafür gibt es dokument_einordnen)
+    eingabe: z.intersection(z.object({ id: Id }), Aenderung),
+    ausfuehren: async (umgebung, nutzer, e: Aenderung & { id: string }) => {
+      const { id, einordnung: _ohne, ...aenderung } = e;
+      const d = await dokumentOderFehler(umgebung, id);
+      try {
+        const r = await sammeln(umgebung.db, [d.id], aenderung, akteur(nutzer));
+        const ergebnis = r.ergebnisse[0];
+        if (!r.ok) throw werkzeugFehler(ergebnis?.ok === false ? ergebnis.fehler : "Nicht möglich");
+      } catch (err) {
+        if (istKonflikt(err)) throw werkzeugFehler(err.message);
+        throw err;
+      }
+      return ordnungZu(umgebung.db, d.id);
     },
   },
 ];

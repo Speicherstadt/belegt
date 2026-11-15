@@ -58,13 +58,15 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
 
     const namen = async (token: string) =>
       (await rpc(token, "tools/list")).result.tools.map((w: { name: string }) => w.name).sort();
-    expect(await namen(lesen)).toEqual(["dokument_lesen", "dokument_text", "dokumente_suchen"]);
+    expect(await namen(lesen)).toEqual(["dokument_lesen", "dokument_text", "dokumente_suchen", "ordnung_listen"]);
     expect(await namen(schreiben)).toEqual([
       "dokument_aufnehmen",
       "dokument_einordnen",
       "dokument_lesen",
+      "dokument_ordnen",
       "dokument_text",
       "dokumente_suchen",
+      "ordnung_listen",
     ]);
   });
 
@@ -91,6 +93,71 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
     const d = await aufruf(lesen, "dokument_lesen", { id });
     expect(d.structuredContent).toMatchObject({ id, dateiname: "strom-oktober.pdf", einordnung: { art: "beleg" } });
     expect(JSON.parse(d.content[0].text).id).toBe(id);
+  });
+
+  it("kennt Tags, Dokumenttyp, Felder und ASN; ein schreibendes Token ordnet zu, legt aber nichts an", async () => {
+    const anlegen = async (pfad: string, body: object) =>
+      (await (await t.anfrage(pfad, json(body), inhaber)).json()).id as string;
+    const tag = await anlegen("/api/tags", { name: "Energie" });
+    const typ = await anlegen("/api/dokumenttypen", { name: "Rechnung" });
+    const summe = await anlegen("/api/felder", { name: "Summe", typ: "betrag" });
+    const neu = await aufruf(schreiben, "dokument_aufnehmen", {
+      dateiname: "gas-november.pdf",
+      inhalt: Buffer.from("%PDF-1.7\n% Gas November\n").toString("base64"),
+    });
+    const id = neu.structuredContent.id as string;
+
+    const ordnung = await aufruf(lesen, "ordnung_listen", {});
+    expect(ordnung.structuredContent).toMatchObject({
+      tags: [{ id: tag, name: "Energie" }],
+      dokumenttypen: [{ id: typ, name: "Rechnung" }],
+      felder: [{ id: summe, name: "Summe", typ: "betrag" }],
+    });
+
+    const gesetzt = await aufruf(schreiben, "dokument_ordnen", {
+      id,
+      tagsHinzu: [tag],
+      dokumenttyp: typ,
+      felder: [{ feldId: summe, wert: "1.234,56" }],
+    });
+    expect(gesetzt.isError).toBeUndefined();
+    expect(gesetzt.structuredContent).toMatchObject({
+      tags: [{ name: "Energie" }],
+      dokumenttyp: { name: "Rechnung" },
+      felder: [{ feldId: summe, wert: 123456 }],
+    });
+    const akteure = await t.sql`select distinct actor from audit_log
+      where table_name in ('dokument_tags', 'dokument_dokumenttypen', 'feldwerte') and new_value ->> 'dokument_id' = ${id}`;
+    expect(akteure.map((a) => a.actor)).toEqual(["token:Ablage"]);
+
+    const d = await aufruf(lesen, "dokument_lesen", { id });
+    expect(d.structuredContent).toMatchObject({
+      asn: expect.any(Number),
+      tags: [{ name: "Energie" }],
+      dokumenttyp: { name: "Rechnung" },
+      felder: [{ name: "Summe", typ: "betrag", wert: 123456 }],
+    });
+    const [treffer] = (await aufruf(lesen, "dokumente_suchen", { suche: "gas-november" })).structuredContent.ergebnis;
+    expect(treffer).toMatchObject({
+      id,
+      asn: d.structuredContent.asn,
+      tags: ["Energie"],
+      dokumenttyp: "Rechnung",
+    });
+
+    // Entfernen geht, Unbekanntes und unpassende Werte sind Fehler des Werkzeugs, ein lesendes Token darf nicht
+    const weg = await aufruf(schreiben, "dokument_ordnen", { id, tagsWeg: [tag], dokumenttyp: null });
+    expect(weg.structuredContent).toMatchObject({ tags: [], dokumenttyp: null });
+    const unbekannt = await aufruf(schreiben, "dokument_ordnen", {
+      id,
+      tagsHinzu: ["00000000-0000-4000-8000-000000000000"],
+    });
+    expect(unbekannt.isError).toBe(true);
+    const ungueltig = await aufruf(schreiben, "dokument_ordnen", { id, felder: [{ feldId: summe, wert: "zwölf" }] });
+    expect(ungueltig.isError).toBe(true);
+    expect((await aufruf(schreiben, "dokument_ordnen", { id })).isError).toBe(true);
+    const verboten = await rpc(lesen, "tools/call", { name: "dokument_ordnen", arguments: { id, tagsHinzu: [tag] } });
+    expect(verboten.error.code).toBe(-32602);
   });
 
   it("liefert Text in Stücken, bei Mails ihren Text", async () => {

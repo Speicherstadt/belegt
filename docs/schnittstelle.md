@@ -38,8 +38,10 @@ bleibt unverändert.
 
 Unter `/api/mcp` spricht Belegt das Model Context Protocol (Streamable HTTP, ohne Sitzung), mit einem API-Token in
 derselben Kopfzeile. Ein Assistent kann damit suchen (`dokumente_suchen`), Angaben und Text lesen (`dokument_lesen`,
-`dokument_text`) und mit dem Recht **schreiben** Dateien aufnehmen und einordnen (`dokument_aufnehmen`,
-`dokument_einordnen`). Löschen kann er nicht. In Claude Code etwa:
+`dokument_text`), jeweils mit Archivnummer, Tags, Dokumenttyp und Feldern, und die vorhandenen Tags, Dokumenttypen und
+Felder abfragen (`ordnung_listen`). Mit dem Recht **schreiben** nimmt er Dateien auf, ordnet ein und setzt Tags,
+Dokumenttyp und Feldwerte (`dokument_aufnehmen`, `dokument_einordnen`, `dokument_ordnen`). Neue Tags, Typen oder Felder
+anlegen und löschen kann er nicht. In Claude Code etwa:
 
 ```bash
 claude mcp add --transport http belegt https://belegt.example/api/mcp --header "Authorization: Bearer belegt_…"
