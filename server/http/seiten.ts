@@ -4,6 +4,7 @@ import { laden } from "../dokumente/dokumente.ts";
 import { fuerDokument } from "../loeschung/loeschung.ts";
 import { ableiten, ableitungenZu, istAbleitungsFehler } from "../seiten/ableiten.ts";
 import { SeitenOperation } from "../seiten/seiten.ts";
+import { begrenzt } from "../trennen/trennen.ts";
 import { rasterVerfuegbar, seiteAlsJpeg, seitenzahl } from "../vorschaubild/raster.ts";
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
@@ -17,6 +18,11 @@ const Zusammenfuegen = z.object({ ids: z.array(Id).min(2).max(20) });
 const SeitenNummer = z.coerce.number().int().min(1).max(5000);
 
 export function seitenRouten(app: App, umgebung: AppUmgebung) {
+  // Jedes Seitenbild lädt das ganze PDF und startet pdftoppm: höchstens vier zugleich, 32 warten, darüber 503. Die
+  // Oberfläche lädt die Bilder erst, wenn sie sichtbar werden
+  const seitenTor = begrenzt(4, 32);
+  const ausgelastet = { fehler: { status: 503, meldung: "Gerade zu viele Seitenbilder, gleich noch einmal" } } as const;
+
   /** Ein PDF, das es gibt und nicht gelöscht ist, mit seiner Datei; sonst die Antwort */
   async function pdfLaden(roh: string) {
     const id = Id.safeParse(roh);
@@ -31,20 +37,30 @@ export function seitenRouten(app: App, umgebung: AppUmgebung) {
     return { pdf: new Uint8Array(bytes) } as const;
   }
 
+  /** Status und Kopf einer Ablehnung; 503 mit Retry-After */
+  const abgelehnt = (status: number) => (status === 503 ? { "Retry-After": "5" } : undefined);
+
   app.get("/api/dokumente/:id/seiten", async (c) => {
-    const r = await pdfLaden(c.req.param("id"));
-    if (r.fehler) return c.json({ fehler: r.fehler.meldung }, r.fehler.status);
-    const anzahl = await seitenzahl(r.pdf).catch(() => null);
-    return anzahl ? c.json({ anzahl }) : c.json({ fehler: "Das PDF lässt sich nicht lesen" }, 422);
+    const r =
+      (await seitenTor(async () => {
+        const p = await pdfLaden(c.req.param("id"));
+        return p.fehler ? p : { anzahl: await seitenzahl(p.pdf).catch(() => null) };
+      })) ?? ausgelastet;
+    if ("fehler" in r) return c.json({ fehler: r.fehler.meldung }, r.fehler.status, abgelehnt(r.fehler.status));
+    return r.anzahl ? c.json({ anzahl: r.anzahl }) : c.json({ fehler: "Das PDF lässt sich nicht lesen" }, 422);
   });
 
   /** Eine Seite als JPEG, 200 px breit, mit ihrer Drehung im PDF */
   app.get("/api/dokumente/:id/seiten/:nr", async (c) => {
     const nr = SeitenNummer.safeParse(c.req.param("nr"));
     if (!nr.success) return c.json({ fehler: "Ungültige Seite" }, 400);
-    const r = await pdfLaden(c.req.param("id"));
-    if (r.fehler) return c.json({ fehler: r.fehler.meldung }, r.fehler.status);
-    const bild = await seiteAlsJpeg(r.pdf, { seite: nr.data, breite: 200 }).catch(() => null);
+    const r =
+      (await seitenTor(async () => {
+        const p = await pdfLaden(c.req.param("id"));
+        return p.fehler ? p : { bild: await seiteAlsJpeg(p.pdf, { seite: nr.data, breite: 200 }).catch(() => null) };
+      })) ?? ausgelastet;
+    if ("fehler" in r) return c.json({ fehler: r.fehler.meldung }, r.fehler.status, abgelehnt(r.fehler.status));
+    const bild = r.bild;
     if (!bild) return c.json({ fehler: "Diese Seite gibt es nicht oder sie lässt sich nicht lesen" }, 404);
     return c.body(new Uint8Array(bild), 200, {
       "Content-Type": "image/jpeg",

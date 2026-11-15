@@ -185,4 +185,19 @@ describe.skipIf(!testDatenbankUrl)("Ableitungen gegen Postgres", { timeout: 30_0
     expect((await als(`/api/dokumente/${q.id}/seiten/3`)).status).toBe(404);
     expect((await als(`/api/dokumente/${q.id}/seiten/abc`)).status).toBe(400);
   });
+
+  it.skipIf(!rasterVerfuegbar())(
+    "rendert nur wenige Seiten zugleich; darüber 503 statt beliebig vieler Prozesse",
+    async () => {
+      const q = await hoch(await pdf(1), "viele.pdf");
+      // Jeder Aufruf lädt das ganze PDF (bis 100 MB) und startet pdftoppm; ohne Grenze stapeln sich Prozesse und Speicher
+      const antworten = await Promise.all(Array.from({ length: 80 }, () => als(`/api/dokumente/${q.id}/seiten/1`)));
+      const status = antworten.map((r) => r.status);
+      expect(status.filter((s) => s === 200).length).toBeGreaterThan(0);
+      const abgelehnt = antworten.filter((r) => r.status === 503);
+      expect(abgelehnt.length).toBeGreaterThan(0);
+      expect(abgelehnt[0]!.headers.get("retry-after")).toBe("5");
+      expect(status.every((s) => s === 200 || s === 503)).toBe(true);
+    },
+  );
 });
