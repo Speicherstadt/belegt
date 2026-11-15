@@ -137,9 +137,24 @@ export function zusammenfuehren(
       .set({ korrespondentId: ziel, geaendertAm: sql`now()` })
       .where(eq(dokumentKorrespondenten.korrespondentId, id));
     await regelnUmhaengen(tx, id, ziel);
+    await sichtbereicheUmhaengen(tx, id, ziel);
     await tx.delete(korrespondenten).where(eq(korrespondenten.id, id));
     return zielZeile;
   });
+}
+
+/**
+ * Sichtbereiche von Mitarbeitern und offenen Einladungen, die den Korrespondenten erlauben, erlauben danach ziel
+ * (server/zugang/sicht.ts). Beim Löschen bleibt die ID stehen: Eine leere Liste schränkte nicht mehr ein.
+ */
+async function sichtbereicheUmhaengen(tx: Tx, id: string, ziel: string) {
+  const neu = sql`jsonb_set(sichtbereich, '{korrespondenten}', (
+    select coalesce(jsonb_agg(distinct case when k = ${id} then ${ziel} else k end), '[]'::jsonb)
+      from jsonb_array_elements_text(sichtbereich -> 'korrespondenten') k))`;
+  const nennt = sql`jsonb_typeof(sichtbereich -> 'korrespondenten') = 'array'
+    and sichtbereich -> 'korrespondenten' ? ${id}`;
+  await tx.execute(sql`update "user" set sichtbereich = ${neu} where ${nennt}`);
+  await tx.execute(sql`update einladungen set sichtbereich = ${neu} where eingeloest_am is null and ${nennt}`);
 }
 
 /** Regeln und Workflows, die den Korrespondenten nennen, auf ziel umstellen; ohne ziel fällt er dort weg */

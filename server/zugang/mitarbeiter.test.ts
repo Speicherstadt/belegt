@@ -277,6 +277,29 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     }
   });
 
+  it("behält nach dem Zusammenführen von Korrespondenten den Sichtbereich", async () => {
+    const alt = await anlegen("/api/korrespondenten", "Stadtwerke GmbH");
+    const doppelt = await hoch(inhaber, "stadtwerke-doppelt");
+    await ordnen(doppelt, { korrespondent: alt });
+    const m = await zugangAnlegen(t, inhaber, "zusammen@example.org", {
+      rolle: "mitarbeiter",
+      recht: "lesen",
+      sichtbereich: { korrespondenten: [alt] },
+    });
+    const einladung = await als(inhaber)(
+      "/api/einladungen",
+      json({ rolle: "mitarbeiter", recht: "lesen", sichtbereich: { korrespondenten: [alt, stadtwerke] } }),
+    );
+    expect(einladung.status).toBe(201);
+    expect(await ids(m)).toEqual([doppelt]);
+    const r = await als(inhaber)(`/api/korrespondenten/${alt}/zusammenfuehren`, json({ ziel: stadtwerke }));
+    expect(r.status).toBe(200);
+    // Die Dokumente von „Stadtwerke GmbH“ heißen jetzt „Stadtwerke“; der Mitarbeiter sieht sie weiter, dazu die übrigen
+    expect(await ids(m)).toEqual([doppelt, vonStadtwerken].sort());
+    const [e] = await t.sql`select sichtbereich from einladungen where id = ${(await einladung.json()).id}`;
+    expect(e?.sichtbereich.korrespondenten).toEqual([stadtwerke]);
+  });
+
   it("lässt ein eigenes Dokument sichtbar, bis es eine Ordnung außerhalb bekommt", async () => {
     const m = await zugangAnlegen(t, inhaber, "hochlader@example.org", {
       rolle: "mitarbeiter",
