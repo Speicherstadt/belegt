@@ -21,7 +21,7 @@ import {
   listenMitOrdnung as regelnListen,
   vorschlag,
 } from "../mail/regeln.ts";
-import { istKonflikt } from "../ordnung/ordnung.ts";
+import { istKonflikt, vorschlagImSichtbereich } from "../ordnung/ordnung.ts";
 import { importVorschlagZu } from "../paperless/kern.ts";
 import { sichtbareIds, sichtVon } from "../zugang/sicht.ts";
 
@@ -73,7 +73,7 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
     if (!id.success)
       return c.json({ vorschlag: null, zuordnung: null, gelernt: null, erechnung: null, ki: null, import: null });
     // Dazu die Kopfdaten einer erkannten E-Rechnung: Datum, Nummer und Verkäufer für die Einordnung
-    const [regel, zuordnung, gelernt, inhalt, ki, aus] = await Promise.all([
+    const [regelRoh, zuordnungRoh, gelerntRoh, inhalt, kiRoh, aus] = await Promise.all([
       vorschlag(umgebung.db, id.data),
       zuordnungVorschlagZu(umgebung.db, id.data),
       gelerntVorschlagZu(umgebung.db, id.data),
@@ -81,6 +81,21 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
       kiVorschlagZu(umgebung.db, id.data),
       importVorschlagZu(umgebung.db, id.data),
     ]);
+    // Ein Mitarbeiter sieht nur Tags, Typen und Korrespondenten seines Sichtbereichs, auch nicht die Namen der Regeln,
+    // die übersprungen wurden (server/ordnung/ordnung.ts)
+    const sicht = sichtVon(c.get("nutzer"));
+    const imBereich = <V extends Parameters<typeof vorschlagImSichtbereich>[0]>(v: V | null | undefined) =>
+      v ? vorschlagImSichtbereich(v, sicht) : null;
+    const regel = regelRoh && { ...regelRoh, ordnung: imBereich(regelRoh.ordnung) };
+    const gefiltert = imBereich(zuordnungRoh);
+    const zuordnung =
+      gefiltert && sicht?.bereich
+        ? gefiltert.tags.length || gefiltert.dokumenttyp || gefiltert.korrespondent
+          ? { ...gefiltert, uebersprungen: [] }
+          : null
+        : gefiltert;
+    const gelernt = imBereich(gelerntRoh);
+    const ki = kiRoh && { ...kiRoh, ordnung: imBereich(kiRoh.ordnung) };
     // Reihenfolge: Regel, Zuordnungsregel, gelernt, Sprachmodell (server/lernen/reihenfolge.ts). zuordnung: aus den
     // Zuordnungsregeln; gelernt: aus den eigenen Einordnungen; ki: Sprachmodell (nur mit KI_URL); import: Titel,
     // Korrespondent und Entstehung aus Paperless-ngx. Übernommen wird nur, was ein Mensch bestätigt

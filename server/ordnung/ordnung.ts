@@ -105,6 +105,26 @@ export function imSichtbereich<T extends { id: string }>(
   return liste.filter((e) => (erlaubt.length ? erlaubt.includes(e.id) : art !== "tags" || !b.ohneTags.includes(e.id)));
 }
 
+type Benannt = { id: string };
+
+/**
+ * Ein Vorschlag (Regel, Zuordnungsregel, gelernt, Sprachmodell) für einen Mitarbeiter: nur Tags, Dokumenttyp und
+ * Korrespondent, die er auch in den Listen sieht (imSichtbereich); ohne Sichtbereich unverändert
+ */
+export function vorschlagImSichtbereich<
+  V extends { tags: Benannt[]; dokumenttyp: Benannt | null; korrespondent: Benannt | null },
+>(v: V, sicht: Sicht | undefined): V {
+  if (!sicht?.bereich) return v;
+  const eins = <T extends Benannt>(x: T | null, art: "dokumenttypen" | "korrespondenten") =>
+    x ? (imSichtbereich([x], sicht, art)[0] ?? null) : null;
+  return {
+    ...v,
+    tags: imSichtbereich(v.tags, sicht, "tags"),
+    dokumenttyp: eins(v.dokumenttyp, "dokumenttypen"),
+    korrespondent: eins(v.korrespondent, "korrespondenten"),
+  };
+}
+
 /** Tags mit der Zahl ihrer Dokumente; mit Sicht (Prüfer, Mitarbeiter) nur der Dokumente darin */
 export async function tagsListen(db: Datenbank, sicht?: Sicht): Promise<(Tag & { anzahl: number })[]> {
   const zeilen = await db

@@ -42,7 +42,7 @@ Beispiele:
 Ein Dokument außerhalb gibt es für den Mitarbeiter nicht: Er findet es weder in Liste, Suche und Startseite noch über
 seine Adresse (`404`), Zahlen bei Tags, Typen und Korrespondenten zählen nur seine Dokumente, ähnliche Dokumente,
 Ableitungen und Mails zeigen nur, was in seinem Sichtbereich liegt. Von Tags, Typen und Korrespondenten sieht er die
-erlaubten, oder alle außer den ausgeschlossenen Tags, wenn für die Art nichts gewählt ist.
+erlaubten, oder alle außer den ausgeschlossenen Tags, wenn für die Art nichts gewählt ist; Vorschläge nennen nur diese.
 
 Mit dem Recht **lesen** öffnet und lädt er Dokumente herunter und liest Notizen. Mit **bearbeiten** nimmt er
 zusätzlich Dokumente auf, ordnet sie ein, setzt Tags, Typ, Korrespondent und Felder (auch für mehrere zugleich) und

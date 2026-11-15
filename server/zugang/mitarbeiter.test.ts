@@ -255,6 +255,28 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     await ordnen(nurTag, { korrespondent: null });
   });
 
+  it("nennt in Vorschlägen keine Tags, Typen und Korrespondenten außerhalb seines Sichtbereichs", async () => {
+    const m = await zugangAnlegen(t, inhaber, "vorschlag@example.org", {
+      rolle: "mitarbeiter",
+      recht: "bearbeiten",
+      sichtbereich: { tags: [projekt], ohneTags: [personal] },
+    });
+    // Eine Zuordnungsregel schlägt für ein sichtbares Dokument auch den ausgeschlossenen Tag vor
+    const vorschlag = { korrespondent: null, dokumenttyp: null, tags: [personal, projekt], uebersprungen: [] };
+    await t.sql`insert into zuordnung_vorschlaege (dokument_id, vorschlag) values (${nurTag}, ${JSON.stringify(vorschlag)}::jsonb)`;
+    try {
+      const v = (await (await als(m)(`/api/dokumente/${nurTag}/vorschlag`)).json()) as {
+        zuordnung: { tags: { name: string }[] } | null;
+      };
+      expect(v.zuordnung?.tags.map((x) => x.name)).toEqual(["Projekt X"]);
+      // Der Inhaber sieht beide
+      const alle = (await (await als(inhaber)(`/api/dokumente/${nurTag}/vorschlag`)).json()) as typeof v;
+      expect(alle.zuordnung?.tags.map((x) => x.name)).toEqual(["Personal", "Projekt X"]);
+    } finally {
+      await t.sql`delete from zuordnung_vorschlaege where dokument_id = ${nurTag}`;
+    }
+  });
+
   it("lässt ein eigenes Dokument sichtbar, bis es eine Ordnung außerhalb bekommt", async () => {
     const m = await zugangAnlegen(t, inhaber, "hochlader@example.org", {
       rolle: "mitarbeiter",
