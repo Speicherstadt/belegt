@@ -166,12 +166,14 @@ async function mailsCsv({ db }: Umgebung, ids: string[]): Promise<string> {
 
 /**
  * Die Zeilen, deren Einträge im Audit-Log zu Dokumenten des Zeitraums gehören: die Dokumente selbst (auch gelöschte,
- * damit ihr Löschnachweis bleibt), ihre Einordnungen, Löschungen, Mails und Anhänge zwischen zwei solchen Dokumenten.
+ * damit ihr Löschnachweis bleibt), ihre Archivnummern, Einordnungen, Löschungen, Mails und Anhänge zwischen zwei
+ * solchen Dokumenten.
  * Tags, Dokumenttyp und Feldwerte kommen über ihre dokument_id dazu (ordnungDerFreigabe), auch entfernte.
  */
 const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     with dok as (select d.id from dokumente d where belegt_dokument_tag(d.id) between ${von}::date and ${bis}::date)
     select id::text from dok
+    union all select x.id::text from archivnummern x where x.dokument_id in (select id from dok)
     union all select x.id::text from einordnungen x where x.dokument_id in (select id from dok)
     union all select x.id::text from loeschungen x where x.dokument_id in (select id from dok)
     union all select x.id::text from mails x where x.dokument_id in (select id from dok)
@@ -204,7 +206,7 @@ async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigab
      where (at at time zone 'Europe/Berlin')::date between ${von}::date and ${bis}::date
        ${
          nurFreigabe
-           ? sql`and ((table_name in ('dokumente', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
+           ? sql`and ((table_name in ('dokumente', 'archivnummern', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
                        and row_id in (${zeilenDerFreigabe({ von, bis })}))
                    or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })}))
                    or ${ordnungDerFreigabe({ von, bis })})`

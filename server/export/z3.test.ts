@@ -196,6 +196,10 @@ describe.skipIf(!testDatenbankUrl)("Z3-Export gegen Postgres", () => {
     expect(tabellen).not.toContain("tags");
     expect(tabellen).not.toContain("felder");
     expect(strFromU8(zip["tags.csv"]!)).toContain("Auto");
+    // Die Archivnummer gehört zum Dokument wie seine Einordnung: Eintrag und Siegel stehen im Protokoll
+    const [asn] = await t.sql<{ id: string }[]>`select id::text from archivnummern where dokument_id = ${beleg.id}`;
+    const zuAsn = zeilen.filter((z) => z.includes(asn!.id));
+    expect(zuAsn.map((z) => z.split(";")[3]).sort()).toEqual(["archivnummern", "seals"]);
   });
 
   it("nimmt Mails mit ihrem Kopf auf", async () => {
