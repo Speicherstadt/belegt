@@ -5,7 +5,8 @@ import { Betrag, Datum } from "./ordnung.ts";
 
 /*
  * Filter der Archivliste nach Tags, Dokumenttyp und eigenen Feldern. In der Abfrage von dokumente.ts ist d die Zeile
- * aus dokumente. Mehrere Tags: das Dokument hat alle; mehrere Bedingungen: alle gelten.
+ * aus dokumente. Mehrere Tags: das Dokument hat alle (tagModus „alle“) oder mindestens einen („einer“); mehrere
+ * Bedingungen: alle gelten.
  */
 
 export interface FeldFilter {
@@ -18,6 +19,8 @@ export interface FeldFilter {
 
 export interface OrdnungFilter {
   tags?: string[];
+  /** „alle“ (Vorgabe): das Dokument hat jeden der Tags; „einer“: mindestens einen */
+  tagModus?: "alle" | "einer";
   /** ID eines Dokumenttyps oder „ohne“ für Dokumente ohne Typ */
   dokumenttyp?: string;
   felder?: FeldFilter[];
@@ -26,13 +29,15 @@ export interface OrdnungFilter {
 const Id = z.uuid();
 
 /**
- * Liest den Filter aus den Parametern einer Anfrage: tag (mehrfach), dokumenttyp, feld.<id>=gesetzt,
+ * Liest den Filter aus den Parametern einer Anfrage: tag (mehrfach), tagModus (alle oder einer), dokumenttyp, feld.<id>=gesetzt,
  * feld.<id>.enthaelt, feld.<id>.von und feld.<id>.bis (Betrag in Cent oder „1.234,56“, Datum JJJJ-MM-TT, Zahl).
  * Unbekannte Felder und unpassende Werte sind ein Fehler (null), kein stilles Ignorieren.
  */
 export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): OrdnungFilter | null {
   const tags = parameter.tag ?? [];
   if (!tags.every((t) => Id.safeParse(t).success)) return null;
+  const tagModus = parameter.tagModus?.[0] ?? "alle";
+  if (tagModus !== "alle" && tagModus !== "einer") return null;
   const typ = parameter.dokumenttyp?.[0];
   if (typ !== undefined && typ !== "ohne" && !Id.safeParse(typ).success) return null;
   const jeFeld = new Map<string, FeldFilter>();
@@ -59,7 +64,7 @@ export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): 
     }
   }
   return {
-    ...(tags.length ? { tags: [...new Set(tags)] } : {}),
+    ...(tags.length ? { tags: [...new Set(tags)], tagModus } : {}),
     ...(typ ? { dokumenttyp: typ } : {}),
     ...(jeFeld.size ? { felder: [...jeFeld.values()] } : {}),
   };
@@ -77,8 +82,11 @@ const wort = (t: string) => `%${t.replace(/[\\%_]/g, (z) => `\\${z}`)}%`;
 /** SQL-Bedingung für den Filter; true ohne Filter */
 export function filterBedingung(f: OrdnungFilter | undefined): SQL {
   const teile: SQL[] = [];
-  for (const tag of f?.tags ?? [])
-    teile.push(sql`exists (select 1 from dokument_tags dt where dt.dokument_id = d.id and dt.tag_id = ${tag}::uuid)`);
+  const tagBedingungen = (f?.tags ?? []).map(
+    (tag) => sql`exists (select 1 from dokument_tags dt where dt.dokument_id = d.id and dt.tag_id = ${tag}::uuid)`,
+  );
+  if (f?.tagModus === "einer" && tagBedingungen.length) teile.push(sql`(${sql.join(tagBedingungen, sql` or `)})`);
+  else teile.push(...tagBedingungen);
   if (f?.dokumenttyp === "ohne")
     teile.push(sql`not exists (select 1 from dokument_dokumenttypen dd where dd.dokument_id = d.id)`);
   else if (f?.dokumenttyp)

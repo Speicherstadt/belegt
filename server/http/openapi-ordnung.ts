@@ -91,7 +91,12 @@ export const listenParameter = [
     schema: { type: "array", items: uuid },
     style: "form",
     explode: true,
-    description: "Nur Dokumente mit allen genannten Tags",
+    description: "Nur Dokumente mit allen genannten Tags (tagModus alle) oder mindestens einem (tagModus einer)",
+  },
+  {
+    name: "tagModus",
+    in: "query",
+    schema: { type: "string", enum: ["alle", "einer"], default: "alle" },
   },
   {
     name: "dokumenttyp",

@@ -57,6 +57,33 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
 });
 
+test("Tag-Filter: alle gewählten oder mindestens einer", async ({ page }, info) => {
+  const projekt = info.project.name;
+  const [erstes, zweites] = [`Modus-A-${projekt}.pdf`, `Modus-B-${projekt}.pdf`];
+  await hochladen(page, erstes);
+  await hochladen(page, zweites);
+  const r = page.request;
+  const liste = (await (await r.get("/api/dokumente?limit=200")).json()) as { id: string; dateiname: string }[];
+  const id = (name: string) => liste.find((d) => d.dateiname === name)!.id;
+  const tagA = (await (await r.post("/api/tags", { data: { name: `Modus A ${projekt}` } })).json()) as { id: string };
+  const tagB = (await (await r.post("/api/tags", { data: { name: `Modus B ${projekt}` } })).json()) as { id: string };
+  await r.post(`/api/dokumente/${id(erstes)}/ordnung`, { data: { tagsHinzu: [tagA.id] } });
+  await r.post(`/api/dokumente/${id(zweites)}/ordnung`, { data: { tagsHinzu: [tagB.id] } });
+
+  await page.goto("/archiv");
+  await page.getByRole("button", { name: `Modus A ${projekt}` }).click();
+  await page.getByRole("button", { name: `Modus B ${projekt}` }).click();
+  await expect(page.getByRole("button", { name: "alle", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("link", { name: erstes })).toHaveCount(0);
+  await page.getByRole("button", { name: "mindestens einer" }).click();
+  await expect(page.getByRole("link", { name: erstes })).toBeVisible();
+  await expect(page.getByRole("link", { name: zweites })).toBeVisible();
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    expect((await axe(page)).violations, colorScheme).toEqual([]);
+  }
+});
+
 test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filtern", async ({ page }, info) => {
   const feld = `Summe ${info.project.name}`;
   const name = `Angebot-${info.project.name}.pdf`;

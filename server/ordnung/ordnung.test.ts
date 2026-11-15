@@ -225,6 +225,10 @@ describe.skipIf(!testDatenbankUrl)("Tags, Dokumenttypen und Felder gegen Postgre
     const nur = (namen: string[]) => namen.filter((n) => n.startsWith("filter-")).sort();
     expect(nur(await liste(`tag=${rot.id}`))).toEqual(["filter-a.pdf", "filter-b.pdf"]);
     expect(nur(await liste(`tag=${rot.id}&tag=${blau.id}`))).toEqual(["filter-a.pdf"]);
+    expect(nur(await liste(`tag=${rot.id}&tag=${blau.id}&tagModus=alle`))).toEqual(["filter-a.pdf"]);
+    // Mindestens einer der Tags: blau hat nur a, rot hat a und b
+    expect(nur(await liste(`tag=${blau.id}&tagModus=einer`))).toEqual(["filter-a.pdf"]);
+    expect(nur(await liste(`tag=${rot.id}&tag=${blau.id}&tagModus=einer`))).toEqual(["filter-a.pdf", "filter-b.pdf"]);
     expect(nur(await liste(`dokumenttyp=${typ.id}`))).toEqual(["filter-a.pdf"]);
     expect(nur(await liste("dokumenttyp=ohne"))).toEqual(["filter-b.pdf", "filter-c.pdf"]);
     expect(nur(await liste(`feld.${notiz.id}=gesetzt`))).toEqual(["filter-a.pdf"]);
@@ -242,6 +246,7 @@ describe.skipIf(!testDatenbankUrl)("Tags, Dokumenttypen und Felder gegen Postgre
     expect(eintrag.dokumenttyp?.name).toBe("Filtertyp");
     // Unpassende Filter sind ein Fehler, kein leerer Treffer
     expect((await als(inhaber)("/api/dokumente?tag=kein-uuid")).status).toBe(400);
+    expect((await als(inhaber)(`/api/dokumente?tag=${rot.id}&tagModus=manche`)).status).toBe(400);
     expect((await als(inhaber)(`/api/dokumente?feld.${summe.id}.von=abc`)).status).toBe(400);
     expect((await als(inhaber)(`/api/dokumente?feld.${summe.id}.enthaelt=x`)).status).toBe(400);
   });

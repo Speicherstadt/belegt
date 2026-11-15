@@ -57,6 +57,8 @@ export type SammelErgebnis = { id: string; ok: true; eingeordnet: boolean } | { 
 /** Filter der Archivliste nach Tags, Dokumenttyp und einem Feld (server/ordnung/filter.ts) */
 export interface ListenFilter {
   tags: string[];
+  /** „alle“: jedes gewählte Tag; „einer“: mindestens eines */
+  tagModus: "alle" | "einer";
   dokumenttyp: string;
   feld: { feldId: string; art: "gesetzt" | "enthaelt" | "bereich"; text: string; von: string; bis: string } | null;
 }

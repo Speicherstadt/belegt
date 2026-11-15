@@ -51,7 +51,7 @@ auf der Seite des Dokuments setzt sie. Mit `EINGANG_ORDNER_TAGS=true` werden die
 
 ## Filter und Suche
 
-Im Archiv filterst du nach Tags (das Dokument hat alle gewählten), nach Dokumenttyp (auch „Ohne Dokumenttyp“) und nach
+Im Archiv filterst du nach Tags (das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach Dokumenttyp (auch „Ohne Dokumenttyp“) und nach
 einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und Datum von–bis. Die Liste zeigt Tags und Dokumenttyp unter
 dem Namen. Die Suche findet die Namen von Tags und Dokumenttyp und die Werte der Felder vom Typ Text, Auswahl und Link.
 

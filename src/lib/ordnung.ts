@@ -21,12 +21,13 @@ export function feldwertText(typ: Feldtyp, wert: Feldwert): string {
   return String(wert);
 }
 
-export const LEERER_FILTER: ListenFilter = { tags: [], dokumenttyp: "", feld: null };
+export const LEERER_FILTER: ListenFilter = { tags: [], tagModus: "alle", dokumenttyp: "", feld: null };
 
 /** Parameter für GET /api/dokumente aus dem Filter der Liste; Beträge gehen als Text („1.234,56“), der Server liest sie */
 export function filterParameter(f: ListenFilter, felder: Feld[]): string {
   const p = new URLSearchParams();
   for (const t of f.tags) p.append("tag", t);
+  if (f.tags.length > 1 && f.tagModus === "einer") p.set("tagModus", "einer");
   if (f.dokumenttyp) p.set("dokumenttyp", f.dokumenttyp);
   const feld = f.feld && felder.find((x) => x.id === f.feld!.feldId);
   if (f.feld && feld) {
