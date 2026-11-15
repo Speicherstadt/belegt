@@ -253,6 +253,13 @@
       "when": 1794760044781,
       "tag": "0035_paperless_import",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794762518226,
+      "tag": "0036_gespeicherte_ansichten",
+      "breakpoints": true
     }
   ]
 }

@@ -55,9 +55,24 @@ Im Archiv filterst du nach Tags (das Dokument hat alle gewählten oder, umgescha
 einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und Datum von–bis. Die Liste zeigt Tags und Dokumenttyp unter
 dem Namen. Die Suche findet die Namen von Tags und Dokumenttyp und die Werte der Felder vom Typ Text, Auswahl und Link.
 
+Sortiert wird nach Eingang (neueste oder älteste zuerst), Titel, Tag der Entstehung oder Fristende. Suche, Filter,
+Sortierung, Liste oder Kacheln und die Zahl je Seite stehen in der Adresse des Archivs; so lässt sich jede Ansicht als
+Link weitergeben oder als Lesezeichen ablegen.
+
+## Gespeicherte Ansichten
+
+„Ansicht speichern“ im Archiv legt die aktuelle Suche mit allen Filtern unter einem Namen ab. Sie steht dann in der
+Seitenleiste unter Archiv; ein Klick setzt Suche und Filter wieder. Unter „Eigene Ansichten verwalten“ benennst du
+Ansichten um, ordnest sie und löschst sie.
+
+Ansichten gehören dem Zugang, der sie anlegt; jeder Zugang hat seine eigenen, auch Steuerberatung und Prüfer. Der
+Inhaber kann eine Ansicht „für alle Zugänge“ speichern, dann sieht die Steuerberatung sie mit, der Prüfer nicht. Eine
+Ansicht zeigt nie mehr, als der Zugang ohnehin sieht, beim Prüfer also nur seinen Zeitraum. Ansichten sind
+Einstellungen, keine Unterlagen: Löschen geht jederzeit, jede Änderung steht im Audit-Log.
+
 ## Mehrfachauswahl
 
-Eingang und Archiv zeigen 50 Dokumente je Seite, darunter „1–50 von 312“ und die Knöpfe zum Blättern. Du wählst
+Eingang und Archiv zeigen 50 Dokumente je Seite (im Archiv auch 25 oder 100), darunter „1–50 von 312“ und die Knöpfe zum Blättern. Du wählst
 Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der Seite; beim Blättern beginnt die
 Auswahl neu. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Dokumenttyp setzen, Feldwert setzen oder
 einordnen. Einordnen geht wie bei einem einzelnen Dokument: Art, Tag der Entstehung (auf Wunsch der Tag des Eingangs

@@ -1,15 +1,18 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import type { ArchivAnsicht } from "../../shared/archivansicht.ts";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { api, type Gruppe, type ListenFilter, PRO_SEITE } from "../lib/api.ts";
-import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
+import { api, type Gruppe } from "../lib/api.ts";
+import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
 import { CameraButton } from "./CameraButton.tsx";
 import { type Auswahl, DocumentGrid, DocumentTable } from "./DocumentTable.tsx";
+import { ListOptions } from "./ListOptions.tsx";
 import { MergePdfs } from "./MergePdfs.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
+import { Pagination } from "./Pagination.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -33,12 +36,18 @@ function gemerkteDarstellung(): Darstellung {
   }
 }
 
-/** Liste der Dokumente mit Suche, Filter nach Aufbewahrung und, für den Inhaber, Upload */
+/**
+ * Liste der Dokumente mit Suche, Filter nach Aufbewahrung und, für den Inhaber, Upload. Suche, Filter, Sortierung und
+ * Darstellung stehen in ansicht; im Archiv kommt sie aus der Adresse (src/pages/ArchivePage.tsx), im Eingang ist sie
+ * nur Zustand der Seite.
+ */
 export function DocumentList({
   suchbar,
   leer,
   feste,
   kamera = false,
+  ansicht,
+  setAnsicht,
 }: {
   suchbar: boolean;
   leer: { title: string; text: string };
@@ -46,27 +55,27 @@ export function DocumentList({
   feste?: Gruppe;
   /** Knopf „Foto aufnehmen“ (Eingang) */
   kamera?: boolean;
+  ansicht: ArchivAnsicht;
+  setAnsicht: (a: ArchivAnsicht) => void;
 }) {
-  const [suche, setSuche] = useState("");
-  const [gewaehlt, setGewaehlt] = useState<Gruppe>("alle");
-  const gruppe = feste ?? gewaehlt;
+  const { suche, proSeite, sortierung } = ansicht;
+  const gruppe = feste ?? ansicht.gruppe;
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
-  const [filter, setFilter] = useState<ListenFilter>(LEERER_FILTER);
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder, enabled: !feste });
-  const parameter = feste ? "" : filterParameter(filter, felder.data ?? []);
+  const parameter = feste ? "" : filterParameter(ansicht, felder.data ?? []);
   // Seite ab 1; eine andere Suche, Gruppe oder ein anderer Filter beginnt wieder vorn
   const [seiteWahl, setSeiteWahl] = useState({ seite: 1, fuer: "" });
-  const abfrage = JSON.stringify([suche, gruppe, parameter]);
+  const abfrage = JSON.stringify([suche, gruppe, parameter, proSeite, sortierung]);
   const seite = seiteWahl.fuer === abfrage ? seiteWahl.seite : 1;
   const abfrageDaten = useQuery({
-    queryKey: ["dokumente", suche, gruppe, parameter, seite],
-    queryFn: () => api.dokumente(suche, gruppe, parameter, seite),
+    queryKey: ["dokumente", suche, gruppe, parameter, seite, proSeite, sortierung],
+    queryFn: () => api.dokumente(suche, gruppe, parameter, seite, proSeite, sortierung),
     placeholderData: keepPreviousData,
   });
   const liste = { ...abfrageDaten, data: abfrageDaten.data?.eintraege };
   const gesamt = abfrageDaten.data?.gesamt ?? 0;
-  const seiten = Math.max(1, Math.ceil(gesamt / PRO_SEITE));
+  const seiten = Math.max(1, Math.ceil(gesamt / proSeite));
   const blaettern = (neu: number) => setSeiteWahl({ seite: neu, fuer: abfrage });
   // Ist die Seite leer geworden (etwa nach dem Einordnen im Eingang), zur letzten mit Einträgen
   const leereSeite = !abfrageDaten.isPlaceholderData && liste.data?.length === 0 && seite > 1;
@@ -87,9 +96,11 @@ export function DocumentList({
       return neu;
     });
   };
-  const [darstellung, setDarstellung] = useState<Darstellung>(gemerkteDarstellung);
+  const [gemerkt, setGemerkt] = useState<Darstellung>(gemerkteDarstellung);
+  const darstellung = ansicht.darstellung ?? gemerkt;
   const darstellen = (d: Darstellung) => {
-    setDarstellung(d);
+    setGemerkt(d);
+    if (ansicht.darstellung) setAnsicht({ ...ansicht, darstellung: d });
     try {
       localStorage.setItem(DARSTELLUNG, d);
     } catch {}
@@ -135,7 +146,7 @@ export function DocumentList({
             <input
               type="search"
               value={suche}
-              onChange={(e) => setSuche(e.target.value)}
+              onChange={(e) => setAnsicht({ ...ansicht, suche: e.target.value })}
               placeholder={m.archive_search()}
               className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"
             />
@@ -214,7 +225,7 @@ export function DocumentList({
               key={f.gruppe}
               type="button"
               aria-pressed={gruppe === f.gruppe}
-              onClick={() => setGewaehlt(f.gruppe)}
+              onClick={() => setAnsicht({ ...ansicht, gruppe: f.gruppe })}
               className="h-8 rounded-full border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
             >
               {f.label()}
@@ -222,7 +233,8 @@ export function DocumentList({
           ))}
         </fieldset>
       )}
-      {!feste && <OrderFilter filter={filter} onChange={setFilter} />}
+      {!feste && <OrderFilter filter={ansicht} onChange={(f) => setAnsicht({ ...ansicht, ...f })} />}
+      {!feste && <ListOptions ansicht={{ ...ansicht, darstellung }} setAnsicht={setAnsicht} />}
       {liste.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {m.list_failed({ meldung: liste.error.message })}
@@ -274,38 +286,7 @@ export function DocumentList({
         ) : (
           <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} />
         ))}
-      {gesamt > 0 && (
-        <nav aria-label={m.pages_label()} className="flex flex-wrap items-center justify-between gap-3 text-sm">
-          <p className="m-0 text-muted tabular-nums" aria-live="polite">
-            {m.pages_range({
-              von: String((seite - 1) * PRO_SEITE + 1),
-              bis: String(Math.min(seite * PRO_SEITE, gesamt)),
-              gesamt: String(gesamt),
-            })}
-          </p>
-          {seiten > 1 && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => blaettern(seite - 1)}
-                disabled={seite <= 1}
-                className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle disabled:opacity-60"
-              >
-                {m.pages_previous()}
-              </button>
-              <span className="tabular-nums">{m.pages_of({ seite: String(seite), seiten: String(seiten) })}</span>
-              <button
-                type="button"
-                onClick={() => blaettern(seite + 1)}
-                disabled={seite >= seiten}
-                className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle disabled:opacity-60"
-              >
-                {m.pages_next()}
-              </button>
-            </div>
-          )}
-        </nav>
-      )}
+      <Pagination seite={seite} seiten={seiten} gesamt={gesamt} proSeite={proSeite} blaettern={blaettern} />
     </div>
   );
 }

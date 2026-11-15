@@ -1,5 +1,6 @@
 import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
+import { SORTIERUNGEN } from "../../shared/archivansicht.ts";
 import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
 import { anzahl, aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
 import {
@@ -92,6 +93,8 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     const seite = Seite.safeParse(c.req.query("seite") ?? "1");
     if (!seite.success) return c.json({ fehler: "Ungültige Seite" }, 400);
     const gruppe = Gruppe.catch("alle").parse(c.req.query("gruppe") ?? "alle");
+    const sortierung = z.enum(SORTIERUNGEN).safeParse(c.req.query("sortierung") ?? "neu");
+    if (!sortierung.success) return c.json({ fehler: "Ungültige Sortierung" }, 400);
     const parameter = c.req.queries();
     const felder = Object.keys(parameter).some((k) => k.startsWith("feld.")) ? await felderListen(umgebung.db) : [];
     const ordnung = filterAus(parameter, felder);
@@ -105,7 +108,12 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
       notizen: !c.get("nutzer").zeitraum,
     };
     const [eintraege, gesamt] = await Promise.all([
-      listen(umgebung.db, { ...abfrage, limit: proSeite, versatz: (seite.data - 1) * proSeite }),
+      listen(umgebung.db, {
+        ...abfrage,
+        limit: proSeite,
+        versatz: (seite.data - 1) * proSeite,
+        sortierung: sortierung.data,
+      }),
       anzahl(umgebung.db, abfrage),
     ]);
     c.header("X-Gesamt", String(gesamt));

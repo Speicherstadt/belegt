@@ -56,7 +56,23 @@ const seiten = [
   }),
 ];
 
-export const router = createRouter({ routeTree: root.addChildren([anmelden, einladung, app.addChildren(seiten)]) });
+/**
+ * Suchparameter bleiben einfache Texte (?gruppe=pflicht&tags=a,b), damit eine Adresse lesbar und eine gespeicherte
+ * Ansicht ein gewöhnlicher Link ist (shared/archivansicht.ts); die Vorgabe des Routers schriebe JSON hinein
+ */
+const parseSearch = (suche: string) => Object.fromEntries(new URLSearchParams(suche));
+const stringifySearch = (werte: Record<string, unknown>) => {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(werte)) if (typeof v === "string" && v !== "") p.set(k, v);
+  const text = p.toString();
+  return text ? `?${text}` : "";
+};
+
+export const router = createRouter({
+  routeTree: root.addChildren([anmelden, einladung, app.addChildren(seiten)]),
+  parseSearch,
+  stringifySearch,
+});
 
 declare module "@tanstack/react-router" {
   interface Register {

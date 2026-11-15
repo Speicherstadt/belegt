@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { eingerichtet } from "./db/status.ts";
+import { archivansichtenRouten } from "./http/archivansichten.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
 import { type App, type AppUmgebung, MAX_UPLOAD, VERSION } from "./http/gemeinsam.ts";
@@ -66,6 +67,7 @@ export function createApp(umgebung?: AppUmgebung) {
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
+    archivansichtenRouten(app, umgebung);
     seitenRouten(app, umgebung);
     notizenRouten(app, umgebung);
     ordnungRouten(app, umgebung);

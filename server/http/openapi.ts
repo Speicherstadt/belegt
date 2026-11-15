@@ -73,6 +73,13 @@ export const openapi = {
               enum: ["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht"],
             },
           },
+          {
+            name: "sortierung",
+            in: "query",
+            schema: { type: "string", enum: ["neu", "alt", "titel", "entstanden", "frist"], default: "neu" },
+            description:
+              "neu: zuletzt eingegangen zuerst; alt: zuerst eingegangen; titel: Titel oder Dateiname; entstanden: Tag der Entstehung, neueste zuerst; frist: Fristende, das nächste zuerst",
+          },
           { name: "seite", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
           { name: "proSeite", in: "query", schema: { type: "integer", minimum: 1, maximum: 200, default: 50 } },
           {

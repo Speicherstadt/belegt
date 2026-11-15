@@ -17,8 +17,11 @@ const ERLAUBT = [
   /^\/api\/zeitstempel(\/[^/]+\/token)?$/,
 ];
 
+/** Seine eigenen gespeicherten Ansichten pflegt auch der Prüfer; sie zeigen nur, was er ohnehin sieht */
+const EIGENE_ANSICHTEN = /^\/api\/ansichten(\/[^/]+)?$/;
+
 export const prueferDarf = (methode: string, pfad: string): boolean =>
-  (methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad));
+  EIGENE_ANSICHTEN.test(pfad) || ((methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad)));
 
 /** Die Dokument-ID eines Pfads unter /api/dokumente/:id, sonst null */
 export const dokumentImPfad = (pfad: string): string | null => /^\/api\/dokumente\/([^/]+)/.exec(pfad)?.[1] ?? null;

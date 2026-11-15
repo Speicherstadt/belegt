@@ -1,3 +1,4 @@
+import type { Sortierung } from "../../shared/archivansicht.ts";
 import { ApiFehler, antwort, aufruf, json } from "./api-aufruf.ts";
 import type { Ordnung, OrdnungsVorschlag, TagKurz } from "./api-ordnung.ts";
 
@@ -124,9 +125,16 @@ export const PRO_SEITE = 50;
 
 export const dokumenteApi = {
   /** Eine Seite der Liste (ab 1) und die Zahl aller Treffer aus X-Gesamt */
-  dokumente: async (suche: string, gruppe: Gruppe = "alle", filter = "", seite = 1, proSeite = PRO_SEITE) => {
+  dokumente: async (
+    suche: string,
+    gruppe: Gruppe = "alle",
+    filter = "",
+    seite = 1,
+    proSeite = PRO_SEITE,
+    sortierung: Sortierung = "neu",
+  ) => {
     const res = await antwort(
-      `/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}&seite=${seite}&proSeite=${proSeite}${filter}`,
+      `/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}&seite=${seite}&proSeite=${proSeite}&sortierung=${sortierung}${filter}`,
     );
     const eintraege = (await res.json()) as Eintrag[];
     return { eintraege, gesamt: Number(res.headers.get("x-gesamt") ?? eintraege.length) };

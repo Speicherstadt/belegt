@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { ansichtAus, ansichtSuche } from "../../shared/archivansicht.ts";
 import { api, type Ich } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 import { Darstellung } from "./Darstellung.tsx";
@@ -13,6 +14,9 @@ const ITEMS = [
   { to: "/quellen", label: () => m.nav_sources() },
   { to: "/verfahrensdoku", label: () => m.nav_procedure() },
 ] as const;
+
+const eintrag =
+  "flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
 
 /** Der Prüfer sieht nur, was er für die Prüfung braucht; die übrigen Schnittstellen lehnt der Server für ihn ab */
 const PRUEFER = new Set(["/", "/archiv", "/pruefung"]);
@@ -29,6 +33,16 @@ export function Sidebar({
   oidc?: { name: string } | null;
   version?: string;
 }) {
+  const ansichten = useQuery({ queryKey: ["ansichten"], queryFn: api.ansichten });
+  const ort = useLocation();
+  // Die gespeicherte Ansicht, deren Filter das Archiv gerade zeigt; dann ist sie markiert und nicht „Archiv“
+  const offeneAnsicht =
+    ort.pathname === "/archiv"
+      ? ansichten.data?.find(
+          (a) =>
+            ansichtSuche(ansichtAus(a.parameter)) === ansichtSuche(ansichtAus(ort.search as Record<string, string>)),
+        )
+      : undefined;
   const konten = useQuery({ queryKey: ["konten"], queryFn: api.konten, enabled: !!oidc && !eingebettet });
   const verbunden = konten.data?.some((k) => k.providerId === "oidc");
   const queryClient = useQueryClient();
@@ -51,14 +65,32 @@ export function Sidebar({
           ...ITEMS.filter((item) => ich.role !== "pruefer" || PRUEFER.has(item.to)),
           ...(ich.role === "inhaber" ? ([{ to: "/zugaenge", label: () => m.nav_access() }] as const) : []),
         ].map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: true }}
-            className="flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg"
-          >
-            {item.label()}
-          </Link>
+          <div key={item.to} className="contents">
+            <Link
+              to={item.to}
+              // Zeigt das Archiv eine gespeicherte Ansicht, ist sie markiert und nicht „Archiv“
+              activeOptions={{ exact: true, includeSearch: item.to === "/archiv" && !!offeneAnsicht }}
+              className={eintrag}
+            >
+              {item.label()}
+            </Link>
+            {item.to === "/archiv" && !!ansichten.data?.length && (
+              <ul aria-label={m.views_nav_label()} className="m-0 flex list-none flex-col gap-0.5 p-0 pl-3">
+                {ansichten.data.map((a) => (
+                  <li key={a.id}>
+                    <Link
+                      to="/archiv"
+                      search={a.parameter}
+                      activeOptions={{ exact: true, includeSearch: true }}
+                      className={eintrag}
+                    >
+                      <span className="truncate">{a.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         ))}
       </nav>
       {!eingebettet && (

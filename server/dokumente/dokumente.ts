@@ -1,5 +1,6 @@
 import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { eq, sql } from "drizzle-orm";
+import type { Sortierung } from "../../shared/archivansicht.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { archivnummern, dokumente, dokumentTags } from "../db/schema.ts";
@@ -126,10 +127,24 @@ export async function anzahl(db: Datenbank, abfrage: ListenAbfrage): Promise<num
   return Number(z?.n ?? 0);
 }
 
+/** ORDER BY je Sortierung (shared/archivansicht.ts); zuletzt immer nach Eingang, damit Seiten stabil bleiben */
+const REIHENFOLGE: Record<Sortierung, ReturnType<typeof sql>> = {
+  neu: sql`d.eingegangen_am desc, d.id desc`,
+  alt: sql`d.eingegangen_am asc, d.id asc`,
+  titel: sql`lower(coalesce(e.titel, d.dateiname, '')) asc, d.eingegangen_am desc, d.id desc`,
+  entstanden: sql`belegt_dokument_tag(d.id) desc, d.eingegangen_am desc, d.id desc`,
+  frist: sql`e.frist_bis asc nulls last, d.eingegangen_am desc, d.id desc`,
+};
+
 /** Eine Seite der Liste, neueste zuerst; versatz überspringt so viele Einträge (Seiten in server/http/dokumente.ts) */
 export async function listen(
   db: Datenbank,
-  { limit = 50, versatz = 0, ...abfrage }: ListenAbfrage & { limit?: number; versatz?: number },
+  {
+    limit = 50,
+    versatz = 0,
+    sortierung = "neu",
+    ...abfrage
+  }: ListenAbfrage & { limit?: number; versatz?: number; sortierung?: Sortierung },
 ): Promise<Eintrag[]> {
   const zeilen = await db.execute<{
     id: string;
@@ -156,7 +171,7 @@ export async function listen(
              where dd.dokument_id = d.id) as dokumenttyp,
            exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild
       ${listenQuelle(abfrage)}
-     order by d.eingegangen_am desc, d.id desc
+     order by ${REIHENFOLGE[sortierung]}
      limit ${limit} offset ${versatz}`);
   return [...zeilen].map((z) => ({
     id: z.id,
