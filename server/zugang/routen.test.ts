@@ -23,6 +23,9 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/einladung/:token": "offen",
   "GET /api/freigabe/:token": "offen",
   "GET /api/geteilt/:token": "offen",
+  // Die Oberfläche (statisch.ts): Dateien aus dist, keine Dokumente; /api reicht sie an die Routen oben weiter
+  "GET /*": "offen",
+  "POST /teilen": "offen",
 
   "GET /api/dokumente/:id": "dokument",
   "POST /api/dokumente/:id/einordnung": "dokument",
@@ -148,6 +151,8 @@ function registriert(): string[] {
     db: {},
     speicher: {},
     auth: { options: { baseURL: "http://localhost:3000" }, handler: () => new Response() },
+    // Mit Oberfläche, damit auch die Routen der statischen Auslieferung (server/http/statisch.ts) hier stehen
+    oberflaeche: "/gibt-es-nicht",
   } as unknown as AppUmgebung;
   const app = createApp(umgebung);
   return [...new Set(app.routes.filter((r) => r.method !== "ALL").map((r) => `${r.method} ${r.path}`))];
