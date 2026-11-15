@@ -384,6 +384,7 @@
   "order_edit_named": "Edit {name}",
   "order_delete": "Delete",
   "order_delete_named": "Delete {name}",
+  "order_tag_excluded_warning": "Excluded for {anzahl} staff members or invitations: without the tag they will see its documents.",
   "order_delete_confirm": "Really delete {name}",
   "order_doctypes": "Document types",
   "order_doctypes_intro": "At most one per document, such as contract or bank statement. The default kind suggests a kind when classifying; the retention period still follows the kind of the classification.",

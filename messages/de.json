@@ -384,6 +384,7 @@
   "order_edit_named": "{name} ändern",
   "order_delete": "Löschen",
   "order_delete_named": "{name} löschen",
+  "order_tag_excluded_warning": "Ausgeschlossen bei {anzahl} Mitarbeitern oder Einladungen: Ohne den Tag sehen sie seine Dokumente.",
   "order_delete_confirm": "{name} wirklich löschen",
   "order_doctypes": "Dokumenttypen",
   "order_doctypes_intro": "Höchstens einer je Dokument, etwa Vertrag oder Kontoauszug. Die Vorgabe-Art schlägt beim Einordnen eine Art vor; maßgeblich für die Frist bleibt die Art der Einordnung.",

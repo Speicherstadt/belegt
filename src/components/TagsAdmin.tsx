@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { FARBNAMEN, type Farbe } from "../../shared/ordnung.ts";
 import { api, type Tag } from "../lib/api.ts";
+import { ausgeschlossenBei } from "../lib/rollen.ts";
 import { m } from "../paraglide/messages.js";
 import { feldKlasse } from "./FieldInput.tsx";
 import { MatchingRule, regelAus, regelText } from "./MatchingRule.tsx";
@@ -45,6 +46,9 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
     },
   });
   const weg = useMutation({ mutationFn: () => api.tagLoeschen(tag.id), onSuccess: neu });
+  // Vor dem Löschen: Schließt ein Mitarbeiter den Tag aus, sähe er danach dessen Dokumente
+  const zugaenge = useQuery({ queryKey: ["zugaenge"], queryFn: api.zugaenge, enabled: loeschen && schreiben });
+  const ausgeschlossen = zugaenge.data ? ausgeschlossenBei(tag.id, zugaenge.data) : 0;
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -93,6 +97,11 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
           </span>
         )}
       </div>
+      {loeschen && ausgeschlossen > 0 && (
+        <p role="alert" className="text-red-700 dark:text-red-400">
+          {m.order_tag_excluded_warning({ anzahl: String(ausgeschlossen) })}
+        </p>
+      )}
       {bearbeiten && (
         <form onSubmit={absenden} className="flex flex-wrap items-end gap-2">
           <label className="flex min-w-0 flex-col gap-1.5 font-medium">

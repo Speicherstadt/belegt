@@ -28,7 +28,9 @@ Der Sichtbereich besteht aus erlaubten Tags, Dokumenttypen und Korrespondenten
 ([Ordnung](ordnung.md)). Innerhalb einer Art genügt einer davon, zwischen den Arten müssen alle passen; eine Art ohne
 Auswahl schränkt nicht ein. Dazu kommen:
 
-- **Ausgeschlossene Tags**: Ein Dokument mit einem davon sieht der Mitarbeiter nie, auch wenn es sonst passt.
+- **Ausgeschlossene Tags**: Ein Dokument mit einem davon sieht der Mitarbeiter nie, auch wenn es sonst passt. Löschst
+  du einen solchen Tag, verlieren seine Dokumente ihn, und der Mitarbeiter sieht sie, wenn sie sonst passen; beim
+  Löschen weist Belegt darauf hin.
 - **Auch Dokumente ohne Tag, Typ und Korrespondent**: etwa damit er den Eingang mit abarbeitet.
 
 Beispiele:
