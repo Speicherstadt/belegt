@@ -20,6 +20,7 @@ import {
 const bytea = customType<{ data: Buffer }>({ dataType: () => "bytea" });
 
 export * from "./auth-schema.ts";
+export * from "./schema-import.ts";
 export * from "./schema-ordnung.ts";
 
 /*
@@ -37,7 +38,7 @@ export const dokumente = pgTable(
     groesse: bigint("groesse", { mode: "number" }).notNull(),
     mimeType: text("mime_type").notNull(),
     dateiname: text("dateiname"),
-    /** Woher: upload, mail, ordner, api */
+    /** Woher: QUELLEN in server/dokumente/dokumente.ts (upload, mail, ordner, api, abgeleitet, import) */
     quelle: text("quelle").notNull(),
     eingegangenAm: timestamp("eingegangen_am", { withTimezone: true }).notNull().defaultNow(),
   },

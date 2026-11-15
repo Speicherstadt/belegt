@@ -18,8 +18,11 @@ export interface Umgebung {
 /** Ein Dokument mit seiner Archivnummer (ASN), die ein Trigger beim Einfügen vergibt */
 export type Dokument = typeof dokumente.$inferSelect & { asn: number };
 
-/** abgeleitet: neues Dokument aus Seiten eines anderen (server/seiten/), das Original bleibt */
-export const QUELLEN = ["upload", "mail", "ordner", "api", "abgeleitet"] as const;
+/**
+ * abgeleitet: neues Dokument aus Seiten eines anderen (server/seiten/), das Original bleibt; import: aus einem anderen
+ * Archiv übernommen (server/paperless/)
+ */
+export const QUELLEN = ["upload", "mail", "ordner", "api", "abgeleitet", "import"] as const;
 export type Quelle = (typeof QUELLEN)[number];
 
 export interface Eingang {

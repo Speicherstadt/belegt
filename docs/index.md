@@ -23,6 +23,7 @@ unverändert, und danach löschst du es nachweisbar.
 | Bereich | Was Belegt kann |
 | --- | --- |
 | [Eingang und Suche](eingang.md) | Hochladen, Mails per IMAP, JMAP, Microsoft 365, Google, SMTP-Journal, MBOX, EML und PST; Volltext mit Text aus PDFs, Office-Dateien und Texterkennung für Scans |
+| [Umzug](umzug.md) | Dokumente aus Paperless-ngx über die API oder aus einem Export, mit Tags, Dokumenttypen, Feldern und Notizen, jedes Original gegen seine Prüfsumme geprüft |
 | [Ordnung](ordnung.md) | Tags, Dokumenttypen und eigene Felder (Betrag, Datum, Auswahl …) mit Filter und Suche, jede Änderung im Verlauf |
 | [E-Rechnungen](eingang.md#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, Nummer, Datum, Verkäufer und Betrag als Vorschlag zur Einordnung |
 | [Fristen und Löschen](fristen.md) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen erst nach Fristende und mit zweiter Person |

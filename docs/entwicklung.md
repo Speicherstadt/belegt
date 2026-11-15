@@ -63,6 +63,7 @@ löschen sie wieder.
 | `ABRUF_MINUTEN` | Abstand der Abrufe im Worker | `5` |
 | `EINGANG_ORDNER` | Ordner, den der Worker überwacht (docs/eingang.md) | – |
 | `EINGANG_ORDNER_TAGS` | Unterordner im Eingangsordner als Tags (`true` oder `false`, docs/eingang.md) | `false` |
+| `IMPORT_ORDNER`, `IMPORT_MAX_GB` | Ordner für hochgeladene Exporte aus Paperless-ngx, den Server und Worker teilen, und ihre größte Größe in GB (docs/umzug.md) | `data/import`, `20` |
 | `TRENNBLATT_CODE` | Inhalt des Codes auf Trennblättern, an denen gescannte Stapel geteilt werden | `BELEGT-TRENNER` |
 | `OCR_SPRACHEN` | Sprachen für die Texterkennung (Tesseract), etwa `deu+eng+fra` | `deu+eng` |
 | `SMTP_PORT`, `SMTP_EMPFAENGER`, `SMTP_TLS_KEY`, `SMTP_TLS_CERT` | SMTP-Journal: Port, erlaubte Empfänger, Pfade zu Schlüssel und Zertifikat für STARTTLS | `2525`, alle, ohne TLS |

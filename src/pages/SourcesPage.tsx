@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiTokens } from "../components/ApiTokens.tsx";
 import { Mailboxes } from "../components/Mailboxes.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
+import { PaperlessImport } from "../components/PaperlessImport.tsx";
 import { Rules } from "../components/Rules.tsx";
 import { Scanning } from "../components/Scanning.tsx";
 import { Webhooks } from "../components/Webhooks.tsx";
@@ -20,6 +21,7 @@ export function SourcesPage() {
         <>
           <ApiTokens />
           <Webhooks />
+          <PaperlessImport />
         </>
       )}
     </div>

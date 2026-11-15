@@ -1,13 +1,15 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { eingerichtet } from "./db/status.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
-import { type App, type AppUmgebung, VERSION } from "./http/gemeinsam.ts";
+import { type App, type AppUmgebung, MAX_UPLOAD, VERSION } from "./http/gemeinsam.ts";
 import { mailRouten } from "./http/mail.ts";
 import { notizenRouten } from "./http/notizen.ts";
 import { oauthRouten } from "./http/oauth.ts";
 import { openapi } from "./http/openapi.ts";
 import { ordnungRouten } from "./http/ordnung.ts";
+import { EXPORT_PFAD, paperlessRouten } from "./http/paperless.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { seitenRouten } from "./http/seiten.ts";
@@ -53,6 +55,14 @@ export function createApp(umgebung?: AppUmgebung) {
       return e ? c.json(e) : c.json({ fehler: "Die Einladung ist ungültig, abgelaufen oder schon eingelöst." }, 404);
     });
 
+    // Bun nimmt für den Export aus Paperless-ngx große Anfragen an (server/index.ts); alle anderen bleiben bei der Grenze
+    // für Uploads, auch die, die selbst keine setzen
+    const grenze = bodyLimit({
+      maxSize: MAX_UPLOAD + 1024 * 1024,
+      onError: (c) => c.json({ fehler: "Anfrage zu groß" }, 413),
+    });
+    app.use("/api/*", (c, next) => (c.req.path === EXPORT_PFAD ? next() : grenze(c, next)));
+
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
@@ -65,6 +75,7 @@ export function createApp(umgebung?: AppUmgebung) {
     pruefungRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);
     oauthRouten(app, umgebung);
+    paperlessRouten(app, umgebung);
     if (umgebung.oberflaeche) statischRouten(app, umgebung.oberflaeche, umgebung.embedOrigin);
   }
 

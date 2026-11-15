@@ -7,6 +7,7 @@ import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
 import { geteiltZahlen } from "../freigabe/teilen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
+import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as zugaengeListen } from "../zugang/einladungen.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
@@ -40,6 +41,14 @@ const ART: Record<Aufbewahrungsart, string> = {
   sonstige: "Sonstige für die Besteuerung bedeutsame Unterlagen (§ 147 Abs. 1 Nr. 5 AO)",
   freiwillig: "Freiwillig aufbewahrt, mit selbst gewählter Frist",
   frei: "Frei abgelegt, ohne Frist",
+};
+
+const STATUS: Record<string, string> = {
+  laeuft: "läuft",
+  fertig: "abgeschlossen",
+  abgebrochen: "abgebrochen",
+  fehler: "mit Fehler beendet",
+  wartet: "wartet",
 };
 
 const ROLLE: Record<string, string> = { inhaber: "Inhaber", steuerberatung: "Steuerberatung", pruefer: "Prüfer" };
@@ -82,7 +91,7 @@ export async function verfahrensdoku(
     trennblattCode?: string;
   },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt] = await Promise.all([
+  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt, importe] = await Promise.all([
     einstellungenLaden(db),
     zugaengeListen(db),
     tokensListen(db),
@@ -93,6 +102,7 @@ export async function verfahrensdoku(
     pruefen(db),
     zeitstempelListen(db),
     geteiltZahlen(db),
+    laeufeFuerVerfahrensdoku(db),
   ]);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
@@ -123,12 +133,19 @@ export async function verfahrensdoku(
           ? "Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht. Belegt nimmt eine Datei erst auf, wenn sie sich zwischen zwei Blicken nicht mehr ändert, und entfernt sie aus dem Ordner erst, nachdem sie im Archiv liegt. Dateien, die sich nicht aufnehmen lassen (größer als 100 MB oder 10 Minuten lang leer), verschiebt es in den Unterordner „fehler“; dort bleiben sie zur Klärung liegen."
           : "",
         `Gescannte Stapel als PDF teilt Belegt an Trennblättern (QR-Code oder Code 128 mit dem Inhalt „${trennblattCode}“)${eingangsordner ? " aus dem Eingangsordner immer und" : ""} beim Hochladen auf Wunsch in einzelne Dokumente. Der Stapel ist dabei nur das Transportmittel: Jedes Teil wird als eigenes Original aufgenommen, die Trennblätter und der Stapel selbst nicht. Lässt sich ein Stapel nicht teilen, wird er unverändert aufgenommen.`,
+        importe.length
+          ? "Dokumente aus Paperless-ngx übernimmt Belegt über dessen REST-API (lesend, mit einem API-Token, das verschlüsselt gespeichert ist und nur an die eingetragene Adresse geht) oder aus einem Export (document_exporter). Übernommen wird immer das Original, nie die Archivversion. Vor der Aufnahme vergleicht Belegt die Prüfsumme aus Paperless-ngx (SHA-256, bei älteren Versionen MD5) mit dem geladenen Original; passt sie nicht, wird das Dokument nicht aufgenommen und der Fehler festgehalten. Ein Original, das schon im Archiv liegt, wird nur verknüpft. Das Ergebnis je Dokument (übernommen, verknüpft oder Fehler mit Grund, beide Prüfsummen) ist versiegelt. Übernommene Dokumente landen im Eingang; Titel, Korrespondent und Datum aus Paperless-ngx sind nur ein Vorschlag. Nur für Dokumenttypen oder Tags, die der Inhaber ausdrücklich einer Art zugeordnet hat, ordnet der Import gleich ein (Akteur „import:paperless“)."
+          : "",
         "Seiten eines archivierten PDFs lassen sich drehen, entfernen oder teilen, mehrere PDFs zu einem zusammenfügen. Das Original bleibt dabei unverändert; das Ergebnis ist ein neues Dokument mit eigener Archivnummer und der Quelle „abgeleitet“, das wie jedes andere eingeordnet wird. Woraus es entstand, mit welcher Operation und welchen Seiten, durch wen und wann, hält eine versiegelte Verknüpfung fest; sie steht im Protokoll und auf der Seite beider Dokumente.",
       ].filter(Boolean),
       liste: [
         ...quellen.map(
           (q) =>
             `Postfach „${q.name}“: ${q.benutzer} auf ${q.host}, Ordner ${q.ordner}${q.aktiv ? "" : " (deaktiviert)"}`,
+        ),
+        ...importe.map(
+          (l) =>
+            `Import aus Paperless-ngx (${l.art === "api" ? `API „${l.quelle ?? ""}“` : `Export ${l.dateiname ?? ""}`}) vom ${tag(new Date(l.begonnenAm ?? l.erstelltAm))}: ${l.uebernommen}${l.gesamt === null ? "" : ` von ${l.gesamt}`} übernommen, davon ${l.doppelt} schon im Archiv, ${l.fehler} nicht übernommen (Prüfsumme abgeglichen); Stand: ${STATUS[l.status]}`,
         ),
         ...regeln.map(
           (r) =>

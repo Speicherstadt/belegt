@@ -179,6 +179,13 @@ export const dokumenteApi = {
         modell: string;
         ordnung: OrdnungsVorschlag | null;
       } | null;
+      /** Titel, Korrespondent und Entstehung aus einem Import (Paperless-ngx) */
+      import: {
+        titel: string | null;
+        korrespondent: string | null;
+        entstanden: string | null;
+        herkunft: string;
+      } | null;
     }>(`/api/dokumente/${id}/vorschlag`),
   links: (id: string) => aufruf<GeteilterLink[]>(`/api/dokumente/${id}/links`),
   linkAnlegen: (id: string, tage: 1 | 7 | 30) =>

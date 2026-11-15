@@ -115,6 +115,14 @@ export async function tagMitNamen(tx: Tx, name: string): Promise<Tag> {
   return t!;
 }
 
+/** Der Dokumenttyp mit diesem Namen (ohne Groß- und Kleinschreibung), angelegt, falls es ihn nicht gibt; gekürzt auf 100 Zeichen */
+export async function dokumenttypMitNamen(tx: Tx, name: string): Promise<Dokumenttyp> {
+  const sauber = Name.parse(name.trim().slice(0, 100));
+  await tx.execute(sql`insert into dokumenttypen (name) values (${sauber}) on conflict ((lower(name))) do nothing`);
+  const [t] = await tx.select().from(dokumenttypen).where(sql`lower(${dokumenttypen.name}) = lower(${sauber})`);
+  return t!;
+}
+
 /** Dokumenttypen mit der Zahl ihrer Dokumente; mit zeitraum (Prüfer) nur der Dokumente darin */
 export async function dokumenttypenListen(
   db: Datenbank,

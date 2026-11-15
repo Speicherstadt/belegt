@@ -50,8 +50,15 @@ const app = createApp({
   kiModell: env.KI_URL && env.KI_MODELL ? { modell: env.KI_MODELL, host: new URL(env.KI_URL).host } : undefined,
   oeffnenMit:
     env.OEFFNEN_MIT_NAME && env.OEFFNEN_MIT_URL ? { name: env.OEFFNEN_MIT_NAME, url: env.OEFFNEN_MIT_URL } : undefined,
+  importOrdner: env.IMPORT_ORDNER,
+  importMax: env.IMPORT_MAX_GB * 1024 ** 3,
   oberflaeche,
 });
 
-Bun.serve({ port: env.PORT, fetch: app.fetch, maxRequestBodySize: 110 * 1024 * 1024 });
+// Große Anfragen nur für den Export aus Paperless-ngx; alle anderen begrenzt die App selbst (server/app.ts)
+Bun.serve({
+  port: env.PORT,
+  fetch: app.fetch,
+  maxRequestBodySize: Math.max(110 * 1024 * 1024, env.IMPORT_MAX_GB * 1024 ** 3 + 1024 * 1024),
+});
 console.log(`Belegt läuft auf Port ${env.PORT}`);

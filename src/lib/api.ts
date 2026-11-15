@@ -1,6 +1,7 @@
 import { betriebApi } from "./api-betrieb.ts";
 import { dokumenteApi } from "./api-dokumente.ts";
 import { ordnungApi } from "./api-ordnung.ts";
+import { paperlessApi } from "./api-paperless.ts";
 import { zugangApi } from "./api-zugang.ts";
 
 /* Alle Aufrufe der Schnittstelle in einem Objekt; die Bereiche stehen in den Dateien api-*.ts */
@@ -56,6 +57,7 @@ export type {
   Tag,
   TagKurz,
 } from "./api-ordnung.ts";
+export type { ImportLauf, ImportStatus, ImportZuordnung, PaperlessQuelle, ZielArt } from "./api-paperless.ts";
 export type { ApiToken, Ich, Zugaenge } from "./api-zugang.ts";
 
-export const api = { ...zugangApi, ...dokumenteApi, ...ordnungApi, ...betriebApi };
+export const api = { ...zugangApi, ...dokumenteApi, ...ordnungApi, ...betriebApi, ...paperlessApi };

@@ -23,6 +23,7 @@ const QUELLE: Record<string, () => string> = {
   ordner: () => m.source_ordner(),
   api: () => m.source_api(),
   abgeleitet: () => m.source_abgeleitet(),
+  import: () => m.source_import(),
 };
 
 function ereignis(e: Ereignis): string {

@@ -31,6 +31,10 @@ export type AppUmgebung = Umgebung & {
   embedOrigin?: string;
   /** App für „Öffnen mit …“ (Name und Adresse mit {url}), wenn eingerichtet */
   oeffnenMit?: OeffnenMit;
+  /** Ordner für hochgeladene Exporte aus Paperless-ngx (IMPORT_ORDNER), den Server und Worker teilen */
+  importOrdner?: string;
+  /** Größte Datei eines Exports in Bytes (IMPORT_MAX_GB) */
+  importMax?: number;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
 };

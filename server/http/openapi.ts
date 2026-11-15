@@ -1,5 +1,6 @@
 import { VERSION } from "./gemeinsam.ts";
 import { feldwert, listenParameter, ordnungPfade, ordnungsFelder } from "./openapi-ordnung.ts";
+import { paperlessPfade } from "./openapi-paperless.ts";
 
 /**
  * OpenAPI 3.1 für die Aufrufe, die Programme mit einem API-Token erreichen. Von Hand geschrieben, damit es kurz und
@@ -28,7 +29,7 @@ const dokument = {
     groesse: { type: "integer", description: "Bytes" },
     mimeType: { type: "string" },
     dateiname: { type: ["string", "null"] },
-    quelle: { type: "string", enum: ["upload", "mail", "ordner", "api", "abgeleitet"] },
+    quelle: { type: "string", enum: ["upload", "mail", "ordner", "api", "abgeleitet", "import"] },
     eingegangenAm: { type: "string", format: "date-time" },
     vorschaubild: { type: "boolean", description: "Nur in der Liste: ob es ein Vorschaubild gibt" },
     ...ordnungsFelder,
@@ -359,5 +360,6 @@ export const openapi = {
       },
     },
     ...ordnungPfade,
+    ...paperlessPfade,
   },
 } as const;

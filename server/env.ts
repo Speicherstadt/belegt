@@ -63,6 +63,10 @@ const Schema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  /** Ordner für hochgeladene Exporte aus Paperless-ngx, den Server und Worker teilen (docs/umzug.md) */
+  IMPORT_ORDNER: z.string().min(1).default("data/import"),
+  /** Größte Datei eines Exports aus Paperless-ngx in GB */
+  IMPORT_MAX_GB: z.coerce.number().int().min(1).max(1000).default(20),
   /** Inhalt des Barcodes auf Trennblättern, an denen ein gescannter Stapel geteilt wird */
   TRENNBLATT_CODE: z.string().trim().min(1).max(200).default("BELEGT-TRENNER"),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */

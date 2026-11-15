@@ -13,6 +13,8 @@ import { migrieren } from "../server/db/migrieren.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
+import { naechsterImport } from "../server/paperless/ausfuehren.ts";
+import { testPaperless } from "../server/paperless/test-paperless.ts";
 import { vorschaubilderErzeugen } from "../server/vorschaubild/vorschaubild.ts";
 
 /*
@@ -35,6 +37,8 @@ await migrieren(basis);
 const { db } = verbinden(basis);
 const verzeichnis = mkdtempSync(join(tmpdir(), "belegt-e2e-"));
 const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
+const schluessel = randomBytes(32);
+const importOrdner = mkdtempSync(join(tmpdir(), "belegt-e2e-import-"));
 const auth = createAuth({
   db,
   secret: "e2e-".repeat(8),
@@ -47,7 +51,8 @@ Bun.serve({
     db,
     speicher,
     auth,
-    schluessel: randomBytes(32),
+    schluessel,
+    importOrdner,
     oeffnen: imapOeffnen,
     // Die Seite, die Belegt im Frame zeigen darf; der Test baut sie im Browser nach (e2e/einbetten.spec.ts)
     embedOrigin: "http://localhost:5199",
@@ -112,4 +117,38 @@ immerWieder(() =>
     { abfragen: kiAbfragen, vorschau: true },
   ),
 );
+// Ein nachgebautes Paperless-ngx für den Umzug (e2e/umzug.spec.ts); Inhalte, die der Worker nicht lesen muss
+const PAPERLESS_PORT = Number(process.env.E2E_PAPERLESS_PORT ?? 3186);
+await testPaperless({
+  port: PAPERLESS_PORT,
+  token: "e2e-paperless-token",
+  tags: [
+    { id: 1, name: "Strom" },
+    { id: 2, name: "Bank" },
+  ],
+  correspondents: [{ id: 1, name: "Stadtwerke Beispiel" }],
+  document_types: [{ id: 1, name: "Rechnung" }],
+  dokumente: [
+    {
+      id: 1,
+      title: "Strom März",
+      correspondent: 1,
+      document_type: 1,
+      tags: [1],
+      created: "2026-03-01",
+      original_file_name: "paperless-strom.bin",
+      original: new TextEncoder().encode("Paperless E2E Strom"),
+    },
+    {
+      id: 2,
+      title: "Kontoauszug",
+      tags: [2],
+      created: "2026-03-31",
+      original_file_name: "paperless-konto.bin",
+      original: new TextEncoder().encode("Paperless E2E Konto"),
+    },
+  ],
+});
+// Statt des Workers: Importe aus Paperless-ngx
+immerWieder(() => naechsterImport({ db, speicher }, { schluessel, importOrdner }));
 console.log(`E2E-Server auf Port ${port}`);

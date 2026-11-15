@@ -24,6 +24,7 @@ RUN apt-get update \
 ENV NODE_ENV=production \
     PORT=3000 \
     DOCUMENTS_DIR=/var/lib/belegt/dokumente \
+    IMPORT_ORDNER=/var/lib/belegt/import \
     TZ=Europe/Berlin
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
@@ -32,7 +33,7 @@ COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/server ./server
 COPY --from=build /app/shared ./shared
 COPY --from=build /app/package.json ./package.json
-RUN mkdir -p /var/lib/belegt/dokumente && chown -R bun:bun /var/lib/belegt
+RUN mkdir -p /var/lib/belegt/dokumente /var/lib/belegt/import && chown -R bun:bun /var/lib/belegt
 USER bun
 VOLUME /var/lib/belegt
 EXPOSE 3000

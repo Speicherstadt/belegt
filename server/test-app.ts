@@ -22,7 +22,8 @@ export async function testApp({
   oidc,
   embedOrigin,
   oeffnenMit,
-}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen" | "embedOrigin" | "oeffnenMit"> & {
+  importOrdner,
+}: Pick<AppUmgebung, "oeffnen" | "oauth" | "abfragen" | "embedOrigin" | "oeffnenMit" | "importOrdner"> & {
   begrenzen?: boolean;
   oidc?: OidcKonfig;
 } = {}) {
@@ -50,6 +51,7 @@ export async function testApp({
     abfragen,
     oidcName: oidc?.name,
     embedOrigin,
+    importOrdner,
   });
 
   /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */

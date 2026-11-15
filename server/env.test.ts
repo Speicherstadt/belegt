@@ -15,7 +15,17 @@ describe("readEnv", () => {
       S3_SPERRE_TAGE: 0,
       TRENNBLATT_CODE: "BELEGT-TRENNER",
       EINGANG_ORDNER_TAGS: false,
+      IMPORT_ORDNER: "data/import",
+      IMPORT_MAX_GB: 20,
     });
+  });
+
+  it("liest Importordner und Grenze für Exporte aus Paperless-ngx", () => {
+    expect(readEnv({ IMPORT_ORDNER: "/var/lib/belegt/import", IMPORT_MAX_GB: "50" })).toMatchObject({
+      IMPORT_ORDNER: "/var/lib/belegt/import",
+      IMPORT_MAX_GB: 50,
+    });
+    expect(() => readEnv({ IMPORT_MAX_GB: "0" })).toThrow(/IMPORT_MAX_GB/);
   });
 
   it("liest den Eingangsordner", () => {

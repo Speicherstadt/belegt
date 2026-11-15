@@ -101,6 +101,14 @@ Dann in `compose.yml` beim Worker die Zeile `- ./eingang:/var/lib/belegt/eingang
 [Trennblättern](eingang.md#trennblätter) teilt der Worker; einen eigenen Code für die Trennblätter setzt
 `TRENNBLATT_CODE` in `.env`. Mit `EINGANG_ORDNER_TAGS=true` werden Unterordner zu Tags.
 
+## Umzug aus Paperless-ngx
+
+Ein hochgeladener Export liegt bis zum Ende seines Imports im Importordner (`IMPORT_ORDNER`, im Image
+`/var/lib/belegt/import` im selben Volume wie die Dokumente, das Server und Worker teilen); Platz braucht es dort für
+das ganze ZIP. Größer als `IMPORT_MAX_GB` (Vorgabe 20) darf es nicht sein. Ein Reverse Proxy davor muss so große
+Uploads durchlassen, bei nginx etwa `client_max_body_size 20g;` für `/api/paperless/export`. Wie der Umzug geht, steht in
+[Von Paperless-ngx zu Belegt](umzug.md).
+
 ## Texterkennung
 
 Das Image bringt Tesseract mit Deutsch und Englisch mit. Andere Sprachen: Paket `tesseract-ocr-<sprache>` im

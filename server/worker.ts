@@ -9,6 +9,7 @@ import { alleAbrufen } from "./mail/abruf.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
 import { ordnerEinlesen, type Zustand } from "./ordner/ordner.ts";
+import { naechsterImport } from "./paperless/ausfuehren.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
@@ -20,9 +21,9 @@ import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
- * Text und E-Rechnungen neuer Dokumente und, wenn eingerichtet, den Eingangsordner und erzeugt Vorschaubilder. Getrennt
- * vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage aufhält. Migrationen wendet der Server an,
- * nicht der Worker.
+ * Text und E-Rechnungen neuer Dokumente, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
+ * und erzeugt Vorschaubilder. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
+ * aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -180,6 +181,18 @@ async function eingangsordner(ordner: string) {
   }
 }
 
+/** Importe aus Paperless-ngx (API und Export), einer nach dem anderen; alle 10 Sekunden ein Blick, ob einer wartet */
+async function paperless() {
+  for (;;) {
+    const r = await naechsterImport({ db, speicher }, { schluessel, importOrdner: env.IMPORT_ORDNER }).catch((err) => {
+      console.error(`Import aus Paperless-ngx fehlgeschlagen: ${meldung(err)}`);
+      return null;
+    });
+    if (r) console.log(`Import aus Paperless-ngx ${r.id}: ${r.status}${r.meldung ? `, ${r.meldung}` : ""}`);
+    else await Bun.sleep(10_000);
+  }
+}
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -189,6 +202,7 @@ async function postfaecher() {
 
 await Promise.all([
   postfaecher(),
+  paperless(),
   webhooks(),
   inhalte(),
   entfernungen(),

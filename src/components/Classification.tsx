@@ -147,6 +147,34 @@ export function Classification({
           </button>
         </p>
       )}
+      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.import && !vorgabe && (
+        <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
+          {m.suggest_import({
+            herkunft: vorschlag.data.import.herkunft,
+            angaben: [
+              vorschlag.data.import.titel,
+              vorschlag.data.import.korrespondent,
+              vorschlag.data.import.entstanden && tag(vorschlag.data.import.entstanden),
+            ]
+              .filter(Boolean)
+              .join(" · "),
+          })}
+          <button
+            type="button"
+            onClick={() => {
+              const i = vorschlag.data!.import!;
+              setVorgabe({
+                entstanden: i.entstanden ?? undefined,
+                titel: i.titel ?? undefined,
+                korrespondent: i.korrespondent ?? undefined,
+              });
+            }}
+            className="h-8 rounded-md border border-border bg-bg px-3 font-medium"
+          >
+            {m.suggest_apply()}
+          </button>
+        </p>
+      )}
       {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.ki && !vorgabe && (
         <div className="flex flex-col gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           <p className="m-0">
