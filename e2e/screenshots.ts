@@ -131,4 +131,14 @@ test("Bilder für README und Doku", async ({ page }) => {
   await page.goto("/pruefung");
   await expect(page.getByRole("region", { name: "Prüfbericht" })).toBeVisible();
   await bild(page, "pruefung");
+
+  // Startseite mit einer Kachel aus einer gespeicherten Ansicht
+  const ansicht = await page.request.post("/api/ansichten", {
+    data: { name: "Steuer 2026", parameter: { suche: "Rechnung" } },
+  });
+  await page.request.put("/api/start/kacheln", { data: { ansichten: [(await ansicht.json()).id] } });
+  await page.goto("/");
+  await expect(page.getByRole("region", { name: "Steuer 2026" })).toContainText("Dokumente");
+  await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
+  await bild(page, "start");
 });

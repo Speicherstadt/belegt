@@ -13,6 +13,7 @@ const ITEMS = [
   { to: "/fristen", label: () => m.nav_retention() },
   { to: "/pruefung", label: () => m.nav_audit() },
   { to: "/quellen", label: () => m.nav_sources() },
+  { to: "/workflows", label: () => m.nav_workflows() },
   { to: "/verfahrensdoku", label: () => m.nav_procedure() },
 ] as const;
 

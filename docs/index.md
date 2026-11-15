@@ -31,6 +31,7 @@ unverändert, und danach löschst du es nachweisbar.
 | [Betriebsprüfung](pruefung.md#prüferzugang-z1) | Prüferzugang mit Zeitraum (Z1), Datenträger nach dem Beschreibungsstandard (Z3), Prüfbericht |
 | [Verfahrensdokumentation](verfahrensdoku.md) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben zum Betrieb und den Lücken, die noch fehlen |
 | [Schnittstellen](schnittstelle.md) | REST-API mit OpenAPI, API-Tokens, Webhooks, MCP für KI-Assistenten, Anmeldung über OpenID Connect und Einbetten |
+| [Workflows](workflows.md) | Wenn ein Dokument ankommt oder eingeordnet wird: Tags, Dokumenttyp, Feldwerte, Notiz oder Webhook nach Bedingungen, je Dokument genau einmal und protokolliert |
 | [Vorschläge](eingang.md#vorschläge-eines-sprachmodells) | Regeln, E-Rechnung und auf Wunsch ein Sprachmodell auf deinem Server schlagen vor; eingeordnet wird erst nach Bestätigung |
 
 ## Schnellstart

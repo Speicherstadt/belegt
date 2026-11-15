@@ -50,8 +50,9 @@ claude mcp add --transport http belegt https://belegt.example/api/mcp --header "
 
 ## Webhooks
 
-Ein Webhook meldet einer Adresse per `POST`, wenn ein Dokument aufgenommen, eingeordnet oder gelöscht wurde, ab dem
-Anlegen und der Reihe nach:
+Ein Webhook meldet einer Adresse per `POST`, wenn ein Dokument aufgenommen, eingeordnet oder gelöscht wurde oder ein
+[Workflow](workflows.md) es meldet (`dokument.workflow`, mit `workflow`: seinem Namen), ab dem Anlegen und der Reihe
+nach:
 
 ```json
 { "id": 42, "art": "dokument.eingeordnet", "dokumentId": "…", "zeitpunkt": "2026-11-14T10:00:00.000Z" }

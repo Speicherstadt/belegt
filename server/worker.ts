@@ -17,11 +17,12 @@ import { dateiTeilen } from "./trennen/trennen.ts";
 import { rasterVerfuegbar } from "./vorschaubild/raster.ts";
 import { vorschaubilderErzeugen } from "./vorschaubild/vorschaubild.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
+import { workflowsAusfuehren } from "./workflows/ausfuehren.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
- * Text und E-Rechnungen neuer Dokumente, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
+ * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
  * und erzeugt Vorschaubilder. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
  * aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
@@ -64,6 +65,18 @@ async function inhalte() {
     });
     if (r.gelesen || r.fehler) console.log(`Inhalte: ${r.gelesen} gelesen, ${r.fehler} nicht lesbar`);
     if (r.gelesen + r.fehler < 20) await Bun.sleep(15_000);
+  }
+}
+
+/** Workflows für neue und eingeordnete Dokumente, alle 5 Sekunden; bei vollem Stapel gleich weiter */
+async function workflows() {
+  for (;;) {
+    const r = await workflowsAusfuehren(db).catch((err) => {
+      console.error(`Workflows fehlgeschlagen: ${meldung(err)}`);
+      return { ausgefuehrt: 0, fehler: 0, wartet: 0 };
+    });
+    if (r.ausgefuehrt || r.fehler) console.log(`Workflows: ${r.ausgefuehrt} ausgeführt, ${r.fehler} fehlgeschlagen`);
+    if (r.ausgefuehrt + r.fehler < 50) await Bun.sleep(5_000);
   }
 }
 
@@ -205,6 +218,7 @@ await Promise.all([
   paperless(),
   webhooks(),
   inhalte(),
+  workflows(),
   entfernungen(),
   ...(rasterVerfuegbar() ? [vorschaubilder()] : []),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),

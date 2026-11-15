@@ -16,6 +16,7 @@ import { imapOeffnen } from "../server/mail/imapflow.ts";
 import { naechsterImport } from "../server/paperless/ausfuehren.ts";
 import { testPaperless } from "../server/paperless/test-paperless.ts";
 import { vorschaubilderErzeugen } from "../server/vorschaubild/vorschaubild.ts";
+import { workflowsAusfuehren } from "../server/workflows/ausfuehren.ts";
 
 /*
  * Server für die E2E-Tests: frische Datenbank neben E2E_DATABASE_URL (sie wird gelöscht und neu angelegt, nie auf echte
@@ -83,6 +84,8 @@ function immerWieder(lauf: () => Promise<unknown>) {
 }
 // Liest die Inhalte neuer Dokumente
 immerWieder(() => inhalteErzeugen({ db, speicher }));
+// Workflows
+immerWieder(() => workflowsAusfuehren(db));
 // Vorschaubilder
 immerWieder(() => vorschaubilderErzeugen({ db, speicher }));
 // Ein nachgebauter Vorschau-Dienst: macht aus jeder Office-Datei ein PDF mit ihrem Namen beim Dienst

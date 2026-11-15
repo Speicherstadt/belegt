@@ -17,6 +17,7 @@ import { seitenRouten } from "./http/seiten.ts";
 import { startRouten } from "./http/start.ts";
 import { statischRouten } from "./http/statisch.ts";
 import { teilenRouten } from "./http/teilen.ts";
+import { workflowsRouten } from "./http/workflows.ts";
 import { zugangRouten } from "./http/zugang.ts";
 import { offen as einladungOffen } from "./zugang/einladungen.ts";
 
@@ -70,6 +71,7 @@ export function createApp(umgebung?: AppUmgebung) {
     dokumenteRouten(app, umgebung);
     archivansichtenRouten(app, umgebung);
     startRouten(app, umgebung);
+    workflowsRouten(app, umgebung);
     seitenRouten(app, umgebung);
     notizenRouten(app, umgebung);
     ordnungRouten(app, umgebung);

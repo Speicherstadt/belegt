@@ -13,7 +13,7 @@ bun install
 bun run dev:server   # Server auf Port 3000 (PORT), braucht DATABASE_URL; wendet beim Start die Migrationen an
 bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
 bun server/smtp.ts   # SMTP-Journal (docs/eingang.md)
-bun server/worker.ts # Worker: Postfächer, Eingangsordner, Webhooks, Text und E-Rechnungen
+bun server/worker.ts # Worker: Postfächer, Eingangsordner, Webhooks, Workflows, Text und E-Rechnungen
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest

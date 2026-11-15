@@ -7,8 +7,8 @@ description: >-
 # Betrieb
 
 Belegt läuft als ein Image für Server und Worker neben PostgreSQL. Der Server wendet beim Start die Migrationen an
-und liefert die Oberfläche aus; der Worker ruft Postfächer ab, überwacht den Eingangsordner, stellt Webhooks zu und
-liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch) auch aus Scans.
+und liefert die Oberfläche aus; der Worker ruft Postfächer ab, überwacht den Eingangsordner, stellt Webhooks zu, führt
+Workflows aus und liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch) auch aus Scans.
 
 ## Starten
 

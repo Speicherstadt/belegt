@@ -32,7 +32,12 @@ export interface Quelle {
   aktiv: boolean;
 }
 
-export const EREIGNISSE = ["dokument.aufgenommen", "dokument.eingeordnet", "dokument.geloescht"] as const;
+export const EREIGNISSE = [
+  "dokument.aufgenommen",
+  "dokument.eingeordnet",
+  "dokument.geloescht",
+  "dokument.workflow",
+] as const;
 export type Ereignisart = (typeof EREIGNISSE)[number];
 
 export interface Webhook {

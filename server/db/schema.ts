@@ -287,12 +287,17 @@ export const apiTokens = pgTable(
   ],
 );
 
-/** Ereignisse für Webhooks; Trigger auf dokumente, einordnungen und loeschungen schreiben sie, nur anhängen */
+/**
+ * Ereignisse für Webhooks; Trigger auf dokumente, einordnungen und loeschungen schreiben sie, nur anhängen. Workflows
+ * lesen aufgenommen und eingeordnet als ihre Auslöser und schreiben dokument.workflow mit ihrem Namen.
+ */
 export const webhookEreignisse = pgTable("webhook_ereignisse", {
   id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
   art: text("art").notNull(),
   dokumentId: uuid("dokument_id").notNull(),
   zeitpunkt: timestamp("zeitpunkt", { withTimezone: true }).notNull().defaultNow(),
+  /** Nur bei dokument.workflow: der Name des Workflows */
+  workflow: text("workflow"),
 });
 
 /**

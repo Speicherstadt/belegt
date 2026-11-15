@@ -35,7 +35,8 @@ export interface Vorschlag {
   regel: { id: string; name: string };
 }
 
-function trifft(b: Bedingung, m: Merkmale): boolean {
+/** Ob alle Bedingungen einer Regel zutreffen; auch für die Bedingungen von Workflows (shared/workflows.ts) */
+export function trifft(b: Bedingung, m: Merkmale): boolean {
   const absender = m.absender?.toLowerCase() ?? "";
   const domain = absender.split("@")[1] ?? "";
   // Eine leere Bedingung trifft nichts, sonst ordnete eine versehentlich leere Regel alles ein

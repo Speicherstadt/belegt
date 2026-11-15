@@ -23,6 +23,8 @@ Zahl der Treffer und den ersten fünf in ihrer Sortierung. Die Auswahl gilt für
 dieselbe Startseite; der Prüfer nur die Zahlen seines Zeitraums und die Kette, nichts zu Löschanträgen, Sperren,
 Quellen und Speicher. Der Eingang selbst liegt unter `/eingang`.
 
+![Startseite mit Zahlen zu Eingang, Archiv, Löschanträgen, Sperren und Speicher, Fristen der nächsten 90 Tage, Quellen, Unveränderbarkeit und einer Kachel aus einer gespeicherten Ansicht](assets/screenshot-start.png)
+
 ## Archivnummer
 
 Jedes Dokument bekommt beim Eingang eine Archivnummer (ASN), fortlaufend in der Reihenfolge des Eingangs: 1, 2, 3 …
@@ -142,7 +144,8 @@ Mit „Keine Art, nur Ordnung“ taggt sie, ohne eine Art vorzuschlagen. Was sei
 vor.
 
 Ein Vorschlag setzt noch keine Frist. „Übernehmen“ setzt Tags, Dokumenttyp und Feldwerte sofort und trägt die Art, wenn
-die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt.
+die Regel eine hat, ins Formular; erst wenn du einordnest, wird das Dokument eingeordnet und gesperrt. Was ohne Klick
+geschehen soll, erledigt ein [Workflow](workflows.md).
 
 ## Suche
 

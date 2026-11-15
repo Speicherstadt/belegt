@@ -8,6 +8,7 @@ const ART: Record<Ereignisart, () => string> = {
   "dokument.aufgenommen": () => m.event_dokument_aufgenommen(),
   "dokument.eingeordnet": () => m.event_dokument_eingeordnet(),
   "dokument.geloescht": () => m.event_dokument_geloescht(),
+  "dokument.workflow": () => m.event_dokument_workflow(),
 };
 
 /** Webhooks: anlegen (Geheimnis einmal), Liste mit Zustand, an- und abschalten; nur für den Inhaber */

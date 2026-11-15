@@ -241,7 +241,11 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     expect(await t.sql`select 1 from tags where lower(name) = 'steuer'`).toHaveLength(1);
     const [eintrag] = await t.sql<{ actor: string }[]>`
       select actor from audit_log where table_name = 'tags' and new_value ->> 'name' = '2026'`;
-    expect(eintrag!.actor).toBe("system:ordner");
+    // Im Unterordner nennt der Akteur seinen Pfad
+    expect(eintrag!.actor).toBe("system:ordner:Steuer/2026");
+    const [oben] = await t.sql<{ actor: string }[]>`
+      select actor from audit_log where table_name = 'dokumente' and new_value ->> 'dateiname' = 'oben-tag.pdf'`;
+    expect(oben!.actor).toBe("system:ordner");
   });
 
   it("setzt ohne die Einstellung keine Tags", async () => {

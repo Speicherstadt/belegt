@@ -8,6 +8,7 @@ import { geteiltZahlen } from "../freigabe/teilen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
 import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
+import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as zugaengeListen } from "../zugang/einladungen.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
@@ -91,19 +92,21 @@ export async function verfahrensdoku(
     trennblattCode?: string;
   },
 ): Promise<Verfahrensdoku> {
-  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt, importe] = await Promise.all([
-    einstellungenLaden(db),
-    zugaengeListen(db),
-    tokensListen(db),
-    quellenListen(db),
-    regelnListen(db),
-    sperrenListen(db),
-    zahlen(db),
-    pruefen(db),
-    zeitstempelListen(db),
-    geteiltZahlen(db),
-    laeufeFuerVerfahrensdoku(db),
-  ]);
+  const [e, zugaenge, tokens, quellen, regeln, sperren, z, befunde, stempel, geteilt, importe, workflows] =
+    await Promise.all([
+      einstellungenLaden(db),
+      zugaengeListen(db),
+      tokensListen(db),
+      quellenListen(db),
+      regelnListen(db),
+      sperrenListen(db),
+      zahlen(db),
+      pruefen(db),
+      zeitstempelListen(db),
+      geteiltZahlen(db),
+      laeufeFuerVerfahrensdoku(db),
+      workflowsBeschreiben(db),
+    ]);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
   const abschnitte: Abschnitt[] = [
@@ -156,20 +159,24 @@ export async function verfahrensdoku(
     {
       titel: "3. Einordnung und Aufbewahrung",
       absaetze: [
-        `${kiModell ? `Ein Sprachmodell (${kiModell.modell} auf ${kiModell.host}) schlägt für Dokumente im Eingang eine Einordnung vor; es bekommt dafür Dateiname, Mailkopf und Text des Dokuments. ` : ""}Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln${kiModell ? " und das Sprachmodell" : ""} machen nur Vorschläge. Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.`,
+        `${kiModell ? `Ein Sprachmodell (${kiModell.modell} auf ${kiModell.host}) schlägt für Dokumente im Eingang eine Einordnung vor; es bekommt dafür Dateiname, Mailkopf und Text des Dokuments. ` : ""}Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln${kiModell ? " und das Sprachmodell" : ""} machen nur Vorschläge.${workflows.ordnenEin ? " Ausnahme: Workflows, bei denen der Inhaber das Einordnen ausdrücklich gewählt hat, ordnen Dokumente im Eingang ohne weitere Bestätigung ein; das Protokoll nennt sie als Akteur „workflow:<Name>“." : ""} Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.`,
         e.aufsicht
           ? "Der Betrieb ist Kredit- oder Wertpapierinstitut oder steht unter Versicherungsaufsicht; Buchungsbelege werden deshalb zehn Jahre aufbewahrt (Art. 97 § 19a Abs. 3 EGAO)."
           : "Buchungsbelege werden acht Jahre aufbewahrt (§ 147 Abs. 3 AO in der Fassung ab 2025, Art. 97 § 19a EGAO).",
         sperren.some((s) => !s.aufgehobenAm)
           ? "Aktive Sperren (etwa wegen einer Außenprüfung oder eines Rechtsstreits) verhindern das Löschen der Dokumente ihres Zeitraums, auch nach Ablauf der Frist (Ablaufhemmung, § 147 Abs. 3 Satz 5 AO)."
           : "Sperren wegen einer Außenprüfung oder eines Rechtsstreits verhindern das Löschen der Dokumente ihres Zeitraums; derzeit ist keine aktiv.",
-      ],
+        workflows.texte.length
+          ? "Workflows führen nach dem Eingang oder der Einordnung eines Dokuments festgelegte Aktionen aus, wenn ihre Bedingungen zutreffen: Tags, Dokumenttyp und Feldwerte setzen, eine Notiz anlegen, ein Webhook-Ereignis auslösen und, nur wenn der Inhaber es ausdrücklich gewählt hat, einordnen. Nur der Inhaber legt sie an. Jeder Workflow bearbeitet jedes Dokument genau einmal, gelöschte nie; das Ergebnis jedes Laufs (ausgeführt mit den Aktionen, trifft nicht, angehalten oder Fehler) hält eine Tabelle fest, die nur anwächst, und jede Änderung steht mit dem Akteur „workflow:<Name>“ im Protokoll. Die aktiven Workflows stehen in der Liste unten, in der Reihenfolge ihrer Ausführung."
+          : "",
+      ].filter(Boolean),
       liste: [
         ...(Object.keys(ART) as Aufbewahrungsart[]).map((a) => {
           const jahre = a === "beleg" ? gesetzlicheJahre(a, { aufsicht: e.aufsicht }) : gesetzlicheJahre(a);
           return `${ART[a]}: ${jahre ? `${jahre} Jahre` : "keine gesetzliche Frist"}`;
         }),
         ...sperren.filter((s) => !s.aufgehobenAm).map((s) => `Sperre „${s.grund}“ für ${s.von} bis ${s.bis}`),
+        ...workflows.texte,
       ],
     },
     {

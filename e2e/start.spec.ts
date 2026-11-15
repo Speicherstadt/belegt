@@ -9,6 +9,7 @@ const SEITEN = [
   { pfad: "/fristen", titel: "Fristen" },
   { pfad: "/pruefung", titel: "Prüfung" },
   { pfad: "/quellen", titel: "Quellen und Schnittstellen" },
+  { pfad: "/workflows", titel: "Workflows" },
   { pfad: "/verfahrensdoku", titel: "Verfahrensdokumentation" },
 ];
 

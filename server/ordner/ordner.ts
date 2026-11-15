@@ -16,6 +16,15 @@ export const FEHLER = "fehler";
 /** Größte Datei, wie beim Upload */
 export const MAX_DATEI = 100 * 1024 * 1024;
 export const AKTEUR = "system:ordner";
+
+/**
+ * Akteur im Audit-Log: system:ordner, für eine Datei in einem Unterordner mit dessen Pfad (system:ordner:Steuer/2026).
+ * Daran erkennen Workflows den Unterordner (server/workflows/), auch ohne EINGANG_ORDNER_TAGS.
+ */
+export const akteurFuer = (rel: string) => {
+  const teile = unterordner(rel);
+  return teile.length ? `${AKTEUR}:${teile.join("/")}` : AKTEUR;
+};
 /** So lange muss eine leere Datei unverändert liegen, bevor sie nach fehler/ kommt: Mancher Scanner legt sie erst an */
 export const LEER_WARTEN_MS = 10 * 60_000;
 
@@ -183,14 +192,19 @@ export function unterordner(rel: string): string[] {
 }
 
 /** Nimmt die Teile auf, die noch nicht im Archiv liegen */
-async function teileAufnehmen(umgebung: Umgebung, teile: Teil[], ergebnis: Ergebnis, tags: string[]): Promise<void> {
+async function teileAufnehmen(
+  umgebung: Umgebung,
+  teile: Teil[],
+  ergebnis: Ergebnis,
+  { tags, akteur }: { tags: string[]; akteur: string },
+): Promise<void> {
   for (const teil of teile) {
     const sha256 = createHash("sha256").update(teil.bytes).digest("hex");
     if (await schonImArchiv(umgebung.db, sha256)) {
       ergebnis.doppelt++;
       continue;
     }
-    await aufnehmen(umgebung, { bytes: teil.bytes, dateiname: teil.dateiname, quelle: "ordner", akteur: AKTEUR, tags });
+    await aufnehmen(umgebung, { bytes: teil.bytes, dateiname: teil.dateiname, quelle: "ordner", akteur, tags });
     ergebnis.neu++;
   }
 }
@@ -238,12 +252,10 @@ export async function ordnerEinlesen(
       continue;
     }
     try {
-      await teileAufnehmen(
-        umgebung,
-        (await teilen?.(bytes, name)) ?? [{ bytes, dateiname: name }],
-        ergebnis,
-        ordnerTags ? unterordner(rel) : [],
-      );
+      await teileAufnehmen(umgebung, (await teilen?.(bytes, name)) ?? [{ bytes, dateiname: name }], ergebnis, {
+        tags: ordnerTags ? unterordner(rel) : [],
+        akteur: akteurFuer(rel),
+      });
     } catch (err) {
       ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) });
       continue;

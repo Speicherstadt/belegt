@@ -210,6 +210,16 @@ export async function sammeln(
   return { ok: true, ergebnisse };
 }
 
+/** Prüft eine Änderung, ohne sie anzuwenden (Aktionen eines Workflows beim Anlegen); wirft einen Konflikt */
+export async function aenderungPruefen(tx: Tx, a: Aenderung): Promise<void> {
+  await vorbereiten(tx, a);
+}
+
+/** Wendet eine Änderung in einer laufenden Transaktion mit Akteur auf ein Dokument an (Aktionen eines Workflows) */
+export async function aenderungAnwenden(tx: Tx, id: string, a: Aenderung): Promise<{ eingeordnet: boolean }> {
+  return anwenden(tx, id, a, await vorbereiten(tx, a));
+}
+
 /** Ob ein Dokument existiert (für 404 vor einer Änderung) */
 export async function gibtEs(db: Datenbank, id: string): Promise<boolean> {
   return (await db.select({ id: dokumente.id }).from(dokumente).where(eq(dokumente.id, id))).length > 0;

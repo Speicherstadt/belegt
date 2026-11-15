@@ -7,12 +7,18 @@ import type { Datenbank } from "../db/client.ts";
 import { webhooks, webhookZustellungen } from "../db/schema.ts";
 
 /**
- * Webhooks: Belegt meldet einem Empfänger per POST, dass ein Dokument aufgenommen, eingeordnet oder gelöscht wurde.
- * Die Nachricht enthält nur Art, Dokument-ID und Zeitpunkt; den Inhalt holt der Empfänger mit einem API-Token. Die
- * Signatur ist HMAC-SHA256 über den Rumpf mit dem Geheimnis des Webhooks (Kopfzeile X-Belegt-Signatur: sha256=…).
+ * Webhooks: Belegt meldet einem Empfänger per POST, dass ein Dokument aufgenommen, eingeordnet oder gelöscht wurde
+ * oder ein Workflow es meldet. Die Nachricht enthält nur Art, Dokument-ID, Zeitpunkt und gegebenenfalls den Workflow;
+ * den Inhalt holt der Empfänger mit einem API-Token. Die Signatur ist HMAC-SHA256 über den Rumpf mit dem Geheimnis des Webhooks (Kopfzeile X-Belegt-Signatur: sha256=…).
  */
 
-export const EREIGNISSE = ["dokument.aufgenommen", "dokument.eingeordnet", "dokument.geloescht"] as const;
+/** dokument.workflow löst ein Workflow aus (Aktion „Webhook“, server/workflows/); die Nachricht nennt ihn */
+export const EREIGNISSE = [
+  "dokument.aufgenommen",
+  "dokument.eingeordnet",
+  "dokument.geloescht",
+  "dokument.workflow",
+] as const;
 
 export const WebhookEingabe = z.object({
   name: z.string().trim().min(1).max(200),
@@ -93,8 +99,14 @@ export async function zustellen(
       ergebnis[w.name] = { zugestellt: 0, fehler };
       continue;
     }
-    const offen = await db.execute<{ id: string; art: string; dokument_id: string; zeitpunkt: Date }>(sql`
-      select e.id, e.art, e.dokument_id, e.zeitpunkt from webhook_ereignisse e
+    const offen = await db.execute<{
+      id: string;
+      art: string;
+      dokument_id: string;
+      zeitpunkt: Date;
+      workflow: string | null;
+    }>(sql`
+      select e.id, e.art, e.dokument_id, e.zeitpunkt, e.workflow from webhook_ereignisse e
        where e.zeitpunkt >= ${w.erstelltAm.toISOString()}::timestamptz and e.art = any(${sql`array[${sql.join(
          w.arten.map((a) => sql`${a}`),
          sql`, `,
@@ -109,6 +121,7 @@ export async function zustellen(
         art: e.art,
         dokumentId: e.dokument_id,
         zeitpunkt: new Date(e.zeitpunkt).toISOString(),
+        ...(e.workflow ? { workflow: e.workflow } : {}),
       });
       try {
         const res = await senden(w.url, {
