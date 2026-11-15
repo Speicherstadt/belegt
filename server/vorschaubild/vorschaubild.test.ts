@@ -57,6 +57,16 @@ describe.skipIf(!rasterVerfuegbar())("Seiten als Bild", { timeout: 30_000 }, () 
     await expect(seitenzahl(strToU8("kein pdf"))).rejects.toThrow();
   });
 
+  it("rastert eine sehr lange Seite nur bis zum Vierfachen der Breite (Speicher)", async () => {
+    // Eine Seite 100 × 14400 pt (577 Bytes PDF) wäre 300 px breit 43200 px hoch; bei 5 pt Breite braucht pdftoppm
+    // dafür über 1 GB Speicher, je Aufruf von /seiten/:nr und für jedes Vorschaubild
+    const doc = await PDFDocument.create();
+    doc.addPage([100, 14400]);
+    const { breite, hoehe } = jpegMasse(await seiteAlsJpeg(new Uint8Array(await doc.save())));
+    expect(breite).toBe(300);
+    expect(hoehe).toBeLessThanOrEqual(1200);
+  });
+
   it("verkleinert JPEG und PNG über ein PDF in Bildgröße", async () => {
     const bild = await png("Quittung");
     const pdf = await PDFDocument.load(await bildAlsPdf(bild, "image/png"));

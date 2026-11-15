@@ -27,7 +27,11 @@ export async function bildAlsPdf(bytes: Uint8Array, mimeType: string): Promise<U
   return pdf.save();
 }
 
-/** Seite (ab 1) eines PDFs als JPEG, breite Pixel breit; pdftoppm als eigener Prozess mit Zeitlimit */
+/**
+ * Seite (ab 1) eines PDFs als JPEG, breite Pixel breit; pdftoppm als eigener Prozess mit Zeitlimit. Höher als viermal
+ * die Breite wird das Bild nicht (von oben abgeschnitten): pdftoppm legt das ganze Raster im Speicher an, und eine
+ * schmale, lange Seite (5 × 14400 pt) bräuchte sonst über 1 GB.
+ */
 export async function seiteAlsJpeg(
   pdf: Uint8Array,
   { seite = 1, breite = 300, zeitlimit = 60_000 }: { seite?: number; breite?: number; zeitlimit?: number } = {},
@@ -40,6 +44,7 @@ export async function seiteAlsJpeg(
       [
         ...["-f", String(seite), "-l", String(seite)],
         ...["-scale-to-x", String(breite), "-scale-to-y", "-1"],
+        ...["-x", "0", "-y", "0", "-W", String(breite), "-H", String(breite * 4)],
         ...["-jpeg", "-jpegopt", "quality=75", "-singlefile"],
         join(ordner, "d.pdf"),
         join(ordner, "seite"),

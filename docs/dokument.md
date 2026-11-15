@@ -14,7 +14,7 @@ Bilder nebeneinander, „Liste“ wieder als Tabelle. Die Wahl merkt sich der Br
 Der Worker erzeugt die Bilder kurz nach dem Eingang mit `pdftoppm` (Poppler, im Image enthalten): aus PDFs, aus JPEG
 und PNG und bei Office-Dateien aus ihrer [Ansicht](eingang.md#ansicht-von-office-dateien). Mails, Textdateien, WebP,
 TIFF und HEIC bekommen keins, dort steht das Kürzel des Formats. Ein Vorschaubild ist wie die Ansicht aus dem Original
-abgeleitet, 300 Pixel breit, und geht mit der Löschung mit; maßgeblich bleibt das Original.
+abgeleitet, 300 Pixel breit und höchstens viermal so hoch (eine längere Seite zeigt ihren oberen Teil), und geht mit der Löschung mit; maßgeblich bleibt das Original.
 
 ## Seiten bearbeiten
 
