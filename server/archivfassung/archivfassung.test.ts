@@ -210,6 +210,16 @@ describe.skipIf(!ocrVerfuegbar())("Archivfassung (Tesseract)", { timeout: 120_00
     expect(Date.now() - start).toBeLessThan(10_000);
   });
 
+  it("rastert die Seite, deren Größe es geprüft hat: den Beschnitt, nicht einen größeren Medienrahmen", async () => {
+    // pdfinfo nennt die Größe des Beschnitts (CropBox); rasterte pdftoppm den Medienrahmen (MediaBox), käme ein
+    // Plakat mit 14400 pt Medienrahmen und kleinem Beschnitt an der Grenze vorbei (hier klein, damit der Test schnell ist)
+    const doc = await PDFDocument.load(await pdfMit(["Beschnitt"], [600, 600]));
+    doc.getPage(0).setCropBox(0, 0, 300, 300);
+    const { pdf } = await archivPdf(new Uint8Array(await doc.save()), "application/pdf");
+    const { width, height } = (await PDFDocument.load(pdf)).getPage(0).getSize();
+    expect([Math.round(width), Math.round(height)]).toEqual([300, 300]);
+  });
+
   it("beendet das Kind mit allen Programmen nach dem Zeitlimit und meldet Fehler als Wert", async () => {
     await expect(archivfassungImKind(png, "image/png", 300)).rejects.toThrow("abgebrochen");
     await expect(archivfassungImKind(png, "text/plain")).rejects.toThrow("Keine Archivfassung für text/plain");

@@ -61,7 +61,8 @@ export async function archivPdf(bytes: Uint8Array, gespeichert: string, zeitlimi
     if (mimeType === "application/pdf") {
       await writeFile(join(ordner, "scan.pdf"), bytes);
       erwartet = await seitenPruefen(join(ordner, "scan.pdf"), zeitlimit);
-      const r = ["-r", String(DPI), "-png", join(ordner, "scan.pdf"), join(ordner, "seite")];
+      // -cropbox: gerastert wird der Beschnitt, dessen Größe pdfinfo nennt, nicht ein größerer Medienrahmen
+      const r = ["-r", String(DPI), "-cropbox", "-png", join(ordner, "scan.pdf"), join(ordner, "seite")];
       await ausfuehren("pdftoppm", r, undefined, zeitlimit);
       bilder = (await readdir(ordner)).filter((n) => n.startsWith("seite")).sort();
     } else if (["image/jpeg", "image/png", "image/webp"].includes(mimeType)) {
