@@ -3,7 +3,7 @@ import { zuordnungVorschlagZu } from "../abgleich/vorschlaege.ts";
 import type { Angemeldet } from "../auth.ts";
 import { inhaltZu } from "../inhalt/inhalt.ts";
 import { kiVorschlagZu } from "../ki/vorschlaege.ts";
-import { gelerntVorschlagZu } from "../lernen/lernen.ts";
+import { gelerntInSicht, gelerntVorschlagZu } from "../lernen/lernen.ts";
 import { gelerntOhneDoppelte } from "../lernen/reihenfolge.ts";
 import {
   abrufen,
@@ -94,7 +94,7 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
           ? { ...gefiltert, uebersprungen: [] }
           : null
         : gefiltert;
-    const gelernt = imBereich(gelerntRoh);
+    const gelernt = await gelerntInSicht(umgebung.db, id.data, imBereich(gelerntRoh), sicht);
     const ki = kiRoh && { ...kiRoh, ordnung: imBereich(kiRoh.ordnung) };
     // Reihenfolge: Regel, Zuordnungsregel, gelernt, Sprachmodell (server/lernen/reihenfolge.ts). zuordnung: aus den
     // Zuordnungsregeln; gelernt: aus den eigenen Einordnungen; ki: Sprachmodell (nur mit KI_URL); import: Titel,
