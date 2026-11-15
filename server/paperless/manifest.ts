@@ -1,3 +1,4 @@
+import { speicherbar } from "../inhalt/erechnung.ts";
 import type { PaperlessFeld } from "./abbildung.ts";
 import type { PaperlessDokument } from "./kern.ts";
 
@@ -146,6 +147,13 @@ export function manifestLesen(teile: unknown[]): Export {
   });
   return { felder, dokumente, papierkorb: alle.filter((s) => s.fields.deleted_at && !s.fields.root_document).length };
 }
+
+/**
+ * JSON von Paperless-ngx (Manifest und API) ohne Zeichen, die Postgres nicht speichert (U+0000, einzelne Surrogate):
+ * Paperless-ngx mit SQLite oder MariaDB hat sie in Titeln, Namen und Notizen; sonst scheiterte jedes Speichern daran
+ */
+export const jsonLesen = (text: string): unknown =>
+  JSON.parse(text, (_schluessel, wert) => (typeof wert === "string" ? speicherbar(wert) : wert));
 
 /** Namen der Manifest-Dateien in einem Export: manifest.json und mit --split-manifest die „…-manifest.json“ */
 export const istManifest = (name: string) => name === "manifest.json" || name.endsWith("-manifest.json");

@@ -1,7 +1,7 @@
 import { MAX_UPLOAD } from "../http/gemeinsam.ts";
 import type { PaperlessFeld } from "./abbildung.ts";
 import type { PaperlessDokument } from "./kern.ts";
-import { optionenAus, waehrungAus } from "./manifest.ts";
+import { jsonLesen, optionenAus, waehrungAus } from "./manifest.ts";
 
 /*
  * REST-API von Paperless-ngx, nur lesend (src/paperless/urls.py, src/documents/views.py, serialisers.py). Anmeldung mit
@@ -165,7 +165,7 @@ function abfrager({ url, token, abfragen }: { url: string; token: string; abfrag
   async function json<T>(pfad: string): Promise<T> {
     const res = await holen(pfad);
     try {
-      return JSON.parse(new TextDecoder().decode(await bytesBis(res, MAX_JSON))) as T;
+      return jsonLesen(new TextDecoder().decode(await bytesBis(res, MAX_JSON))) as T;
     } catch {
       throw fehler(`Paperless-ngx: keine gültige Antwort auf ${pfad.split("?")[0]}`);
     }

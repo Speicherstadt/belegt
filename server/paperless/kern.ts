@@ -152,6 +152,22 @@ export async function fehlerFesthalten(
   return { ergebnis: "fehler", grund: g };
 }
 
+/**
+ * Meldung eines Fehlers für Lauf und Ergebnis (beides bleibt, das Ergebnis versiegelt): die eines Triggers oder eine
+ * eigene, bei anderen Fehlern der Datenbank nur ihr Code. Deren Meldung nennt die Anfrage mit allen Parametern, also
+ * Titel, Notizen und Feldwerte, die mit einer Löschung des Dokuments gehen sollen.
+ */
+export function fehlerMeldung(err: unknown): string {
+  type Pg = { code?: unknown; severity?: unknown; message?: string };
+  const e = err as Pg & { cause?: Pg };
+  // Fehler von Postgres haben severity, auch eingepackt in den Fehler von Drizzle (cause)
+  const pg = e?.severity ? e : e?.cause?.severity ? e.cause : null;
+  if (pg?.code === "23514") return String(pg.message ?? "Nicht erlaubt").slice(0, 1000);
+  if (pg) return `Die Datenbank lehnt ab (${String(pg.code)})`;
+  if (err instanceof Error && !/^Failed query/.test(err.message)) return err.message.slice(0, 1000);
+  return "Die Datenbank lehnt ab";
+}
+
 /** Ein Dokument, das nicht gelöscht ist, mit diesem Original; das älteste */
 async function schonImArchiv(db: Datenbank, sha256: string): Promise<string | null> {
   const [d] = await db.execute<{ id: string }>(sql`
@@ -260,7 +276,7 @@ export async function dokumentUebernehmen(
   }).catch((err: Error) => err);
   // Lehnt Postgres das Dokument ab (etwa einen Namen, der nicht passt), ist nichts davon gespeichert: ein Fehler am
   // Dokument. Ist die Datenbank weg, scheitert auch das Festhalten, und der Lauf endet
-  if (id instanceof Error) return fehlerFesthalten(db, importId, d, `Nicht aufgenommen: ${id.message}`);
+  if (id instanceof Error) return fehlerFesthalten(db, importId, d, `Nicht aufgenommen: ${fehlerMeldung(id)}`);
   return { ergebnis: "uebernommen", dokumentId: id };
 }
 

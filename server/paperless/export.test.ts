@@ -8,6 +8,7 @@ import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { zugangAnlegen } from "../test-zugaenge.ts";
 import { naechsterImport } from "./ausfuehren.ts";
+import { fehlerMeldung } from "./kern.ts";
 
 const text = (t: string) => new TextEncoder().encode(t);
 const sha = (b: Uint8Array) => createHash("sha256").update(b).digest("hex");
@@ -73,6 +74,23 @@ function exportZip() {
     "originals/kaputt.pdf": b,
   });
 }
+
+describe("Meldung eines Fehlers am Import", () => {
+  it("nennt bei Fehlern der Datenbank nur den Code, nie Anfrage und Parameter", () => {
+    // So packt Drizzle einen Fehler von Postgres ein; das Ergebnis je Dokument ist versiegelt und überlebt die Löschung
+    const drizzle = new Error('Failed query: insert into "notizen" ...\nparams: Geheime Notiz', {
+      cause: Object.assign(new Error("invalid byte sequence"), { severity: "ERROR", code: "22021" }),
+    });
+    expect(fehlerMeldung(drizzle)).toBe("Die Datenbank lehnt ab (22021)");
+    const trigger = new Error("Failed query: ...", {
+      cause: Object.assign(new Error("Das Dokument ist gelöscht"), { severity: "ERROR", code: "23514" }),
+    });
+    expect(fehlerMeldung(trigger)).toBe("Das Dokument ist gelöscht");
+    expect(fehlerMeldung(Object.assign(new Error("ENOENT: no such file"), { code: "ENOENT" }))).toBe(
+      "ENOENT: no such file",
+    );
+  });
+});
 
 describe.skipIf(!testDatenbankUrl)("Import aus einem Export von Paperless-ngx", { timeout: 60_000 }, () => {
   let t: Awaited<ReturnType<typeof testApp>>;
@@ -162,6 +180,38 @@ describe.skipIf(!testDatenbankUrl)("Import aus einem Export von Paperless-ngx", 
     const [e] = await t.sql<{ ergebnis: string }[]>`
       select ergebnis from import_eintraege where import_id = ${zweiter.id} and paperless_id = 11`;
     expect(e!.ergebnis).toBe("doppelt");
+  });
+
+  it("übernimmt ein Dokument mit Nullzeichen in Titel, Dateiname und Notiz, ohne die Zeichen", async () => {
+    // Postgres speichert kein U+0000 in text; Paperless-ngx mit SQLite oder MariaDB schon
+    const original = text("%PDF-1.4\n% Nullzeichen\n");
+    const manifest = [
+      { model: "documents.correspondent", pk: 1, fields: { name: "Firma\u0000 GmbH" } },
+      {
+        model: "documents.document",
+        pk: 31,
+        fields: {
+          title: "Rech\u0000nung",
+          correspondent: 1,
+          tags: [],
+          original_filename: "rech\u0000nung.pdf",
+          checksum: sha(original),
+          deleted_at: null,
+        },
+        __exported_file_name__: "originals/null.pdf",
+      },
+      { model: "documents.note", pk: 9, fields: { document: 31, note: "Not\u0000iz", user: null } },
+    ];
+    const zip = zipSync({ "manifest.json": text(JSON.stringify(manifest)), "originals/null.pdf": original });
+    const l = (await (await hochladen(zip)).json()) as { id: string };
+    expect(await lauf()).toMatchObject({ id: l.id, status: "fertig" });
+    const [e] = await t.sql<{ ergebnis: string; titel: string; korrespondent: string; dokument_id: string }[]>`
+      select ergebnis, titel, korrespondent, dokument_id from import_eintraege where import_id = ${l.id}`;
+    expect(e).toMatchObject({ ergebnis: "uebernommen", titel: "Rechnung", korrespondent: "Firma GmbH" });
+    const [d] = await t.sql<{ dateiname: string }[]>`select dateiname from dokumente where id = ${e!.dokument_id}`;
+    expect(d!.dateiname).toBe("rechnung.pdf");
+    const [n] = await t.sql<{ text: string }[]>`select text from notizen where dokument_id = ${e!.dokument_id}`;
+    expect(n!.text).toMatch(/^Notiz\n/);
   });
 
   it("beendet den Lauf mit Fehler, wenn das Manifest fehlt, und bricht einen wartenden sofort ab", async () => {

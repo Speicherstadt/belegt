@@ -87,7 +87,8 @@ Eigene Felder legt Belegt mit passendem Typ an oder findet sie per Namen:
 
 Gibt es schon ein Feld dieses Namens mit anderem Typ, heißt das neue „Name (Paperless-ngx)“. Ein Wert, der nicht
 passt, etwa ein Betrag in einer anderen Währung als Euro oder ein Text über 1000 Zeichen, steht in einer Notiz am
-Dokument. Was beim Abbilden nicht eins zu eins ging, steht als Hinweis am Import.
+Dokument. Was beim Abbilden nicht eins zu eins ging, steht als Hinweis am Import. Nullzeichen (U+0000), die Paperless-ngx mit SQLite oder MariaDB in Titeln, Namen
+und Notizen haben kann, lässt Belegt weg.
 
 Die [Verfahrensdokumentation](verfahrensdoku.md) führt jeden Import mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der
 Prüfsummen auf.

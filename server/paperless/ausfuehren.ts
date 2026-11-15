@@ -5,9 +5,17 @@ import { importe, paperlessQuellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { MAX_UPLOAD } from "../http/gemeinsam.ts";
 import { type Abfragen, paperlessApi } from "./api.ts";
-import { AKTEUR, dokumentUebernehmen, erledigt, fehlerFesthalten, type Vorbereitet, vorbereiten } from "./kern.ts";
+import {
+  AKTEUR,
+  dokumentUebernehmen,
+  erledigt,
+  fehlerFesthalten,
+  fehlerMeldung,
+  type Vorbereitet,
+  vorbereiten,
+} from "./kern.ts";
 import { exportEntfernen, exportPfad } from "./laeufe.ts";
-import { istManifest, manifestLesen } from "./manifest.ts";
+import { istManifest, jsonLesen, manifestLesen } from "./manifest.ts";
 import { zipOeffnen } from "./zip.ts";
 
 /*
@@ -29,7 +37,7 @@ const MAX_MANIFEST = 500 * 1024 * 1024;
 
 type Ende = "fertig" | "abgebrochen";
 
-const meldung = (err: unknown) => (err instanceof Error ? err.message : String(err)).slice(0, 1000);
+const meldung = (err: unknown) => (err instanceof Error ? fehlerMeldung(err) : String(err)).slice(0, 1000);
 
 async function abbruchGewuenscht(umgebung: Umgebung, id: string): Promise<boolean> {
   const [z] = await umgebung.db.select({ von: importe.abbrechenVon }).from(importe).where(eq(importe.id, id));
@@ -77,7 +85,7 @@ async function exportLauf(umgebung: Umgebung, lauf: typeof importe.$inferSelect,
     const teile: unknown[] = [];
     for (const name of namen) {
       try {
-        teile.push(JSON.parse(new TextDecoder().decode(await zip.lesen(name, MAX_MANIFEST))));
+        teile.push(jsonLesen(new TextDecoder().decode(await zip.lesen(name, MAX_MANIFEST))));
       } catch (err) {
         throw new Error(`${name}: ${err instanceof SyntaxError ? "kein gültiges JSON" : meldung(err)}`);
       }
