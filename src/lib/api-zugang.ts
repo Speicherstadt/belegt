@@ -1,4 +1,4 @@
-import type { Rolle } from "../../shared/rollen.ts";
+import type { Recht, Rolle, Sichtbereich } from "../../shared/rollen.ts";
 import { geteilteVerwerfen } from "../pwa/teilen.ts";
 import { aufruf, json } from "./api-aufruf.ts";
 
@@ -10,7 +10,16 @@ export interface Ich {
   role: Rolle;
   /** Nur beim Prüfer: der freigegebene Zeitraum */
   zeitraum?: { von: string; bis: string };
+  /** Nur beim Mitarbeiter: Recht und Sichtbereich */
+  recht?: Recht;
+  sichtbereich?: Sichtbereich;
 }
+
+/** Eine Einladung: Steuerberatung, Prüfer mit Zeitraum oder Mitarbeiter mit Recht und Sichtbereich */
+export type NeuerZugang =
+  | { rolle: "steuerberatung" }
+  | { rolle: "pruefer"; zeitraum: { von: string; bis: string } }
+  | { rolle: "mitarbeiter"; recht: Recht; sichtbereich: Sichtbereich };
 
 export interface Zugaenge {
   zugaenge: {
@@ -19,6 +28,9 @@ export interface Zugaenge {
     rolle: Rolle;
     zeitraumVon: string | null;
     zeitraumBis: string | null;
+    recht: Recht | null;
+    sichtbereich: Sichtbereich | null;
+    entzogenAm: string | null;
     erstelltAm: string;
   }[];
   einladungen: {
@@ -26,6 +38,8 @@ export interface Zugaenge {
     rolle: Rolle;
     zeitraumVon: string | null;
     zeitraumBis: string | null;
+    recht: Recht | null;
+    sichtbereich: Sichtbereich | null;
     erstelltAm: string;
     gueltigBis: string;
     eingeloestAm: string | null;
@@ -80,7 +94,7 @@ export const zugangApi = {
       headers: { "content-type": "application/json", "x-belegt-einrichtungscode": code },
     }),
   einladung: (token: string) =>
-    aufruf<{ rolle: Rolle; zeitraumVon: string | null; zeitraumBis: string | null }>(
+    aufruf<{ rolle: Rolle; zeitraumVon: string | null; zeitraumBis: string | null; recht?: Recht }>(
       `/api/einladung/${encodeURIComponent(token)}`,
     ),
   einladungAnnehmen: (token: string, email: string, passwort: string) =>
@@ -89,11 +103,10 @@ export const zugangApi = {
       headers: { "content-type": "application/json", "x-belegt-einladung": token },
     }),
   zugaenge: () => aufruf<Zugaenge>("/api/zugaenge"),
-  einladen: (rolle: "steuerberatung" | "pruefer", zeitraum?: { von: string; bis: string }) =>
-    aufruf<{ id: string; pfad: string }>(
-      "/api/einladungen",
-      json(rolle === "pruefer" ? { rolle, zeitraum } : { rolle }),
-    ),
+  einladen: (zugang: NeuerZugang) => aufruf<{ id: string; pfad: string }>("/api/einladungen", json(zugang)),
+  mitarbeiterAendern: (id: string, recht: Recht, sichtbereich: Sichtbereich) =>
+    aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}`, { ...json({ recht, sichtbereich }), method: "PATCH" }),
+  entziehen: (id: string) => aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}/entziehen`, { method: "POST" }),
   zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),

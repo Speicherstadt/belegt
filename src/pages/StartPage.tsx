@@ -12,6 +12,7 @@ import { m } from "../paraglide/messages.js";
  */
 export function StartPage() {
   const start = useQuery({ queryKey: ["start"], queryFn: api.start });
+  const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={m.start_title()} intro={m.start_intro()} />
@@ -24,7 +25,8 @@ export function StartPage() {
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
         {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
         {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
-        <ChainStatus />
+        {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
+        {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus />}
       </div>
       <ViewTiles />
     </div>

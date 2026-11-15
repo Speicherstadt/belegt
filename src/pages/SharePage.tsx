@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { darfSchreiben } from "../../shared/rollen.ts";
+import { darfBearbeiten } from "../../shared/rollen.ts";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
 import { groesse } from "../lib/format.ts";
@@ -28,7 +28,7 @@ export function SharePage() {
     },
   });
   const verwerfen = useMutation({ mutationFn: fertig });
-  const schreiben = darfSchreiben(ich.data?.role);
+  const schreiben = darfBearbeiten(ich.data);
   const liste = dateien.data ?? [];
 
   return (

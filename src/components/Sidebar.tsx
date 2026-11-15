@@ -20,8 +20,14 @@ const ITEMS = [
 const eintrag =
   "flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
 
-/** Der Prüfer sieht nur, was er für die Prüfung braucht; die übrigen Schnittstellen lehnt der Server für ihn ab */
-const PRUEFER = new Set(["/", "/eingang", "/archiv", "/pruefung"]);
+/**
+ * Der Prüfer sieht nur, was er für die Prüfung braucht, der Mitarbeiter nur die Dokumente seines Sichtbereichs; die
+ * übrigen Schnittstellen lehnt der Server für beide ab
+ */
+const NUR: Partial<Record<Ich["role"], Set<string>>> = {
+  pruefer: new Set(["/", "/eingang", "/archiv", "/pruefung"]),
+  mitarbeiter: new Set(["/", "/eingang", "/archiv"]),
+};
 
 export function Sidebar({
   ich,
@@ -64,7 +70,7 @@ export function Sidebar({
       )}
       <nav aria-label={m.nav_label()} className="flex flex-col gap-0.5">
         {[
-          ...ITEMS.filter((item) => ich.role !== "pruefer" || PRUEFER.has(item.to)),
+          ...ITEMS.filter((item) => NUR[ich.role]?.has(item.to) ?? true),
           ...(ich.role === "inhaber" ? ([{ to: "/zugaenge", label: () => m.nav_access() }] as const) : []),
         ].map((item) => (
           <div key={item.to} className="contents">

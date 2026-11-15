@@ -5,9 +5,9 @@ import { m } from "../paraglide/messages.js";
 
 const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
 
-/** Darf ich als zweite Person bestätigen? Nicht, wer beantragt hat; Prüfer nie */
+/** Darf ich als zweite Person bestätigen? Nicht, wer beantragt hat; nur Inhaber und Steuerberatung */
 export function kannBestaetigen(l: Loeschung, ich: Ich | undefined): boolean {
-  return !!ich && ich.role !== "pruefer" && l.beantragtVon !== `nutzer:${ich.email}`;
+  return !!ich && (ich.role === "inhaber" || ich.role === "steuerberatung") && l.beantragtVon !== `nutzer:${ich.email}`;
 }
 
 /** Löschung auf der Dokumentseite: Nachweis, offener Antrag oder Antrag stellen */

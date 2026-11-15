@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
-import { darfSchreiben } from "../../shared/rollen.ts";
+import { darfBearbeiten } from "../../shared/rollen.ts";
 import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { tag } from "../lib/format.ts";
@@ -36,13 +36,13 @@ export function Classification({
     queryKey: ["vorschlag", dokumentId],
     queryFn: () => api.vorschlag(dokumentId),
     // Vorschläge gibt es nur für den, der einordnen darf
-    enabled: !einordnung && ich.data?.role === "inhaber",
+    enabled: !einordnung && darfBearbeiten(ich.data),
   });
   // Vorhandene Korrespondenten zur Auswahl; ein neuer Name legt beim Einordnen einen an
   const korrespondenten = useQuery({
     queryKey: ["korrespondenten"],
     queryFn: api.korrespondenten,
-    enabled: darfSchreiben(ich.data?.role),
+    enabled: darfBearbeiten(ich.data),
   });
   const speichern = useMutation({
     mutationFn: (eingabe: Parameters<typeof api.einordnen>[1]) => api.einordnen(dokumentId, eingabe),
@@ -94,7 +94,7 @@ export function Classification({
       ) : (
         <p className="m-0 text-muted text-sm">{m.classify_none()}</p>
       )}
-      {darfSchreiben(ich.data?.role) && !offen && (
+      {darfBearbeiten(ich.data) && !offen && (
         <button
           type="button"
           onClick={() => setOffen(true)}
@@ -103,7 +103,7 @@ export function Classification({
           {m.classify_change()}
         </button>
       )}
-      {darfSchreiben(ich.data?.role) && offen && dokumenttyp?.vorgabeArt && (
+      {darfBearbeiten(ich.data) && offen && dokumenttyp?.vorgabeArt && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {m.suggest_doctype({ art: artLabel(dokumenttyp.vorgabeArt), typ: dokumenttyp.name })}
           <button
@@ -115,7 +115,7 @@ export function Classification({
           </button>
         </p>
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.vorschlag && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.vorschlag && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {vorschlag.data.vorschlag.art
             ? m.suggest_label({
@@ -138,13 +138,13 @@ export function Classification({
           </button>
         </p>
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.zuordnung && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.zuordnung && (
         <RuleMatchSuggestion zuordnung={vorschlag.data.zuordnung} onUebernehmen={(o) => ordnen.mutate(o)} />
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.gelernt && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.gelernt && (
         <LearnedSuggestion gelernt={vorschlag.data.gelernt} onArt={setArt} onOrdnung={(o) => ordnen.mutate(o)} />
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.erechnung && !vorgabe && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.erechnung && !vorgabe && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {m.suggest_einvoice({
             nummer: vorschlag.data.erechnung.nummer ?? "–",
@@ -167,7 +167,7 @@ export function Classification({
           </button>
         </p>
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.import && !vorgabe && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.import && !vorgabe && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           {m.suggest_import({
             herkunft: vorschlag.data.import.herkunft,
@@ -195,7 +195,7 @@ export function Classification({
           </button>
         </p>
       )}
-      {darfSchreiben(ich.data?.role) && offen && vorschlag.data?.ki && !vorgabe && (
+      {darfBearbeiten(ich.data) && offen && vorschlag.data?.ki && !vorgabe && (
         <div className="flex flex-col gap-2 rounded-md border border-border bg-subtle p-2 text-sm">
           <p className="m-0">
             {m.suggest_ki({ art: artLabel(vorschlag.data.ki.art), modell: vorschlag.data.ki.modell })}{" "}
@@ -220,7 +220,7 @@ export function Classification({
           </button>
         </div>
       )}
-      {darfSchreiben(ich.data?.role) && offen && (
+      {darfBearbeiten(ich.data) && offen && (
         <form
           key={`${JSON.stringify(vorgabe)}:${korrespondent?.id ?? ""}`}
           onSubmit={absenden}

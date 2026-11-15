@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { darfBearbeiten } from "../../shared/rollen.ts";
 import { api, type Ich } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -56,7 +57,7 @@ export function Notes({ dokumentId, ich, geloescht }: { dokumentId: string; ich:
           </li>
         ))}
       </ul>
-      {!geloescht && (
+      {!geloescht && (ich.role !== "mitarbeiter" || darfBearbeiten(ich)) && (
         <form
           className="flex flex-col gap-2"
           onSubmit={(e) => {

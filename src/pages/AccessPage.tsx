@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { AccessUsers } from "../components/AccessUsers.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
+import {
+  LEERER_SICHTBEREICH,
+  type MitarbeiterWahl,
+  ScopeEditor,
+  sichtbereichText,
+  useNamen,
+} from "../components/ScopeEditor.tsx";
 import { api } from "../lib/api.ts";
 import { tag, zeitpunkt } from "../lib/format.ts";
 import { rolleLabel } from "../lib/rollen.ts";
@@ -8,18 +16,30 @@ import { m } from "../paraglide/messages.js";
 
 const zeitraumText = (von: string, bis: string) => m.access_period({ von: tag(von), bis: tag(bis) });
 
-/** Zugänge: Konten, Einladungen anlegen und zurückziehen; nur für den Inhaber */
+/** Zugänge: Konten (Mitarbeiter ändern, entziehen), Einladungen anlegen und zurückziehen; nur für den Inhaber */
 export function AccessPage() {
   const queryClient = useQueryClient();
   const daten = useQuery({ queryKey: ["zugaenge"], queryFn: api.zugaenge });
-  const [rolle, setRolle] = useState<"steuerberatung" | "pruefer">("steuerberatung");
+  const [rolle, setRolle] = useState<"steuerberatung" | "pruefer" | "mitarbeiter">("steuerberatung");
+  const [mitarbeiter, setMitarbeiter] = useState<MitarbeiterWahl>({
+    recht: "lesen",
+    sichtbereich: LEERER_SICHTBEREICH,
+  });
+  const { name } = useNamen();
   const jahr = String(new Date().getFullYear() - 1);
   const [von, setVon] = useState(`${jahr}-01-01`);
   const [bis, setBis] = useState(`${jahr}-12-31`);
   const [link, setLink] = useState<string | null>(null);
   const zeitraumOk = rolle !== "pruefer" || (!!von && !!bis && von <= bis);
   const einladen = useMutation({
-    mutationFn: () => api.einladen(rolle, rolle === "pruefer" ? { von, bis } : undefined),
+    mutationFn: () =>
+      api.einladen(
+        rolle === "pruefer"
+          ? { rolle, zeitraum: { von, bis } }
+          : rolle === "mitarbeiter"
+            ? { rolle, ...mitarbeiter }
+            : { rolle },
+      ),
     onSuccess: async (e) => {
       setLink(`${window.location.origin}${e.pfad}`);
       await queryClient.invalidateQueries({ queryKey: ["zugaenge"] });
@@ -44,17 +64,7 @@ export function AccessPage() {
         <h2 id="konten" className="m-0 font-semibold text-base">
           {m.access_users()}
         </h2>
-        <ul className="m-0 flex list-none flex-col gap-2 p-0">
-          {daten.data?.zugaenge.map((z) => (
-            <li key={z.id} className="flex flex-wrap justify-between gap-2 rounded-lg border border-border p-3 text-sm">
-              <span className="font-medium">{z.email}</span>
-              <span className="text-muted">
-                {rolleLabel(z.rolle)}
-                {z.zeitraumVon && z.zeitraumBis && ` · ${zeitraumText(z.zeitraumVon, z.zeitraumBis)}`}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {daten.data && <AccessUsers zugaenge={daten.data.zugaenge} />}
       </section>
       <section aria-labelledby="einladungen" className="flex flex-col gap-3">
         <h2 id="einladungen" className="m-0 font-semibold text-base">
@@ -70,6 +80,7 @@ export function AccessPage() {
             >
               <option value="steuerberatung">{m.role_steuerberatung()}</option>
               <option value="pruefer">{m.role_pruefer()}</option>
+              <option value="mitarbeiter">{m.role_mitarbeiter()}</option>
             </select>
           </label>
           {rolle === "pruefer" && (
@@ -94,6 +105,11 @@ export function AccessPage() {
               </label>
             </>
           )}
+          {rolle === "mitarbeiter" && (
+            <div className="basis-full">
+              <ScopeEditor wert={mitarbeiter} aendern={setMitarbeiter} />
+            </div>
+          )}
           <button
             type="button"
             disabled={!zeitraumOk}
@@ -117,7 +133,8 @@ export function AccessPage() {
             >
               <span>
                 <span className="font-medium">{rolleLabel(e.rolle)}</span>
-                {e.zeitraumVon && e.zeitraumBis && ` (${zeitraumText(e.zeitraumVon, e.zeitraumBis)})`} ·{" "}
+                {e.zeitraumVon && e.zeitraumBis && ` (${zeitraumText(e.zeitraumVon, e.zeitraumBis)})`}
+                {e.sichtbereich && ` (${sichtbereichText(e.sichtbereich, name)})`} ·{" "}
                 <span className="text-muted">{zustand(e)}</span>
               </span>
               {!e.eingeloestAm && !e.zurueckgezogenAm && new Date(e.gueltigBis) > new Date() && (

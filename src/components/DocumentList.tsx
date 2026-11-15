@@ -1,7 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import type { ArchivAnsicht } from "../../shared/archivansicht.ts";
-import { darfSchreiben } from "../../shared/rollen.ts";
+import { darfBearbeiten, darfSchreiben } from "../../shared/rollen.ts";
 import { api, type Gruppe } from "../lib/api.ts";
 import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
@@ -84,7 +84,9 @@ export function DocumentList({
   }, [leereSeite, seiten, abfrage]);
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
+  // Mails einlesen und PDFs zusammenfügen nur der Inhaber; hochladen und sammeln auch Mitarbeiter mit bearbeiten
   const schreiben = darfSchreiben(ich.data?.role);
+  const bearbeiten = darfBearbeiten(ich.data);
   // Gewählt ist nur, was die Liste gerade zeigt; ein anderer Filter oder eine andere Seite nimmt nichts Unsichtbares mit
   const ausgewaehlt = (liste.data ?? []).filter((d) => auswahl.has(d.id)).map((d) => d.id);
   const alleGewaehlt = !!liste.data?.length && ausgewaehlt.length === liste.data.length;
@@ -106,7 +108,7 @@ export function DocumentList({
     } catch {}
   };
   const auswahlFuerListe: Auswahl = {
-    schreiben,
+    schreiben: bearbeiten,
     gewaehlt: auswahl,
     umschalten,
     alleGewaehlt,
@@ -152,7 +154,7 @@ export function DocumentList({
             />
           </label>
         )}
-        {schreiben && (
+        {bearbeiten && (
           <>
             <input
               ref={eingabe}
@@ -176,6 +178,11 @@ export function DocumentList({
             >
               {hochladen.isPending ? m.upload_busy() : m.upload()}
             </button>
+            {kamera && <CameraButton />}
+          </>
+        )}
+        {schreiben && (
+          <>
             <input
               ref={mailEingabe}
               type="file"
@@ -199,7 +206,6 @@ export function DocumentList({
             >
               {mailImport.isPending ? m.import_mails_busy() : m.import_mails()}
             </button>
-            {kamera && <CameraButton />}
           </>
         )}
         <fieldset className="m-0 flex gap-1 border-0 p-0">
@@ -255,7 +261,7 @@ export function DocumentList({
           {m.upload_failed({ meldung: hochladen.error.message })}
         </p>
       )}
-      {schreiben && ausgewaehlt.length > 0 && liste.data && (
+      {bearbeiten && ausgewaehlt.length > 0 && liste.data && (
         <BulkEdit
           gewaehlt={ausgewaehlt}
           eintraege={liste.data}

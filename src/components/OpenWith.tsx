@@ -16,7 +16,8 @@ export function OpenWith({ dokumentId, mimeType }: { dokumentId: string; mimeTyp
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const [fehler, setFehler] = useState(false);
   const app = status.data?.oeffnenMit;
-  if (!app || !OFFICE.test(mimeType) || !ich.data || ich.data.role === "pruefer") return null;
+  if (!app || !OFFICE.test(mimeType) || !ich.data || ich.data.role === "pruefer" || ich.data.role === "mitarbeiter")
+    return null;
 
   async function oeffnen() {
     setFehler(false);

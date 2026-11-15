@@ -44,6 +44,11 @@ export function InvitePage() {
         {einladung.data && (
           <form onSubmit={absenden} className="flex flex-col gap-4">
             <p className="m-0 text-muted text-sm">{m.invite_intro({ rolle: rolleLabel(einladung.data.rolle) })}</p>
+            {einladung.data.recht && (
+              <p className="m-0 text-sm">
+                {einladung.data.recht === "bearbeiten" ? m.invite_right_edit() : m.invite_right_read()}
+              </p>
+            )}
             {einladung.data.zeitraumVon && einladung.data.zeitraumBis && (
               <p className="m-0 text-sm">
                 {m.invite_period({ von: tag(einladung.data.zeitraumVon), bis: tag(einladung.data.zeitraumBis) })}

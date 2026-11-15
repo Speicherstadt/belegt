@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
-import { darfSchreiben } from "../../shared/rollen.ts";
+import { darfBearbeiten } from "../../shared/rollen.ts";
 import { api, type Feld, type Ordnung, type OrdnungAenderung } from "../lib/api.ts";
 import { feldwertText } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
@@ -25,7 +25,7 @@ export function DocumentOrdnung({
   geloescht: boolean;
 }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
-  const schreiben = darfSchreiben(ich.data?.role) && !geloescht;
+  const schreiben = darfBearbeiten(ich.data) && !geloescht;
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
   const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten, enabled: schreiben });
