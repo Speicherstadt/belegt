@@ -178,6 +178,12 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
     const ungueltig = await aufruf(schreiben, "dokument_ordnen", { id, felder: [{ feldId: summe, wert: "zwölf" }] });
     expect(ungueltig.isError).toBe(true);
     expect((await aufruf(schreiben, "dokument_ordnen", { id })).isError).toBe(true);
+    // Nur eine Einordnung: die setzt dokument_ordnen nicht, also ist es keine Änderung und kein Erfolg
+    const nurEinordnung = await aufruf(schreiben, "dokument_ordnen", {
+      id,
+      einordnung: { art: "beleg", entstanden: "2026-11-01" },
+    });
+    expect(nurEinordnung.isError).toBe(true);
     const verboten = await rpc(lesen, "tools/call", { name: "dokument_ordnen", arguments: { id, tagsHinzu: [tag] } });
     expect(verboten.error.code).toBe(-32602);
   });

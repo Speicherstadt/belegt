@@ -305,6 +305,14 @@ export const WERKZEUGE: Werkzeug[] = [
     eingabe: z.intersection(z.object({ id: Id }), Aenderung),
     ausfuehren: async (umgebung, nutzer, e: Aenderung & { id: string }) => {
       const { id, einordnung: _ohne, ...aenderung } = e;
+      // Die Einordnung setzt dokument_einordnen; bleibt ohne sie nichts übrig, wäre ein Erfolg irreführend
+      if (
+        !aenderung.tagsHinzu.length &&
+        !aenderung.tagsWeg.length &&
+        !aenderung.felder.length &&
+        aenderung.dokumenttyp === undefined
+      )
+        throw werkzeugFehler("Keine Änderung: tagsHinzu, tagsWeg, dokumenttyp oder felder angeben");
       const d = await dokumentOderFehler(umgebung, id);
       try {
         const r = await sammeln(umgebung.db, [d.id], aenderung, akteur(nutzer));
