@@ -45,6 +45,14 @@ describe("Oberfläche ausliefern", () => {
     expect(res.headers.get("x-frame-options")).toBeNull();
   });
 
+  it("nimmt unter /teilen keine Dateien an, sondern zeigt die Seite der App (das Teilen nimmt der Service Worker an)", async () => {
+    const form = new FormData();
+    form.append("dateien", new File(["x"], "a.pdf"));
+    const res = await app.request("/teilen", { method: "POST", body: form });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe("/teilen");
+  });
+
   it("öffnet für Adressen der App die index.html, auch beim Neuladen", async () => {
     for (const pfad of ["/", "/archiv", "/dokumente/1234"]) {
       const res = await app.request(pfad);

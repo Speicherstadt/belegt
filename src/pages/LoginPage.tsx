@@ -3,6 +3,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
+import { hatGeteilteDateien } from "../pwa/teilen.ts";
+
+/** Nach dem Anmelden zurück zu geteilten Dateien, die vorher ohne Sitzung ankamen, sonst in den Eingang */
+const ziel = async () => ((await hatGeteilteDateien()) ? "/teilen" : "/");
 
 /** Anmelden; solange es keinen Zugang gibt, richtet dieselbe Seite den Inhaber ein */
 export function LoginPage() {
@@ -30,7 +34,7 @@ export function LoginPage() {
     try {
       await (einrichten ? api.einrichten(email, passwort, String(form.get("code"))) : api.anmelden(email, passwort));
       await queryClient.invalidateQueries();
-      await navigate({ to: "/" });
+      await navigate({ to: await ziel() });
     } catch (err) {
       setFehler(m.login_failed({ meldung: err instanceof Error ? err.message : String(err) }));
     } finally {
@@ -66,7 +70,7 @@ export function LoginPage() {
           <>
             <button
               type="button"
-              onClick={() => void api.anmeldenMitAnbieter("/")}
+              onClick={async () => void api.anmeldenMitAnbieter(await ziel())}
               className="h-9 rounded-md border border-border font-medium text-sm hover:bg-subtle"
             >
               {m.oidc_sign_in({ name: status.data.oidc.name })}

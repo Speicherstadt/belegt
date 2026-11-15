@@ -8,6 +8,7 @@ import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
+import { CameraButton } from "./CameraButton.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { TagChip } from "./TagChip.tsx";
@@ -33,11 +34,14 @@ export function DocumentList({
   suchbar,
   leer,
   feste,
+  kamera = false,
 }: {
   suchbar: boolean;
   leer: { title: string; text: string };
   /** Feste Gruppe ohne Filter, etwa „offen“ für den Eingang */
   feste?: Gruppe;
+  /** Knopf „Foto aufnehmen“ (Eingang) */
+  kamera?: boolean;
 }) {
   const [suche, setSuche] = useState("");
   const [gewaehlt, setGewaehlt] = useState<Gruppe>("alle");
@@ -149,6 +153,7 @@ export function DocumentList({
             >
               {mailImport.isPending ? m.import_mails_busy() : m.import_mails()}
             </button>
+            {kamera && <CameraButton />}
           </>
         )}
       </div>

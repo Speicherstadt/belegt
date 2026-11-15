@@ -11,6 +11,7 @@ import { LoginPage } from "./pages/LoginPage.tsx";
 import { OrderPage } from "./pages/OrderPage.tsx";
 import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
+import { SharePage } from "./pages/SharePage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
 
 // Die Brücke zur einbettenden Seite läuft auf jeder Seite, auch beim Anmelden
@@ -46,6 +47,8 @@ const seiten = [
   createRoute({ getParentRoute: () => app, path: "/pruefung", component: AuditPage }),
   createRoute({ getParentRoute: () => app, path: "/zugaenge", component: AccessPage }),
   createRoute({ getParentRoute: () => app, path: "/quellen", component: SourcesPage }),
+  // Ziel des Teilens vom Handy (share_target im Manifest, src/pwa/)
+  createRoute({ getParentRoute: () => app, path: "/teilen", component: SharePage }),
   createRoute({
     getParentRoute: () => app,
     path: "/verfahrensdoku",

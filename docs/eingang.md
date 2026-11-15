@@ -1,7 +1,7 @@
 ---
 title: "Eingang, Mails und Suche"
 description: >-
-  Dokumente und Mails nach Belegt bringen: Hochladen, IMAP, JMAP, Microsoft 365, Google, SMTP-Journal, PST, Volltext, E-Rechnungen und Vorschläge.
+  Dokumente und Mails nach Belegt bringen: Hochladen, Handy, IMAP, JMAP, Microsoft 365, Google, SMTP-Journal, PST, Volltext, E-Rechnungen und Vorschläge.
 ---
 
 # Eingang
@@ -16,6 +16,25 @@ Sie steht in der Liste und auf der Seite des Dokuments, damit du sie etwa auf da
 vergibt sie in derselben Transaktion wie das Dokument und versiegelt sie; ändern, löschen oder ein zweites Mal vergeben
 lässt sie sich nicht. Scheitert eine Aufnahme, bleibt ihre Nummer unbenutzt, es kann also Lücken geben. Dokumente, die
 vor der Archivnummer eingegangen sind, haben ihre Nummer nach der Zeit ihres Eingangs bekommen.
+
+## Unterwegs mit dem Handy
+
+**App installieren.** Belegt lässt sich als App auf den Startbildschirm legen: in Chrome oder Edge über „App
+installieren“ bzw. „Zum Startbildschirm hinzufügen“, auf dem iPhone in Safari über Teilen → „Zum Home-Bildschirm“. Das
+braucht HTTPS (oder `localhost`). Die App ist dieselbe Oberfläche in einem eigenen Fenster; die Dokumente bleiben auf
+dem Server. Ohne Verbindung zeigt sie nur einen Hinweis, denn gespeichert wird auf dem Gerät nichts außer dieser
+Hinweisseite. Eingebettet in ein Portal ([Einbetten](einbetten.md)) gibt es die App nicht.
+
+**Teilen an Belegt.** Ist die App auf Android (Chrome, Edge, Samsung Internet) installiert, steht Belegt im Menü
+„Teilen“ anderer Apps, für PDFs, Bilder, Office-Dateien und Mails (`.eml`). Die Dateien landen zuerst nur auf dem
+Handy, auf der Seite **Geteilte Dateien**; erst **In den Eingang** lädt sie hoch, **Verwerfen** löscht sie. Bist du
+nicht angemeldet, meldest du dich an und kommst danach zurück zu den Dateien. Beim Abmelden löscht Belegt geteilte
+Dateien, die noch nicht hochgeladen sind. Hochladen darf nur der Inhaber. Auf dem iPhone und in Firefox gibt es das
+Teilen an eine Web-App nicht; dort lädst du über **Hochladen** hoch.
+
+**Foto aufnehmen.** Im Eingang öffnet **Foto aufnehmen** auf dem Handy die Kamera, auch auf dem iPhone, am Rechner die
+Auswahl für Bilder. Jedes Foto geht sofort in den Eingang, danach nimmst du das nächste auf. Für mehrseitige Belege ist
+ein Scan als PDF besser ([Trennblätter](#trennblätter)).
 
 ## Eingangsordner
 

@@ -65,7 +65,7 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 
 | Bereich | Was Belegt kann |
 |---|---|
-| 📥 [Eingang](https://firsttris.github.io/belegt/eingang.html) | Hochladen per Drag-and-drop, überwachter Ordner für Scanner mit Trennblättern für Stapel, Mails per IMAP, JMAP, Microsoft 365 und Google (OAuth), SMTP-Journal, Import aus EML, MBOX und PST |
+| 📥 [Eingang](https://firsttris.github.io/belegt/eingang.html) | Hochladen per Drag-and-drop, Foto mit dem Handy und Teilen an die installierte App, überwachter Ordner für Scanner mit Trennblättern für Stapel, Mails per IMAP, JMAP, Microsoft 365 und Google (OAuth), SMTP-Journal, Import aus EML, MBOX und PST |
 | 🔎 [Suche](https://firsttris.github.io/belegt/eingang.html) | Volltext über Dateiname, Einordnung, Mail, Text aus PDFs, Word, Excel, PowerPoint, OpenDocument und Texterkennung (Tesseract) für Scans; Office-Dateien auf Wunsch mit Ansicht als PDF; fortlaufende Archivnummer (ASN) |
 | 🏷️ [Ordnung](https://firsttris.github.io/belegt/ordnung.html) | Tags in Farben, Dokumenttypen und eigene Felder (Text, Zahl, Betrag, Datum, Ja/Nein, Auswahl, Link) mit Filter und Suche, jede Änderung im Audit-Log |
 | 🧾 [E-Rechnungen](https://firsttris.github.io/belegt/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, Nummer, Datum, Verkäufer und Betrag als Vorschlag |

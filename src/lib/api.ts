@@ -25,6 +25,7 @@ export type {
 } from "./api-ordnung.ts";
 
 import type { Rolle } from "../../shared/rollen.ts";
+import { geteilteVerwerfen } from "../pwa/teilen.ts";
 
 /* Aufrufe der Schnittstelle (docs/api.md); Cookies der Sitzung schickt der Browser mit */
 
@@ -342,7 +343,11 @@ export const api = {
   zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
   anmelden: (email: string, passwort: string) =>
     aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),
-  abmelden: () => aufruf<unknown>("/api/auth/sign-out", json({})),
+  // Geteilte Dateien, die noch nicht hochgeladen sind, bleiben nach dem Abmelden nicht im Browser
+  abmelden: async () => {
+    await geteilteVerwerfen();
+    return aufruf<unknown>("/api/auth/sign-out", json({}));
+  },
   dokumente: (suche: string, gruppe: Gruppe = "alle", filter = "") =>
     aufruf<Eintrag[]>(`/api/dokumente?suche=${encodeURIComponent(suche)}&gruppe=${gruppe}${filter}`),
   dokument: (id: string) =>

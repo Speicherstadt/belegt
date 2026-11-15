@@ -37,6 +37,10 @@ test("im Frame der erlaubten Seite: Design von dort, Nachrichten nur zwischen be
     expect(nachrichten.every((n) => n.origin === new URL(baseURL!).origin && n.data.source === "belegt")).toBe(true);
     expect(nachrichten.map((n) => n.data.type)).toEqual(expect.arrayContaining(["ready", "route"]));
     expect(nachrichten.find((n) => n.data.type === "route")?.data.path).toMatch(/^\//);
+    // Eingebettet meldet Belegt keinen Service Worker an (src/pwa/registrieren.ts)
+    const belegt = seite.frames().find((f) => f.url().startsWith(baseURL!))!;
+    expect(await belegt.evaluate(() => navigator.serviceWorker.getRegistrations().then((r) => r.length))).toBe(0);
+    expect(kontext.serviceWorkers()).toHaveLength(0);
   } finally {
     await kontext.close();
     await new Promise<void>((ok) => portal.close(() => ok()));

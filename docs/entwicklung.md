@@ -21,6 +21,10 @@ bun run e2e          # Playwright mit axe gegen echten Server (Port 3185) und Vi
 bun run build
 ```
 
+Die installierbare App (Manifest, Service Worker, Seite ohne Verbindung) steht in `src/pwa/`; Vite liefert sie in der
+Entwicklung aus und legt sie beim Bauen nach `dist`. Die Symbole in `public/icons/` erzeugt `bun scripts/symbole.ts` aus
+`docs/assets/icon.svg` und `icon-maskable.svg`.
+
 Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Paraglide); `bun install` und
 `bun run typecheck` übersetzen sie nach `src/paraglide/`. Die Sprache folgt dem Browser, sonst Deutsch.
 

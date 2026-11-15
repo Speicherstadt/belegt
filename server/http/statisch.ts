@@ -39,6 +39,9 @@ async function datei(pfad: string): Promise<Uint8Array | null> {
 export function statischRouten(app: App, verzeichnis: string, embedOrigin?: string) {
   const wurzel = normalize(verzeichnis) + sep;
   const KOPF = kopf(embedOrigin);
+  // Geteilte Dateien nimmt nur der Service Worker im Browser an (src/pwa/sw.js); ohne ihn kommt hier nichts an, der
+  // Server liest den Rumpf nicht und zeigt die Seite /teilen ohne Dateien
+  app.post("/teilen", (c) => c.redirect("/teilen", 303));
   app.get("*", async (c, next) => {
     const pfad = c.req.path;
     if (pfad.startsWith("/api/") || pfad === "/healthz") return next();
