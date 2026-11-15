@@ -13,17 +13,17 @@ diesem Eintrag nichts verändert wurde. „Drucken oder als PDF sichern“ gibt 
 
 ## Prüferzugang (Z1)
 
-Unter **Zugänge** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
+Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
 Der Prüfer liest nur: Eingang, Archiv und Prüfung, und von den Dokumenten nur die, deren Tag (Entstanden, sonst
 Eingang) im Zeitraum liegt; die Mail zu einem Anhang nur, wenn auch sie darin liegt. Seinen Z3-Export schneidet
 Belegt auf diesen Zeitraum zu, im Protokoll stehen nur die Einträge zu diesen Dokumenten. Fristen, Sperren, Löschungen,
-Regeln, Postfächer und Notizen sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein.
+Regeln, Postfächer und Notizen sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein und entziehst den alten Zugang.
 
 ## Datenträger für die Betriebsprüfung (Z3)
 
 Für die Datenträgerüberlassung (GoBD Rz. 167) wählst du einen Zeitraum und lädst ein ZIP herunter. Ein Dokument
 gehört zum Zeitraum, wenn der Tag seiner Einordnung („Entstanden“) darin liegt, sonst der Tag des Eingangs. Gelöschte
-Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prüfer dürfen ebenfalls exportieren.
+Dokumente fehlen, ihr Löschnachweis steht im Protokoll. Steuerberatung und Prüfer dürfen ebenfalls exportieren, Mitarbeiter nicht.
 
 | Datei | Inhalt |
 | --- | --- |

@@ -77,7 +77,7 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 | 🕵️ [Betriebsprüfung](https://firsttris.github.io/belegt/pruefung.html#prüferzugang-z1) | Prüferzugang mit Zeitraum (Z1), Datenträger mit `index.xml` (Z3), Prüfbericht zum Drucken |
 | 📘 [Verfahrensdokumentation](https://firsttris.github.io/belegt/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
 | 🔌 [Schnittstellen](https://firsttris.github.io/belegt/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
-| 🔐 [Anmeldung](https://firsttris.github.io/belegt/einbetten.html) | Konten nur per Einladung, Rollen Inhaber, Steuerberatung und Prüfer, OpenID Connect, Einbetten in ein Portal, [Teilen per Link](https://firsttris.github.io/belegt/teilen.html) mit Ablauf und Widerruf |
+| 🔐 [Anmeldung](https://firsttris.github.io/belegt/einbetten.html) | Konten nur per Einladung, Rollen Inhaber, Steuerberatung, Prüfer und [Mitarbeiter](https://firsttris.github.io/belegt/zugaenge.html) mit Sichtbereich nach Tags, Typen oder Korrespondenten, OpenID Connect, Einbetten in ein Portal, [Teilen per Link](https://firsttris.github.io/belegt/teilen.html) mit Ablauf und Widerruf |
 | 🌍 Sprachen | Oberfläche auf Deutsch und Englisch, hell, dunkel oder nach dem Gerät, per Tastatur bedienbar und gegen WCAG 2.2 AA geprüft |
 
 ## Screenshots
@@ -160,8 +160,9 @@ und was es bekommt.
 <summary><b>Kann meine Steuerberatung oder die Betriebsprüfung damit arbeiten?</b></summary>
 
 Ja, über eine Einladung: Die Steuerberatung liest und bestätigt Löschungen als zweite Person; ein Prüfer sieht nur
-Dokumente seines Zeitraums und lädt den Datenträger herunter. Siehe
-[Prüfung, Z1 und Z3](https://firsttris.github.io/belegt/pruefung.html).
+Dokumente seines Zeitraums und lädt den Datenträger herunter. Mitarbeiter sehen nur Dokumente bestimmter Tags, Typen
+oder Korrespondenten und ordnen sie auf Wunsch ein. Siehe [Prüfung, Z1 und Z3](https://firsttris.github.io/belegt/pruefung.html)
+und [Zugänge](https://firsttris.github.io/belegt/zugaenge.html).
 </details>
 
 <details>

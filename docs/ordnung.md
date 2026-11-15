@@ -8,8 +8,8 @@ description: >-
 
 Neben der Art, die die Frist bestimmt ([Fristen](fristen.md)), ordnest du Dokumente mit Korrespondenten, Tags,
 Dokumenttypen und eigenen Feldern. Das sind Metadaten, nicht das Original: Sie lassen sich ändern, aber jede Änderung steht mit Person und
-Zeitpunkt im Audit-Log und im Verlauf des Dokuments. Anlegen und zuweisen darf nur der Inhaber; Steuerberatung und
-Prüfer sehen sie. Verwaltet werden sie auf der Seite Ordnung.
+Zeitpunkt im Audit-Log und im Verlauf des Dokuments. Anlegen darf nur der Inhaber, zuweisen auch
+[Mitarbeiter](zugaenge.md#mitarbeiter) mit dem Recht „bearbeiten“ in ihrem Sichtbereich; Steuerberatung und Prüfer sehen sie. Verwaltet werden sie auf der Seite Ordnung.
 
 ## Korrespondenten
 
@@ -128,7 +128,8 @@ Ansichten um, ordnest sie und löschst sie.
 
 Ansichten gehören dem Zugang, der sie anlegt; jeder Zugang hat seine eigenen, auch Steuerberatung und Prüfer. Der
 Inhaber kann eine Ansicht „für alle Zugänge“ speichern, dann sieht die Steuerberatung sie mit, der Prüfer nicht. Eine
-Ansicht zeigt nie mehr, als der Zugang ohnehin sieht, beim Prüfer also nur seinen Zeitraum. Ansichten sind
+Ansicht zeigt nie mehr, als der Zugang ohnehin sieht, beim Prüfer also nur seinen Zeitraum, beim Mitarbeiter seinen
+Sichtbereich. Ansichten sind
 Einstellungen, keine Unterlagen: Löschen geht jederzeit, jede Änderung steht im Audit-Log.
 
 ## Mehrfachauswahl

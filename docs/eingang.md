@@ -21,7 +21,7 @@ Hash-Kette und Siegeln und der letzte Zeitstempel. Gelöschte Dokumente zählen 
 Unter „Kacheln wählen“ zeigst du [gespeicherte Ansichten](ordnung.md#gespeicherte-ansichten) als Kacheln, jede mit der
 Zahl der Treffer und den ersten fünf in ihrer Sortierung. Die Auswahl gilt für deinen Zugang. Die Steuerberatung sieht
 dieselbe Startseite; der Prüfer nur die Zahlen seines Zeitraums und die Kette, nichts zu Löschanträgen, Sperren,
-Quellen und Speicher. Der Eingang selbst liegt unter `/eingang`.
+Quellen und Speicher; ein [Mitarbeiter](zugaenge.md#mitarbeiter) nur die Zahlen seines Sichtbereichs. Der Eingang selbst liegt unter `/eingang`.
 
 ![Startseite mit Zahlen zu Eingang, Archiv, Löschanträgen, Sperren und Speicher, Fristen der nächsten 90 Tage, Quellen, Unveränderbarkeit und einer Kachel aus einer gespeicherten Ansicht](assets/screenshot-start.png)
 

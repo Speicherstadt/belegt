@@ -29,6 +29,7 @@ unverändert, und danach löschst du es nachweisbar.
 | [Fristen und Löschen](fristen.md) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen erst nach Fristende und mit zweiter Person |
 | [Unveränderbarkeit](pruefung.md) | Siegel und Hash-Kette in PostgreSQL, Prüfung von Kette und Dateien, Zeitstempel nach RFC 3161, auf Wunsch S3 mit Object Lock |
 | [Betriebsprüfung](pruefung.md#prüferzugang-z1) | Prüferzugang mit Zeitraum (Z1), Datenträger nach dem Beschreibungsstandard (Z3), Prüfbericht |
+| [Zugänge](zugaenge.md) | Steuerberatung, Prüfer und Mitarbeiter, die nur Dokumente bestimmter Tags, Typen oder Korrespondenten sehen und darin bearbeiten |
 | [Verfahrensdokumentation](verfahrensdoku.md) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben zum Betrieb und den Lücken, die noch fehlen |
 | [Schnittstellen](schnittstelle.md) | REST-API mit OpenAPI, API-Tokens, Webhooks, MCP für KI-Assistenten, Anmeldung über OpenID Connect und Einbetten |
 | [Workflows](workflows.md) | Wenn ein Dokument ankommt oder eingeordnet wird: Tags, Dokumenttyp, Feldwerte, Notiz oder Webhook nach Bedingungen, je Dokument genau einmal und protokolliert |

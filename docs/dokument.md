@@ -71,5 +71,5 @@ Programme lesen Notizen mit einem Token mit dem Recht lesen und schreiben sie mi
 Auf der Seite eines Dokuments stehen unter **Ähnliche Dokumente** bis zu fünf andere, die ihm im Text am meisten
 gleichen, etwa die Stromrechnungen der anderen Monate. Belegt nimmt dafür aus dem Volltext des Dokuments (Dateiname,
 Einordnung, Mail, gelesener Text, Tags) die Wörter, die darin oft und im übrigen Archiv selten vorkommen, und sucht
-nach Dokumenten mit möglichst vielen davon. Gelöschte erscheinen nicht, Prüfer sehen nur Dokumente ihres Zeitraums.
+nach Dokumenten mit möglichst vielen davon. Gelöschte erscheinen nicht, Prüfer und Mitarbeiter sehen nur Dokumente ihres Zeitraums oder Sichtbereichs.
 Notizen zählen nicht mit. Hat ein Dokument keinen Text, der anderswo vorkommt, bleibt der Bereich weg.
