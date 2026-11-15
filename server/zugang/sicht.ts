@@ -112,7 +112,9 @@ export const nurFuerInhaber = (meldung: string) => Object.assign(new Error(meldu
 
 /**
  * Am Ende einer Änderung in derselben Transaktion: Sieht der Mitarbeiter das Dokument danach nicht mehr, wirft sie, und
- * die Transaktion rollt zurück. Ohne Sichtbereich (Inhaber, Programme) nichts.
+ * die Transaktion rollt zurück. Ohne Sichtbereich (Inhaber, Programme) nichts. Zwei gleichzeitige Änderungen prüft sie
+ * nacheinander, weil jede vorher ins Audit-Log schreibt und dessen Sperre (belegt.audit_chain) bis zum Ende der
+ * Transaktion hält; ohne Änderung gibt es nichts zu prüfen (Test in server/ordnung/sammeln.test.ts).
  */
 export async function imSichtbereichBleiben(tx: Tx, id: string, sicht?: Sicht): Promise<void> {
   if (!sicht?.bereich) return;

@@ -1,6 +1,9 @@
+import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
+import type { Sicht } from "../zugang/sicht.ts";
+import { sammeln as sammelnIn } from "./zuordnung.ts";
 
 const json = (body: unknown): RequestInit => ({
   method: "POST",
@@ -172,5 +175,37 @@ describe.skipIf(!testDatenbankUrl)("Sammelbearbeitung gegen Postgres", () => {
     const [eintrag] = await t.sql<{ actor: string }[]>`
       select actor from audit_log where table_name = 'dokument_tags' and new_value ->> 'tag_id' = ${tag}`;
     expect(eintrag!.actor).toBe("token:T schreiben");
+  });
+  it("prüft gleichzeitige Änderungen eines Mitarbeiters nacheinander: keine schiebt das Dokument hinaus", async () => {
+    // Sichtbereich Tag A oder Tag B; das Dokument hat beide. Nimmt eine Änderung A und eine gleichzeitige B weg, sähe
+    // jede für sich das Dokument noch (über den anderen Tag), zusammen läge es außerhalb (Write Skew). Das verhindert die
+    // Sperre der Hash-Kette (belegt.audit_chain, bis zum Ende der Transaktion): Die zweite schreibt ihren Eintrag erst
+    // nach dem Ende der ersten und prüft danach, was diese geändert hat (server/zugang/sicht.ts)
+    const a = await anlegen("/api/tags", { name: "Skew A" });
+    const b = await anlegen("/api/tags", { name: "Skew B" });
+    const [doc, halter] = [await hoch("skew.pdf"), await hoch("halter.pdf")];
+    expect((await sammeln({ ids: [doc, halter], tagsHinzu: [a, b] })).status).toBe(200);
+    const sicht: Sicht = {
+      bereich: { tags: [a, b], dokumenttypen: [], korrespondenten: [], ohneTags: [], ohneOrdnung: false },
+      nutzerId: "mitarbeiter",
+    };
+    // Die erste Änderung hält bei halter an, nachdem sie doc geändert und geprüft hat: Die Zeile ist gesperrt
+    // Eigene Verbindungen: die beiden des Tests brauchen die Änderungen
+    const neben = postgres(testDatenbankUrl!, { max: 2, onnotice: () => {} });
+    const sperre = await neben.reserve();
+    await sperre`begin`;
+    await sperre`select 1 from dokument_tags where dokument_id = ${halter} and tag_id = ${a} for update`;
+    const erste = sammelnIn(t.db, [doc, halter], { tagsWeg: [a], tagsHinzu: [], felder: [] }, "test:eins", sicht);
+    const wartet = async () => Number((await neben`select count(*) as n from pg_locks where not granted`)[0]?.n) > 0;
+    for (let i = 0; i < 100 && !(await wartet()); i++) await new Promise((r) => setTimeout(r, 20));
+    const zweite = sammelnIn(t.db, [doc], { tagsWeg: [b], tagsHinzu: [], felder: [] }, "test:zwei", sicht);
+    await new Promise((r) => setTimeout(r, 300));
+    await sperre`commit`;
+    sperre.release();
+    await neben.end();
+    const [r1, r2] = await Promise.all([erste, zweite]);
+    expect(r1.ok).toBe(true);
+    expect(r2.ok).toBe(false);
+    expect((await zuordnungen(b)).sort()).toEqual([doc, halter].sort());
   });
 });
