@@ -21,6 +21,15 @@ export async function korrespondentMitNamen(tx: Tx, name: string): Promise<Korre
   return k!;
 }
 
+/** Der Korrespondent mit diesem Namen (ohne Groß- und Kleinschreibung), ohne ihn anzulegen; null, wenn es ihn nicht gibt */
+export async function korrespondentVorhanden(tx: Tx, name: string): Promise<Korrespondent | null> {
+  const [k] = await tx
+    .select()
+    .from(korrespondenten)
+    .where(sql`lower(${korrespondenten.name}) = lower(${name.trim().slice(0, 300)})`);
+  return k ?? null;
+}
+
 /** Setzt den Korrespondenten eines Dokuments (null entfernt ihn); derselbe noch einmal ändert nichts */
 export async function korrespondentSetzen(tx: Tx, dokumentId: string, korrespondentId: string | null) {
   if (korrespondentId === null) {

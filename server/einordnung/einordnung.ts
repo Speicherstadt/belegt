@@ -4,8 +4,8 @@ import { type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
-import { korrespondentMitNamen, korrespondentSetzen } from "../ordnung/korrespondent-setzen.ts";
-import { imSichtbereichBleiben, type Sicht } from "../zugang/sicht.ts";
+import { korrespondentMitNamen, korrespondentSetzen, korrespondentVorhanden } from "../ordnung/korrespondent-setzen.ts";
+import { imSichtbereichBleiben, NEUER_KORRESPONDENT, nurFuerInhaber, type Sicht } from "../zugang/sicht.ts";
 
 export const ARTEN = [
   "buecher",
@@ -47,21 +47,35 @@ export function einordnen(
   sicht?: Sicht,
 ): Promise<Einordnung> {
   return mitAkteur(db, akteur, async (tx) => {
-    const neu = await einordnenIn(tx, dokumentId, eingabe);
+    const neu = await einordnenIn(tx, dokumentId, eingabe, sicht);
     await imSichtbereichBleiben(tx, dokumentId, sicht);
     return neu;
   });
 }
 
-/** Wie einordnen, in einer laufenden Transaktion mit Akteur (Sammelbearbeitung) */
-export async function einordnenIn(tx: Tx, dokumentId: string, eingabe: EinordnungEingabe): Promise<Einordnung> {
+/**
+ * Wie einordnen, in einer laufenden Transaktion mit Akteur (Sammelbearbeitung). Mit dem Sichtbereich eines Mitarbeiters
+ * nur Korrespondenten aus der Liste: Listen ändert nur der Inhaber (docs/zugaenge.md).
+ */
+export async function einordnenIn(
+  tx: Tx,
+  dokumentId: string,
+  eingabe: EinordnungEingabe,
+  sicht?: Sicht,
+): Promise<Einordnung> {
   // Institute unter Aufsicht bewahren Buchungsbelege zehn Jahre auf (Art. 97 § 19a Abs. 3 EGAO)
   const [betrieb] = await tx.execute<{ aufsicht: boolean }>(sql`select aufsicht from einstellungen where id = 1`);
   const frist = fristende(eingabe.art, eingabe.entstanden, {
     freiwilligBis: eingabe.freiwilligBis,
     aufsicht: betrieb?.aufsicht ?? false,
   });
-  const korrespondent = eingabe.korrespondent?.trim() ? await korrespondentMitNamen(tx, eingabe.korrespondent) : null;
+  const name = eingabe.korrespondent?.trim();
+  const korrespondent = !name
+    ? null
+    : sicht?.bereich
+      ? await korrespondentVorhanden(tx, name)
+      : await korrespondentMitNamen(tx, name);
+  if (name && !korrespondent) throw nurFuerInhaber(NEUER_KORRESPONDENT);
   const [neu] = await tx
     .insert(einordnungen)
     .values({

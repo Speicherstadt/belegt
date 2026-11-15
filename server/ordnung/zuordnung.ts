@@ -164,6 +164,7 @@ async function anwenden(
   id: string,
   a: Aenderung,
   werte: Awaited<ReturnType<typeof vorbereiten>>,
+  sicht?: Sicht,
 ): Promise<{ eingeordnet: boolean }> {
   const tag = await eingangstag(tx, id);
   if (!tag) throw new Error("Nicht gefunden");
@@ -200,10 +201,12 @@ async function anwenden(
   if (!a.einordnung) return { eingeordnet: false };
   const { nurOffene, ...einordnung } = a.einordnung;
   if (nurOffene && (await aktuelle(tx, id))) return { eingeordnet: false };
-  await einordnenIn(tx, id, {
-    ...einordnung,
-    entstanden: einordnung.entstanden === "eingang" ? tag : einordnung.entstanden,
-  });
+  await einordnenIn(
+    tx,
+    id,
+    { ...einordnung, entstanden: einordnung.entstanden === "eingang" ? tag : einordnung.entstanden },
+    sicht,
+  );
   return { eingeordnet: true };
 }
 
@@ -228,7 +231,7 @@ export async function sammeln(
       for (const id of [...new Set(ids)]) {
         try {
           const r = await tx.transaction(async (sp) => {
-            const r = await anwenden(sp as Tx, id, a, werte);
+            const r = await anwenden(sp as Tx, id, a, werte, sicht);
             await imSichtbereichBleiben(sp as Tx, id, sicht);
             return r;
           });

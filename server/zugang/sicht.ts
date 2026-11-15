@@ -85,14 +85,19 @@ export async function sichtbareIds(db: Datenbank | Tx, ids: string[], sicht?: Si
 export const AUS_DEM_SICHTBEREICH =
   "Danach läge das Dokument außerhalb deines Sichtbereichs; diese Änderung kann nur der Inhaber vornehmen.";
 
+/** Meldung, wenn ein Mitarbeiter beim Einordnen einen Korrespondenten nennt, den es in der Liste nicht gibt */
+export const NEUER_KORRESPONDENT = "Diesen Korrespondenten gibt es nicht; neue legt nur der Inhaber an.";
+
+/** Fehler, den die Routen als 409 melden: Die Änderung darf nur der Inhaber vornehmen */
+export const nurFuerInhaber = (meldung: string) => Object.assign(new Error(meldung), { sichtbereich: true });
+
 /**
  * Am Ende einer Änderung in derselben Transaktion: Sieht der Mitarbeiter das Dokument danach nicht mehr, wirft sie, und
  * die Transaktion rollt zurück. Ohne Sichtbereich (Inhaber, Programme) nichts.
  */
 export async function imSichtbereichBleiben(tx: Tx, id: string, sicht?: Sicht): Promise<void> {
   if (!sicht?.bereich) return;
-  if (!(await sichtbareIds(tx, [id], sicht)).has(id))
-    throw Object.assign(new Error(AUS_DEM_SICHTBEREICH), { sichtbereich: true });
+  if (!(await sichtbareIds(tx, [id], sicht)).has(id)) throw nurFuerInhaber(AUS_DEM_SICHTBEREICH);
 }
 
 export const istSichtbereichsFehler = (err: unknown): err is Error =>

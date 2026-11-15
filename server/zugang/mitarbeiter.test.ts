@@ -235,6 +235,26 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     expect(await ids(k)).toEqual([vonStadtwerken]);
   });
 
+  it("legt beim Einordnen keinen neuen Korrespondenten an, nimmt aber einen aus der Liste", async () => {
+    // Listen anlegen darf nur der Inhaber (docs/zugaenge.md), auch nicht nebenbei über den Namen in der Einordnung
+    const m = await zugangAnlegen(t, inhaber, "neuer-name@example.org", {
+      rolle: "mitarbeiter",
+      recht: "bearbeiten",
+      sichtbereich: { tags: [projekt] },
+    });
+    const neu = { art: "beleg", entstanden: "2024-01-01", korrespondent: "Erfundene GmbH" };
+    expect((await als(m)(`/api/dokumente/${nurTag}/einordnung`, json(neu))).status).toBe(409);
+    const sammel = await als(m)(
+      "/api/dokumente/sammeln",
+      json({ ids: [nurTag], einordnung: { ...neu, nurOffene: false } }),
+    );
+    expect(sammel.status).toBe(409);
+    expect(await t.sql`select 1 from korrespondenten where name = 'Erfundene GmbH'`).toHaveLength(0);
+    const vorhanden = { art: "beleg", entstanden: "2024-01-01", korrespondent: "stadtwerke" };
+    expect((await als(m)(`/api/dokumente/${nurTag}/einordnung`, json(vorhanden))).status).toBe(201);
+    await ordnen(nurTag, { korrespondent: null });
+  });
+
   it("lässt ein eigenes Dokument sichtbar, bis es eine Ordnung außerhalb bekommt", async () => {
     const m = await zugangAnlegen(t, inhaber, "hochlader@example.org", {
       rolle: "mitarbeiter",
