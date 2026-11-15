@@ -1,6 +1,6 @@
 import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { eq, sql } from "drizzle-orm";
-import { mitAkteur } from "../db/akteur.ts";
+import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { archivnummern, dokumente, dokumentTags } from "../db/schema.ts";
 import { type Gruppe, gruppenBedingung } from "../einordnung/einordnung.ts";
@@ -17,41 +17,52 @@ export interface Umgebung {
 /** Ein Dokument mit seiner Archivnummer (ASN), die ein Trigger beim Einfügen vergibt */
 export type Dokument = typeof dokumente.$inferSelect & { asn: number };
 
-export const QUELLEN = ["upload", "mail", "ordner", "api"] as const;
+/** abgeleitet: neues Dokument aus Seiten eines anderen (server/seiten/), das Original bleibt */
+export const QUELLEN = ["upload", "mail", "ordner", "api", "abgeleitet"] as const;
 export type Quelle = (typeof QUELLEN)[number];
+
+export interface Eingang {
+  bytes: Uint8Array;
+  dateiname: string | null;
+  quelle: Quelle;
+  akteur: string;
+  tags?: string[];
+}
 
 /**
  * Nimmt ein Original auf: zuerst die Datei unter ihrem Hash, dann die Zeile, versiegelt und im Audit-Log. Scheitert die
  * Zeile, liegt die Datei schon sicher; eine zweite Aufnahme derselben Datei schreibt sie nicht neu. tags (Namen, etwa
  * die Unterordner des Eingangsordners) setzt sie in derselben Transaktion und legt fehlende Tags an.
  */
-export async function aufnehmen(
-  { db, speicher }: Umgebung,
-  eingang: { bytes: Uint8Array; dateiname: string | null; quelle: Quelle; akteur: string; tags?: string[] },
-): Promise<Dokument> {
-  const sha256 = await speicher.speichern(eingang.bytes);
-  const mimeType = dateityp(eingang.bytes);
-  return mitAkteur(db, eingang.akteur, async (tx) => {
-    const [neu] = await tx
-      .insert(dokumente)
-      .values({
-        sha256,
-        groesse: eingang.bytes.byteLength,
-        mimeType,
-        dateiname: eingang.dateiname,
-        quelle: eingang.quelle,
-      })
-      .returning();
-    const [a] = await tx
-      .select({ nummer: archivnummern.nummer })
-      .from(archivnummern)
-      .where(eq(archivnummern.dokumentId, neu!.id));
-    for (const name of eingang.tags ?? []) {
-      const tag = await tagMitNamen(tx, name);
-      await tx.insert(dokumentTags).values({ dokumentId: neu!.id, tagId: tag.id }).onConflictDoNothing();
-    }
-    return { ...neu!, asn: a!.nummer };
-  });
+export async function aufnehmen(umgebung: Umgebung, eingang: Eingang): Promise<Dokument> {
+  const sha256 = await umgebung.speicher.speichern(eingang.bytes);
+  return mitAkteur(umgebung.db, eingang.akteur, (tx) => zeileAnlegen(tx, sha256, eingang));
+}
+
+/**
+ * Die Zeile eines Dokuments, dessen Datei schon unter sha256 im Speicher liegt, in einer laufenden Transaktion mit
+ * Akteur; für mehrere Dokumente in einer Transaktion (server/seiten/ableiten.ts)
+ */
+export async function zeileAnlegen(tx: Tx, sha256: string, eingang: Omit<Eingang, "akteur">): Promise<Dokument> {
+  const [neu] = await tx
+    .insert(dokumente)
+    .values({
+      sha256,
+      groesse: eingang.bytes.byteLength,
+      mimeType: dateityp(eingang.bytes),
+      dateiname: eingang.dateiname,
+      quelle: eingang.quelle,
+    })
+    .returning();
+  const [a] = await tx
+    .select({ nummer: archivnummern.nummer })
+    .from(archivnummern)
+    .where(eq(archivnummern.dokumentId, neu!.id));
+  for (const name of eingang.tags ?? []) {
+    const tag = await tagMitNamen(tx, name);
+    await tx.insert(dokumentTags).values({ dokumentId: neu!.id, tagId: tag.id }).onConflictDoNothing();
+  }
+  return { ...neu!, asn: a!.nummer };
 }
 
 export interface Eintrag extends Dokument {
@@ -61,6 +72,8 @@ export interface Eintrag extends Dokument {
   titel: string | null;
   tags: { id: string; name: string; farbe: string }[];
   dokumenttyp: { id: string; name: string } | null;
+  /** Ob es ein Vorschaubild gibt (GET /api/dokumente/:id/vorschaubild) */
+  vorschaubild: boolean;
 }
 
 /** „ASN 123“, „asn123“ oder nur „123“: die gesuchte Archivnummer, sonst null */
@@ -125,6 +138,7 @@ export async function listen(
     titel: string | null;
     tags: Eintrag["tags"];
     dokumenttyp: Eintrag["dokumenttyp"];
+    vorschaubild: boolean;
   }>(sql`
     select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel,
            (select coalesce(json_agg(json_build_object('id', t.id, 'name', t.name, 'farbe', t.farbe)
@@ -132,7 +146,8 @@ export async function listen(
               from dokument_tags dt join tags t on t.id = dt.tag_id where dt.dokument_id = d.id) as tags,
            (select json_build_object('id', ty.id, 'name', ty.name)
               from dokument_dokumenttypen dd join dokumenttypen ty on ty.id = dd.dokumenttyp_id
-             where dd.dokument_id = d.id) as dokumenttyp
+             where dd.dokument_id = d.id) as dokumenttyp,
+           exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild
       ${listenQuelle(abfrage)}
      order by d.eingegangen_am desc, d.id desc
      limit ${limit} offset ${versatz}`);
@@ -150,6 +165,7 @@ export async function listen(
     titel: z.titel,
     tags: z.tags,
     dokumenttyp: z.dokumenttyp,
+    vorschaubild: z.vorschaubild,
   }));
 }
 
@@ -188,13 +204,15 @@ export interface Ereignis {
   akteur: string | null;
   aktion: string;
   tabelle: string;
-  /** Bei Tags, Dokumenttyp und Feldern: der Name (heute; null, wenn inzwischen gelöscht) */
+  /** Bei Tags, Dokumenttyp und Feldern: der Name (heute; null, wenn inzwischen gelöscht); bei Ableitungen die Operation */
   detail: string | null;
+  /** Nur bei Ableitungen: aus einer Quelle abgeleitet oder ein neues Dokument daraus */
+  richtung?: "aus" | "daraus";
 }
 
 /**
- * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp und Feldwerte und
- * sein Siegel, in der Reihenfolge der Kette
+ * Was das Audit-Log zu einem Dokument verzeichnet: seine Zeile, seine Einordnungen, Tags, Dokumenttyp und Feldwerte,
+ * Ableitungen in beide Richtungen und sein Siegel, in der Reihenfolge der Kette
  */
 export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: Ereignis[]; siegel: string | null }> {
   const ereignisse = await db.execute<{
@@ -204,8 +222,11 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
     action: string;
     table_name: string;
     detail: string | null;
+    richtung: "aus" | "daraus" | null;
   }>(sql`
     select a.seq, a.at, a.actor, a.action, a.table_name,
+           case when a.table_name = 'ableitungen'
+                then case when a.new_value ->> 'dokument_id' = ${id} then 'aus' else 'daraus' end end as richtung,
            case a.table_name
              when 'dokument_tags' then (select t.name from tags t
                                          where t.id::text = coalesce(a.new_value, a.old_value) ->> 'tag_id')
@@ -213,12 +234,15 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
                                                   where ty.id::text = coalesce(a.new_value, a.old_value) ->> 'dokumenttyp_id')
              when 'feldwerte' then (select f.name from felder f
                                      where f.id::text = coalesce(a.new_value, a.old_value) ->> 'feld_id')
+             when 'ableitungen' then a.new_value ->> 'operation'
            end as detail
       from audit_log a
      where (a.table_name = 'dokumente' and a.row_id = ${id})
         or (a.table_name = 'einordnungen' and a.new_value ->> 'dokument_id' = ${id})
         or (a.table_name in ('dokument_tags', 'dokument_dokumenttypen', 'feldwerte')
             and coalesce(a.new_value, a.old_value) ->> 'dokument_id' = ${id})
+        or (a.table_name = 'ableitungen'
+            and (a.new_value ->> 'dokument_id' = ${id} or a.new_value ->> 'quelle_id' = ${id}))
         or (a.table_name = 'seals' and a.new_value ->> 'row_id' in (
               select ${id} union all select x.id::text from einordnungen x where x.dokument_id = ${id}::uuid))
      order by a.seq`);
@@ -233,6 +257,7 @@ export async function verlauf(db: Datenbank, id: string): Promise<{ ereignisse: 
       aktion: e.action,
       tabelle: e.table_name,
       detail: e.detail,
+      ...(e.richtung ? { richtung: e.richtung } : {}),
     })),
     siegel: siegel?.digest ?? null,
   };

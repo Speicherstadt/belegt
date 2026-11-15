@@ -27,6 +27,7 @@ import { felderListen } from "../ordnung/ordnung.ts";
 import { ordnungZu } from "../ordnung/zuordnung.ts";
 import { TRENNBLATT_CODE, trennblattPdf } from "../trennen/trennblatt.ts";
 import { dateiTeilen } from "../trennen/trennen.ts";
+import { vorschaubildZu } from "../vorschaubild/vorschaubild.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
 
@@ -215,6 +216,23 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     return c.body(new Uint8Array(pdf), 200, {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename*=UTF-8''${dateinameKodiert(name)}`,
+      "X-Content-Type-Options": "nosniff",
+    });
+  });
+
+  /** Vorschaubild der ersten Seite (JPEG); abgeleitet, ändert sich nie, solange das Dokument nicht gelöscht ist */
+  app.get("/api/dokumente/:id/vorschaubild", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    if ((await fuerDokument(umgebung.db, dokument.id))?.bestaetigtAm)
+      return c.json({ fehler: "Das Dokument ist gelöscht" }, 410);
+    const bild = await vorschaubildZu(umgebung.db, dokument.id);
+    if (!bild) return c.json({ fehler: "Kein Vorschaubild" }, 404);
+    return c.body(new Uint8Array(bild), 200, {
+      "Content-Type": "image/jpeg",
+      // Nur im Browser der angemeldeten Person, nicht in geteilten Caches; eine Stunde, damit eine Löschung bald greift
+      "Cache-Control": "private, max-age=3600",
       "X-Content-Type-Options": "nosniff",
     });
   });

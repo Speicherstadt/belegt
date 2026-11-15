@@ -20,6 +20,7 @@ export type {
 } from "./api-betrieb.ts";
 export { EREIGNISSE } from "./api-betrieb.ts";
 export type {
+  Ableitungsart,
   Art,
   Dokument,
   Einordnung,
@@ -30,8 +31,18 @@ export type {
   Gruppe,
   Loeschung,
   MailAnsicht,
+  SeitenOperation,
+  Verknuepfung,
 } from "./api-dokumente.ts";
-export { ansichtUrl, dateiUrl, exportUrl, PRO_SEITE, trennblattUrl } from "./api-dokumente.ts";
+export {
+  ansichtUrl,
+  dateiUrl,
+  exportUrl,
+  PRO_SEITE,
+  seiteUrl,
+  trennblattUrl,
+  vorschaubildUrl,
+} from "./api-dokumente.ts";
 export type {
   Dokumenttyp,
   Feld,

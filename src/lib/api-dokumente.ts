@@ -24,6 +24,8 @@ export interface Eintrag extends Dokument {
   titel: string | null;
   tags: TagKurz[];
   dokumenttyp: { id: string; name: string } | null;
+  /** Ob es ein Vorschaubild der ersten Seite gibt */
+  vorschaubild: boolean;
 }
 
 export interface Einordnung {
@@ -65,6 +67,28 @@ export interface Ereignis {
   aktion: string;
   tabelle: string;
   detail: string | null;
+  /** Nur bei Ableitungen: aus einer Quelle abgeleitet oder ein neues Dokument daraus */
+  richtung?: "aus" | "daraus";
+}
+
+export type SeitenOperation =
+  | { operation: "drehen"; drehungen: { seite: number; grad: 90 | 180 | 270 }[] }
+  | { operation: "entfernen"; seiten: number[] }
+  | { operation: "teilen"; nach: number };
+export type Ableitungsart = SeitenOperation["operation"] | "zusammenfuegen";
+
+/** Ein anderes Dokument, aus dem dieses abgeleitet ist oder das daraus abgeleitet wurde */
+export interface Verknuepfung {
+  dokumentId: string;
+  dateiname: string | null;
+  titel: string | null;
+  asn: number;
+  operation: Ableitungsart;
+  parameter: Record<string, unknown>;
+  position: number;
+  akteur: string;
+  erstelltAm: string;
+  geloescht: boolean;
 }
 
 export interface ERechnung {
@@ -154,6 +178,12 @@ export const dokumenteApi = {
     aufruf<{ id: string; url: string; gueltigBis: string }>(`/api/dokumente/${id}/links`, json({ tage })),
   linkWiderrufen: (id: string, link: string) =>
     aufruf<{ ok: true }>(`/api/dokumente/${id}/links/${link}/widerrufen`, { method: "POST" }),
+  seiten: (id: string) => aufruf<{ anzahl: number }>(`/api/dokumente/${id}/seiten`),
+  seitenBearbeiten: (id: string, op: SeitenOperation) =>
+    aufruf<{ dokumente: Dokument[] }>(`/api/dokumente/${id}/seiten`, json(op)),
+  zusammenfuegen: (ids: string[]) => aufruf<Dokument>("/api/dokumente/zusammenfuegen", json({ ids })),
+  ableitungen: (id: string) =>
+    aufruf<{ aus: Verknuepfung[]; daraus: Verknuepfung[] }>(`/api/dokumente/${id}/ableitungen`),
   freigabe: (id: string) =>
     aufruf<{ url: string; gueltigBis: string }>(`/api/dokumente/${id}/freigabe`, { method: "POST" }),
 };
@@ -162,5 +192,7 @@ export const exportUrl = (von: string, bis: string) =>
   `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
 
 export const trennblattUrl = "/api/trennblatt.pdf";
+export const seiteUrl = (id: string, nr: number) => `/api/dokumente/${id}/seiten/${nr}`;
+export const vorschaubildUrl = (id: string) => `/api/dokumente/${id}/vorschaubild`;
 export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

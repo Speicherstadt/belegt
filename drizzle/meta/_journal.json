@@ -225,6 +225,20 @@
       "when": 1794719012205,
       "tag": "0031_ki_vorschlag_loeschung",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794754752082,
+      "tag": "0032_vorschaubilder",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794755776575,
+      "tag": "0033_ableitungen",
+      "breakpoints": true
     }
   ]
 }

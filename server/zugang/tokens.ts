@@ -59,7 +59,7 @@ export async function listen(db: Datenbank): Promise<Token[]> {
 const LESEN = [
   /^\/api\/ich$/,
   /^\/api\/dokumente$/,
-  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf))?$/,
+  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|inhalt|mail|verlauf|vorschaubild|ableitungen))?$/,
   /^\/api\/(tags|dokumenttypen|felder)$/,
 ];
 const SCHREIBEN = [

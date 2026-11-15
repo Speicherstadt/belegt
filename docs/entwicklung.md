@@ -32,8 +32,8 @@ Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Parag
 
 Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests gegen Postgres brauchen
 `TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer. Die Tests der Texterkennung brauchen `tesseract` (mit
-Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, die der Trennblätter `pdftoppm`;
-sonst werden sie übersprungen.
+Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, die der Trennblätter und
+Vorschaubilder `pdftoppm`; sonst werden sie übersprungen.
 
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test

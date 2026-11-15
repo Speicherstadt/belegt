@@ -1,17 +1,15 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
-import { api, type Eintrag, type Gruppe, type ListenFilter, PRO_SEITE } from "../lib/api.ts";
-import { artLabel } from "../lib/arten.ts";
-import { groesse, tag, zeitpunkt } from "../lib/format.ts";
+import { api, type Gruppe, type ListenFilter, PRO_SEITE } from "../lib/api.ts";
 import { filterParameter, LEERER_FILTER } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
 import { CameraButton } from "./CameraButton.tsx";
+import { type Auswahl, DocumentGrid, DocumentTable } from "./DocumentTable.tsx";
+import { MergePdfs } from "./MergePdfs.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
-import { TagChip } from "./TagChip.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -23,10 +21,16 @@ const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "geloescht", label: () => m.filter_deleted() },
 ];
 
-function aufbewahrung(d: Eintrag): string {
-  if (!d.art) return m.retention_open();
-  if (!d.fristBis) return artLabel(d.art);
-  return `${artLabel(d.art)}, ${m.retention_until({ datum: tag(d.fristBis) })}`;
+type Darstellung = "liste" | "kacheln";
+const DARSTELLUNG = "belegt.darstellung.liste";
+
+/** Liste oder Kacheln, je Browser gemerkt; ohne Speicher (privates Fenster) die Liste */
+function gemerkteDarstellung(): Darstellung {
+  try {
+    return localStorage.getItem(DARSTELLUNG) === "kacheln" ? "kacheln" : "liste";
+  } catch {
+    return "liste";
+  }
 }
 
 /** Liste der Dokumente mit Suche, Filter nach Aufbewahrung und, für den Inhaber, Upload */
@@ -82,6 +86,23 @@ export function DocumentList({
       if (!neu.delete(id)) neu.add(id);
       return neu;
     });
+  };
+  const [darstellung, setDarstellung] = useState<Darstellung>(gemerkteDarstellung);
+  const darstellen = (d: Darstellung) => {
+    setDarstellung(d);
+    try {
+      localStorage.setItem(DARSTELLUNG, d);
+    } catch {}
+  };
+  const auswahlFuerListe: Auswahl = {
+    schreiben,
+    gewaehlt: auswahl,
+    umschalten,
+    alleGewaehlt,
+    alleUmschalten: () => {
+      setSammelMeldung(null);
+      setAuswahl(alleGewaehlt ? new Set() : new Set((liste.data ?? []).map((d) => d.id)));
+    },
   };
   const eingabe = useRef<HTMLInputElement>(null);
   const mailEingabe = useRef<HTMLInputElement>(null);
@@ -170,6 +191,20 @@ export function DocumentList({
             {kamera && <CameraButton />}
           </>
         )}
+        <fieldset className="m-0 flex gap-1 border-0 p-0">
+          <legend className="sr-only">{m.view_label()}</legend>
+          {(["liste", "kacheln"] as const).map((d) => (
+            <button
+              key={d}
+              type="button"
+              aria-pressed={darstellung === d}
+              onClick={() => darstellen(d)}
+              className="h-10 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
+            >
+              {d === "liste" ? m.view_list() : m.view_grid()}
+            </button>
+          ))}
+        </fieldset>
       </div>
       {!feste && (
         <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0">
@@ -218,78 +253,27 @@ export function DocumentList({
           }}
         />
       )}
+      {schreiben && liste.data && (
+        <MergePdfs
+          gewaehlt={liste.data.filter((d) => auswahl.has(d.id))}
+          fertig={(meldung) => {
+            setAuswahl(new Set());
+            setSammelMeldung(meldung);
+          }}
+        />
+      )}
       {sammelMeldung && (
         <p role="status" className="m-0 text-sm">
           {sammelMeldung}
         </p>
       )}
       {liste.data?.length === 0 && seite === 1 && <EmptyState title={leer.title} text={leer.text} />}
-      {!!liste.data?.length && (
-        // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
-        <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
-            <thead>
-              <tr className="border-border border-b text-left text-muted">
-                {schreiben && (
-                  <th className="w-10 px-3 py-2.5">
-                    <input
-                      type="checkbox"
-                      checked={alleGewaehlt}
-                      onChange={() => {
-                        setSammelMeldung(null);
-                        setAuswahl(alleGewaehlt ? new Set() : new Set(liste.data!.map((d) => d.id)));
-                      }}
-                      aria-label={m.bulk_select_page()}
-                      className="size-4"
-                    />
-                  </th>
-                )}
-                <th className="px-3 py-2.5 text-right font-medium">{m.col_asn()}</th>
-                <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
-                <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
-                <th className="px-3 py-2.5 font-medium">{m.col_type()}</th>
-                <th className="px-3 py-2.5 text-right font-medium">{m.col_size()}</th>
-                <th className="px-3 py-2.5 text-right font-medium">{m.col_received()}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {liste.data.map((d) => (
-                <tr key={d.id} className="border-border border-b last:border-b-0 hover:bg-subtle">
-                  {schreiben && (
-                    <td className="px-3 py-3">
-                      <input
-                        type="checkbox"
-                        checked={auswahl.has(d.id)}
-                        onChange={() => umschalten(d.id)}
-                        aria-label={m.bulk_select({ name: d.titel ?? d.dateiname ?? m.unnamed() })}
-                        className="size-4"
-                      />
-                    </td>
-                  )}
-                  <td className="px-3 py-3 text-right text-muted tabular-nums">{d.asn}</td>
-                  <td className="px-3 py-3 font-medium">
-                    <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">
-                      {d.titel ?? d.dateiname ?? m.unnamed()}
-                    </Link>
-                    {(d.dokumenttyp || d.tags.length > 0) && (
-                      <span className="mt-1 flex flex-wrap items-center gap-1.5 font-normal">
-                        {d.dokumenttyp && <span className="text-muted text-xs">{d.dokumenttyp.name}</span>}
-                        {d.tags.map((t) => (
-                          <TagChip key={t.id} tag={t} />
-                        ))}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-3">{aufbewahrung(d)}</td>
-                  <td className="px-3 py-3 text-muted">{d.mimeType}</td>
-                  <td className="px-3 py-3 text-right tabular-nums">{groesse(d.groesse)}</td>
-                  <td className="px-3 py-3 text-right tabular-nums">{zeitpunkt(d.eingegangenAm)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
+      {!!liste.data?.length &&
+        (darstellung === "kacheln" ? (
+          <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} />
+        ) : (
+          <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} />
+        ))}
       {gesamt > 0 && (
         <nav aria-label={m.pages_label()} className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <p className="m-0 text-muted tabular-nums" aria-live="polite">

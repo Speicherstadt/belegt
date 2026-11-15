@@ -9,6 +9,7 @@ import { openapi } from "./http/openapi.ts";
 import { ordnungRouten } from "./http/ordnung.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
+import { seitenRouten } from "./http/seiten.ts";
 import { statischRouten } from "./http/statisch.ts";
 import { teilenRouten } from "./http/teilen.ts";
 import { zugangRouten } from "./http/zugang.ts";
@@ -54,6 +55,7 @@ export function createApp(umgebung?: AppUmgebung) {
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
+    seitenRouten(app, umgebung);
     ordnungRouten(app, umgebung);
     freigabeRouten(app, umgebung);
     teilenRouten(app, umgebung);

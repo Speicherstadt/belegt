@@ -123,6 +123,7 @@ export async function verfahrensdoku(
           ? "Ein Eingangsordner (etwa das Ziel eines Scanners) wird alle 5 Sekunden überwacht. Belegt nimmt eine Datei erst auf, wenn sie sich zwischen zwei Blicken nicht mehr ändert, und entfernt sie aus dem Ordner erst, nachdem sie im Archiv liegt. Dateien, die sich nicht aufnehmen lassen (leer, größer als 100 MB), verschiebt es in den Unterordner „fehler“; dort bleiben sie zur Klärung liegen."
           : "",
         `Gescannte Stapel als PDF teilt Belegt an Trennblättern (QR-Code oder Code 128 mit dem Inhalt „${trennblattCode}“)${eingangsordner ? " aus dem Eingangsordner immer und" : ""} beim Hochladen auf Wunsch in einzelne Dokumente. Der Stapel ist dabei nur das Transportmittel: Jedes Teil wird als eigenes Original aufgenommen, die Trennblätter und der Stapel selbst nicht. Lässt sich ein Stapel nicht teilen, wird er unverändert aufgenommen.`,
+        "Seiten eines archivierten PDFs lassen sich drehen, entfernen oder teilen, mehrere PDFs zu einem zusammenfügen. Das Original bleibt dabei unverändert; das Ergebnis ist ein neues Dokument mit eigener Archivnummer und der Quelle „abgeleitet“, das wie jedes andere eingeordnet wird. Woraus es entstand, mit welcher Operation und welchen Seiten, durch wen und wann, hält eine versiegelte Verknüpfung fest; sie steht im Protokoll und auf der Seite beider Dokumente.",
       ].filter(Boolean),
       liste: [
         ...quellen.map(

@@ -13,6 +13,7 @@ import {
   smallint,
   text,
   timestamp,
+  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -458,4 +459,49 @@ export const freigabeAbrufe = pgTable(
     abgerufenAm: timestamp("abgerufen_am", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("freigabe_abrufe_freigabe").on(t.freigabeId)],
+);
+
+/**
+ * Vorschaubild der ersten Seite (JPEG, 300 px breit) für Liste und Kacheln: aus PDFs, JPEG und PNG und aus der Ansicht
+ * von Office-Dateien; erzeugt der Worker mit pdftoppm. Abgeleitet wie ansichten: weder versiegelt noch im Audit-Log,
+ * jederzeit neu erzeugbar, mit der bestätigten Löschung weg (belegt_inhalt_loeschen).
+ */
+export const vorschaubilder = pgTable("vorschaubilder", {
+  dokumentId: uuid("dokument_id")
+    .primaryKey()
+    .references(() => dokumente.id),
+  bild: bytea("bild"),
+  fehler: text("fehler"),
+  erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Woraus ein Dokument abgeleitet ist: Seiten gedreht, entfernt, geteilt oder mehrere PDFs zusammengefügt
+ * (server/seiten/). Das neue Dokument ist ein eigenes Original mit Quelle „abgeleitet“, die Quelle bleibt unverändert.
+ * Eine Zeile je Quelle, position ist ihre Reihenfolge beim Zusammenfügen. Versiegelt ab dem Einfügen.
+ */
+export const ableitungen = pgTable(
+  "ableitungen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dokumentId: uuid("dokument_id")
+      .notNull()
+      .references(() => dokumente.id),
+    quelleId: uuid("quelle_id")
+      .notNull()
+      .references(() => dokumente.id),
+    position: smallint("position").notNull().default(1),
+    operation: text("operation").notNull(),
+    /** Seiten und Drehungen, wie sie die Operation bekam (server/seiten/seiten.ts) */
+    parameter: jsonb("parameter").notNull().default({}),
+    akteur: text("akteur").notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("ableitungen_operation", sql`${t.operation} in ('drehen', 'entfernen', 'teilen', 'zusammenfuegen')`),
+    check("ableitungen_nicht_selbst", sql`${t.dokumentId} <> ${t.quelleId}`),
+    check("ableitungen_position", sql`${t.position} >= 1`),
+    unique("ableitungen_eindeutig").on(t.dokumentId, t.position),
+    index("ableitungen_quelle").on(t.quelleId),
+  ],
 );

@@ -28,8 +28,9 @@ const dokument = {
     groesse: { type: "integer", description: "Bytes" },
     mimeType: { type: "string" },
     dateiname: { type: ["string", "null"] },
-    quelle: { type: "string", enum: ["upload", "mail", "ordner", "api"] },
+    quelle: { type: "string", enum: ["upload", "mail", "ordner", "api", "abgeleitet"] },
     eingegangenAm: { type: "string", format: "date-time" },
+    vorschaubild: { type: "boolean", description: "Nur in der Liste: ob es ein Vorschaubild gibt" },
     ...ordnungsFelder,
   },
 } as const;
@@ -164,6 +165,31 @@ export const openapi = {
           "200": { description: "PDF", content: { "application/pdf": {} } },
           "404": fehler,
           "410": fehler,
+        },
+      },
+    },
+    "/api/dokumente/{id}/vorschaubild": {
+      get: {
+        summary: "Vorschaubild der ersten Seite (JPEG, 300 px breit), aus dem Original oder seiner Ansicht abgeleitet",
+        parameters: [idParam],
+        responses: {
+          "200": { description: "JPEG", content: { "image/jpeg": {} } },
+          "404": fehler,
+          "410": fehler,
+        },
+      },
+    },
+    "/api/dokumente/{id}/ableitungen": {
+      get: {
+        summary:
+          "Woraus das Dokument abgeleitet ist (aus) und was daraus abgeleitet wurde (daraus): Seiten gedreht, entfernt, geteilt oder zusammengefügt",
+        parameters: [idParam],
+        responses: {
+          "200": {
+            description:
+              "aus und daraus: je dokumentId, dateiname, titel, asn, operation, parameter, position, akteur, erstelltAm, geloescht",
+          },
+          "404": fehler,
         },
       },
     },

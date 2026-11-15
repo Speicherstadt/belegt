@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
+import { darfSchreiben } from "../../shared/rollen.ts";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
+import { Derivations, operationLabel } from "../components/Derivations.tsx";
 import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { MailSection } from "../components/MailSection.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
+import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { ansichtUrl, api, dateiUrl, type Ereignis } from "../lib/api.ts";
@@ -17,6 +20,7 @@ const QUELLE: Record<string, () => string> = {
   mail: () => m.source_mail(),
   ordner: () => m.source_ordner(),
   api: () => m.source_api(),
+  abgeleitet: () => m.source_abgeleitet(),
 };
 
 function ereignis(e: Ereignis): string {
@@ -29,6 +33,10 @@ function ereignis(e: Ereignis): string {
     return e.aktion === "DELETE" ? m.event_doctype_removed({ name }) : m.event_doctype_set({ name });
   if (e.tabelle === "feldwerte")
     return e.aktion === "DELETE" ? m.event_field_removed({ name }) : m.event_field_set({ name });
+  if (e.tabelle === "ableitungen")
+    return e.richtung === "aus"
+      ? m.event_derived_from({ operation: operationLabel(e.detail) })
+      : m.event_derived_into({ operation: operationLabel(e.detail) });
   if (e.aktion === "INSERT") return m.event_insert();
   return m.event_other({ aktion: e.aktion });
 }
@@ -92,6 +100,7 @@ export function DocumentPage() {
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
           <MailSection dokumentId={d.id} />
+          <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
           <EInvoice dokumentId={d.id} />
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
@@ -168,6 +177,9 @@ export function DocumentPage() {
           </section>
         </div>
       </div>
+      {!geloescht && d.mimeType === "application/pdf" && darfSchreiben(ich.data?.role) && (
+        <PageEditor dokumentId={d.id} />
+      )}
     </div>
   );
 }

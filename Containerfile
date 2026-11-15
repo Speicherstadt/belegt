@@ -16,7 +16,8 @@ RUN bun run build \
 
 FROM docker.io/oven/bun:1.4.4-slim
 # tesseract-ocr mit Deutsch und Englisch: Texterkennung für Scans; poppler-utils: pdftoppm rastert gescannte PDFs für
-# die Texterkennung und die Suche nach Trennblättern. Beides läuft als eigener Prozess mit Zeitlimit (server/inhalt/ocr.ts).
+# die Texterkennung, die Suche nach Trennblättern und Vorschaubilder, pdfinfo zählt Seiten. Alles läuft als eigener
+# Prozess mit Zeitlimit (server/inhalt/ocr.ts).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng poppler-utils tzdata \
  && rm -rf /var/lib/apt/lists/*

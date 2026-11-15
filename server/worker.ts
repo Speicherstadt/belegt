@@ -13,13 +13,16 @@ import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
 import { dateiTeilen } from "./trennen/trennen.ts";
+import { rasterVerfuegbar } from "./vorschaubild/raster.ts";
+import { vorschaubilderErzeugen } from "./vorschaubild/vorschaubild.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab, stellt alle 15 Sekunden Webhooks zu, liest
- * Text und E-Rechnungen neuer Dokumente und, wenn eingerichtet, den Eingangsordner. Getrennt vom Server, damit ein
- * hängender Abruf oder eine schwere Datei keine Anfrage aufhält. Migrationen wendet der Server an, nicht der Worker.
+ * Text und E-Rechnungen neuer Dokumente und, wenn eingerichtet, den Eingangsordner und erzeugt Vorschaubilder. Getrennt
+ * vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage aufhält. Migrationen wendet der Server an,
+ * nicht der Worker.
  */
 const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
@@ -124,6 +127,20 @@ async function ansichten(url: string) {
   }
 }
 
+/** Mit pdftoppm: Vorschaubilder der ersten Seite, alle 15 Sekunden; bei vollem Stapel gleich weiter */
+async function vorschaubilder() {
+  for (;;) {
+    const r = await vorschaubilderErzeugen({ db, speicher }).catch((err) => ({
+      erzeugt: 0,
+      fehler: 0,
+      meldung: meldung(err),
+    }));
+    if (r.erzeugt || r.fehler) console.log(`Vorschaubilder: ${r.erzeugt} erzeugt, ${r.fehler} nicht möglich`);
+    if ("meldung" in r) console.error(`Vorschaubilder: ${r.meldung}`);
+    if (r.erzeugt + r.fehler < 10) await Bun.sleep(15_000);
+  }
+}
+
 /**
  * Mit EINGANG_ORDNER: alle 5 Sekunden ein Blick in den Ordner; aufgenommen wird, was zwei Blicke lang gleich bleibt.
  * PDFs mit Trennblättern werden vorher geteilt; scheitert das, kommt der Stapel unverändert ins Archiv.
@@ -169,6 +186,7 @@ await Promise.all([
   webhooks(),
   inhalte(),
   entfernungen(),
+  ...(rasterVerfuegbar() ? [vorschaubilder()] : []),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.EINGANG_ORDNER ? [eingangsordner(env.EINGANG_ORDNER)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),

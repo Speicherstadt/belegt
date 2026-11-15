@@ -16,7 +16,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter „Quellen und Schnittstellen“ an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`) und Tags, Dokumenttypen und Felder,
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/ableitungen`) und Tags, Dokumenttypen und Felder,
 mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein und setzt Tags, Dokumenttyp und Feldwerte; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
@@ -49,6 +49,11 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/ordnung` (`tagsHinzu`, `tagsWeg`, `dokumenttyp` (ID oder `null`), `felder`: `[{feldId, wert}]`) | Tags, Dokumenttyp und Feldwerte setzen; `wert` `null` entfernt, ein Betrag in Cent oder als `1.234,56`; Antwort der neue Stand; `400` bei ungültigem Wert, `409` nach der Löschung |
 | `POST /api/dokumente/sammeln` (`ids`: 1 bis 500, dazu wie bei `ordnung` und optional `einordnung`: wie beim Einordnen, `entstanden` auch `eingang`, `nurOffene` (Vorgabe `true`)) | Sammelbearbeitung in einer Transaktion; Antwort `ok` und `ergebnisse` je Dokument (`ok`, `eingeordnet` oder `fehler`); scheitert eines, `409` und nichts ist geändert |
 | `GET /api/dokumente/:id/datei` | das Original; `409`, wenn die Datei fehlt oder ihr Hash nicht mehr stimmt |
+| `GET /api/dokumente/:id/vorschaubild` | Vorschaubild der ersten Seite als JPEG, abgeleitet ([`dokument.md`](dokument.md#vorschaubilder)); `404` ohne, `410` nach der Löschung. In der Liste sagt `vorschaubild`, ob es eins gibt |
+| `GET /api/dokumente/:id/seiten`, `GET /api/dokumente/:id/seiten/:nr` | Seitenzahl eines PDFs (`anzahl`) und eine Seite als JPEG, 200 px breit; nur mit Sitzung, nicht für Prüfer; `503` ohne `pdftoppm` |
+| `POST /api/dokumente/:id/seiten` (`operation`: `drehen` mit `drehungen`: `[{seite, grad: 90 \| 180 \| 270}]`, `entfernen` mit `seiten`, `teilen` mit `nach`) | legt aus einem PDF ein neues Dokument an, beim Teilen zwei ([`dokument.md`](dokument.md#seiten-bearbeiten)); das Original bleibt. Antwort `201` mit `{dokumente: [...]}`; `400` bei Seiten, die es nicht gibt, oder keinem PDF, `410` nach der Löschung, `422` bei einem PDF, das sich nicht bearbeiten lässt. Nur der Inhaber mit Sitzung |
+| `POST /api/dokumente/zusammenfuegen` (`ids`: 2 bis 20 PDFs in der gewünschten Reihenfolge) | fügt die PDFs zu einem neuen Dokument zusammen; Antwort `201` mit dem Dokument. Nur der Inhaber mit Sitzung |
+| `GET /api/dokumente/:id/ableitungen` | `aus` (woraus das Dokument abgeleitet ist) und `daraus` (was daraus abgeleitet wurde), je mit `dokumentId`, `asn`, `operation`, `parameter`, `position`, `akteur`, `erstelltAm`; ein Prüfer sieht nur Dokumente seines Zeitraums |
 | `GET /api/dokumente/:id/ansicht` | die Ansicht einer Office-Datei als PDF, abgeleitet; `404` ohne Ansicht (`ansicht: false` in `GET /api/dokumente/:id`) |
 | `POST /api/dokumente/:id/einordnung` (`art`, `entstanden`, optional `freiwilligBis`, `titel`, `korrespondent`) | ordnet ein; die Frist rechnet Belegt nach § 147 AO |
 | `GET /api/dokumente?gruppe=offen\|pflicht\|freiwillig\|frei\|loeschbar\|geloescht` | nur der Eingang, eine Art der Aufbewahrung, was gelöscht werden darf, oder die Löschnachweise; ohne `gruppe` keine gelöschten |
@@ -63,7 +68,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (frei Abgelegtes: sofort gelöscht); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |
 | `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
-| `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp und Feldwerte, mit `detail`: deren Name) und sein Siegel |
+| `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp und Feldwerte, mit `detail`: deren Name; Ableitungen mit `detail`: Operation und `richtung`: `aus` oder `daraus`) und sein Siegel |
 | `GET /api/einstellungen`, `POST /api/einstellungen` (`firma`, `anschrift`, `verantwortlich`, `aufsicht`, `datensicherung`, `scannen`, `ergaenzungen`) | Angaben zum Betrieb; ändern nur der Inhaber |
 | `GET /api/verfahrensdoku` | Verfahrensdokumentation als Abschnitte, mit `luecken` und `vollstaendig` ([`verfahrensdoku.md`](verfahrensdoku.md)) |
 | `GET /api/export?von=JJJJ-MM-TT&bis=JJJJ-MM-TT` | Datenträger (Z3) als ZIP, gestreamt; Inhalt in [`pruefung.md`](pruefung.md) |

@@ -13,6 +13,7 @@ import { migrieren } from "../server/db/migrieren.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
+import { vorschaubilderErzeugen } from "../server/vorschaubild/vorschaubild.ts";
 
 /*
  * Server für die E2E-Tests: frische Datenbank neben E2E_DATABASE_URL (sie wird gelöscht und neu angelegt, nie auf echte
@@ -63,8 +64,22 @@ Bun.serve({
   }).fetch,
   maxRequestBodySize: 110 * 1024 * 1024,
 });
-// Statt des Workers: liest die Inhalte neuer Dokumente jede Sekunde
-setInterval(() => void inhalteErzeugen({ db, speicher }).catch(() => {}), 1000);
+/**
+ * Statt des Workers: ein Lauf nach dem anderen, jede Sekunde. Mit setInterval stapelten sich Läufe, die länger dauern
+ * (Texterkennung, pdftoppm), und ihre Prozesse, bis der Speicher voll war.
+ */
+function immerWieder(lauf: () => Promise<unknown>) {
+  void (async () => {
+    for (;;) {
+      await lauf().catch(() => {});
+      await Bun.sleep(1000);
+    }
+  })();
+}
+// Liest die Inhalte neuer Dokumente
+immerWieder(() => inhalteErzeugen({ db, speicher }));
+// Vorschaubilder
+immerWieder(() => vorschaubilderErzeugen({ db, speicher }));
 // Ein nachgebauter Vorschau-Dienst: macht aus jeder Office-Datei ein PDF mit ihrem Namen beim Dienst
 const vorschauAbfragen = async (_url: string, init: RequestInit) => {
   const datei = (init.body as FormData).get("files") as File;
@@ -74,11 +89,7 @@ const vorschauAbfragen = async (_url: string, init: RequestInit) => {
     .drawText(`Ansicht von ${datei.name}`, { x: 50, y: 700, font: await pdf.embedFont(StandardFonts.Helvetica) });
   return new Response(new Uint8Array(await pdf.save()));
 };
-setInterval(
-  () =>
-    void ansichtenErzeugen({ db, speicher }, "http://vorschau.invalid", { abfragen: vorschauAbfragen }).catch(() => {}),
-  1000,
-);
+immerWieder(() => ansichtenErzeugen({ db, speicher }, "http://vorschau.invalid", { abfragen: vorschauAbfragen }));
 // Ein nachgebautes Sprachmodell: schlägt für Dateien mit „ki-“ im Namen einen Geschäftsbrief vor, sonst nichts Brauchbares
 const kiAbfragen = async (_url: string, init: RequestInit) => {
   const nachricht = JSON.parse(String(init.body)).messages.at(-1).content as string;
@@ -93,14 +104,12 @@ const kiAbfragen = async (_url: string, init: RequestInit) => {
     : "kein JSON";
   return Response.json({ message: { content: typeof vorschlag === "string" ? vorschlag : JSON.stringify(vorschlag) } });
 };
-setInterval(
-  () =>
-    void kiVorschlaegeErzeugen(
-      db,
-      { url: "http://ki.invalid", modell: "e2e-modell" },
-      // Der nachgebaute Vorschau-Dienst oben läuft: alte Office-Formate warten auf ihre Ansicht
-      { abfragen: kiAbfragen, vorschau: true },
-    ).catch(() => {}),
-  1000,
+immerWieder(() =>
+  kiVorschlaegeErzeugen(
+    db,
+    { url: "http://ki.invalid", modell: "e2e-modell" },
+    // Der nachgebaute Vorschau-Dienst oben läuft: alte Office-Formate warten auf ihre Ansicht
+    { abfragen: kiAbfragen, vorschau: true },
+  ),
 );
 console.log(`E2E-Server auf Port ${port}`);
