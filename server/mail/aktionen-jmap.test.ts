@@ -223,4 +223,19 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über JMAP", () => {
     expect(j.zustand.mails.has("m7")).toBe(true);
     expect(j.zustand.sets.at(-1)).toEqual({ update: undefined, destroy: ["m6"] });
   });
+
+  it("nimmt beim Löschen eine Mail, die auch in anderen Ordnern liegt, nur aus dem abgeholten Ordner", async () => {
+    j.zustand.mails.clear();
+    const id = await quelle("jmap-loeschen-mehrere");
+    await einstellen(id, { aktion: "loeschen", warteStunden: 1, loeschenBestaetigt: true });
+    j.anlegen("m9", mailRoh(9, "jmap-aktion"), ["wichtig"]);
+    await abholen(id);
+    expect(await ausfuehren(id, new Date(Date.now() + 2 * 3_600_000))).toEqual({
+      ausgefuehrt: 1,
+      entfallen: 0,
+      fehler: 0,
+    });
+    expect(j.zustand.mails.get("m9")?.mailboxIds).toEqual({ wichtig: true });
+    expect(j.zustand.sets.at(-1)).toEqual({ update: { m9: { "mailboxIds/posteingang": null } }, destroy: undefined });
+  });
 });

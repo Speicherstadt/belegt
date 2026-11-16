@@ -159,8 +159,9 @@ export async function jmapOrdner(zugang: Zugang, abfragen: Abfragen = fetch): Pr
 
 /**
  * Aktionen an Mails eines Ordners über Email/set (RFC 8621, 4.6): Schlüsselwörter $seen und $flagged setzen, den Ordner
- * in mailboxIds tauschen (andere Ordner der Mail bleiben), destroy löscht die Mail. Jede Aktion wirft, wenn der Server
- * sie ablehnt (notUpdated, notDestroyed); mit dem Typ notFound, wenn es die Mail nicht mehr gibt.
+ * in mailboxIds tauschen (andere Ordner der Mail bleiben); Löschen nimmt die Mail aus dem abgeholten Ordner und nur,
+ * wenn sie in keinem anderen liegt, destroy. Jede Aktion wirft, wenn der Server sie ablehnt (notUpdated,
+ * notDestroyed); mit dem Typ notFound, wenn es die Mail nicht mehr gibt.
  */
 export async function jmapBearbeiten(zugang: Zugang, abfragen: Abfragen = fetch) {
   const { konto, aufrufen, mailboxen, finden, laden } = await verbinden(zugang, abfragen);
@@ -197,6 +198,15 @@ export async function jmapBearbeiten(zugang: Zugang, abfragen: Abfragen = fetch)
     schluesselwort: (id: string, wort: "$seen" | "$flagged") => aendern(id, { [`keywords/${wort}`]: true }),
     verschieben: (id: string, zielId: string) =>
       aendern(id, { [`mailboxIds/${quelle.id}`]: null, [`mailboxIds/${zielId}`]: true }),
-    loeschen: (id: string) => setzen({ destroy: [id] }, id, "notDestroyed"),
+    // Liegt die Mail auch in anderen Ordnern (Labels), nimmt Belegt sie nur aus dem abgeholten; destroy träfe sie
+    // überall. Liegt sie nur hier, geht das nicht (eine Email gehört zu mindestens einer Mailbox, RFC 8621, 4.1.1):
+    // dann destroy
+    loeschen: async (id: string) => {
+      const e = await imOrdner(id);
+      if (!e) throw Object.assign(new Error("JMAP: notFound"), { typ: "notFound" });
+      const andere = Object.keys(e.mailboxIds).filter((m) => m !== quelle.id && e.mailboxIds[m]);
+      if (andere.length) await aendern(id, { [`mailboxIds/${quelle.id}`]: null });
+      else await setzen({ destroy: [id] }, id, "notDestroyed");
+    },
   };
 }
