@@ -90,6 +90,8 @@ export function DocumentList({
   }, [leereSeite, seiten, abfrage]);
   // Suche oder Filter machen aus „leer“ ein „keine Treffer“ (DESIGN.md, Leerzustand); im Eingang gibt es keine
   const filterAktiv = !!suche.trim() || (!feste && (gruppe !== "alle" || parameter !== ""));
+  // Zeigt der Leerzustand „Dokument hochladen“, ist der Knopf in der Leiste nur zweitrangig: genau eine Hauptaktion
+  const leerMitUpload = liste.data?.length === 0 && seite === 1 && !filterAktiv;
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
   // Mails einlesen und PDFs zusammenfügen nur der Inhaber; hochladen und sammeln auch Mitarbeiter mit bearbeiten
@@ -128,6 +130,8 @@ export function DocumentList({
     },
   };
   const eingabe = useRef<HTMLInputElement>(null);
+  const suchEingabe = useRef<HTMLInputElement>(null);
+  const uploadKnopf = useRef<HTMLButtonElement>(null);
   const mailEingabe = useRef<HTMLInputElement>(null);
   const mailImport = useMutation({
     mutationFn: async (dateien: File[]) => {
@@ -162,6 +166,7 @@ export function DocumentList({
           <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border border-border px-3 text-sm">
             <span className="sr-only">{m.archive_search()}</span>
             <input
+              ref={suchEingabe}
               type="search"
               value={suche}
               onChange={(e) => setAnsicht({ ...ansicht, suche: e.target.value })}
@@ -187,10 +192,11 @@ export function DocumentList({
               }}
             />
             <button
+              ref={uploadKnopf}
               type="button"
               onClick={() => eingabe.current?.click()}
               disabled={hochladen.isPending}
-              className="h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+              className={`h-10 rounded-md px-4 font-medium text-sm disabled:opacity-60 ${leerMitUpload ? "border border-border hover:bg-subtle" : "bg-primary text-onprimary"}`}
             >
               {hochladen.isPending ? m.upload_busy() : m.upload()}
             </button>
@@ -317,14 +323,16 @@ export function DocumentList({
           {filterAktiv ? (
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                // Der Knopf verschwindet mit dem Zurücksetzen; der Fokus soll nicht auf body fallen
+                suchEingabe.current?.focus();
                 setAnsicht({
                   ...LEERE_ANSICHT,
                   sortierung: ansicht.sortierung,
                   proSeite: ansicht.proSeite,
                   darstellung: ansicht.darstellung,
-                })
-              }
+                });
+              }}
               className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
             >
               {m.archive_reset_filter()}
@@ -333,7 +341,11 @@ export function DocumentList({
             bearbeiten && (
               <button
                 type="button"
-                onClick={() => eingabe.current?.click()}
+                onClick={() => {
+                  // Nach dem Hochladen ist der Leerzustand weg; der Fokus geht auf den bleibenden Knopf oben
+                  uploadKnopf.current?.focus();
+                  eingabe.current?.click();
+                }}
                 disabled={hochladen.isPending}
                 className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
               >

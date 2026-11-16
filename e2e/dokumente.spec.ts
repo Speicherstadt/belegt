@@ -133,7 +133,9 @@ test("Suche ohne Treffer sagt „Keine Treffer“, „Filter zurücksetzen“ le
   await page.goto("/archiv");
   const suche = page.getByLabel("Volltext in Dokumenten, Mails und Anhängen");
   await suche.fill("gibt-es-nicht");
-  await page.getByRole("button", { name: "Pflicht" }).click();
+  const pflicht = page.getByRole("button", { name: "Pflicht" });
+  await pflicht.click();
+  await expect(pflicht).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "Keine Treffer für „gibt-es-nicht“" })).toBeVisible();
   await expect(page.getByText("Noch keine Dokumente")).toHaveCount(0);
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
@@ -141,8 +143,40 @@ test("Suche ohne Treffer sagt „Keine Treffer“, „Filter zurücksetzen“ le
 
   await page.getByRole("button", { name: "Filter zurücksetzen" }).click();
   await expect(suche).toHaveValue("");
+  await expect(suche).toBeFocused();
+  await expect(pflicht).toHaveAttribute("aria-pressed", "false");
   await expect(page.getByRole("button", { name: "Alle", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: /Keine Treffer/ })).toHaveCount(0);
+});
+
+test("ein Filter ohne Suche ohne Treffer sagt „Keine Treffer“ ohne Suchbegriff", async ({ page }) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  await page.goto("/archiv");
+  const pflicht = page.getByRole("button", { name: "Pflicht" });
+  await pflicht.click();
+  await expect(pflicht).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Keine Treffer", exact: true })).toBeVisible();
+  await expect(page.getByText("Noch keine Dokumente")).toHaveCount(0);
+  await page.getByRole("button", { name: "Filter zurücksetzen" }).click();
+  await expect(pflicht).toHaveAttribute("aria-pressed", "false");
+});
+
+test("ohne Recht zum Bearbeiten bietet ein leeres Archiv kein Hochladen an", async ({ page }) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  await page.route("**/api/ich", async (route) => {
+    const antwort = await route.fetch();
+    await route.fulfill({ response: antwort, json: { ...(await antwort.json()), role: "pruefer" } });
+  });
+  await page.goto("/archiv");
+  await expect(page.getByRole("heading", { name: "Noch keine Dokumente" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Dokument hochladen" })).toHaveCount(0);
+});
+
+test("ein leerer Eingang bietet das Hochladen an", async ({ page }) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  await page.goto("/eingang");
+  await expect(page.getByRole("heading", { name: "Eingang ist leer" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Dokument hochladen" })).toBeVisible();
 });
 
 test("ein leeres Archiv sagt „Noch keine Dokumente“ und bietet das Hochladen an", async ({ page }) => {
@@ -152,6 +186,8 @@ test("ein leeres Archiv sagt „Noch keine Dokumente“ und bietet das Hochladen
   await expect(page.getByRole("heading", { name: /Keine Treffer/ })).toHaveCount(0);
   const knopf = page.getByRole("button", { name: "Dokument hochladen" });
   await expect(knopf).toBeVisible();
+  // Genau eine Hauptaktion: „Hochladen“ in der Leiste ist im Leerzustand zweitrangig (ohne Primärfarbe)
+  await expect(page.getByRole("button", { name: "Hochladen", exact: true })).not.toHaveClass(/bg-primary/);
   const dialog = page.waitForEvent("filechooser");
   await knopf.click();
   await dialog;

@@ -17,7 +17,7 @@ export function PageHeader({ title, intro }: { title: string; intro: string }) {
 export function EmptyState({ title, text, children }: { title: string; text: string; children?: ReactNode }) {
   return (
     <section className="flex flex-col items-center gap-2 rounded-lg border border-border px-6 py-12 text-center">
-      <h2 className="m-0 font-medium text-base">{title}</h2>
+      <h2 className="m-0 font-medium text-base [overflow-wrap:anywhere]">{title}</h2>
       <p className="m-0 text-muted text-sm">{text}</p>
       {children}
     </section>

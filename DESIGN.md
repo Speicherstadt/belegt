@@ -158,7 +158,7 @@ z. B. „Erneut versuchen“). Den Rohtext des Servers gibt es eingeklappt unter
 ### Leerzustand
 
 Ein Satz und **genau ein** Knopf zur nächsten Handlung: „Noch keine Dokumente. [Dokument hochladen]“, „Noch kein
-Postfach. [Postfach verbinden]“. „Keine Treffer für ‚Rechnung‘. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
+Postfach. [Postfach verbinden]“. „Keine Treffer für „Rechnung“. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
 Dokumente“ und darf nie wie ein leeres Archiv aussehen. Umgesetzt für Archiv und Eingang (`DocumentList.tsx`); die
 übrigen Leerzustände („Noch keine Tags“, „Noch keine Postfächer“ …) haben noch keinen Knopf.
 
