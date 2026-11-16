@@ -34,8 +34,8 @@ Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests ge
 `TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer. Die Tests der Texterkennung brauchen `tesseract` (mit
 Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, die der Trennblätter und
 Vorschaubilder `pdftoppm`; sonst werden sie übersprungen. Den Test mit dem echten KoSIT-Validator startet
-`VALIDATOR_TEST_URL` (etwa `docker build -t belegt-validator deploy/validator && docker run -p 8081:8080
-belegt-validator`, dann `http://localhost:8081`), den mit Gotenberg `VORSCHAU_TEST_URL`; die CI setzt beide.
+`VALIDATOR_TEST_URL` (etwa `docker compose --profile validator build validator`, dann
+`docker run -p 8081:8080 belegt-validator:lokal` und `http://localhost:8081`), den mit Gotenberg `VORSCHAU_TEST_URL`; die CI setzt beide.
 
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test

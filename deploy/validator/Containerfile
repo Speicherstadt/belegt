@@ -2,7 +2,7 @@
 # Belegt – Prüfdienst für E-Rechnungen: der Validator der KoSIT als HTTP-Dienst (Daemon) mit der Konfiguration für
 # XRechnung, die auch EN 16931 ohne XRechnung prüft (ZUGFeRD, Factur-X). Belegt schickt das XML an VALIDATOR_URL
 # (docs/betrieb.md, „E-Rechnungen prüfen“).
-#   docker build -t belegt-validator deploy/validator
+#   docker build -t belegt-validator -f deploy/validator/Containerfile deploy/validator
 # Quellen: https://github.com/itplr-kosit/validator (docs/daemon.md) und
 # https://github.com/itplr-kosit/validator-configuration-xrechnung (docs/usage.md); beide Apache-2.0.
 ARG VALIDATOR_VERSION=1.6.3

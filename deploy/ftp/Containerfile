@@ -1,6 +1,6 @@
 # Belegt – FTP für Netzwerkscanner („Scan to FTP“): vsftpd schreibt in den Eingangsordner, den der Worker überwacht
 # (docs/scannen.md). Nur im eigenen Netz gedacht; FTP ohne TLS überträgt Passwort und Dateien unverschlüsselt.
-#   docker build -t belegt-ftp deploy/ftp
+#   docker build -t belegt-ftp -f deploy/ftp/Containerfile deploy/ftp
 FROM docker.io/library/debian:trixie-slim
 # openssl nur für ein selbst signiertes Zertifikat, wenn FTPS an ist und keins eingehängt wurde. tini ist Prozess 1:
 # vsftpd als Prozess 1 bekäme die verwaisten Prozesse beendeter Sitzungen und stürzte nach wenigen Sitzungen ab
