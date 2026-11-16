@@ -33,7 +33,9 @@ Texte der Oberfläche stehen in `messages/de.json` und `messages/en.json` (Parag
 Vitest für alles ohne Browser, Playwright für das, was jemand klickt. Tests gegen Postgres brauchen
 `TEST_DATABASE_URL` und werden sonst übersprungen; die CI setzt sie immer. Die Tests der Texterkennung brauchen `tesseract` (mit
 Deutsch) und `pdftoppm` (Poppler), etwa `apt install tesseract-ocr-deu poppler-utils`, die der Trennblätter und
-Vorschaubilder `pdftoppm`; sonst werden sie übersprungen.
+Vorschaubilder `pdftoppm`; sonst werden sie übersprungen. Den Test mit dem echten KoSIT-Validator startet
+`VALIDATOR_TEST_URL` (etwa `docker build -t belegt-validator deploy/validator && docker run -p 8081:8080
+belegt-validator`, dann `http://localhost:8081`), den mit Gotenberg `VORSCHAU_TEST_URL`; die CI setzt beide.
 
 ```sh
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
@@ -84,6 +86,7 @@ löschen sie wieder.
 | `OEFFNEN_MIT_NAME`, `OEFFNEN_MIT_URL` | Knopf „Öffnen mit …“ für eine andere App, Adresse mit `{url}` und `{name}` (docs/schnittstelle.md) | – |
 | `MAIL_SMTP_URL`, `MAIL_SMTP_PASSWORT`, `MAIL_ABSENDER` | Benachrichtigungen per Mail: SMTP-Server (`smtp://benutzer@host:587` mit STARTTLS, `smtps://…:465`), Passwort, Absender (docs/betrieb.md) | –, –, `belegt@<Host von BETTER_AUTH_URL>` |
 | `VORSCHAU_URL` | Vorschau-Dienst mit der Schnittstelle von Gotenberg für die Ansicht von Office-Dateien (docs/betrieb.md) | – |
+| `VALIDATOR_URL` | KoSIT-Validator als Dienst für die Prüfung von E-Rechnungen (docs/betrieb.md) | – |
 
 ## Migrationen
 

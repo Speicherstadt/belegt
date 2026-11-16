@@ -225,6 +225,21 @@ Netz `vorschau` ohne Internet, weil es fremde Dateien öffnet. Ist der Dienst ni
 später wieder; Dateien, die vor dem Einschalten eingegangen sind, bekommen ihre Ansicht nachträglich. Eine Datei, an der Gotenberg sein Zeitlimit
 (`--api-timeout`, Vorgabe 30 Sekunden) überschreitet, bekommt keine Ansicht.
 
+## E-Rechnungen prüfen { #erechnung-pruefen }
+
+```bash
+docker compose --profile validator up -d
+```
+
+Mit `VALIDATOR_URL=http://validator:8080` in `.env` schickt der Worker das XML jeder erkannten E-Rechnung (XRechnung,
+eingebettet in ZUGFeRD und Factur-X) an den [Validator der KoSIT](https://github.com/itplr-kosit/validator) mit der
+[Konfiguration für XRechnung](https://github.com/itplr-kosit/validator-configuration-xrechnung) (Image
+`tristanteu/belegt-validator` aus `deploy/validator`). Sie prüft XRechnung in UBL und CII und EN 16931 ohne XRechnung;
+ein ZUGFeRD-Profil unterhalb von EN 16931 (etwa BASIC WL) gilt als ungültig, weil kein Szenario passt. Was er findet,
+steht auf der Seite des Dokuments ([Eingang](eingang.md#text-und-e-rechnungen)). Der Dienst läuft im Netz `validator`
+ohne Internet, weil er fremde Dateien liest. Ist er nicht erreichbar, versucht es der Worker später wieder; E-Rechnungen,
+die vor dem Einschalten eingegangen sind, prüft er nachträglich.
+
 ## Eingangsordner
 
 Für einen Scanner oder eine Freigabe, in die Dateien abgelegt werden, legst du neben `compose.yml` einen Ordner an und

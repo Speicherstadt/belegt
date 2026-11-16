@@ -101,7 +101,16 @@ export async function aktuelle(db: Datenbank | Tx, dokumentId: string): Promise<
   return e ?? null;
 }
 
-export const Gruppe = z.enum(["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht"]);
+export const Gruppe = z.enum([
+  "alle",
+  "offen",
+  "pflicht",
+  "freiwillig",
+  "frei",
+  "loeschbar",
+  "geloescht",
+  "erechnung_ungueltig",
+]);
 export type Gruppe = z.infer<typeof Gruppe>;
 
 const geloescht = sql`exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)`;
@@ -133,6 +142,9 @@ function gruppenOhneGeloescht(gruppe: Exclude<Gruppe, "geloescht">, heute: strin
       return sql`e.art = 'freiwillig'`;
     case "frei":
       return sql`e.art = 'frei'`;
+    // Vom KoSIT-Validator abgelehnt (server/erechnung/pruefung.ts)
+    case "erechnung_ungueltig":
+      return sql`exists (select 1 from erechnung_pruefungen p where p.dokument_id = d.id and not p.gueltig)`;
   }
 }
 

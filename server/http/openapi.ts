@@ -81,8 +81,9 @@ export const openapi = {
             in: "query",
             schema: {
               type: "string",
-              enum: ["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht"],
+              enum: ["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht", "erechnung_ungueltig"],
             },
+            description: "erechnung_ungueltig: E-Rechnungen, die der KoSIT-Validator abgelehnt hat (mit VALIDATOR_URL)",
           },
           {
             name: "sortierung",

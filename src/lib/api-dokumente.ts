@@ -5,7 +5,15 @@ import type { Ordnung, OrdnungsVorschlag, TagKurz } from "./api-ordnung.ts";
 /* Dokumente: Liste, Aufnahme, Einordnung, Löschung, Mails, Vorschläge, Verlauf und Links (docs/api.md) */
 
 export type Art = "buecher" | "zoll" | "beleg" | "geschaeftsbrief" | "sonstige" | "freiwillig" | "frei";
-export type Gruppe = "alle" | "offen" | "pflicht" | "freiwillig" | "frei" | "loeschbar" | "geloescht";
+export type Gruppe =
+  | "alle"
+  | "offen"
+  | "pflicht"
+  | "freiwillig"
+  | "frei"
+  | "loeschbar"
+  | "geloescht"
+  | "erechnung_ungueltig";
 
 export interface Dokument {
   id: string;
@@ -141,6 +149,16 @@ export interface ERechnung {
   waehrung: string | null;
 }
 
+/** Ergebnis des KoSIT-Validators für eine E-Rechnung */
+export interface ERechnungsPruefung {
+  gueltig: boolean;
+  szenario: string | null;
+  fehler: number;
+  warnungen: number;
+  meldungen: { stufe: "fehler" | "warnung"; code: string | null; text: string }[];
+  geprueftAm: string;
+}
+
 /** Ein gültiger geteilter Link (docs/teilen.md); den Link selbst gibt es nur beim Anlegen */
 export interface GeteilterLink {
   id: string;
@@ -194,9 +212,13 @@ export const dokumenteApi = {
   },
   verlauf: (id: string) => aufruf<{ ereignisse: Ereignis[]; siegel: string | null }>(`/api/dokumente/${id}/verlauf`),
   inhalt: (id: string) =>
-    aufruf<{ erechnung: ERechnung | null; fehler: string | null; ocr: boolean; textLaenge: number } | null>(
-      `/api/dokumente/${id}/inhalt`,
-    ),
+    aufruf<{
+      erechnung: ERechnung | null;
+      fehler: string | null;
+      ocr: boolean;
+      textLaenge: number;
+      pruefung: ERechnungsPruefung | null;
+    } | null>(`/api/dokumente/${id}/inhalt`),
   einordnen: (
     id: string,
     eingabe: { art: Art; entstanden: string; freiwilligBis?: string; titel?: string; korrespondent?: string },

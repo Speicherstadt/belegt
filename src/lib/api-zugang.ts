@@ -67,6 +67,8 @@ export const zugangApi = {
       embedOrigin: string | null;
       version: string;
       oeffnenMit: { name: string } | null;
+      /** E-Rechnungen werden mit dem KoSIT-Validator geprüft */
+      erechnungPruefung: boolean;
     }>("/api/status"),
   /** Anmelden über den OIDC-Anbieter; stumm: prompt=none, ohne Rückfrage beim Anbieter (im Frame) */
   anmeldenMitAnbieter: async (ziel: string, stumm = false) => {

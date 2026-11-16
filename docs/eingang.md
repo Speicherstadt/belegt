@@ -261,7 +261,11 @@ Kurz nach dem Eingang liest der Worker jedes PDF und XML: den Text eines PDFs f�
 E-Rechnung nach EN 16931, als XRechnung (UBL oder CII) oder eingebettet in ein PDF (ZUGFeRD, Factur-X). Auf der Seite
 des Dokuments stehen dann Nummer, Datum, Verkäufer, Käufer und Gesamtbetrag (BT-1, BT-2, BT-27, BT-44, BT-112). Beim
 Einordnen übernimmt „Übernehmen“ Datum, „Rechnung <Nummer>“ als Titel und den Verkäufer; die Art kommt aus einer
-passenden Regel, sonst „Buchungsbeleg“. Geprüft wird die Rechnung dabei nicht, und maßgeblich bleibt das Original.
+passenden Regel, sonst „Buchungsbeleg“. Maßgeblich bleibt das Original. Mit dem [Prüfdienst](betrieb.md#erechnung-pruefen)
+prüft der Worker danach jede E-Rechnung mit dem Validator der KoSIT gegen XRechnung oder EN 16931; die Seite des
+Dokuments zeigt „Gültig“ oder „Ungültig“ mit den ersten Fehlern und Warnungen (Regel und Text), und der Filter
+„E-Rechnung ungültig“ im Archiv sammelt die abgelehnten. Das Ergebnis ist abgeleitet wie der Text und geht mit der
+bestätigten Löschung. Ohne den Dienst prüft Belegt nichts.
 Bilder (JPEG, PNG, WebP) und PDFs ohne Textebene gehen durch die Texterkennung (Tesseract, Deutsch und Englisch);
 die Seite des Dokuments sagt dann „aus der Texterkennung“, und es gibt ein [durchsuchbares
 PDF](dokument.md#durchsuchbares-pdf). HEIC liest sie nicht. Von einem PDF liest sie die ersten 50 Seiten; eine Seite

@@ -37,6 +37,7 @@ export type {
   Einordnung,
   Eintrag,
   ERechnung,
+  ERechnungsPruefung,
   Ereignis,
   Erklaerung,
   GelernterVorschlag,

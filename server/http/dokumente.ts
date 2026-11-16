@@ -16,6 +16,7 @@ import {
   sperrenListen,
   uebersicht,
 } from "../einordnung/einordnung.ts";
+import { pruefungZu } from "../erechnung/pruefung.ts";
 import { inhaltZu } from "../inhalt/inhalt.ts";
 import {
   beantragen,
@@ -303,8 +304,10 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     const id = Id.safeParse(c.req.param("id"));
     const dokument = id.success ? await laden(umgebung.db, id.data) : null;
     if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
-    // null, solange der Worker die Datei noch nicht gelesen hat oder es nichts zu lesen gibt (Bilder)
-    return c.json(await inhaltZu(umgebung.db, dokument.id));
+    // null, solange der Worker die Datei noch nicht gelesen hat oder es nichts zu lesen gibt (Bilder); pruefung ist
+    // das Ergebnis des KoSIT-Validators für eine E-Rechnung, null ohne (server/erechnung/pruefung.ts)
+    const inhalt = await inhaltZu(umgebung.db, dokument.id);
+    return c.json(inhalt && { ...inhalt, pruefung: await pruefungZu(umgebung.db, dokument.id) });
   });
 
   app.get("/api/dokumente/:id/verlauf", async (c) => {

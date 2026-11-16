@@ -34,18 +34,27 @@ const OHNE_TEXT = (text: string) => text.replace(/\s/g, "").length < 20;
 /** Gekürzt auf MAX_TEXT, ohne Zeichen, die Postgres nicht speichert (speicherbar) */
 const fuerDatenbank = (text: string) => speicherbar(text.slice(0, MAX_TEXT));
 
+type PdfDokument = Awaited<ReturnType<typeof getDocumentProxy>>;
+
+/** Die eingebettete E-Rechnung eines PDFs mit ihrem XML, oder null */
+async function eingebettet(pdf: PdfDokument): Promise<{ xml: string; erechnung: ERechnung } | null> {
+  // pdf.js liefert erst die Namen; den Inhalt holt getAttachmentContent, nur für Namen einer E-Rechnung
+  for (const [id, a] of (await pdf.getAttachments()) ?? []) {
+    if (!EINGEBETTET.test(a.filename || id)) continue;
+    const inhalt = a.content ?? (await pdf.getAttachmentContent(id));
+    if (!inhalt) continue;
+    const xml = new TextDecoder().decode(inhalt);
+    const erechnung = eRechnungLesen(xml);
+    if (erechnung) return { xml, erechnung };
+  }
+  return null;
+}
+
 async function pdfLesen(bytes: Uint8Array, ocr: boolean): Promise<Gelesen> {
   const pdf = await getDocumentProxy(new Uint8Array(bytes));
   try {
     const { text } = await extractText(pdf, { mergePages: true });
-    let erechnung: ERechnung | null = null;
-    // pdf.js liefert erst die Namen; den Inhalt holt getAttachmentContent, nur für Namen einer E-Rechnung
-    for (const [id, a] of (await pdf.getAttachments()) ?? []) {
-      if (!EINGEBETTET.test(a.filename || id)) continue;
-      const inhalt = a.content ?? (await pdf.getAttachmentContent(id));
-      erechnung = inhalt ? eRechnungLesen(new TextDecoder().decode(inhalt)) : null;
-      if (erechnung) break;
-    }
+    const erechnung = (await eingebettet(pdf))?.erechnung ?? null;
     if (ocr && OHNE_TEXT(text)) return { text: fuerDatenbank(await pdfScanText(bytes)), erechnung, ocr: true };
     return { text: fuerDatenbank(text), erechnung };
   } finally {
@@ -72,6 +81,25 @@ export async function lesen(bytes: Uint8Array, gespeichert: string, { ocr = fals
   return { text: "", erechnung: null };
 }
 
+/**
+ * Das XML einer E-Rechnung: die Datei selbst (XRechnung) oder das in ein PDF eingebettete (ZUGFeRD, Factur-X); null,
+ * wenn es keine E-Rechnung ist. Für die Prüfung mit dem KoSIT-Validator (server/erechnung/)
+ */
+export async function eRechnungXml(bytes: Uint8Array, gespeichert: string): Promise<string | null> {
+  const mimeType = gespeichert === "application/octet-stream" ? dateityp(bytes) : gespeichert;
+  if (mimeType === "application/xml") {
+    const xml = new TextDecoder().decode(bytes);
+    return eRechnungLesen(xml) ? xml : null;
+  }
+  if (mimeType !== "application/pdf") return null;
+  const pdf = await getDocumentProxy(new Uint8Array(bytes));
+  try {
+    return (await eingebettet(pdf))?.xml ?? null;
+  } finally {
+    await pdf.loadingTask.destroy();
+  }
+}
+
 const KIND = fileURLToPath(new URL("./lesen-kind.ts", import.meta.url));
 
 /**
@@ -85,6 +113,12 @@ export async function lesenImKind(
 ): Promise<Gelesen> {
   const aus = await ausfuehren("bun", [KIND, mimeType, ocr ? "ocr" : ""], bytes, zeitlimit);
   return JSON.parse(aus) as Gelesen;
+}
+
+/** eRechnungXml im eigenen Prozess mit Zeitlimit, aus demselben Grund wie lesenImKind */
+export async function eRechnungXmlImKind(bytes: Uint8Array, mimeType: string, zeitlimit = 60_000) {
+  const aus = await ausfuehren("bun", [KIND, mimeType, "xml"], bytes, zeitlimit);
+  return (JSON.parse(aus) as { xml: string | null }).xml;
 }
 
 /**

@@ -24,6 +24,8 @@ const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "loeschbar", label: () => m.filter_deletable() },
   { gruppe: "geloescht", label: () => m.filter_deleted() },
 ];
+/** Nur mit eingerichtetem Prüfdienst (VALIDATOR_URL) */
+const UNGUELTIG = { gruppe: "erechnung_ungueltig" as const, label: () => m.filter_einvoice_invalid() };
 
 type Darstellung = "liste" | "kacheln";
 const DARSTELLUNG = "belegt.darstellung.liste";
@@ -63,6 +65,8 @@ export function DocumentList({
   const gruppe = feste ?? ansicht.gruppe;
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
+  const status = useQuery({ queryKey: ["status"], queryFn: api.status });
+  const gruppenFilter = status.data?.erechnungPruefung || gruppe === UNGUELTIG.gruppe ? [...FILTER, UNGUELTIG] : FILTER;
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder, enabled: !feste });
   const parameter = feste ? "" : filterParameter(ansicht, felder.data ?? []);
   // Seite ab 1; eine andere Suche, Gruppe oder ein anderer Filter beginnt wieder vorn
@@ -233,7 +237,7 @@ export function DocumentList({
       {!feste && (
         <fieldset className="m-0 flex flex-wrap gap-2 border-0 p-0">
           <legend className="sr-only">{m.archive_filter_label()}</legend>
-          {FILTER.map((f) => (
+          {gruppenFilter.map((f) => (
             <button
               key={f.gruppe}
               type="button"

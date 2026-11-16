@@ -29,6 +29,7 @@ x-umgebung: &umgebung # Getrennte Rollen (docs/betrieb.md): App-Anmeldung aus .e
   KI_URL: ${KI_URL:-}
   KI_MODELL: ${KI_MODELL:-}
   VORSCHAU_URL: ${VORSCHAU_URL:-}
+  VALIDATOR_URL: ${VALIDATOR_URL:-}
   EINGANG_ORDNER: ${EINGANG_ORDNER:-}
   EINGANG_ORDNER_TAGS: ${EINGANG_ORDNER_TAGS:-}
   TRENNBLATT_CODE: ${TRENNBLATT_CODE:-}
@@ -123,7 +124,7 @@ services:
       server:
         condition: service_healthy
     environment: *umgebung
-    networks: [default, vorschau]
+    networks: [default, vorschau, validator]
     volumes:
       - dokumente:/var/lib/belegt
       # Eingangsordner, etwa für einen Scanner (docs/eingang.md): mkdir eingang && sudo chown 1000 eingang,
@@ -201,6 +202,17 @@ services:
     volumes:
       - caddy:/data
 
+  # Prüfdienst für E-Rechnungen (KoSIT-Validator), nur mit: docker compose --profile validator up -d;
+  # VALIDATOR_URL=http://validator:8080 in .env. Im eigenen Netz ohne Internet, denn er liest fremde XML-Dateien
+  validator:
+    build:
+      context: deploy/validator
+      dockerfile: Containerfile
+    image: belegt-validator:lokal
+    profiles: [validator]
+    restart: unless-stopped
+    networks: [validator]
+
   # FTP für Netzwerkscanner, nur mit: docker compose --profile ftp up -d (docs/scannen.md). Schreibt in denselben
   # Eingangsordner wie der Worker; FTP_BENUTZER, FTP_PASSWORT und FTP_PASV_ADRESSE in .env. Nur im eigenen Netz
   ftp:
@@ -268,6 +280,8 @@ configs:
 networks:
   default:
   vorschau:
+    internal: true
+  validator:
     internal: true
   # Caddy und Server; Caddy hat die feste Adresse aus BELEGT_TRUSTED_PROXIES, alle anderen bekommen eine aus ip_range,
   # das Gateway (.1) ist nicht vertrauenswürdig. Nutzt ein anderes Netz schon 172.31.250.0/29, hier und dort ändern.

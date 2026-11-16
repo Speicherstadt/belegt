@@ -24,6 +24,7 @@ export * from "./schema-alltag.ts";
 export * from "./schema-archivfassung.ts";
 export * from "./schema-betrieb.ts";
 export * from "./schema-doppelt.ts";
+export * from "./schema-erechnung.ts";
 export * from "./schema-import.ts";
 export * from "./schema-ordnung.ts";
 export * from "./schema-postfach.ts";

@@ -39,8 +39,17 @@ jobs:
     env:
       TEST_DATABASE_URL: postgres://belegt:belegt@localhost:5432/belegt_test
       VORSCHAU_TEST_URL: http://localhost:3001
+      VALIDATOR_TEST_URL: http://localhost:8081
     steps:
       - uses: actions/checkout@v7
+      # KoSIT-Validator aus deploy/validator für die Prüfung von E-Rechnungen; ohne VALIDATOR_TEST_URL würde der Test
+      # dazu übersprungen. Als eigener Schritt, weil ein Dienst der CI ein fertiges Image bräuchte
+      - name: Validator für E-Rechnungen
+        run: |
+          docker build -t belegt-validator deploy/validator
+          docker run -d --name validator -p 8081:8080 belegt-validator
+          for i in $(seq 1 60); do curl -fsS http://localhost:8081/server/health >/dev/null && exit 0; sleep 2; done
+          docker logs validator; exit 1
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4

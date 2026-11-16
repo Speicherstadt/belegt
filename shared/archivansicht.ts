@@ -6,7 +6,16 @@
  * Tags mit Komma getrennt; Unbekanntes oder Ungültiges fällt auf die Vorgabe zurück, statt die Seite zu brechen.
  */
 
-export const GRUPPEN = ["alle", "offen", "pflicht", "freiwillig", "frei", "loeschbar", "geloescht"] as const;
+export const GRUPPEN = [
+  "alle",
+  "offen",
+  "pflicht",
+  "freiwillig",
+  "frei",
+  "loeschbar",
+  "geloescht",
+  "erechnung_ungueltig",
+] as const;
 export type ListenGruppe = (typeof GRUPPEN)[number];
 
 /** neu: zuletzt eingegangen zuerst (Vorgabe); alt: zuerst eingegangen; titel: nach Titel oder Dateiname; entstanden:

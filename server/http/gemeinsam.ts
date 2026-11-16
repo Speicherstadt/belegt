@@ -25,6 +25,8 @@ export type AppUmgebung = Umgebung & {
   objektsperre?: boolean;
   /** Sprachmodell für Vorschläge, wenn eingerichtet (für die Verfahrensdokumentation) */
   kiModell?: { modell: string; host: string };
+  /** E-Rechnungen werden mit dem Validator der KoSIT geprüft (VALIDATOR_URL; Filter und Verfahrensdokumentation) */
+  erechnungPruefung?: boolean;
   /** Der Worker überwacht einen Eingangsordner (für die Verfahrensdokumentation) */
   eingangsordner?: boolean;
   /** Code auf Trennblättern (TRENNBLATT_CODE), Vorgabe BELEGT-TRENNER */

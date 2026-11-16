@@ -54,6 +54,7 @@ export function createApp(umgebung?: AppUmgebung) {
         embedOrigin: umgebung.embedOrigin ?? null,
         version: VERSION,
         oeffnenMit: umgebung.oeffnenMit ? { name: umgebung.oeffnenMit.name } : null,
+        erechnungPruefung: !!umgebung.erechnungPruefung,
       }),
     );
 

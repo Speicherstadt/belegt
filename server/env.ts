@@ -59,6 +59,8 @@ const Schema = z.object({
     .optional(),
   /** Vorschau-Dienst mit der Schnittstelle von Gotenberg, etwa http://gotenberg:3000; Ansichten für Office-Dateien */
   VORSCHAU_URL: z.string().url().optional(),
+  /** Prüfdienst für E-Rechnungen: Validator der KoSIT als Daemon, etwa http://validator:8080 (docs/betrieb.md) */
+  VALIDATOR_URL: z.string().url().optional(),
   /** Ordner, den der Worker überwacht (etwa Ziel eines Scanners), im Container /var/lib/belegt/eingang */
   EINGANG_ORDNER: z.string().min(1).optional(),
   /** Unterordner im Eingangsordner als Tags (jede Ebene ein Tag, angelegt, falls es ihn nicht gibt) */

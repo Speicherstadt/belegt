@@ -7,6 +7,7 @@ import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { zugriffLesen, zugriffWarnung } from "./db/rollen.ts";
 import { readEnv } from "./env.ts";
+import { erechnungenPruefen } from "./erechnung/pruefung.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
 import { ocrVerfuegbar } from "./inhalt/ocr.ts";
 import { kiVorschlaegeErzeugen } from "./ki/vorschlaege.ts";
@@ -182,6 +183,20 @@ async function ansichten(url: string) {
   }
 }
 
+/** Mit VALIDATOR_URL: E-Rechnungen mit dem Validator der KoSIT prüfen, alle 30 Sekunden; bei vollem Stapel gleich weiter */
+async function erechnungen(url: string) {
+  for (;;) {
+    const r = await erechnungenPruefen({ db, speicher }, url).catch((err) => ({
+      geprueft: 0,
+      ungueltig: 0,
+      meldung: meldung(err),
+    }));
+    if (r.geprueft) console.log(`E-Rechnungen: ${r.geprueft} geprüft, davon ${r.ungueltig} ungültig`);
+    if (r.meldung) console.error(`E-Rechnungen: ${r.meldung}, später noch einmal`);
+    if (r.geprueft < 10) await Bun.sleep(30_000);
+  }
+}
+
 /** Mit pdftoppm: Vorschaubilder der ersten Seite, alle 15 Sekunden; bei vollem Stapel gleich weiter */
 async function vorschaubilder() {
   for (;;) {
@@ -312,5 +327,6 @@ await Promise.all([
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
   ...(mail ? [benachrichtigungen(mail.versender)] : []),
   ...(env.VORSCHAU_URL ? [ansichten(env.VORSCHAU_URL)] : []),
+  ...(env.VALIDATOR_URL ? [erechnungen(env.VALIDATOR_URL)] : []),
   ...(env.KI_URL && env.KI_MODELL ? [kiVorschlaege({ url: env.KI_URL, modell: env.KI_MODELL })] : []),
 ]);

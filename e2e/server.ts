@@ -14,6 +14,7 @@ import { createAuth } from "../server/auth.ts";
 import { smtpVersender } from "../server/benachrichtigungen/versand.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrierenMitRechten } from "../server/db/migrieren.ts";
+import { erechnungenPruefen } from "../server/erechnung/pruefung.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
@@ -85,6 +86,7 @@ Bun.serve({
     importOrdner,
     mail,
     oeffnen: imapOeffnen,
+    erechnungPruefung: true,
     // Die Seite, die Belegt im Frame zeigen darf; der Test baut sie im Browser nach (e2e/einbetten.spec.ts)
     embedOrigin: "http://localhost:5199",
     // „Öffnen mit …“: die App fängt der Test im Browser ab (e2e/ansicht.spec.ts)
@@ -133,6 +135,18 @@ const vorschauAbfragen = async (_url: string, init: RequestInit) => {
     .drawText(`Ansicht von ${datei.name}`, { x: 50, y: 700, font: await pdf.embedFont(StandardFonts.Helvetica) });
   return new Response(new Uint8Array(await pdf.save()));
 };
+/** Nachgebauter KoSIT-Validator: eine Rechnungsnummer mit „UNGUELTIG“ lehnt er ab (BR-CO-15), alles andere nimmt er an */
+const validatorAbfragen = async (_url: string, init: RequestInit) => {
+  const ungueltig = String(init.body).includes("UNGUELTIG");
+  const meldung = ungueltig
+    ? '<rep:message level="error" code="BR-CO-15">[BR-CO-15]-Invoice total amount with VAT (BT-112) = Invoice total amount without VAT (BT-109) + Invoice total VAT amount (BT-110).</rep:message>'
+    : "";
+  return new Response(
+    `<rep:report xmlns:rep="http://www.xoev.de/de/validator/varl/1" xmlns:s="http://www.xoev.de/de/validator/framework/1/scenarios"><rep:scenarioMatched><s:scenario><s:name>EN16931 XRechnung (UBL Invoice)</s:name></s:scenario><rep:validationStepResult id="val-sch.1" valid="${!ungueltig}">${meldung}</rep:validationStepResult></rep:scenarioMatched><rep:assessment>${ungueltig ? "<rep:reject/>" : "<rep:accept/>"}</rep:assessment></rep:report>`,
+    { status: ungueltig ? 406 : 200 },
+  );
+};
+immerWieder(() => erechnungenPruefen({ db, speicher }, "http://validator.invalid", { abfragen: validatorAbfragen }));
 immerWieder(() => ansichtenErzeugen({ db, speicher }, "http://vorschau.invalid", { abfragen: vorschauAbfragen }));
 // Ein nachgebautes Sprachmodell: schlägt für Dateien mit „ki-“ im Namen einen Geschäftsbrief vor, sonst nichts Brauchbares
 const kiAbfragen = async (_url: string, init: RequestInit) => {
