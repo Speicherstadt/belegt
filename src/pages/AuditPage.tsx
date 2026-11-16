@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { BackupStatus } from "../components/BackupStatus.tsx";
+import { DatabaseAccess } from "../components/DatabaseAccess.tsx";
 import { Export } from "../components/Export.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { api } from "../lib/api.ts";
@@ -123,6 +125,19 @@ export function AuditPage() {
             </tbody>
           </table>
         </section>
+      )}
+      {/* Rechte der Datenbankanmeldung und Sicherung: nicht für Prüfer, der Server lehnt sie ab */}
+      {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
+        <>
+          <DatabaseAccess />
+          <section aria-labelledby="sicherung" className="flex flex-col gap-2 rounded-lg border border-border p-4">
+            <h2 id="sicherung" className="m-0 font-semibold text-base">
+              {m.backup_title()}
+            </h2>
+            <p className="m-0 text-muted text-sm">{m.backup_intro()}</p>
+            <BackupStatus />
+          </section>
+        </>
       )}
       {ich.data && (
         <div className="print:hidden">

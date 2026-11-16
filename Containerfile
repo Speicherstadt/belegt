@@ -1,5 +1,5 @@
-# Belegt – ein Image für Server und Worker. Der Server wendet beim Start die Migrationen an und liefert die gebaute
-# Oberfläche aus; der Worker (bun server/worker.ts) ruft Postfächer ab, stellt Webhooks zu und liest Text.
+# Belegt – ein Image für Server und Worker. Der Server wendet beim Start die Migrationen an (mit MIGRATION_DATABASE_URL
+# als eigener Schritt davor, server/start.sh) und liefert die gebaute Oberfläche aus; der Worker (bun server/worker.ts) ruft Postfächer ab, stellt Webhooks zu und liest Text.
 FROM docker.io/oven/bun:1.4.4-slim AS build
 WORKDIR /app
 COPY bun.lock package.json ./
@@ -38,4 +38,4 @@ USER bun
 VOLUME /var/lib/belegt
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s CMD bun -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
-CMD ["bun", "server/index.ts"]
+CMD ["sh", "server/start.sh"]

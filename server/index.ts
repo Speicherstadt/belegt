@@ -4,7 +4,8 @@ import { createApp } from "./app.ts";
 import { createAuth } from "./auth.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
-import { migrieren } from "./db/migrieren.ts";
+import { datenbankVorbereiten } from "./db/migrieren.ts";
+import { zugriffWarnung } from "./db/rollen.ts";
 import { eingerichtet } from "./db/status.ts";
 import { readEnv } from "./env.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
@@ -15,7 +16,10 @@ const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
 if (!env.BETTER_AUTH_SECRET) throw new Error("BETTER_AUTH_SECRET fehlt (mindestens 32 Zeichen)");
 
-await migrieren(env.DATABASE_URL);
+// Getrennte Rollen: migriert mit MIGRATION_DATABASE_URL, sonst wie bisher mit DATABASE_URL (dann mit Warnung)
+const zugriff = await datenbankVorbereiten({ appUrl: env.DATABASE_URL, migrationUrl: env.MIGRATION_DATABASE_URL });
+const warnung = zugriffWarnung(zugriff);
+if (warnung) console.warn(warnung);
 const { db } = verbinden(env.DATABASE_URL);
 const { speicher, sperrbar } = speicherAusEnv(env);
 // Einrichtungscode für das erste Konto: bei jedem Start neu, nur im Log

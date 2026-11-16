@@ -1,7 +1,9 @@
 import { sql } from "drizzle-orm";
 import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts";
 import { zuordnungsregelnBeschreiben } from "../abgleich/vorschlaege.ts";
+import { backupStand } from "../betrieb/backup.ts";
 import type { Datenbank } from "../db/client.ts";
+import { zugriffLesen } from "../db/rollen.ts";
 import { pruefen } from "../dokumente/dokumente.ts";
 import { sperrenListen } from "../einordnung/einordnung.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
@@ -13,7 +15,9 @@ import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
 import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
+import { rechteBeschreiben } from "./datenbank.ts";
 import { postfachAktion, postfachAktionenAbsatz } from "./postfach.ts";
+import { sicherungBeschreiben } from "./sicherung.ts";
 import { zugaengeBeschreiben } from "./zugaenge.ts";
 
 /**
@@ -108,6 +112,8 @@ export async function verfahrensdoku(
     workflows,
     zuordnung,
     lernstand,
+    zugriff,
+    sicherung,
   ] = await Promise.all([
     einstellungenLaden(db),
     zugaengeBeschreiben(db),
@@ -123,7 +129,10 @@ export async function verfahrensdoku(
     workflowsBeschreiben(db),
     zuordnungsregelnBeschreiben(db),
     klassifikatorStand(db),
+    zugriffLesen(db.$client),
+    backupStand(db, jetzt),
   ]);
+  const rechte = rechteBeschreiben(zugriff);
   const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
 
   const abschnitte: Abschnitt[] = [
@@ -205,6 +214,7 @@ export async function verfahrensdoku(
       absaetze: [
         "Die Unveränderbarkeit liegt in der Datenbank (PostgreSQL), nicht nur in der Anwendung: Dokumente, Archivnummern, Einordnungen, Mails und Löschnachweise sind ab dem Einfügen versiegelt, Ändern, Löschen und Leeren der Tabellen lehnt die Datenbank ab.",
         "Jede Änderung an protokollierten Tabellen schreibt die Datenbank in ein Protokoll, das nur anwächst. Jeder Eintrag enthält den SHA-256 seines Vorgängers (Hash-Kette); Akteur und Zeitpunkt stehen in jedem Eintrag.",
+        rechte.absatz,
         objektsperre
           ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
           : "Die Dateien liegen unter ihrem SHA-256 im Dateisystem des Servers; eine Änderung fällt beim Lesen und bei der Prüfung auf.",
@@ -216,6 +226,7 @@ export async function verfahrensdoku(
           ? `Bei Erstellung dieses Dokuments meldete die Prüfung ${befunde.length} Befunde.`
           : "Bei Erstellung dieses Dokuments meldete die Prüfung von Kette und Siegeln keine Befunde.",
       ].filter(Boolean),
+      liste: rechte.liste,
     },
     {
       titel: "5. Löschung",
@@ -249,6 +260,7 @@ export async function verfahrensdoku(
       absaetze: [
         "Belegt läuft als Server mit PostgreSQL-Datenbank und einem Verzeichnis für die Dateien; der Abruf der Postfächer läuft in einem eigenen Prozess.",
         e.datensicherung,
+        ...sicherungBeschreiben(sicherung),
       ].filter(Boolean),
       luecken: fehlt(
         e.datensicherung,

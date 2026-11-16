@@ -3,6 +3,7 @@ import { ansichtenErzeugen } from "./ansicht/ansicht.ts";
 import { archivfassungenErzeugen } from "./archivfassung/archivfassung.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
+import { zugriffLesen, zugriffWarnung } from "./db/rollen.ts";
 import { readEnv } from "./env.ts";
 import { inhalteErzeugen } from "./inhalt/inhalt.ts";
 import { ocrVerfuegbar } from "./inhalt/ocr.ts";
@@ -34,7 +35,10 @@ const env = readEnv();
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL fehlt");
 if (!env.BELEGT_SCHLUESSEL) throw new Error("BELEGT_SCHLUESSEL fehlt");
 const schluessel = schluesselAus(env.BELEGT_SCHLUESSEL);
-const { db } = verbinden(env.DATABASE_URL);
+const { db, sql } = verbinden(env.DATABASE_URL);
+// Mehr Rechte als nötig: Warnung im Log, Betrieb wie bisher (docs/betrieb.md, „Getrennte Datenbankrollen“)
+const warnung = zugriffWarnung(await zugriffLesen(sql));
+if (warnung) console.warn(`Worker: ${warnung}`);
 const { speicher, sperrbar } = speicherAusEnv(env);
 
 async function runde() {

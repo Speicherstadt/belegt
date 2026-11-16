@@ -43,3 +43,24 @@ jobs:
     permissions:
       contents: write
       packages: write
+
+  # Backup-Container (deploy/backup) mit denselben Tags, damit Sicherung, Prüfung und Datenbank zur selben Version passen;
+  # gebaut aus dem Repository, denn der Test-Restore ruft die Prüfung von Belegt auf. Das GitHub-Release legt nur der
+  # Lauf der App an.
+  docker-backup:
+    needs: [tested, checks]
+    if: ${{ !cancelled() && needs.tested.result == 'success' && needs.checks.result != 'failure' }}
+    # Eine Version mit den Eingaben ghcr-image, readme und github-release
+    uses: firsttris/workflows/.github/workflows/docker-release.yml@5011fb6bf2b7423d211ecffa82218ba067fb5fed # main
+    with:
+      image: tristanteu/belegt-backup
+      description: "Backup für Belegt: pg_dump und Originale mit restic, Test-Restore mit der Prüfung der Kette"
+      dockerfile: deploy/backup/Containerfile
+      ghcr: true
+      ghcr-image: firsttris/belegt-backup
+      readme: deploy/backup/README.md
+      github-release: false
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write

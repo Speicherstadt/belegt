@@ -123,6 +123,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/zeitstempel": "verboten",
   "GET /api/zeitstempel/:id/token": "verboten",
   "GET /api/pruefung": "verboten",
+  "GET /api/betrieb": "verboten",
   "GET /api/mcp": "verboten",
   "DELETE /api/mcp": "verboten",
   "POST /api/mcp": "verboten",

@@ -105,7 +105,8 @@ curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/comp
 chmod 600 .env
 ```
 
-Trag in `.env` die drei Geheimnisse ein (`POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, `BELEGT_SCHLUESSEL`), dann:
+Trag in `.env` die Geheimnisse ein (`POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `BETTER_AUTH_SECRET`,
+`BELEGT_SCHLUESSEL`); die App arbeitet dann mit einer eigenen Datenbankrolle, die keine Sperre abschalten kann. Dann:
 
 ```bash
 docker compose up -d
@@ -113,7 +114,8 @@ docker compose logs server
 ```
 
 Mit dem Einrichtungscode aus dem Log legst du unter `BELEGT_URL` das erste Konto an, den Inhaber. SMTP-Journal und
-Sprachmodell sind eigene Profile (`--profile journal`, `--profile ki`); S3, Zeitstempel, Microsoft 365, Google und
+Sprachmodell sind eigene Profile (`--profile journal`, `--profile ki`), ebenso die tägliche Sicherung mit Test-Restore
+(`--profile backup`); S3, Zeitstempel, Microsoft 365, Google und
 OpenID Connect stehen in [Installation und Betrieb](https://firsttris.github.io/belegt/betrieb.html).
 
 > [!IMPORTANT]

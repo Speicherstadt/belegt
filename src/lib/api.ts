@@ -3,6 +3,7 @@ import { betriebApi } from "./api-betrieb.ts";
 import { dokumenteApi } from "./api-dokumente.ts";
 import { ordnungApi } from "./api-ordnung.ts";
 import { paperlessApi } from "./api-paperless.ts";
+import { standApi } from "./api-stand.ts";
 import { workflowsApi } from "./api-workflows.ts";
 import { zugangApi } from "./api-zugang.ts";
 
@@ -69,6 +70,14 @@ export type {
 } from "./api-ordnung.ts";
 export type { ImportLauf, ImportStatus, ImportZuordnung, PaperlessQuelle, ZielArt } from "./api-paperless.ts";
 export type {
+  BackupLauf,
+  BackupStand,
+  Betriebsstand,
+  DatenbankProblem,
+  Datenbankzugriff,
+  TabellenRechte,
+} from "./api-stand.ts";
+export type {
   Ausloeser,
   Workflow,
   WorkflowAktion,
@@ -86,4 +95,5 @@ export const api = {
   ...paperlessApi,
   ...alltagApi,
   ...workflowsApi,
+  ...standApi,
 };

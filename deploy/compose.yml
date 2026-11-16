@@ -2,6 +2,69 @@
 # Geheimnisse in .env (Vorlage: compose.env.example), siehe https://firsttris.github.io/belegt/betrieb.html
 name: belegt
 
+# Umgebung für Server, Worker und SMTP-Journal; die Eigentümeradresse bekommt nur der Server für die Migrationen
+x-umgebung: &umgebung # Getrennte Rollen (docs/betrieb.md): App-Anmeldung aus .env; ohne sie wie bisher der Eigentümer, mit Warnung
+  DATABASE_URL: ${DATABASE_URL:-postgres://belegt:${POSTGRES_PASSWORD}@postgres:5432/belegt}
+  BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET in .env setzen (mindestens 32 Zeichen)}
+  BETTER_AUTH_URL: ${BELEGT_URL:-http://localhost:3000}
+  BELEGT_SCHLUESSEL: ${BELEGT_SCHLUESSEL:?BELEGT_SCHLUESSEL in .env setzen (openssl rand -base64 32)}
+  ABRUF_MINUTEN: ${ABRUF_MINUTEN:-5}
+  MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+  MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+  MICROSOFT_TENANT: ${MICROSOFT_TENANT:-common}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+  OIDC_ISSUER: ${OIDC_ISSUER:-}
+  OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+  OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+  OIDC_NAME: ${OIDC_NAME:-}
+  BELEGT_EMBED_ORIGIN: ${BELEGT_EMBED_ORIGIN:-}
+  S3_ENDPUNKT: ${S3_ENDPUNKT:-}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_REGION: ${S3_REGION:-}
+  S3_ZUGANG_ID: ${S3_ZUGANG_ID:-}
+  S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
+  S3_PFAD_STIL: ${S3_PFAD_STIL:-}
+  S3_SPERRE_TAGE: ${S3_SPERRE_TAGE:-}
+  TSA_URL: ${TSA_URL:-}
+  KI_URL: ${KI_URL:-}
+  KI_MODELL: ${KI_MODELL:-}
+  VORSCHAU_URL: ${VORSCHAU_URL:-}
+  EINGANG_ORDNER: ${EINGANG_ORDNER:-}
+  EINGANG_ORDNER_TAGS: ${EINGANG_ORDNER_TAGS:-}
+  TRENNBLATT_CODE: ${TRENNBLATT_CODE:-}
+  IMPORT_MAX_GB: ${IMPORT_MAX_GB:-}
+  OEFFNEN_MIT_NAME: ${OEFFNEN_MIT_NAME:-}
+  OEFFNEN_MIT_URL: ${OEFFNEN_MIT_URL:-}
+
+# Sicherung (Profil backup) und Wiederherstellen (Profil restore) mit dem Image aus deploy/backup, als Eigentümer der
+# Datenbank; siehe docs/betrieb.md, „Sichern“
+x-backup: &backup
+  image: docker.io/tristanteu/belegt-backup:${BELEGT_VERSION:-latest}
+  depends_on:
+    postgres:
+      condition: service_healthy
+  environment:
+    PGPASSWORD: ${POSTGRES_PASSWORD}
+    # Standard: Volume backups auf diesem Rechner. Besser ein zweites System: sftp:…, s3:…, rest:…
+    RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:-/backups}
+    RESTIC_PASSWORD: ${RESTIC_PASSWORD:-}
+    # Eigener Name je Instanz, wenn mehrere ein Repository teilen
+    BACKUP_HOST: ${BACKUP_HOST:-belegt}
+    BACKUP_TIME: ${BACKUP_TIME:-03:15}
+    # Test-Restore nach dem Backup alle so viele Tage, 0 schaltet ihn ab
+    RESTORE_CHECK_DAYS: ${RESTORE_CHECK_DAYS:-7}
+    # Zugang zu einem Repository auf S3, sonst leer
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+    # Originale in S3 mit Object Lock: gesichert wird nur die Datenbank, der Test-Restore prüft die Dateien im Bucket
+    S3_ENDPUNKT: ${S3_ENDPUNKT:-}
+    S3_BUCKET: ${S3_BUCKET:-}
+    S3_REGION: ${S3_REGION:-}
+    S3_ZUGANG_ID: ${S3_ZUGANG_ID:-}
+    S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
+    S3_PFAD_STIL: ${S3_PFAD_STIL:-}
+
 services:
   postgres:
     image: docker.io/library/postgres:18
@@ -10,6 +73,11 @@ services:
       POSTGRES_USER: belegt
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD in .env setzen}
       POSTGRES_DB: belegt
+      # Legt beim ersten Start die App-Rolle belegt_app an, wenn APP_DB_PASSWORD gesetzt ist (configs.app-rolle)
+      BELEGT_APP_PASSWORT: ${APP_DB_PASSWORD:-}
+    configs:
+      - source: app-rolle
+        target: /docker-entrypoint-initdb.d/belegt-app-rolle.sh
     volumes:
       - postgres:/var/lib/postgresql
     healthcheck:
@@ -24,39 +92,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    environment: &umgebung
-      DATABASE_URL: postgres://belegt:${POSTGRES_PASSWORD}@postgres:5432/belegt
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET in .env setzen (mindestens 32 Zeichen)}
-      BETTER_AUTH_URL: ${BELEGT_URL:-http://localhost:3000}
-      BELEGT_SCHLUESSEL: ${BELEGT_SCHLUESSEL:?BELEGT_SCHLUESSEL in .env setzen (openssl rand -base64 32)}
-      ABRUF_MINUTEN: ${ABRUF_MINUTEN:-5}
-      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
-      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
-      MICROSOFT_TENANT: ${MICROSOFT_TENANT:-common}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      OIDC_ISSUER: ${OIDC_ISSUER:-}
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
-      OIDC_NAME: ${OIDC_NAME:-}
-      BELEGT_EMBED_ORIGIN: ${BELEGT_EMBED_ORIGIN:-}
-      S3_ENDPUNKT: ${S3_ENDPUNKT:-}
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_REGION: ${S3_REGION:-}
-      S3_ZUGANG_ID: ${S3_ZUGANG_ID:-}
-      S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
-      S3_PFAD_STIL: ${S3_PFAD_STIL:-}
-      S3_SPERRE_TAGE: ${S3_SPERRE_TAGE:-}
-      TSA_URL: ${TSA_URL:-}
-      KI_URL: ${KI_URL:-}
-      KI_MODELL: ${KI_MODELL:-}
-      VORSCHAU_URL: ${VORSCHAU_URL:-}
-      EINGANG_ORDNER: ${EINGANG_ORDNER:-}
-      EINGANG_ORDNER_TAGS: ${EINGANG_ORDNER_TAGS:-}
-      TRENNBLATT_CODE: ${TRENNBLATT_CODE:-}
-      IMPORT_MAX_GB: ${IMPORT_MAX_GB:-}
-      OEFFNEN_MIT_NAME: ${OEFFNEN_MIT_NAME:-}
-      OEFFNEN_MIT_URL: ${OEFFNEN_MIT_URL:-}
+    environment:
+      <<: *umgebung
+      # Eigentümer der Datenbank nur für den Migrationsschritt vor dem Start (server/start.sh)
+      MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:-}
     ports:
       - "${BELEGT_PORT:-3000}:3000"
     volumes:
@@ -99,6 +138,35 @@ services:
     healthcheck:
       disable: true
 
+  # Tägliche Sicherung mit Test-Restore, nur mit: docker compose --profile backup up -d (docs/betrieb.md)
+  backup:
+    <<: *backup
+    profiles: [backup]
+    restart: unless-stopped
+    volumes:
+      - dokumente:/belegt:ro
+      - backups:/backups
+      # Repository über sftp: SSH-Schlüssel einhängen, Zeile einkommentieren
+      # - ~/.ssh:/root/.ssh:ro
+    healthcheck:
+      # Ungesund, wenn der letzte Lauf fehlschlug oder seit zwei Tagen keiner durchlief; vor dem ersten Lauf gesund
+      test:
+        [
+          "CMD-SHELL",
+          's=/var/lib/belegt-backup/status; [ ! -f $$s ] || { grep -q ''^ok'' $$s && [ -n "$$(find $$s -mmin -2880)" ]; }',
+        ]
+      interval: 5m
+
+  # Wiederherstellen, startet nicht mit up:
+  #   docker compose stop server worker smtp && docker compose run --rm restore latest && docker compose up -d
+  restore:
+    <<: *backup
+    profiles: [restore]
+    entrypoint: ["restore.sh"]
+    volumes:
+      - dokumente:/belegt
+      - backups:/backups
+      # - ~/.ssh:/root/.ssh:ro
   # Sprachmodell für Vorschläge, nur mit: docker compose --profile ki up -d; KI_URL=http://ollama:11434 in .env
   ollama:
     image: docker.io/ollama/ollama:latest
@@ -116,6 +184,17 @@ services:
     command: ["gotenberg", "--chromium-disable-routes=true"]
     networks: [vorschau]
 
+# Nur beim ersten Start mit leerem Volume (docker-entrypoint-initdb.d); bestehende Installationen legen die Rolle von
+# Hand an (docs/betrieb.md, „Getrennte Datenbankrollen“). Das Skript wird eingelesen, nicht ausgeführt: kein exit.
+configs:
+  app-rolle:
+    content: |
+      if [ -n "$${BELEGT_APP_PASSWORT:-}" ]; then
+        psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" -v pw="$$BELEGT_APP_PASSWORT" <<'SQL'
+      CREATE ROLE belegt_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT PASSWORD :'pw';
+      SQL
+      fi
+
 networks:
   default:
   vorschau:
@@ -125,3 +204,5 @@ volumes:
   ollama:
   postgres:
   dokumente:
+  # restic-Repository, wenn RESTIC_REPOSITORY nicht gesetzt ist
+  backups:

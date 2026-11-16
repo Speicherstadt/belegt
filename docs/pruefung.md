@@ -11,6 +11,11 @@ Original und vergleicht es mit seinem Hash. Darunter steht der Prüfbericht: Zei
 Einträge geprüft wurden, und der Prüfwert, der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu
 diesem Eintrag nichts verändert wurde. „Drucken oder als PDF sichern“ gibt den Bericht ohne Navigation aus.
 
+Inhaber und Steuerberatung sehen dort auch den **Datenbankzugriff**: ob die App mit einer eigenen, eingeschränkten Rolle
+arbeitet ([Getrennte Datenbankrollen](betrieb.md#getrennte-datenbankrollen)), sonst eine Warnung mit dem Grund, und die
+wirksamen Rechte je Tabelle, so wie die Datenbank sie meldet. Daneben steht der Stand der
+[Sicherung](betrieb.md#sichern): letztes Backup, letzter bestandener Test-Restore und Fehler.
+
 ## Prüferzugang (Z1)
 
 Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.

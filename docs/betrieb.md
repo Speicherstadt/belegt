@@ -22,9 +22,10 @@ curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/comp
 chmod 600 .env
 ```
 
-In `.env` drei Geheimnisse eintragen, etwa mit `openssl rand -hex 32` und `openssl rand -base64 32`:
-`POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET` (mindestens 32 Zeichen) und `BELEGT_SCHLUESSEL` (32 Bytes base64; damit
-sind Postfach-Passwörter und Webhook-Geheimnisse verschlüsselt). `BELEGT_URL` ist die Adresse, unter der Belegt
+In `.env` die Geheimnisse eintragen, etwa mit `openssl rand -hex 24` und `openssl rand -base64 32`:
+`POSTGRES_PASSWORD` und `APP_DB_PASSWORD` (nur Buchstaben und Ziffern, sie stehen in den Adressen darunter),
+`BETTER_AUTH_SECRET` (mindestens 32 Zeichen) und `BELEGT_SCHLUESSEL` (32 Bytes base64; damit sind Postfach-Passwörter
+und Webhook-Geheimnisse verschlüsselt). `BELEGT_URL` ist die Adresse, unter der Belegt
 erreichbar ist (hinter einem Reverse Proxy mit HTTPS die öffentliche).
 
 ```bash
@@ -33,6 +34,44 @@ docker compose up -d
 
 Beim ersten Start schreibt der Server einen Einrichtungscode ins Log (`docker compose logs server`). Mit ihm legst du
 unter `BELEGT_URL` das erste Konto an, den Inhaber; der Code gilt bis zum nächsten Neustart.
+
+## Getrennte Datenbankrollen
+
+Server, Worker und SMTP-Journal melden sich mit der Rolle `belegt_app` an (`DATABASE_URL`). Sie besitzt keine Tabelle,
+hat keine Rechte als Superuser, für Rollen oder neue Datenbanken und kann deshalb weder Trigger abschalten noch Tabellen
+ändern, leeren oder `session_replication_role` setzen. Nur der Migrationsschritt vor dem Start arbeitet als Eigentümer
+`belegt` (`MIGRATION_DATABASE_URL`) und vergibt danach die Rechte neu, auch ohne neue Migration:
+
+| Tabellen | Rechte der App |
+| --- | --- |
+| Nur ergänzen: Audit-Log, Siegel, versiegelte Tabellen ohne Festschreibungsspalte (Dokumente, Archivnummern, Einordnungen, Mails …), Freigaben, Postfach-Aktionen | lesen, einfügen |
+| Kopf der Kette (`audit_chain`), den nur der Trigger des Audit-Logs fortschreibt | lesen, ändern |
+| `sealed_tables`, `backup_status` | lesen |
+| Alle anderen; Festschreibungen (etwa bestätigte Löschungen) prüfen die Trigger | lesen, einfügen, ändern, löschen |
+
+`TRUNCATE`, `TRIGGER`, eigene Objekte und temporäre Tabellen gibt es für die App nie. Der Server bekommt die
+Eigentümeradresse nicht (`server/start.sh`). Die wirksamen Rechte stehen unter „Prüfung“ › „Datenbankzugriff“ und in
+der Verfahrensdokumentation.
+
+**Neue Installation:** `APP_DB_PASSWORD` in `.env` setzen; Postgres legt die Rolle beim ersten Start mit leerem
+Volume an.
+
+**Bestehende Installation:** erst sichern, dann die Rolle einmal anlegen (`createuser` fragt das Passwort zweimal; es
+muss zu `APP_DB_PASSWORD` passen) und die drei Zeilen `APP_DB_PASSWORD`, `DATABASE_URL` und `MIGRATION_DATABASE_URL`
+aus `compose.env.example` in `.env` übernehmen:
+
+```bash
+docker compose exec postgres createuser -U belegt --login --no-superuser --no-createdb --no-createrole --pwprompt belegt_app
+docker compose up -d
+```
+
+Ohne die beiden Adressen läuft Belegt wie bisher mit dem Eigentümer weiter; Log, Startseite und „Prüfung“ warnen dann.
+Mit `MIGRATION_DATABASE_URL` bricht der Start ab, wenn die App-Anmeldung zu viele Rechte hat, dieselbe wie die des
+Eigentümers ist, auf eine andere Datenbank zeigt oder mit `session_replication_role = replica` startet. Fehlt eine
+Migration und ist nur die App-Anmeldung da, startet der Server nicht.
+
+Die Trennung schützt vor einer übernommenen App, nicht vor dem Betreiber mit Eigentümer- oder Serverzugang; dafür
+bleiben Zeitstempel, notierte Prüfwerte und Sicherungen an einem zweiten Ort.
 
 ## Dateien in S3 mit Object Lock
 
@@ -51,18 +90,55 @@ Entfernen stündlich wieder.
 ## Sichern
 
 Zu sichern sind die Datenbank und das Volume `dokumente` (die Originale unter ihrem SHA-256; mit S3 der Bucket, etwa
-mit Replikation in einen zweiten), dazu `.env`: Ohne
-`BELEGT_SCHLUESSEL` lassen sich Postfach-Passwörter und Webhook-Geheimnisse nicht mehr entschlüsseln.
+mit Replikation in einen zweiten), dazu `.env`: Ohne `BELEGT_SCHLUESSEL` lassen sich Postfach-Passwörter und
+Webhook-Geheimnisse nicht mehr entschlüsseln.
+
+Das übernimmt der Backup-Container (`tristanteu/belegt-backup`, aus `deploy/backup`): `RESTIC_PASSWORD` in `.env`
+setzen (`openssl rand -base64 32`, an einem zweiten Ort aufbewahren), dann
+
+```bash
+docker compose --profile backup up -d
+docker compose exec backup backup.sh   # eine Sicherung jetzt, etwa vor einem Update
+```
+
+Täglich um `BACKUP_TIME` (Standard 03:15) sichert er die Datenbank mit `pg_dump` (custom format, mit Prüfsumme) und die
+Originale, verschlüsselt mit [restic](https://restic.net). Mit S3 sichert er nur die Datenbank; die Dateien liegen im
+Bucket mit Object Lock. Ziel ist das Volume `backups`; besser ein zweites System über `RESTIC_REPOSITORY` (`sftp:…`,
+`s3:…` mit `AWS_ACCESS_KEY_ID` und `AWS_SECRET_ACCESS_KEY`, `rest:…`). Aufbewahrt werden 14 tägliche, 24 monatliche und
+11 jährliche Stände. Mehrere Instanzen in einem Repository brauchen je einen eigenen `BACKUP_HOST`.
+
+**Test-Restore:** Alle `RESTORE_CHECK_DAYS` Tage (Standard 7, `0` schaltet ab) spielt er nach dem Backup den Stand in
+eine Wegwerf-Datenbank ein und prüft ihn mit der Prüfung von Belegt: Hash-Kette, Kopf, Siegel und jedes Original gegen
+seinen Hash (bei S3 die Dateien im Bucket); der Kopf der Kette muss in der laufenden Datenbank stehen. Danach löscht er
+die Wegwerf-Datenbank. Von Hand: `docker compose exec backup restore-check.sh` (oder mit einer Snapshot-ID). Platz
+braucht es dafür kurz für eine zweite Kopie der Datenbank und für den Snapshot im Container.
+
+Ergebnis und Fehler stehen auf der Startseite unter „Betrieb“, unter „Prüfung“ und mit Ziel, Rhythmus und letztem Test
+in der Verfahrensdokumentation (Tabelle `backup_status`, nur ergänzen, mit Audit-Log; die App kann sie nur lesen). Der
+Container ist ungesund, wenn das letzte Backup fehlschlug oder zwei Tage keins durchlief.
+
+**Wiederherstellen** ersetzt Datenbank und Originale vollständig; gibt es die Datenbank nicht mehr (neuer Server), legt
+es sie an:
+
+```bash
+docker compose stop server worker smtp
+docker compose run --rm restore          # verfügbare Stände
+docker compose run --rm restore latest   # oder eine Snapshot-ID, fragt nach „ja“
+docker compose up -d
+```
+
+Der Start danach vergibt die Rechte der App-Rolle neu (auf einem neuen Server die Rolle vorher anlegen, siehe
+[Getrennte Datenbankrollen](#getrennte-datenbankrollen)). Dann unter „Prüfung“ mit „Auch alle Dateien prüfen“ prüfen.
+
+Ohne den Container geht es auch von Hand, dann ohne Test-Restore und ohne Eintrag in der App:
 
 ```bash
 docker compose exec -T postgres pg_dump -U belegt -Fc belegt > belegt.dump
 ```
 
 Löscht Belegt Mails in einem Postfach ([Nach dem Abholen](eingang.md#nach-dem-abholen)), wähle die Wartezeit dort
-länger als den Abstand zwischen zwei Sicherungen.
-
-Nach einer Wiederherstellung prüft „Prüfung“ mit „Auch alle Dateien prüfen“, ob Kette, Siegel und Dateien stimmen.
-Beschreibe die Sicherung unter „Verfahrensdoku“; sie gehört in die Verfahrensdokumentation.
+länger als den Abstand zwischen zwei Sicherungen. Beschreibe die Sicherung unter „Verfahrensdoku“ (wer die
+Wiederherstellung prüft, wo das Passwort liegt); sie gehört in die Verfahrensdokumentation.
 
 ## Aktualisieren
 

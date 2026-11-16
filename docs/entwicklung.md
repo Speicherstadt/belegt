@@ -39,9 +39,14 @@ Vorschaubilder `pdftoppm`; sonst werden sie übersprungen.
 TEST_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_test bun run test
 ```
 
+Die Tests der Sicherung (`deploy/backup/backup.test.ts`) brauchen `pg_dump`, `pg_restore`, `psql` und `flock` und
+nehmen für restic einen Nachbau (`deploy/backup/restic-attrappe.sh`); das echte restic läuft in der CI im Job
+„Container bauen und starten“.
+
 Die E2E-Tests starten einen eigenen Server mit frischer Datenbank unter `E2E_DATABASE_URL` (Vorgabe
 `postgres://belegt:belegt@localhost:5432/belegt_e2e`; sie wird gelöscht und neu angelegt) und richten Belegt zuerst
-über die Oberfläche ein (`e2e/einrichten.setup.ts`).
+über die Oberfläche ein (`e2e/einrichten.setup.ts`). Der Server läuft dabei wie im Betrieb als eigene App-Rolle
+`<name>_app`; der Benutzer aus `E2E_DATABASE_URL` migriert und braucht dafür `CREATEROLE`.
 
 Daneben legt der Lauf `<name>_vorlage` an (einmal migriert) und je Vitest-Worker `<name>_<Nummer>` als Kopie davon
 (`server/test-db.ts`). Der Benutzer braucht `CREATEDB`; Tests, die eine Manipulation an den Triggern vorbei
@@ -55,7 +60,8 @@ löschen sie wieder.
 | Variable | Bedeutung | Vorgabe |
 | --- | --- | --- |
 | `PORT` | Port des Servers | `3000` |
-| `DATABASE_URL` | Postgres; Pflicht für den Server | – |
+| `DATABASE_URL` | Postgres; Pflicht für Server, Worker und SMTP-Journal. Mit getrennten Rollen die App-Anmeldung (docs/betrieb.md) | – |
+| `MIGRATION_DATABASE_URL` | Eigentümer der Datenbank, nur für Migrationen und die Rechte der App-Anmeldung; `bun server/migrieren.ts` oder der Server selbst | – |
 | `DOCUMENTS_DIR` | Wurzel des Dateispeichers | `data/dokumente` |
 | `BETTER_AUTH_SECRET` | Schlüssel für Sitzungen, mindestens 32 Zeichen; Pflicht für den Server | – |
 | `BETTER_AUTH_URL` | Adresse, unter der Belegt erreichbar ist | `http://localhost:3000` |
@@ -82,7 +88,9 @@ löschen sie wieder.
 Die erste Migration (`drizzle/0000_gobd_kern.sql`) ist die SQL-Vorlage aus `@firsttris/gobd-kern` mit dem Präfix
 `belegt`: Audit-Log als Hash-Kette, Siegel, Sperren und die Prüfung. Tabellen stehen in `server/db/schema.ts`;
 `bun --bun drizzle-kit generate --name <name>` erzeugt die Migration, versiegelte und protokollierte Tabellen meldet
-sie danach mit `SELECT belegt_seal_table('…')` oder `SELECT belegt_audit_table('…')` an. Eine Migration, die schon
+sie danach mit `SELECT belegt_seal_table('…')` oder `SELECT belegt_audit_table('…')` an. Rechte vergibt keine
+Migration: Nach jedem Lauf leitet `server/db/rollen.ts` sie aus den Triggern ab (`belegt_append_only` nimmt UPDATE und
+DELETE); `server/db/rollen.test.ts` versucht als App-Rolle, was verboten ist. Eine Migration, die schon
 auf `main` ist, wird nie mehr geändert.
 
 Der Kern kommt als Datei vom Release in Haben (`package.json`); eine neue Version trägt man dort mit der neuen URL ein.

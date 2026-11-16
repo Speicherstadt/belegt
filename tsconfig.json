@@ -16,5 +16,5 @@
     "noEmit": true,
     "types": ["bun"]
   },
-  "include": ["server", "shared", "src", "*.ts"]
+  "include": ["server", "shared", "src", "deploy", "*.ts"]
 }

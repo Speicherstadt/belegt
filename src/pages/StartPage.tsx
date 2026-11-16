@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "../components/PageHeader.tsx";
+import { OperationStatus } from "../components/start/OperationStatus.tsx";
 import { StartNumbers, UpcomingRetention } from "../components/start/StartNumbers.tsx";
 import { ChainStatus, SourceStatus } from "../components/start/SystemStatus.tsx";
 import { ViewTiles } from "../components/start/ViewTiles.tsx";
@@ -27,6 +28,8 @@ export function StartPage() {
         {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
         {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
         {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus />}
+        {/* Betrieb nur für Inhaber und Steuerberatung; der Server lehnt es für andere ab */}
+        {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <OperationStatus />}
       </div>
       <ViewTiles />
     </div>

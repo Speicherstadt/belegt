@@ -30,6 +30,16 @@ Besonders wichtig sind deshalb Lücken
 Probleme in PostgreSQL, Tesseract, Poppler oder anderen eingebundenen Programmen gehören zu diesen Projekten; macht
 erst die Konfiguration von Belegt sie ausnutzbar, bitte hier melden.
 
+## Getrennte Datenbankrollen
+
+Mit [getrennten Rollen](https://firsttris.github.io/belegt/betrieb.html#getrennte-datenbankrollen) arbeitet die App als
+Rolle ohne Eigentum an Tabellen und ohne Rechte, Trigger abzuschalten, Tabellen zu ändern oder zu leeren oder den
+Replikationsmodus zu setzen. Nur der Migrationsschritt nutzt den Eigentümer und vergibt danach die Rechte neu; der
+Server bekommt dessen Adresse nicht. Eine übernommene App kann so nur, was auch die Oberfläche kann, und die Trigger
+prüfen es weiter. Gegen den Betreiber mit Eigentümer- oder Serverzugang helfen Zeitstempel, notierte Prüfwerte und
+Sicherungen an einem zweiten Ort. Bestehende Installationen mit einer Adresse laufen weiter; „Prüfung“ zeigt die
+wirksamen Rechte und warnt.
+
 ## Abhängigkeiten aktuell halten
 
 Die Abhängigkeiten hält [Renovate](https://github.com/apps/renovate) aktuell (`.github/renovate.json5`). Jedes

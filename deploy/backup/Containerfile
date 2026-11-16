@@ -1,0 +1,48 @@
+# Belegt – Backup-Container: pg_dump, restic und die Prüfung von Belegt für den
+# Test-Restore (server/pruefung/cli.ts mit Bun). Gebaut aus dem Repository, damit Prüfung und Datenbank zur selben
+# Version passen:  docker build -t belegt-backup -f deploy/backup/Containerfile .
+# backup.sh nimmt das pg_dump der Major-Version, in der die Datenbank läuft; eingebaut sind die Versionen ab
+# PG_AB, damit auch eine Datenbank auf postgres:16 oder 17 gesichert werden kann.
+FROM docker.io/oven/bun:1.4.4-slim AS app
+WORKDIR /app
+COPY bun.lock package.json ./
+RUN bun install --frozen-lockfile --production --ignore-scripts \
+ && rm -rf node_modules/pst-extractor/example
+COPY drizzle drizzle
+COPY server server
+COPY shared shared
+
+FROM ghcr.io/restic/restic:0.19.1 AS restic
+
+FROM docker.io/library/postgres:18
+ARG PG_AB=16
+# ca-certificates für Ziele über HTTPS (s3:, rest:), openssh-client für sftp:
+RUN set -eux; \
+    alt="$(seq "$PG_AB" "$((PG_MAJOR - 1))" | tr '\n' ' ')"; \
+    sed -i "s/\$/ $alt/" /etc/apt/sources.list.d/pgdg.list; \
+    apt-get update; \
+    for v in $alt; do pakete="${pakete:-} postgresql-client-$v"; done; \
+    apt-get install -y --no-install-recommends ca-certificates openssh-client $pakete; \
+    rm -rf /var/lib/apt/lists/*; \
+    for v in $alt; do test -x "/usr/lib/postgresql/$v/bin/pg_dump"; done
+COPY --from=restic /usr/bin/restic /usr/local/bin/restic
+COPY --from=app /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=app /app /app
+COPY deploy/backup/entrypoint.sh deploy/backup/backup.sh deploy/backup/backup-status.sh deploy/backup/restore.sh deploy/backup/restore-check.sh /usr/local/bin/
+# Datenbank wie in compose.yml (Dienst postgres) mit dem Eigentümer belegt; das Passwort kommt als PGPASSWORD, das
+# restic-Passwort als RESTIC_PASSWORD oder RESTIC_PASSWORD_FILE. Die Originale liegen im Volume unter /belegt.
+ENV PGHOST=postgres \
+    PGUSER=belegt \
+    PGDATABASE=belegt \
+    RESTIC_REPOSITORY=/backups \
+    BACKUP_HOST=belegt \
+    BACKUP_TIME=03:15 \
+    RESTORE_CHECK_DAYS=7 \
+    DOKUMENTE_DIR=/belegt/dokumente \
+    BELEGT_APP=/app \
+    NODE_ENV=production \
+    TZ=Europe/Berlin
+# Das postgres-Image hält mit SIGINT an; der Zeitplan endet mit SIGTERM
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["zeitplan"]

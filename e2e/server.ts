@@ -11,7 +11,7 @@ import { createApp } from "../server/app.ts";
 import { archivfassungenErzeugen } from "../server/archivfassung/archivfassung.ts";
 import { createAuth } from "../server/auth.ts";
 import { verbinden } from "../server/db/client.ts";
-import { migrieren } from "../server/db/migrieren.ts";
+import { migrierenMitRechten } from "../server/db/migrieren.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
@@ -22,7 +22,8 @@ import { workflowsAusfuehren } from "../server/workflows/ausfuehren.ts";
 
 /*
  * Server für die E2E-Tests: frische Datenbank neben E2E_DATABASE_URL (sie wird gelöscht und neu angelegt, nie auf echte
- * Daten zeigen lassen), eigener Speicher, eigener Port. Playwright startet ihn vor den Tests.
+ * Daten zeigen lassen), eigener Speicher, eigener Port. Der Benutzer aus E2E_DATABASE_URL migriert und legt die
+ * App-Rolle <name>_app an (braucht CREATEROLE). Playwright startet ihn vor den Tests.
  */
 const basis = process.env.E2E_DATABASE_URL ?? "postgres://belegt:belegt@localhost:5432/belegt_e2e";
 const port = Number(process.env.E2E_SERVER_PORT ?? 3185);
@@ -34,10 +35,21 @@ adminUrl.pathname = "/postgres";
 const admin = postgres(adminUrl.toString(), { max: 1, onnotice: () => {} });
 await admin`drop database if exists ${admin(name)} with (force)`;
 await admin`create database ${admin(name)}`;
+// Getrennte Rollen wie im Betrieb (docs/betrieb.md): Der Server läuft als App-Rolle ohne Eigentum an den Tabellen
+const appRolle = `${name}_app`;
+await admin.unsafe(`do $$ begin
+  if not exists (select 1 from pg_roles where rolname = '${appRolle}') then
+    create role "${appRolle}" login nosuperuser nocreatedb nocreaterole noinherit;
+  end if;
+end $$`);
+await admin.unsafe(`alter role "${appRolle}" password 'e2e-app'`);
 await admin.end();
+const appUrl = new URL(basis);
+appUrl.username = appRolle;
+appUrl.password = "e2e-app";
 
-await migrieren(basis);
-const { db } = verbinden(basis);
+await migrierenMitRechten(basis, appUrl.toString());
+const { db } = verbinden(appUrl.toString());
 const verzeichnis = mkdtempSync(join(tmpdir(), "belegt-e2e-"));
 const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
 const schluessel = randomBytes(32);
