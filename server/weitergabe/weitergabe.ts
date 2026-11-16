@@ -126,10 +126,14 @@ const meldung = (err: unknown) =>
     .split("\n")[0]!
     .slice(0, 300);
 
-/** Fällige Weitergaben holen und für zehn Minuten vormerken, damit ein zweiter Lauf sie nicht zugleich sendet */
-async function faellige(db: Umgebung["db"], stapel: number) {
+/**
+ * Die nächste fällige Weitergabe holen und vormerken, damit ein zweiter Worker sie nicht zugleich sendet. Immer nur eine:
+ * Die Vormerkung muss länger halten als das Senden selbst (Zeitlimit und Laden der Datei, dafür fünf Minuten mehr); für
+ * einen ganzen Stapel liefe sie ab, während die letzte noch auf ihre Antwort wartet.
+ */
+async function naechste(db: Umgebung["db"], zeitlimit: number) {
   return mitAkteur(db, AKTEUR, async (tx) => {
-    const zeilen = await tx.execute<{
+    const [z] = await tx.execute<{
       id: string;
       workflow_id: string;
       position: number;
@@ -138,13 +142,14 @@ async function faellige(db: Umgebung["db"], stapel: number) {
     }>(sql`
       select id, workflow_id, position, dokument_id, versuche from weitergaben
        where stand = 'offen' and naechster_versuch <= now()
-       order by naechster_versuch, id limit ${stapel} for update skip locked`);
-    for (const z of zeilen)
-      await tx
-        .update(weitergaben)
-        .set({ naechsterVersuch: sql`now() + interval '10 minutes'` })
-        .where(eq(weitergaben.id, z.id));
-    return [...zeilen];
+       order by naechster_versuch, id limit 1 for update skip locked`);
+    if (!z) return null;
+    const sekunden = Math.ceil(zeitlimit / 1000) + 300;
+    await tx
+      .update(weitergaben)
+      .set({ naechsterVersuch: sql`now() + make_interval(secs => ${sekunden})` })
+      .where(eq(weitergaben.id, z.id));
+    return z;
   });
 }
 
@@ -177,7 +182,9 @@ export async function weitergeben(
 ): Promise<{ gesendet: number; fehler: number }> {
   let gesendet = 0;
   let fehler = 0;
-  for (const z of await faellige(db, stapel)) {
+  for (let i = 0; i < stapel; i++) {
+    const z = await naechste(db, zeitlimit);
+    if (!z) break;
     const [w] = await db.select().from(workflows).where(eq(workflows.id, z.workflow_id));
     const aktion = (w?.aktionen as Aktion[] | undefined)?.[z.position];
     const dok = await angaben(db, z.dokument_id, basisUrl);
