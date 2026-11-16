@@ -12,8 +12,8 @@ Workflows aus und liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch
 
 ## Starten
 
-Das Image `tristanteu/belegt` gibt es auf Docker Hub und als `ghcr.io/firsttris/belegt`, für amd64 und arm64. Ohne den
-Quellcode reichen zwei Dateien:
+Das Image `tristanteu/belegt` (auch `ghcr.io/firsttris/belegt`, für amd64 und arm64) erscheint mit dem ersten Release
+auf Docker Hub und GHCR. Dann reichen ohne den Quellcode zwei Dateien:
 
 ```bash
 mkdir belegt && cd belegt
