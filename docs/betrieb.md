@@ -239,8 +239,9 @@ eingebettet in ZUGFeRD und Factur-X) an den [Validator der KoSIT](https://github
 `tristanteu/belegt-validator` aus `deploy/validator`). Sie prüft XRechnung in UBL und CII und EN 16931 ohne XRechnung;
 ein ZUGFeRD-Profil unterhalb von EN 16931 (etwa BASIC WL) gilt als ungültig, weil kein Szenario passt. Was er findet,
 steht auf der Seite des Dokuments ([Eingang](eingang.md#text-und-e-rechnungen)). Der Dienst läuft im Netz `validator`
-ohne Internet, weil er fremde Dateien liest. Ist er nicht erreichbar, versucht es der Worker später wieder; E-Rechnungen,
-die vor dem Einschalten eingegangen sind, prüft er nachträglich.
+ohne Internet, weil er fremde Dateien liest. Ist er nicht erreichbar, versucht es der Worker später wieder; scheitert
+der gesunde Dienst an einer Datei (Fehler 500, Zeitlimit, Bericht über 32 MB), gilt sie als ungültig mit diesem Grund.
+E-Rechnungen, die vor dem Einschalten eingegangen sind, prüft er nachträglich.
 
 ## Eingangsordner
 

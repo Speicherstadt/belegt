@@ -40,6 +40,8 @@ const MAX_BERICHT = 32 * 1024 * 1024;
 /** Der Dienst ist gerade nicht da: nichts festhalten, im nächsten Lauf wieder (wie beim Vorschau-Dienst) */
 const nichtErreichbar = (meldung: string) => Object.assign(new Error(meldung), { nichtErreichbar: true });
 const istNichtErreichbar = (err: unknown) => err instanceof Error && "nichtErreichbar" in err;
+/** Ein Befund der Datei, den erechnungenPruefen festhält: Der Validator konnte sie nicht prüfen */
+const nichtPruefbar = (meldung: string) => new Error(meldung);
 
 const parser = new XMLParser({
   removeNSPrefix: true,
@@ -111,7 +113,7 @@ export type Abfragen = (url: string, init: RequestInit) => Promise<Response>;
 
 /** Der Rumpf der Antwort als Text, höchstens MAX_BERICHT Bytes; darüber bricht das Lesen ab */
 async function begrenztLesen(res: Response): Promise<string> {
-  const zuGross = () => nichtErreichbar("Antwort des Validators zu groß");
+  const zuGross = () => nichtPruefbar("Prüfbericht des Validators zu groß");
   if (Number(res.headers.get("content-length") ?? 0) > MAX_BERICHT) throw zuGross();
   const teile: Uint8Array[] = [];
   let laenge = 0;
@@ -127,14 +129,28 @@ async function begrenztLesen(res: Response): Promise<string> {
 }
 
 /**
- * Schickt das XML an den Validator. Antwortet er nicht, mit 429 oder 5xx, ist das vorübergehend (nichtErreichbar);
- * 400 und 422 (das XML lässt sich nicht verarbeiten) sind ein Befund der Datei.
+ * Schickt das XML an den Validator. Antwortet er nicht, mit 429 oder 5xx, ist das vorübergehend (nichtErreichbar), außer
+ * er ist dabei gesund (GET /server/health): Dann lag es an der Datei (500 bei einer Ausnahme während der Prüfung,
+ * CheckHandler.java), und sie stünde sonst in jedem Lauf vorn und hielte alle späteren auf (wie bei Gotenberg,
+ * server/ansicht/ansicht.ts). 400 und 422 (das XML lässt sich nicht verarbeiten) sind ein Befund der Datei.
  */
 export async function beimDienstPruefen(
   xml: string,
   url: string,
   { abfragen = fetch, zeitlimit = 120_000 }: { abfragen?: Abfragen; zeitlimit?: number } = {},
 ): Promise<Pruefung> {
+  const gesund = () =>
+    abfragen(new URL("/server/health", url).href, {
+      method: "GET",
+      redirect: "manual",
+      signal: AbortSignal.timeout(10_000),
+    }).then(
+      async (r) => {
+        await r.body?.cancel().catch(() => {});
+        return r.status === 200;
+      },
+      () => false,
+    );
   let res: Response;
   try {
     res = await abfragen(url, {
@@ -144,10 +160,17 @@ export async function beimDienstPruefen(
       redirect: "manual",
       signal: AbortSignal.timeout(zeitlimit),
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError" && (await gesund()))
+      throw nichtPruefbar("Der Validator konnte die Datei nicht prüfen (Zeitlimit)");
     throw nichtErreichbar("Validator nicht erreichbar");
   }
-  if (res.status === 429 || res.status >= 500) throw nichtErreichbar(`Validator antwortet ${res.status}`);
+  if (res.status === 429) throw nichtErreichbar("Validator ausgelastet (429)");
+  if (res.status >= 500) {
+    await res.body?.cancel().catch(() => {});
+    if (await gesund()) throw nichtPruefbar(`Der Validator konnte die Datei nicht prüfen (${res.status})`);
+    throw nichtErreichbar(`Validator antwortet ${res.status}`);
+  }
   const text = await begrenztLesen(res);
   if (res.status === 400 || res.status === 422) {
     return {
@@ -199,7 +222,15 @@ export async function erechnungenPruefen(
           };
     } catch (err) {
       if (istNichtErreichbar(err)) return { geprueft, ungueltig, meldung: (err as Error).message };
-      throw err;
+      // Sonst ein Befund der Datei (nichtPruefbar): festhalten, damit sie spätere nicht aufhält
+      const text = kurz(err instanceof Error ? err.message : "Nicht prüfbar");
+      pruefung = {
+        gueltig: false,
+        szenario: null,
+        fehler: 1,
+        warnungen: 0,
+        meldungen: [{ stufe: "fehler", code: null, text }],
+      };
     }
     await db
       .insert(erechnungPruefungen)
