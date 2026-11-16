@@ -234,7 +234,14 @@ export async function abrufen(
   } finally {
     await postfach?.schliessen().catch(() => {});
     await mitAkteur(db, akteur, (tx) =>
-      tx.update(quellen).set({ letzterAbruf: new Date(), letzterFehler: ergebnis.fehler }).where(eq(quellen.id, q.id)),
+      tx
+        .update(quellen)
+        .set({
+          letzterAbruf: new Date(),
+          letzterFehler: ergebnis.fehler,
+          ...(ergebnis.fehler ? {} : { letzterErfolg: new Date() }),
+        })
+        .where(eq(quellen.id, q.id)),
     );
   }
   return ergebnis;

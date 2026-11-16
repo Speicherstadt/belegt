@@ -71,7 +71,12 @@ export function Sidebar({
       <nav aria-label={m.nav_label()} className="flex flex-col gap-0.5">
         {[
           ...ITEMS.filter((item) => NUR[ich.role]?.has(item.to) ?? true),
-          ...(ich.role === "inhaber" ? ([{ to: "/zugaenge", label: () => m.nav_access() }] as const) : []),
+          ...(ich.role === "inhaber"
+            ? ([
+                { to: "/zugaenge", label: () => m.nav_access() },
+                { to: "/benachrichtigungen", label: () => m.nav_notifications() },
+              ] as const)
+            : []),
         ].map((item) => (
           <div key={item.to} className="contents">
             <Link

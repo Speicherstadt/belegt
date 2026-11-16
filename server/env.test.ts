@@ -39,6 +39,14 @@ describe("readEnv", () => {
     expect(() => readEnv({ ARCHIVFASSUNG: "nein" })).toThrow(/ARCHIVFASSUNG/);
   });
 
+  it("liest den Versand von Benachrichtigungen und nennt das Passwort in keinem Fehler", () => {
+    expect(readEnv({}).MAIL_SMTP_URL).toBeUndefined();
+    const env = readEnv({ MAIL_SMTP_URL: "smtps://belegt@mail.example.org:465", MAIL_SMTP_PASSWORT: "geheim-123" });
+    expect(env.MAIL_SMTP_URL).toBe("smtps://belegt@mail.example.org:465");
+    expect(() => readEnv({ MAIL_SMTP_URL: "https://mail.example.org" })).toThrow(/MAIL_SMTP_URL/);
+    expect(() => readEnv({ MAIL_SMTP_URL: "smtp://belegt:geheim-456@" })).toThrow(/^(?!.*geheim-456)/);
+  });
+
   it("liest Port und Datenbank", () => {
     const env = readEnv({ PORT: "8080", DATABASE_URL: "postgres://belegt@localhost:5432/belegt" });
     expect(env.PORT).toBe(8080);

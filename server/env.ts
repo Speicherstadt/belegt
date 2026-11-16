@@ -77,6 +77,17 @@ const Schema = z.object({
   IMPORT_MAX_GB: z.coerce.number().int().min(1).max(1000).default(20),
   /** Inhalt des Barcodes auf Trennblättern, an denen ein gescannter Stapel geteilt wird */
   TRENNBLATT_CODE: z.string().trim().min(1).max(200).default("BELEGT-TRENNER"),
+  /**
+   * Benachrichtigungen per Mail (docs/betrieb.md#benachrichtigungen): SMTP-Server als smtp://benutzer@host:587 (STARTTLS)
+   * oder smtps://…:465, Passwort getrennt (oder in der Adresse), Absender; ohne MAIL_SMTP_URL keine Mails
+   */
+  MAIL_SMTP_URL: z
+    .string()
+    .url()
+    .refine((u) => /^smtps?:\/\//.test(u), "smtp:// oder smtps://")
+    .optional(),
+  MAIL_SMTP_PASSWORT: z.string().min(1).optional(),
+  MAIL_ABSENDER: z.string().min(3).max(320).optional(),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
   /** Proxys, deren X-Forwarded-For gilt (Adressen oder CIDR); ohne sie zählt nur die Verbindung (docs/betrieb.md) */
   BELEGT_TRUSTED_PROXIES: z

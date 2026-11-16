@@ -13,7 +13,7 @@ bun install
 bun run dev:server   # Server auf Port 3000 (PORT), braucht DATABASE_URL; wendet beim Start die Migrationen an
 bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
 bun server/smtp.ts   # SMTP-Journal (docs/eingang.md)
-bun server/worker.ts # Worker: Postfächer, Eingangsordner, Webhooks, Workflows, Text und E-Rechnungen
+bun server/worker.ts # Worker: Postfächer, Eingangsordner, Webhooks, Workflows, Text und E-Rechnungen, Benachrichtigungen
 bun run typecheck
 bun run lint         # Biome; bun run format behebt Formatfehler
 bun run test         # Vitest
@@ -45,7 +45,8 @@ nehmen für restic einen Nachbau (`deploy/backup/restic-attrappe.sh`); das echte
 
 Die E2E-Tests starten einen eigenen Server mit frischer Datenbank unter `E2E_DATABASE_URL` (Vorgabe
 `postgres://belegt:belegt@localhost:5432/belegt_e2e`; sie wird gelöscht und neu angelegt) und richten Belegt zuerst
-über die Oberfläche ein (`e2e/einrichten.setup.ts`). Der Server läuft dabei wie im Betrieb als eigene App-Rolle
+über die Oberfläche ein (`e2e/einrichten.setup.ts`). Für die Testmail läuft daneben ein nachgebauter SMTP-Server auf
+Port 3187 (`E2E_SMTP_PORT`). Der Server läuft dabei wie im Betrieb als eigene App-Rolle
 `<name>_app`; der Benutzer aus `E2E_DATABASE_URL` migriert und braucht dafür `CREATEROLE`.
 
 Daneben legt der Lauf `<name>_vorlage` an (einmal migriert) und je Vitest-Worker `<name>_<Nummer>` als Kopie davon
@@ -81,6 +82,7 @@ löschen sie wieder.
 | `TSA_URL` | Zeitstempeldienst nach RFC 3161 für den täglichen Zeitstempel über die Kette (docs/pruefung.md) | – |
 | `KI_URL`, `KI_MODELL` | Sprachmodell (Ollama) für Vorschläge zur Einordnung, auf eigenem Server (docs/eingang.md) | – |
 | `OEFFNEN_MIT_NAME`, `OEFFNEN_MIT_URL` | Knopf „Öffnen mit …“ für eine andere App, Adresse mit `{url}` und `{name}` (docs/schnittstelle.md) | – |
+| `MAIL_SMTP_URL`, `MAIL_SMTP_PASSWORT`, `MAIL_ABSENDER` | Benachrichtigungen per Mail: SMTP-Server (`smtp://benutzer@host:587` mit STARTTLS, `smtps://…:465`), Passwort, Absender (docs/betrieb.md) | –, –, `belegt@<Host von BETTER_AUTH_URL>` |
 | `VORSCHAU_URL` | Vorschau-Dienst mit der Schnittstelle von Gotenberg für die Ansicht von Office-Dateien (docs/betrieb.md) | – |
 
 ## Migrationen

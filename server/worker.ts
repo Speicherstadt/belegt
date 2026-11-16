@@ -1,6 +1,8 @@
 import { zuordnungVorschlaegeErzeugen } from "./abgleich/vorschlaege.ts";
 import { ansichtenErzeugen } from "./ansicht/ansicht.ts";
 import { archivfassungenErzeugen } from "./archivfassung/archivfassung.ts";
+import { benachrichtigen } from "./benachrichtigungen/benachrichtigen.ts";
+import { mailAusEnv, type Versender } from "./benachrichtigungen/versand.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { zugriffLesen, zugriffWarnung } from "./db/rollen.ts";
@@ -28,7 +30,7 @@ import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 /*
  * Worker als eigener Prozess: ruft die Postfächer alle ABRUF_MINUTEN ab und führt danach fällige Aktionen dort aus, stellt alle 15 Sekunden Webhooks zu, liest
  * Text und E-Rechnungen neuer Dokumente, führt Workflows aus, wertet Zuordnungsregeln aus, lernt aus den Einordnungen, importiert aus Paperless-ngx und, wenn eingerichtet, liest den Eingangsordner
- * und erzeugt Vorschaubilder und durchsuchbare PDFs von Scans. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
+ * und erzeugt Vorschaubilder und durchsuchbare PDFs von Scans; mit MAIL_SMTP_URL verschickt er Benachrichtigungen. Getrennt vom Server, damit ein hängender Abruf oder eine schwere Datei keine Anfrage
  * aufhält. Migrationen wendet der Server an, nicht der Worker.
  */
 const env = readEnv();
@@ -256,6 +258,32 @@ async function paperless() {
   }
 }
 
+/**
+ * Mit MAIL_SMTP_URL: Benachrichtigungen alle 15 Minuten, die Prüfung der Kette dabei einmal am Tag (ab dem Start). Ins
+ * Log kommen nur Zahlen, nie Adresse oder Passwort des SMTP-Servers.
+ */
+async function benachrichtigungen(versender: Versender) {
+  let letztePruefung = 0;
+  for (;;) {
+    const jetzt = new Date();
+    const kettePruefen = jetzt.getTime() - letztePruefung >= 86_400_000;
+    const r = await benachrichtigen(
+      { db, versender, basisUrl: env.BETTER_AUTH_URL },
+      { jetzt, heute: new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(jetzt), kettePruefen },
+    ).catch((err) => {
+      console.error(`Benachrichtigungen fehlgeschlagen: ${meldung(err)}`);
+      return null;
+    });
+    if (r && kettePruefen) letztePruefung = jetzt.getTime();
+    if (r && (r.gesendet || r.fehler))
+      console.log(`Benachrichtigungen: ${r.gesendet} gesendet${r.fehler ? `, ${r.fehler} nicht zugestellt` : ""}`);
+    await Bun.sleep(900_000);
+  }
+}
+
+const mail = mailAusEnv(env);
+if (!mail) console.log("Benachrichtigungen per Mail aus: MAIL_SMTP_URL fehlt");
+
 async function postfaecher() {
   for (;;) {
     await runde().catch((err) => console.error(`Abruf fehlgeschlagen: ${meldung(err)}`));
@@ -277,6 +305,7 @@ await Promise.all([
   ...(sperrbar ? [objektsperren(sperrbar)] : []),
   ...(env.EINGANG_ORDNER ? [eingangsordner(env.EINGANG_ORDNER)] : []),
   ...(env.TSA_URL ? [zeitstempel(env.TSA_URL)] : []),
+  ...(mail ? [benachrichtigungen(mail.versender)] : []),
   ...(env.VORSCHAU_URL ? [ansichten(env.VORSCHAU_URL)] : []),
   ...(env.KI_URL && env.KI_MODELL ? [kiVorschlaege({ url: env.KI_URL, modell: env.KI_MODELL })] : []),
 ]);

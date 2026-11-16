@@ -167,6 +167,39 @@ Löscht Belegt Mails in einem Postfach ([Nach dem Abholen](eingang.md#nach-dem-a
 länger als den Abstand zwischen zwei Sicherungen. Beschreibe die Sicherung unter „Verfahrensdoku“ (wer die
 Wiederherstellung prüft, wo das Passwort liegt); sie gehört in die Verfahrensdokumentation.
 
+## Benachrichtigungen { #benachrichtigungen }
+
+Mit einem SMTP-Server meldet sich Belegt per Mail, wenn etwas Aufmerksamkeit braucht. In `.env`:
+
+```bash
+MAIL_SMTP_URL=smtp://belegt@mail.firma.de:587
+MAIL_SMTP_PASSWORT=…
+MAIL_ABSENDER=belegt@firma.de
+```
+
+`smtp://` verlangt STARTTLS, `smtps://` (Port 465) TLS von Anfang an; nur ein Server im eigenen Netz ohne TLS bekommt
+`?tls=nein` an die Adresse. Das Passwort steht nur in der Umgebung, nie in Log, Datenbank oder Oberfläche. Ohne
+`MAIL_SMTP_URL` verschickt Belegt nichts, und die Startseite sagt es dem Inhaber.
+
+Unter **Benachrichtigungen** (nur der Inhaber) schaltest du jeden Anlass an oder aus:
+
+| Anlass | Wann | Vorgabe |
+| --- | --- | --- |
+| Sicherung | Backup oder Test-Restore fehlgeschlagen, oder seit X Tagen kein erfolgreiches Backup ([Sichern](#sichern)) | an, 2 Tage |
+| Postfach | seit X Tagen nicht erfolgreich abgerufen, oder eine [Aktion im Postfach](eingang.md#nach-dem-abholen) fehlgeschlagen | an, 1 Tag |
+| Kette | die tägliche [Prüfung](pruefung.md) von Kette, Kopf und Siegeln meldet Befunde | an |
+| Löschung | ein Antrag wartet auf die zweite Person; geht an Inhaber und Steuerberatung außer dem Antragsteller | an |
+| Fristen | wöchentlich: Fristen, die in den nächsten 30 Tagen enden | an |
+| Eingang | mehr als N Dokumente warten auf ihre Einordnung | aus, 50 |
+| Workflows | Läufe sind fehlgeschlagen, mit den Namen der Workflows | an |
+
+Empfänger sind der Inhaber und bis zu 20 weitere Adressen. Eine Mail enthält Zahlen, Namen von Postfächern und
+Workflows und Archivnummern, dazu einen Link auf die Seite in Belegt (`BETTER_AUTH_URL`); nie Titel, Dateinamen,
+Absender oder Text von Dokumenten. Dieselbe Meldung im selben Zustand kommt höchstens einmal am Tag (Fristen einmal in
+der Woche), ein neuer Zustand sofort; ein gescheiterter Versand frühestens nach einer Stunde wieder. Der Worker prüft
+alle 15 Minuten, die Kette einmal am Tag. Jede gesendete Mail steht mit Anlass, Empfängern und Betreff unter „Zuletzt
+gesendet“ und im Protokoll; ändern lässt sich dieser Eintrag nicht. **Testmail senden** prüft den Versand.
+
 ## Aktualisieren
 
 ```bash

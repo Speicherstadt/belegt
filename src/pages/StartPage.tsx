@@ -29,7 +29,9 @@ export function StartPage() {
         {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
         {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus />}
         {/* Betrieb nur für Inhaber und Steuerberatung; der Server lehnt es für andere ab */}
-        {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <OperationStatus />}
+        {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
+          <OperationStatus inhaber={ich.data.role === "inhaber"} />
+        )}
       </div>
       <ViewTiles />
     </div>

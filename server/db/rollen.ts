@@ -194,7 +194,7 @@ export const NUR_LESEN = ["sealed_tables", "backup_status", "audit_log", "seals"
  * Einstellungen in genau einer Zeile, die die App ändert, aber nie löscht: Ohne die Zeile fiele etwa die Pflicht zum
  * zweiten Faktor still weg (server/zugang/zwei-faktor.ts)
  */
-export const OHNE_LOESCHEN = ["anmeldung_einstellungen"];
+export const OHNE_LOESCHEN = ["anmeldung_einstellungen", "benachrichtigung_einstellungen"];
 
 /**
  * Rechte je Tabelle aus ihren Triggern: Wer per belegt_append_only nur ergänzt werden darf (versiegelte Tabellen ohne

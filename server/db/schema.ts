@@ -231,6 +231,8 @@ export const quellen = pgTable(
     uidValidity: bigint("uid_validity", { mode: "number" }),
     letzterAbruf: timestamp("letzter_abruf", { withTimezone: true }),
     letzterFehler: text("letzter_fehler"),
+    /** Letzter Abruf ohne Fehler; für die Benachrichtigung „seit X Tagen nicht abgerufen“ */
+    letzterErfolg: timestamp("letzter_erfolg", { withTimezone: true }),
     aktiv: boolean("aktiv").notNull().default(true),
     erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
     /** imap oder jmap */

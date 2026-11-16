@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { eingerichtet } from "./db/status.ts";
 import { archivansichtenRouten } from "./http/archivansichten.ts";
+import { benachrichtigungenRouten } from "./http/benachrichtigungen.ts";
 import { betriebRouten } from "./http/betrieb.ts";
 import { mitClientIp } from "./http/client-ip.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
@@ -85,6 +86,7 @@ export function createApp(umgebung?: AppUmgebung) {
     mailRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     betriebRouten(app, umgebung);
+    benachrichtigungenRouten(app, umgebung);
     schnittstelleRouten(app, umgebung);
     oauthRouten(app, umgebung);
     paperlessRouten(app, umgebung);

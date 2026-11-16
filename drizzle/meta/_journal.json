@@ -351,6 +351,13 @@
       "when": 1794820826069,
       "tag": "0049_zwei_faktor",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794824859112,
+      "tag": "0050_benachrichtigungen",
+      "breakpoints": true
     }
   ]
 }

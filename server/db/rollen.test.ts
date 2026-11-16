@@ -105,6 +105,8 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     ["den Stand der Sicherung fälschen", "insert into backup_status (art, ok) values ('backup', true)"],
     ["die Rolle wechseln", "set role postgres"],
     ["die Pflicht zum zweiten Faktor löschen", "delete from anmeldung_einstellungen"],
+    ["die Einstellungen der Benachrichtigungen löschen", "delete from benachrichtigung_einstellungen"],
+    ["eine gesendete Benachrichtigung ändern", "update benachrichtigungen set ok = true"],
   ])("verbietet der App-Rolle: %s", async (_was, befehl) => {
     expect(await alsApp(befehl)).not.toBeNull();
   });
@@ -145,6 +147,14 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     expect(t("two_factor")).toMatchObject(alles);
     expect(t("passkey")).toMatchObject(alles);
     expect(t("anmeldung_einstellungen")).toMatchObject({ select: true, insert: true, update: true, delete: false });
+    // Benachrichtigungen: Einstellungen nur ändern, das Protokoll nur ergänzen
+    expect(t("benachrichtigung_einstellungen")).toMatchObject({
+      select: true,
+      insert: true,
+      update: true,
+      delete: false,
+    });
+    expect(t("benachrichtigungen")).toMatchObject(nurErgaenzen);
     expect(tabellen.every((x) => !x.truncate && !x.trigger)).toBe(true);
   });
 

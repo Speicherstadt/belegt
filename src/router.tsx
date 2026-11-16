@@ -9,6 +9,7 @@ import { DocumentPage } from "./pages/DocumentPage.tsx";
 import { InboxPage } from "./pages/InboxPage.tsx";
 import { InvitePage } from "./pages/InvitePage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
+import { NotificationsPage } from "./pages/NotificationsPage.tsx";
 import { OrderPage } from "./pages/OrderPage.tsx";
 import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
@@ -51,6 +52,7 @@ const seiten = [
   createRoute({ getParentRoute: () => app, path: "/pruefung", component: AuditPage }),
   createRoute({ getParentRoute: () => app, path: "/zugaenge", component: AccessPage }),
   createRoute({ getParentRoute: () => app, path: "/konto", component: AccountPage }),
+  createRoute({ getParentRoute: () => app, path: "/benachrichtigungen", component: NotificationsPage }),
   createRoute({ getParentRoute: () => app, path: "/quellen", component: SourcesPage }),
   createRoute({ getParentRoute: () => app, path: "/workflows", component: WorkflowsPage }),
   // Ziel des Teilens vom Handy (share_target im Manifest, src/pwa/)

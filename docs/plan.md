@@ -109,6 +109,14 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug und Alltag.
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf | niedrig | offen |
 
+## Etappen F
+
+| Etappe | Inhalt | Stand |
+| --- | --- | --- |
+| F1 · Zwei-Faktor und Benachrichtigungen | TOTP mit Backup-Codes und Passkeys, Pflicht je Rolle, Zurücksetzen durch den Inhaber und Notfall-Skript ([Zugänge](zugaenge.md#zwei-faktor)); Benachrichtigungen per Mail mit Anlässen, Entprellen und Protokoll ([Betrieb](betrieb.md#benachrichtigungen)) | erledigt |
+| F2 | noch festzulegen | offen |
+| F3 | noch festzulegen | offen |
+
 ## Offene Entscheidungen
 
 - [ ] Lizenz: AGPL wie Haben, Kontext und Schreibzeug?

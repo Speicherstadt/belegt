@@ -5,11 +5,13 @@ import { join } from "node:path";
 import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import postgres from "postgres";
+import { SMTPServer } from "smtp-server";
 import { zuordnungVorschlaegeErzeugen } from "../server/abgleich/vorschlaege.ts";
 import { ansichtenErzeugen } from "../server/ansicht/ansicht.ts";
 import { createApp } from "../server/app.ts";
 import { archivfassungenErzeugen } from "../server/archivfassung/archivfassung.ts";
 import { createAuth } from "../server/auth.ts";
+import { smtpVersender } from "../server/benachrichtigungen/versand.ts";
 import { verbinden } from "../server/db/client.ts";
 import { migrierenMitRechten } from "../server/db/migrieren.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
@@ -54,6 +56,19 @@ const verzeichnis = mkdtempSync(join(tmpdir(), "belegt-e2e-"));
 const speicher = dateispeicher({ verzeichnis: () => verzeichnis });
 const schluessel = randomBytes(32);
 const importOrdner = mkdtempSync(join(tmpdir(), "belegt-e2e-import-"));
+// Ein nachgebauter SMTP-Server für Benachrichtigungen und Testmail (e2e/benachrichtigungen.spec.ts); nimmt alles an
+const SMTP_PORT = Number(process.env.E2E_SMTP_PORT ?? 3187);
+const smtp = new SMTPServer({
+  disabledCommands: ["STARTTLS", "AUTH"],
+  logger: false,
+  onData: (stream, _sitzung, fertig) => {
+    stream.resume();
+    stream.on("end", () => fertig());
+  },
+});
+await new Promise<void>((ok) => smtp.listen(SMTP_PORT, "127.0.0.1", ok));
+const absender = "belegt@e2e.example";
+const mail = { absender, versender: smtpVersender({ url: `smtp://127.0.0.1:${SMTP_PORT}?tls=nein`, absender }) };
 const auth = createAuth({
   db,
   secret: "e2e-".repeat(8),
@@ -68,6 +83,7 @@ Bun.serve({
     auth,
     schluessel,
     importOrdner,
+    mail,
     oeffnen: imapOeffnen,
     // Die Seite, die Belegt im Frame zeigen darf; der Test baut sie im Browser nach (e2e/einbetten.spec.ts)
     embedOrigin: "http://localhost:5199",

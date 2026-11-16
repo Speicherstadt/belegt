@@ -1,4 +1,5 @@
 import { alltagApi } from "./api-alltag.ts";
+import { benachrichtigungenApi } from "./api-benachrichtigungen.ts";
 import { betriebApi } from "./api-betrieb.ts";
 import { dokumenteApi } from "./api-dokumente.ts";
 import { kontoApi } from "./api-konto.ts";
@@ -12,6 +13,7 @@ import { zugangApi } from "./api-zugang.ts";
 
 export type { GespeicherteAnsicht, Start } from "./api-alltag.ts";
 export { ApiFehler } from "./api-aufruf.ts";
+export type { Anlaesse, Benachrichtigungen, BenachrichtigungsEinstellungen } from "./api-benachrichtigungen.ts";
 export type {
   AktionenProtokoll,
   Befund,
@@ -99,4 +101,5 @@ export const api = {
   ...alltagApi,
   ...workflowsApi,
   ...standApi,
+  ...benachrichtigungenApi,
 };

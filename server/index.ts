@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { createApp } from "./app.ts";
 import { createAuth } from "./auth.ts";
+import { mailAusEnv } from "./benachrichtigungen/versand.ts";
 import { schluesselAus } from "./crypto.ts";
 import { verbinden } from "./db/client.ts";
 import { datenbankVorbereiten } from "./db/migrieren.ts";
@@ -61,6 +62,7 @@ const app = createApp({
     env.OEFFNEN_MIT_NAME && env.OEFFNEN_MIT_URL ? { name: env.OEFFNEN_MIT_NAME, url: env.OEFFNEN_MIT_URL } : undefined,
   importOrdner: env.IMPORT_ORDNER,
   importMax: env.IMPORT_MAX_GB * 1024 ** 3,
+  mail: mailAusEnv(env),
   oberflaeche,
 });
 

@@ -35,6 +35,10 @@ x-umgebung: &umgebung # Getrennte Rollen (docs/betrieb.md): App-Anmeldung aus .e
   IMPORT_MAX_GB: ${IMPORT_MAX_GB:-}
   OEFFNEN_MIT_NAME: ${OEFFNEN_MIT_NAME:-}
   OEFFNEN_MIT_URL: ${OEFFNEN_MIT_URL:-}
+  # Benachrichtigungen per Mail (docs/betrieb.md, „Benachrichtigungen“); ohne MAIL_SMTP_URL keine Mails
+  MAIL_SMTP_URL: ${MAIL_SMTP_URL:-}
+  MAIL_SMTP_PASSWORT: ${MAIL_SMTP_PASSWORT:-}
+  MAIL_ABSENDER: ${MAIL_ABSENDER:-}
 
 # Sicherung (Profil backup) und Wiederherstellen (Profil restore) mit dem Image aus deploy/backup, als Eigentümer der
 # Datenbank; siehe docs/betrieb.md, „Sichern“

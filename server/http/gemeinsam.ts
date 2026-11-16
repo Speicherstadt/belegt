@@ -3,6 +3,7 @@ import { z } from "zod";
 import paket from "../../package.json" with { type: "json" };
 import { RECHTE } from "../../shared/rollen.ts";
 import type { Angemeldet, Auth } from "../auth.ts";
+import type { Versender } from "../benachrichtigungen/versand.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import type { OeffnenMit } from "../freigabe/freigabe.ts";
 import type { Oeffnen } from "../mail/abruf.ts";
@@ -38,6 +39,8 @@ export type AppUmgebung = Umgebung & {
   importMax?: number;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
+  /** Versand von Benachrichtigungen per Mail (MAIL_SMTP_URL), für die Testmail; ohne ihn keine Mails */
+  mail?: { versender: Versender; absender: string };
   /** Adresse des Clients einer Anfrage (server/http/client-ip.ts); ohne sie, etwa in Tests, keine */
   clientIp?: (req: Request) => string | undefined;
 };
