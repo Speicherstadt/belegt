@@ -38,6 +38,8 @@ export type AppUmgebung = Umgebung & {
   importMax?: number;
   /** Ordner der gebauten Oberfläche; ohne ihn liefert der Server nur die Schnittstelle (Entwicklung mit Vite) */
   oberflaeche?: string;
+  /** Adresse des Clients einer Anfrage (server/http/client-ip.ts); ohne sie, etwa in Tests, keine */
+  clientIp?: (req: Request) => string | undefined;
 };
 export type App = Hono<{ Variables: { nutzer: Angemeldet } }>;
 

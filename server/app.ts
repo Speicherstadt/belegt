@@ -3,6 +3,7 @@ import { bodyLimit } from "hono/body-limit";
 import { eingerichtet } from "./db/status.ts";
 import { archivansichtenRouten } from "./http/archivansichten.ts";
 import { betriebRouten } from "./http/betrieb.ts";
+import { mitClientIp } from "./http/client-ip.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
 import { type App, type AppUmgebung, MAX_UPLOAD, VERSION } from "./http/gemeinsam.ts";
@@ -37,7 +38,8 @@ export function createApp(umgebung?: AppUmgebung) {
 
   if (umgebung) {
     const { auth } = umgebung;
-    app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+    // Better Auth bekommt die Adresse aus der Verbindung, nie aus einem Header des Clients (server/http/client-ip.ts)
+    app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(mitClientIp(c.req.raw, umgebung.clientIp?.(c.req.raw))));
 
     /** Öffentlich: Beschreibung der Schnittstelle für Programme */
     app.get("/api/openapi.json", (c) => c.json(openapi));

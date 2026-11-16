@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { proxysLesen } from "./http/client-ip.ts";
 
 /** Einstellungen aus der Umgebung; fehlt etwas Nötiges, startet der Server nicht. */
 const Schema = z.object({
@@ -77,6 +78,17 @@ const Schema = z.object({
   /** Inhalt des Barcodes auf Trennblättern, an denen ein gescannter Stapel geteilt wird */
   TRENNBLATT_CODE: z.string().trim().min(1).max(200).default("BELEGT-TRENNER"),
   /** Die eine Seite, die Belegt in einem Frame zeigen darf, etwa https://portal.firma.de */
+  /** Proxys, deren X-Forwarded-For gilt (Adressen oder CIDR); ohne sie zählt nur die Verbindung (docs/betrieb.md) */
+  BELEGT_TRUSTED_PROXIES: z
+    .string()
+    .optional()
+    .superRefine((text, ctx) => {
+      try {
+        proxysLesen(text);
+      } catch (err) {
+        ctx.addIssue({ code: "custom", message: (err as Error).message });
+      }
+    }),
   BELEGT_EMBED_ORIGIN: z
     .string()
     .url()

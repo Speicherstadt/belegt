@@ -102,6 +102,9 @@ services:
       <<: *umgebung
       # Eigentümer der Datenbank nur für den Migrationsschritt vor dem Start (server/start.sh)
       MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:-}
+      # X-Forwarded-For gilt nur von Caddy (Profil https, feste Adresse im Netz proxy); sonst zählt die Verbindung
+      BELEGT_TRUSTED_PROXIES: ${BELEGT_TRUSTED_PROXIES:-172.31.250.2}
+    networks: [default, proxy]
     ports:
       - "${BELEGT_PORT:-3000}:3000"
     volumes:
@@ -181,6 +184,9 @@ services:
     restart: unless-stopped
     depends_on:
       - server
+    networks:
+      proxy:
+        ipv4_address: 172.31.250.2
     ports:
       - "80:80"
       - "443:443"
@@ -239,6 +245,13 @@ networks:
   default:
   vorschau:
     internal: true
+  # Caddy und Server; Caddy hat die feste Adresse aus BELEGT_TRUSTED_PROXIES, alle anderen bekommen eine aus ip_range,
+  # das Gateway (.1) ist nicht vertrauenswürdig. Nutzt ein anderes Netz schon 172.31.250.0/29, hier und dort ändern.
+  proxy:
+    ipam:
+      config:
+        - subnet: 172.31.250.0/29
+          ip_range: 172.31.250.4/30
 
 volumes:
   ollama:

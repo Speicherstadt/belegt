@@ -51,6 +51,15 @@ describe("Caddy-Block für HTTPS", () => {
     expect(vorlage.join("\n")).not.toMatch(/X-Frame-Options|frame-ancestors/);
   });
 
+  // Der Server nimmt X-Forwarded-For nur von BELEGT_TRUSTED_PROXIES (server/http/client-ip.ts)
+  it.each(["deploy/compose.yml", "compose.yml"])("vertraut in %s nur der festen Adresse von Caddy", (datei) => {
+    const text = readFileSync(join(wurzel, datei), "utf8");
+    expect(text).toContain(`BELEGT_TRUSTED_PROXIES: \${BELEGT_TRUSTED_PROXIES:-172.31.250.2}`);
+    expect(text).toMatch(/\n {2}caddy:\n(?: {4}.*\n)*? {4}networks:\n {6}proxy:\n {8}ipv4_address: 172\.31\.250\.2\n/);
+    // Andere Container bekommen ihre Adresse außerhalb davon, das Gateway ist .1
+    expect(text).toContain("- subnet: 172.31.250.0/29\n          ip_range: 172.31.250.4/30");
+  });
+
   it("leitet in Compose an den Dienst server und nimmt die Domain aus DOMAIN", () => {
     for (const datei of ["deploy/compose.yml", "compose.yml"]) {
       const block = ausCompose(datei);

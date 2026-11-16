@@ -7,6 +7,7 @@ import type { Recht, Rolle, Sichtbereich } from "../shared/rollen.ts";
 import type { Datenbank } from "./db/client.ts";
 import * as schema from "./db/schema.ts";
 import { eingerichtet } from "./db/status.ts";
+import { CLIENT_IP_HEADER } from "./http/client-ip.ts";
 import { EINLADUNG_HEADER, EINRICHTUNGSCODE_HEADER, einloesen, offen, zugangLaden } from "./zugang/einladungen.ts";
 
 const verboten = (message: string) => new APIError("FORBIDDEN", { message });
@@ -103,6 +104,8 @@ export function createAuth({
         ]
       : [],
     rateLimit: { enabled: begrenzen, storage: "memory", window: 60, max: 20 },
+    // Nur die Adresse, die Belegt aus der Verbindung ermittelt; X-Forwarded-For wertet server/http/client-ip.ts aus
+    advanced: { ipAddress: { ipAddressHeaders: [CLIENT_IP_HEADER] } },
     user: {
       additionalFields: {
         role: { type: "string", input: false, required: false },

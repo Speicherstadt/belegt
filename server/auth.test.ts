@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { clientIp, proxysLesen } from "./http/client-ip.ts";
 import { VERSION } from "./http/gemeinsam.ts";
 import { testApp } from "./test-app.ts";
 import { testDatenbankUrl } from "./test-db.ts";
@@ -191,6 +192,58 @@ describe.skipIf(!testDatenbankUrl)("Begrenzung der Anmeldeversuche", () => {
       const status: number[] = [];
       for (let i = 0; i < 25; i++) status.push((await versuch()).status);
       expect(status).toContain(429);
+    } finally {
+      await t.aufraeumen();
+    }
+  });
+  it("lässt sich ohne vertrauenswürdigen Proxy nicht mit wechselndem X-Forwarded-For umgehen", async () => {
+    const t = await testApp({ begrenzen: true });
+    try {
+      await t.registrieren("anna@example.org");
+      const status: number[] = [];
+      for (let i = 0; i < 25; i++) {
+        const res = await t.anfrage("/api/auth/sign-in/email", {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-forwarded-for": `198.51.100.${i + 1}` },
+          body: JSON.stringify({ email: "anna@example.org", password: "falsch-falsch-falsch" }),
+        });
+        status.push(res.status);
+      }
+      expect(status).toContain(429);
+    } finally {
+      await t.aufraeumen();
+    }
+  });
+
+  // Die Verbindung kommt in Tests aus x-test-verbindung, wie sonst aus Bun.serve (server/index.ts)
+  it("zählt hinter einem vertrauenswürdigen Proxy je Client aus X-Forwarded-For", async () => {
+    const proxys = proxysLesen("172.31.250.2");
+    const t = await testApp({
+      begrenzen: true,
+      clientIp: (req) =>
+        clientIp(req.headers.get("x-test-verbindung") ?? undefined, req.headers.get("x-forwarded-for"), proxys),
+    });
+    try {
+      await t.registrieren("anna@example.org");
+      const versuch = (client: string, verbindung = "172.31.250.2") =>
+        t.anfrage("/api/auth/sign-in/email", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-test-verbindung": verbindung,
+            "x-forwarded-for": client,
+          },
+          body: JSON.stringify({ email: "anna@example.org", password: "falsch-falsch-falsch" }),
+        });
+      const status: number[] = [];
+      for (let i = 0; i < 25; i++) status.push((await versuch("203.0.113.7")).status);
+      expect(status).toContain(429);
+      // Ein anderer Client hinter demselben Proxy ist nicht gesperrt
+      expect((await versuch("203.0.113.8")).status).toBe(401);
+      // Wer den Server direkt erreicht, kann sich nicht als anderer Client ausgeben
+      const direkt: number[] = [];
+      for (let i = 0; i < 25; i++) direkt.push((await versuch(`198.51.100.${i + 1}`, "192.0.2.9")).status);
+      expect(direkt).toContain(429);
     } finally {
       await t.aufraeumen();
     }

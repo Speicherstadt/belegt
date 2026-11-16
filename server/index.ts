@@ -8,6 +8,7 @@ import { datenbankVorbereiten } from "./db/migrieren.ts";
 import { zugriffWarnung } from "./db/rollen.ts";
 import { eingerichtet } from "./db/status.ts";
 import { readEnv } from "./env.ts";
+import { clientIp, proxysLesen } from "./http/client-ip.ts";
 import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
@@ -38,7 +39,11 @@ const auth = createAuth({ db, secret: env.BETTER_AUTH_SECRET, baseURL: env.BETTE
 const schluessel = env.BELEGT_SCHLUESSEL ? schluesselAus(env.BELEGT_SCHLUESSEL) : undefined;
 // Die gebaute Oberfläche liefert der Server selbst aus, wenn es sie gibt (bun run build); sonst Vite in der Entwicklung
 const oberflaeche = existsSync("dist/index.html") ? "dist" : undefined;
+// Adresse der Verbindung je Anfrage für Better Auth; X-Forwarded-For nur von BELEGT_TRUSTED_PROXIES
+const verbindungen = new WeakMap<Request, string | undefined>();
+const proxys = proxysLesen(env.BELEGT_TRUSTED_PROXIES);
 const app = createApp({
+  clientIp: (req) => clientIp(verbindungen.get(req), req.headers.get("x-forwarded-for"), proxys),
   db,
   speicher,
   auth,
@@ -62,7 +67,10 @@ const app = createApp({
 // Große Anfragen nur für den Export aus Paperless-ngx; alle anderen begrenzt die App selbst (server/app.ts)
 Bun.serve({
   port: env.PORT,
-  fetch: app.fetch,
+  fetch: (req, server) => {
+    verbindungen.set(req, server.requestIP(req)?.address);
+    return app.fetch(req);
+  },
   maxRequestBodySize: Math.max(110 * 1024 * 1024, env.IMPORT_MAX_GB * 1024 ** 3 + 1024 * 1024),
 });
 console.log(`Belegt läuft auf Port ${env.PORT}`);

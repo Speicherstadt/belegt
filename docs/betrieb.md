@@ -50,6 +50,12 @@ weil der Export aus Paperless-ngx bis `IMPORT_MAX_GB` groß sein darf. Für eine
 die Vorlage, mit demselben Block. Das SMTP-Journal geht nicht über Caddy; für STARTTLS dort siehe
 [SMTP-Journal](eingang.md#smtp-journal).
 
+Die Anmeldeversuche begrenzt Belegt je Client. Die Adresse kommt aus der Verbindung; `X-Forwarded-For` gilt nur, wenn
+die Verbindung von einem Proxy aus `BELEGT_TRUSTED_PROXIES` kommt (Adressen oder Netze, mit Komma getrennt), und dann
+der rechteste Eintrag, der selbst kein solcher Proxy ist. Compose setzt dafür die feste Adresse von Caddy im Netz
+`proxy`. Für einen eigenen Proxy trägst du die Adresse ein, von der er den Server erreicht; ohne Eintrag zählt die
+Verbindung, und hinter einem Proxy teilen sich dann alle einen Zähler.
+
 ## Getrennte Datenbankrollen
 
 Server, Worker und SMTP-Journal melden sich mit der Rolle `belegt_app` an (`DATABASE_URL`). Sie besitzt keine Tabelle,
