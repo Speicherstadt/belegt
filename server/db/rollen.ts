@@ -73,8 +73,9 @@ async function identitaet(sql: Leser): Promise<Identitaet> {
  * https://www.postgresql.org/docs/16/role-membership.html
  * https://www.postgresql.org/docs/16/runtime-config-client.html#GUC-SESSION-REPLICATION-ROLE (nur Superuser oder mit
  * ausdrücklichem Recht auf den Parameter)
- * Eigentümer kommen aus pg_shdepend, nicht aus einer Liste von Objekttypen:
- * https://www.postgresql.org/docs/16/catalog-pg-shdepend.html
+ * Eigentümer kommen aus pg_shdepend, nicht aus einer Liste von Objekttypen
+ * (https://www.postgresql.org/docs/16/catalog-pg-shdepend.html), ohne Large Objects: Die darf jede Rolle anlegen
+ * (lo_create), und ein eigenes gibt keine Macht über Tabellen; sonst verhinderte die App ihren nächsten Start.
  */
 async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugriff> {
   const [r] = await sql<
@@ -93,6 +94,7 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
       select datdba as oid from pg_database where datname = current_database()
       union select refobjid from pg_shdepend where refclassid = 'pg_authid'::regclass and deptype = 'o'
         and dbid = (select oid from pg_database where datname = current_database())
+        and classid <> 'pg_largeobject'::regclass
     ) select
       exists(select 1 from erreichbar where rolsuper or rolcreaterole or rolcreatedb or rolreplication or rolbypassrls)
         or exists(select 1 from erreichbar r cross join pg_auth_members m

@@ -218,6 +218,16 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     }
   });
 
+  // lo_create darf jede Rolle; ein eigenes Large Object gibt keine Macht über Tabellen oder Trigger
+  it("startet weiter, wenn die App-Rolle ein Large Object angelegt hat", async () => {
+    const [lo] = await app<{ oid: number }[]>`select lo_create(0) as oid`;
+    try {
+      await expect(migrierenMitRechten(testDatenbankUrl!, appUrl)).resolves.toMatchObject({ eingeschraenkt: true });
+    } finally {
+      await admin`select lo_unlink(${lo!.oid})`;
+    }
+  });
+
   it("lehnt eine App-Rolle mit Rechten zum Anlegen von Rollen ab", async () => {
     await admin.unsafe(`alter role "${appRolle}" createrole`);
     try {
