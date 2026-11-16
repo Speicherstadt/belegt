@@ -34,6 +34,8 @@ export interface Pruefung {
 /** So viele Meldungen und Zeichen je Meldung werden gespeichert; der Validator kann Hunderte liefern */
 const MAX_MELDUNGEN = 20;
 const MAX_TEXT = 300;
+/** Größer liest Belegt keinen Prüfbericht; er enthält die Erklärung als HTML, bleibt aber weit darunter */
+const MAX_BERICHT = 32 * 1024 * 1024;
 
 /** Der Dienst ist gerade nicht da: nichts festhalten, im nächsten Lauf wieder (wie beim Vorschau-Dienst) */
 const nichtErreichbar = (meldung: string) => Object.assign(new Error(meldung), { nichtErreichbar: true });
@@ -107,6 +109,23 @@ export function berichtLesen(xml: string): Pruefung | null {
 
 export type Abfragen = (url: string, init: RequestInit) => Promise<Response>;
 
+/** Der Rumpf der Antwort als Text, höchstens MAX_BERICHT Bytes; darüber bricht das Lesen ab */
+async function begrenztLesen(res: Response): Promise<string> {
+  const zuGross = () => nichtErreichbar("Antwort des Validators zu groß");
+  if (Number(res.headers.get("content-length") ?? 0) > MAX_BERICHT) throw zuGross();
+  const teile: Uint8Array[] = [];
+  let laenge = 0;
+  for await (const teil of res.body ?? []) {
+    laenge += teil.length;
+    if (laenge > MAX_BERICHT) {
+      await res.body?.cancel().catch(() => {});
+      throw zuGross();
+    }
+    teile.push(teil);
+  }
+  return Buffer.concat(teile).toString("utf8");
+}
+
 /**
  * Schickt das XML an den Validator. Antwortet er nicht, mit 429 oder 5xx, ist das vorübergehend (nichtErreichbar);
  * 400 und 422 (das XML lässt sich nicht verarbeiten) sind ein Befund der Datei.
@@ -129,7 +148,7 @@ export async function beimDienstPruefen(
     throw nichtErreichbar("Validator nicht erreichbar");
   }
   if (res.status === 429 || res.status >= 500) throw nichtErreichbar(`Validator antwortet ${res.status}`);
-  const text = await res.text();
+  const text = await begrenztLesen(res);
   if (res.status === 400 || res.status === 422) {
     return {
       gueltig: false,
