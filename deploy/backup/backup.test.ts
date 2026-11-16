@@ -210,6 +210,37 @@ describe.skipIf(!testDatenbankUrl || !hatWerkzeuge)("Backup und Test-Restore (Po
     expect(r.aus).toContain("Abgebrochen");
   });
 
+  it("prüft die Sicherung vor dem Ersetzen und ersetzt bei Befunden nichts, außer mit --trotz-befunden", async () => {
+    expect(skript("backup.sh", [], { RESTORE_CHECK_DAYS: "0" }).status).toBe(0);
+    writeFileSync(join(letzterSnapshot(), datei("Rechnung 1")), "verändert");
+    const zielDb = () => postgres(testDatenbankUrl!.replace(`/${db}`, `/${ziel}`), { max: 1, onnotice: () => {} });
+    const vorher = zielDb();
+    try {
+      await vorher`select set_config('belegt.actor', 'test:restore', false)`;
+      await vorher`update einstellungen set firma = 'Stand vor dem Restore'`;
+    } finally {
+      await vorher.end();
+    }
+    const dokumente = join(ordner, "nach-befund");
+    const extra = { PGDATABASE: ziel, DOKUMENTE_DIR: dokumente, DOKUMENTE_UID: String(process.getuid?.() ?? 0) };
+    const r = skript("restore.sh", ["latest"], extra, "ja\n");
+    expect(r.status).not.toBe(0);
+    expect(r.aus).toContain("Datei passt nicht zu ihrem Hash");
+    expect(r.aus).toContain("nichts geändert");
+    const danach = zielDb();
+    try {
+      expect(await danach`select firma from einstellungen`).toEqual([{ firma: "Stand vor dem Restore" }]);
+    } finally {
+      await danach.end();
+    }
+    expect(existsSync(dokumente) ? readdirSync(dokumente) : []).toEqual([]);
+    expect(await admin`select datname from pg_database where datname = ${`${ziel}_restore`}`).toEqual([]);
+    // Ausdrücklich trotzdem: etwa wenn nur ein Teil der Originale beschädigt ist
+    const trotz = skript("restore.sh", ["latest", "--trotz-befunden"], extra, "ja\n");
+    expect(trotz.status, trotz.aus).toBe(0);
+    expect(trotz.aus).toContain("Datei passt nicht zu ihrem Hash");
+  });
+
   it("sichert bei Originalen in S3 nur die Datenbank", async () => {
     const r = skript("backup.sh", [], { S3_ENDPUNKT: "https://s3.example", RESTORE_CHECK_DAYS: "0" });
     expect(r.status, r.aus).toBe(0);

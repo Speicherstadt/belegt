@@ -151,7 +151,10 @@ docker compose run --rm restore latest   # oder eine Snapshot-ID, fragt nach „
 docker compose up -d
 ```
 
-Der Start danach vergibt die Rechte der App-Rolle neu (auf einem neuen Server die Rolle vorher anlegen, siehe
+Vor dem Ersetzen spielt `restore` die Sicherung in eine eigene Datenbank ein und prüft sie wie der Test-Restore. Meldet
+die Prüfung etwas, bleibt alles, wie es war. Gibt es keine bessere Sicherung, etwa weil nur einzelne Originale
+beschädigt sind, stellt `restore latest --trotz-befunden` trotzdem wieder her. Der Start danach vergibt die Rechte der
+App-Rolle neu (auf einem neuen Server die Rolle vorher anlegen, siehe
 [Getrennte Datenbankrollen](#getrennte-datenbankrollen)). Dann unter „Prüfung“ mit „Auch alle Dateien prüfen“ prüfen.
 
 Ohne den Container geht es auch von Hand, dann ohne Test-Restore und ohne Eintrag in der App:

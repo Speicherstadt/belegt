@@ -5,15 +5,22 @@
 #   docker compose stop server worker smtp
 #   docker compose run --rm restore              # verfügbare Stände anzeigen
 #   docker compose run --rm restore latest       # oder eine Snapshot-ID
+#   docker compose run --rm restore latest --trotz-befunden   # auch wenn die Prüfung Befunde meldet
 #   docker compose up -d
 #
 # Achtung: ersetzt die Datenbank PGDATABASE und die Dateien in DOKUMENTE_DIR vollständig; gibt es die Datenbank noch
 # nicht, wird sie angelegt. Liegen die Originale in S3, stellt es nur die Datenbank wieder her. Belegt muss danach mit
 # demselben BELEGT_SCHLUESSEL laufen wie beim Backup. Die Rechte der App-Rolle vergibt der nächste Start des Servers.
+# Vor dem Ersetzen prüft es die Sicherung wie der Test-Restore (Kette, Kopf, Siegel, jedes Original gegen seinen Hash);
+# bei Befunden ersetzt es nichts. --trotz-befunden stellt dennoch wieder her, etwa wenn nur einzelne Originale
+# beschädigt sind und keine bessere Sicherung da ist; die Befunde stehen dann im Log und unter „Prüfung“.
 set -euo pipefail
 . "${BASH_SOURCE[0]%/*}/backup-status.sh"
 DOKUMENTE_DIR="${DOKUMENTE_DIR:-/belegt/dokumente}"
 snapshot="${1:-}"
+trotz=false
+[ "${2:-}" != --trotz-befunden ] || trotz=true
+app="${BELEGT_APP:-/app}"
 if [ -z "$snapshot" ]; then
   restic snapshots --tag belegt
   echo "Aufruf: restore.sh <snapshot-id|latest>; latest ist der neueste Stand von Host $BACKUP_HOST." >&2
@@ -73,6 +80,23 @@ if ! "$pg_restore_bin" --no-owner --no-acl --exit-on-error --dbname="${db}_resto
   dropdb --if-exists "${db}_restore"
   echo "Einspielen fehlgeschlagen; die bisherige Datenbank ist unverändert." >&2
   exit 1
+fi
+# Die Prüfung von Belegt in der eingespielten Kopie mit den Originalen aus dem Snapshot (bei S3: aus dem Bucket)
+echo "Prüfe die Sicherung (Kette, Siegel, Originale) …"
+pruefen=(env -u DATABASE_URL PGDATABASE="${db}_restore")
+[ "$dokumente" = s3 ] || pruefen+=(DOCUMENTS_DIR="$source" S3_ENDPUNKT=)
+rc=0
+summary="$("${pruefen[@]}" bun "$app/server/pruefung/cli.ts" --text)" || rc=$?
+if [ "$rc" != 0 ]; then
+  echo "Prüfung der Sicherung: $summary" >&2
+  if [ "$trotz" != true ]; then
+    dropdb --if-exists "${db}_restore"
+    echo "Die Sicherung hat Befunde; nichts geändert. Mit --trotz-befunden trotzdem wiederherstellen." >&2
+    exit 1
+  fi
+  echo "Stelle trotz Befunden wieder her (--trotz-befunden)." >&2
+else
+  echo "Prüfung der Sicherung: $summary"
 fi
 # Inzwischen gestartet?
 if app_running; then

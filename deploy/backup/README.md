@@ -16,7 +16,7 @@ Kopf, Siegel und jedes Original gegen seinen Hash. Basis ist `postgres:18` mit d
 | `backup.sh` | Ein Backup jetzt; alle `RESTORE_CHECK_DAYS` Tage (Standard 7) folgt ein Test-Restore |
 | `restore-check.sh` / `restore-check.sh <id>` | Test-Restore jetzt, ersetzt nichts |
 | `restore.sh` | Verfügbare Stände anzeigen |
-| `restore.sh latest` / `restore.sh <id>` | Datenbank und Originale ersetzen (Belegt vorher stoppen) |
+| `restore.sh latest` / `restore.sh <id>` | Sicherung prüfen, dann Datenbank und Originale ersetzen (Belegt vorher stoppen); bei Befunden nur mit `--trotz-befunden` |
 
 Die Tags folgen Belegt (`:latest`, `:0.2`, `:0.2.0`, `:next`). Einrichten und Wiederherstellen:
 [Betrieb › Sichern](https://firsttris.github.io/belegt/betrieb.html#sichern).
