@@ -115,7 +115,7 @@ docker compose logs server
 
 Mit dem Einrichtungscode aus dem Log legst du unter `BELEGT_URL` das erste Konto an, den Inhaber. SMTP-Journal und
 Sprachmodell sind eigene Profile (`--profile journal`, `--profile ki`), ebenso die tägliche Sicherung mit Test-Restore
-(`--profile backup`); S3, Zeitstempel, Microsoft 365, Google und
+(`--profile backup`) und HTTPS mit Caddy (`--profile https`); S3, Zeitstempel, Microsoft 365, Google und
 OpenID Connect stehen in [Installation und Betrieb](https://firsttris.github.io/belegt/betrieb.html).
 
 > [!IMPORTANT]

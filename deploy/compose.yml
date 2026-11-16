@@ -167,6 +167,24 @@ services:
       - dokumente:/belegt
       - backups:/backups
       # - ~/.ssh:/root/.ssh:ro
+  # HTTPS mit automatischem Zertifikat, nur mit: docker compose --profile https up -d (docs/betrieb.md, „HTTPS“);
+  # DOMAIN und BELEGT_URL=https://<DOMAIN> in .env, Ports 80 und 443 offen
+  caddy:
+    image: docker.io/library/caddy:2
+    profiles: [https]
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy:/data
+
   # Sprachmodell für Vorschläge, nur mit: docker compose --profile ki up -d; KI_URL=http://ollama:11434 in .env
   ollama:
     image: docker.io/ollama/ollama:latest
@@ -195,6 +213,20 @@ configs:
       SQL
       fi
 
+  # Wie deploy/Caddyfile (deploy/caddy.test.ts vergleicht beide)
+  caddyfile:
+    content: |
+      ${DOMAIN:-localhost} {
+        encode zstd gzip
+        # Rahmen und Inhaltstyp setzt Belegt selbst (BELEGT_EMBED_ORIGIN); hier nur, was zu HTTPS gehört
+        header {
+          Strict-Transport-Security "max-age=31536000; includeSubDomains"
+          -Server
+        }
+        # Keine Grenze für Anfragen: Belegt begrenzt Uploads selbst, der Export aus Paperless-ngx ist bis IMPORT_MAX_GB groß
+        reverse_proxy server:3000
+      }
+
 networks:
   default:
   vorschau:
@@ -206,3 +238,5 @@ volumes:
   dokumente:
   # restic-Repository, wenn RESTIC_REPOSITORY nicht gesetzt ist
   backups:
+  # Zertifikate von Caddy (Profil https)
+  caddy:

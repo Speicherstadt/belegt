@@ -76,8 +76,8 @@ Stand im November 2026:
 
 - **Fertig:** Phasen 1 bis 5: SMTP-Journal, IMAP, JMAP, Microsoft 365 und Google per OAuth, MBOX und EML;
   XRechnung und ZUGFeRD, REST-API mit OpenAPI, Webhooks, Tokens, Einbetten mit OIDC und MCP; Prüferzugang, Z3-Export,
-  Prüfbericht und Verfahrensdokumentation. Dazu Texterkennung, Container und Compose, getrennte Datenbankrollen
-  und Backup-Container mit Test-Restore.
+  Prüfbericht und Verfahrensdokumentation. Dazu Texterkennung, Container und Compose, getrennte Datenbankrollen,
+  Backup-Container mit Test-Restore und HTTPS mit Caddy.
 - **Offen:** aus Phase 6 das Testat selbst; die Unterlagen dafür stehen in `docs/testat.md` (S3 mit Object Lock, Zeitstempel nach RFC 3161, PST und Vorschläge eines lokalen Sprachmodells sind fertig; Mandanten nicht nötig, eine Instanz je Firma).
 
 ## Anbindung der Produkte

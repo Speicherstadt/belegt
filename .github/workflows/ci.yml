@@ -100,6 +100,9 @@ jobs:
             echo "BELEGT_SCHLUESSEL=$(openssl rand -base64 32)"
           } > .env
       - run: docker compose build
+      # Die Vorlage für einen eigenen Caddy und der Block im Profil https (gleich, deploy/caddy.test.ts)
+      - name: Caddyfile gültig
+        run: docker run --rm -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - run: docker compose up -d --wait --wait-timeout 180
       - name: Server, Oberfläche und Worker antworten
         run: |

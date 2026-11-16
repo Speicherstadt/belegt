@@ -35,6 +35,21 @@ docker compose up -d
 Beim ersten Start schreibt der Server einen Einrichtungscode ins Log (`docker compose logs server`). Mit ihm legst du
 unter `BELEGT_URL` das erste Konto an, den Inhaber; der Code gilt bis zum nächsten Neustart.
 
+## HTTPS
+
+Mit dem Profil `https` stellt [Caddy](https://caddyserver.com) Belegt unter einer Domain mit automatischem Zertifikat
+bereit. In `.env` `DOMAIN` (zeigt auf den Server, Ports 80 und 443 offen), `BELEGT_URL=https://<DOMAIN>` und
+`BELEGT_PORT=127.0.0.1:3000` setzen, damit der Server selbst nur lokal erreichbar ist, dann:
+
+```bash
+docker compose --profile https up -d
+```
+
+Caddy setzt HSTS und komprimiert; Rahmen und Inhaltstyp setzt Belegt selbst. Eine Grenze für Uploads setzt Caddy nicht,
+weil der Export aus Paperless-ngx bis `IMPORT_MAX_GB` groß sein darf. Für einen eigenen Caddy ist `deploy/Caddyfile`
+die Vorlage, mit demselben Block. Das SMTP-Journal geht nicht über Caddy; für STARTTLS dort siehe
+[SMTP-Journal](eingang.md#smtp-journal).
+
 ## Getrennte Datenbankrollen
 
 Server, Worker und SMTP-Journal melden sich mit der Rolle `belegt_app` an (`DATABASE_URL`). Sie besitzt keine Tabelle,

@@ -1,0 +1,12 @@
+# Vorlage für einen eigenen Caddy vor Belegt (docs/betrieb.md, „HTTPS“): Domain anpassen, BELEGT_URL=https://<Domain>
+belegt.example.de {
+	encode zstd gzip
+	# Rahmen und Inhaltstyp setzt Belegt selbst (BELEGT_EMBED_ORIGIN); hier nur, was zu HTTPS gehört
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	# Keine Grenze für Anfragen: Belegt begrenzt Uploads selbst, der Export aus Paperless-ngx ist bis IMPORT_MAX_GB groß
+	# Ein eigener Caddy auf dem Rechner; mit Compose nimm das Profil https (deploy/compose.yml)
+	reverse_proxy localhost:3000
+}
