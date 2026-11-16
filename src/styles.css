@@ -70,6 +70,12 @@
     outline: 2px solid var(--fg);
     outline-offset: 2px;
   }
+
+  /* Felder: Ring ohne Abstand auf dem Rand, der sich färbt, kein Doppelrahmen */
+  :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), select, textarea):focus-visible {
+    outline-offset: 0;
+    border-color: var(--fg);
+  }
 }
 
 body {
