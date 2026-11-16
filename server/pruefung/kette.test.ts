@@ -42,6 +42,16 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
     expect(await letztePruefung(t.db)).toMatchObject({ ausgeloestVon: "nutzer:anna@example.org" });
   });
 
+  it("startet bei gleichzeitigen Anfragen nur einen Lauf; die anderen hören, dass schon geprüft wird", async () => {
+    const zahl = async () => (await t.sql`select count(*)::int as n from kettenpruefungen`)[0]!.n as number;
+    const vorher = await zahl();
+    const antworten = await Promise.all(
+      Array.from({ length: 5 }, () => t.anfrage("/api/kette/pruefen", { method: "POST" }, inhaber)),
+    );
+    expect(antworten.map((r) => r.status).sort()).toEqual([201, 409, 409, 409, 409]);
+    expect(await zahl()).toBe(vorher + 1);
+  });
+
   it("hält einen Befund fest, und der Lauf lässt sich weder ändern noch löschen", async () => {
     // Eine Zeile an den Triggern vorbei geändert (braucht einen Superuser)
     const [d] = await t.sql`select id from dokumente limit 1`;
@@ -61,6 +71,6 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
     await expect(t.sql`update kettenpruefungen set ok = true, befunde = 0`).rejects.toThrow();
     await expect(t.sql`delete from kettenpruefungen`).rejects.toThrow();
     const [protokoll] = await t.sql`select count(*)::int as n from audit_log where table_name = 'kettenpruefungen'`;
-    expect(protokoll?.n).toBe(3);
+    expect(protokoll?.n).toBe(4);
   });
 });
