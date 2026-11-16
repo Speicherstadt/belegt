@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { WorkflowAktion } from "../../lib/api.ts";
 import { m } from "../../paraglide/messages.js";
 import { feldKlasse } from "../FieldInput.tsx";
@@ -31,8 +30,8 @@ export function sendenAus(f: FormData): Extract<WorkflowAktion, { art: "senden" 
   };
 }
 
-export function SendAction() {
-  const [an, setAn] = useState(false);
+/** Das Häkchen hält WorkflowForm, damit es nach dem Anlegen mit dem Formular zurückgesetzt wird */
+export function SendAction({ an, setAn }: { an: boolean; setAn: (ja: boolean) => void }) {
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border p-3">
       <label className="flex items-center gap-2 font-medium">

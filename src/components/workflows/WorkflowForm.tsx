@@ -39,6 +39,7 @@ export function WorkflowForm() {
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const [feldId, setFeldId] = useState("");
   const [einordnen, setEinordnen] = useState(false);
+  const [senden, setSenden] = useState(false);
   const [art, setArt] = useState<Art>("beleg");
   const [hinweis, setHinweis] = useState<string | null>(null);
   const anlegen = useMutation({
@@ -95,6 +96,7 @@ export function WorkflowForm() {
           form.reset();
           setFeldId("");
           setEinordnen(false);
+          setSenden(false);
         },
       },
     );
@@ -130,6 +132,8 @@ export function WorkflowForm() {
         setFeldId={setFeldId}
         einordnen={einordnen}
         setEinordnen={setEinordnen}
+        senden={senden}
+        setSenden={setSenden}
         art={art}
         setArt={setArt}
       />

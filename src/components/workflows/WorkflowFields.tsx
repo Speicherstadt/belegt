@@ -116,6 +116,8 @@ export function WorkflowActions(p: {
   setFeldId: (id: string) => void;
   einordnen: boolean;
   setEinordnen: (ja: boolean) => void;
+  senden: boolean;
+  setSenden: (ja: boolean) => void;
   art: Art;
   setArt: (a: Art) => void;
 }) {
@@ -180,7 +182,7 @@ export function WorkflowActions(p: {
         <input type="checkbox" name="webhook" className="size-4" />
         {m.workflow_webhook()}
       </label>
-      <SendAction />
+      <SendAction an={p.senden} setAn={p.setSenden} />
       <ClassifyAction einordnen={p.einordnen} setEinordnen={p.setEinordnen} art={p.art} setArt={p.setArt} />
     </fieldset>
   );
