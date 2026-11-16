@@ -38,17 +38,19 @@ const ENDUNG: Record<string, string> = {
 
 /**
  * Ein Teil eines Namens ohne Zeichen, die in Windows, macOS oder Linux nicht erlaubt sind oder aus dem Ordner führen
- * (/ \ : * ? " < > | und Steuerzeichen), ohne Punkte und Leerzeichen am Rand und höchstens 100 Zeichen lang
+ * (/ \ : * ? " < > | und Steuerzeichen), ohne unsichtbare Zeichen für Breite und Schreibrichtung (mit U+202E sähe
+ * „Rechnung‮fdp.exe“ aus wie „Rechnungexe.pdf“), ohne Punkte und Leerzeichen am Rand und höchstens 100 Zeichen lang,
+ * gezählt in ganzen Zeichen, damit kein halbes Emoji übrig bleibt
  */
 export function namensteil(text: string): string {
-  return (
-    text
-      // biome-ignore lint/suspicious/noControlCharactersInRegex: gerade die Steuerzeichen sollen weg
-      .replace(/[\u0000-\u001F\u007F/\\:*?"<>|]/g, "_")
-      .replace(/\s+/g, " ")
-      .slice(0, 100)
-      .replace(/^[\s.]+|[\s.]+$/g, "")
-  );
+  const ersetzt = text
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: gerade die Steuerzeichen sollen weg
+    .replace(/[\u0000-\u001F\u007F-\u009F\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF/\\:*?"<>|]/g, "_")
+    .replace(/\s+/g, " ");
+  return Array.from(ersetzt)
+    .slice(0, 100)
+    .join("")
+    .replace(/^[\s.]+|[\s.]+$/g, "");
 }
 
 export interface Benennbar {
@@ -107,7 +109,8 @@ export async function auswahlZip(
   sicht?: Sicht,
   { maxBytes = ZIP_MAX_BYTES }: { maxBytes?: number } = {},
 ): Promise<ZipErgebnis> {
-  const eindeutigeIds = [...new Set(ids)];
+  // Postgres liefert UUIDs klein geschrieben; so findet die Reihenfolge jede Zeile wieder
+  const eindeutigeIds = [...new Set(ids.map((id) => id.toLowerCase()))];
   if (!eindeutigeIds.length) return { ok: false, grund: "keine" };
   const zeilen = [
     ...(await umgebung.db.execute<Zeile>(sql`
