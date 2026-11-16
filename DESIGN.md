@@ -97,7 +97,7 @@ Eine globale Regel in `styles.css`:
 - **Knöpfe, Links, Checkboxen:** 2 px Ring in `--fg` mit 2 px Abstand, so entsteht er im Hell- wie im Dunkelmodus.
 - **Felder** (Text-Eingaben, Auswahllisten, Textfelder; nicht Checkbox, Radio, Datei, Schieber): Der Ring hat keinen
   Abstand (`outline-offset: 0`) und der Rand färbt sich in `--fg`, so entsteht kein Doppelrahmen. Die globale Regel
-  in `styles.css` tut genau das.
+  in `styles.css` tut genau das; die Randfarbe steht dort ungeschichtet, sonst verlöre sie gegen `border-border`.
 - Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
   am umgebenden Label.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).

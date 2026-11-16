@@ -71,11 +71,15 @@
     outline-offset: 2px;
   }
 
-  /* Felder: Ring ohne Abstand auf dem Rand, der sich färbt, kein Doppelrahmen */
+  /* Felder: Ring ohne Abstand auf dem Rand, kein Doppelrahmen; die Randfarbe steht darunter ungeschichtet */
   :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), select, textarea):focus-visible {
     outline-offset: 0;
-    border-color: var(--fg);
   }
+}
+
+/* Ungeschichtet, sonst verliert sie gegen border-border (Utilities-Ebene) und der Rand bliebe grau */
+:is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="range"]), select, textarea):focus-visible {
+  border-color: var(--fg);
 }
 
 body {

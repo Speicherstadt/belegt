@@ -62,7 +62,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     await page.evaluate(() => {
       document.body.insertAdjacentHTML(
         "beforeend",
-        '<div id="fokus"><button>k</button><a href="#fokus">l</a><input type="checkbox" aria-label="c"><input type="text" aria-label="t" style="border:1px solid"></div>',
+        '<div id="fokus"><button>k</button><a href="#fokus">l</a><input type="checkbox" aria-label="c"><input type="text" aria-label="t" class="h-9 rounded-md border border-border bg-bg px-3"></div>',
       );
     });
     const fg = await page.evaluate(() => {
