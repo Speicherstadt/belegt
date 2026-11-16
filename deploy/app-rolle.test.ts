@@ -61,6 +61,9 @@ describe.skipIf(!testDatenbankUrl || !psql)("Init-Skript der App-Rolle (Postgres
           PATH: `${ordner}:${process.env.PATH}`,
           PGHOST: u.hostname,
           PGPORT: u.port || "5432",
+          // Kennwort des Superusers aus TEST_DATABASE_URL (in der CI nötig, lokal oft trust); über die Umgebung, nie als
+          // Argument – genau das prüft der Test für das Kennwort der App-Rolle
+          ...(u.password ? { PGPASSWORD: decodeURIComponent(u.password) } : {}),
           POSTGRES_USER: decodeURIComponent(u.username),
           POSTGRES_DB: decodeURIComponent(u.pathname.slice(1)),
           BELEGT_APP_PASSWORT: passwort,
