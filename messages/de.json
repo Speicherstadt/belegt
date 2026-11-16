@@ -798,6 +798,7 @@
   "mailbox_action_save": "Aktion speichern",
   "mailbox_action_cancel": "Abbrechen",
   "mailbox_delete_hint": "Belegt löscht eine Mail im Postfach nur, wenn sie vollständig im Archiv liegt und Byte für Byte dem Original gleicht, und erst nach der Wartezeit, damit eine Sicherung des Archivs dazwischen liegen kann. Gelöscht ist gelöscht: Im Postfach lässt sich die Mail danach nicht wiederherstellen.",
+  "mailbox_delete_all": "Beim ersten Abruf und wenn der Server den Ordner neu nummeriert (UIDVALIDITY) oder bei JMAP seine Änderungen nicht mehr liefert, holt Belegt alle Mails des Ordners erneut; nach der Wartezeit löscht es dann jede, die im Archiv liegt, auch solche, die schon lange vorher archiviert waren.",
   "mailbox_delete_wait": "Wartezeit in Stunden",
   "mailbox_delete_after_lock": "Erst löschen, wenn die Datei im Bucket bis zum Fristende gesperrt ist",
   "mailbox_delete_confirm": "Ich bestätige, dass Belegt archivierte Mails in diesem Postfach endgültig löscht.",

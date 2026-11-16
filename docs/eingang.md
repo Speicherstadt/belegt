@@ -152,7 +152,9 @@ Aktionen“ am Postfach, in einem Protokoll, das sich nicht ändern lässt, und 
 **Löschen** musst du beim Einstellen ausdrücklich bestätigen; wer und wann, steht am Postfach und in der
 Verfahrensdokumentation. Gelöscht wird frühestens nach einer Wartezeit ab der Archivierung (Vorgabe 24 Stunden, 1 bis
 2160), damit eine [Sicherung](betrieb.md#sichern) des Archivs dazwischen liegt, und nur, wenn die Mail im Postfach Byte
-für Byte dem Original im Archiv gleicht. Mit [S3 und Object Lock](betrieb.md#dateien-in-s3-mit-object-lock) kannst du
+für Byte dem Original im Archiv gleicht. Beim ersten Abruf und wenn der Server den Ordner neu nummeriert (UIDVALIDITY)
+oder bei JMAP seine Änderungen nicht mehr liefert, holt Belegt alle Mails des Ordners erneut; nach der Wartezeit löscht
+es dann jede, die im Archiv liegt, auch solche, die schon lange vor dem Einstellen archiviert waren. Mit [S3 und Object Lock](betrieb.md#dateien-in-s3-mit-object-lock) kannst du
 zusätzlich verlangen, dass die Datei im Bucket bis zum Fristende gesperrt ist; das ist sie erst, wenn die Mail
 eingeordnet ist. Verschieben in einen Papierkorb (IMAP `\Trash`, JMAP-Rolle `trash` oder Namen wie „Papierkorb“,
 „Trash“, „Gelöschte Elemente“) ist Löschen mit Verzögerung, weil er sich von selbst leert; dafür gilt dasselbe wie

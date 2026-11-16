@@ -54,4 +54,11 @@ describe("Aktion nach dem Abholen: Formular", () => {
     expect(html).toMatch(/<input type="checkbox"[^>]*name="sperre" checked=""/);
     expect(speichern(html)).not.toContain('disabled=""');
   });
+
+  it("sagt beim Löschen, dass der erste Abruf und ein neu nummerierter Ordner alle archivierten Mails betreffen", () => {
+    const html = zeigen(new QueryClient());
+    const hinweis = /<p role="note"[^>]*>(.*?)<\/p>/.exec(html)![1]!;
+    expect(hinweis).toContain("ersten Abruf");
+    expect(hinweis).toContain("UIDVALIDITY");
+  });
 });

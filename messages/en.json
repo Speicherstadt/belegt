@@ -798,6 +798,7 @@
   "mailbox_action_save": "Save action",
   "mailbox_action_cancel": "Cancel",
   "mailbox_delete_hint": "Belegt deletes a mail in the mailbox only once it is completely in the archive and identical to the original byte for byte, and only after the waiting time, so that a backup of the archive can happen in between. Deleted is deleted: the mail cannot be restored in the mailbox afterwards.",
+  "mailbox_delete_all": "On the first fetch, and when the server renumbers the folder (UIDVALIDITY) or, with JMAP, can no longer report its changes, Belegt fetches all mails of the folder again; after the waiting time it then deletes every one that is in the archive, including those archived long before.",
   "mailbox_delete_wait": "Waiting time in hours",
   "mailbox_delete_after_lock": "Only delete once the file is locked in the bucket until the end of its retention",
   "mailbox_delete_confirm": "I confirm that Belegt permanently deletes archived mails in this mailbox.",

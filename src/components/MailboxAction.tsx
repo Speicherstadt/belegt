@@ -150,7 +150,7 @@ export function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => voi
         <>
           <p role="note" className="m-0 rounded-md border border-border bg-subtle p-3">
             {papierkorb && `${m.mailbox_move_trash_hint()} `}
-            {m.mailbox_delete_hint()}
+            {m.mailbox_delete_hint()} {m.mailbox_delete_all()}
           </p>
           <label className="flex flex-col gap-1.5 font-medium">
             {m.mailbox_delete_wait()}
