@@ -10,7 +10,7 @@ fi
   || { echo "BACKUP_TIME muss die Form HH:MM haben, ist aber: $BACKUP_TIME" >&2; exit 2; }
 # Als PID 1 beendet nur ein eigener Handler den Container sofort; sleep läuft deshalb im Hintergrund
 trap 'exit 0' TERM INT
-echo "Backup täglich um $BACKUP_TIME ($TZ) nach $(sed -E 's#(://)[^/@]*@#\1#' <<< "$RESTIC_REPOSITORY")"
+echo "Backup täglich um $BACKUP_TIME ($TZ) nach $(sed -E 's#(://)[^/]*@#\1#' <<< "$RESTIC_REPOSITORY")"
 while true; do
   now="$(date +%s)"
   next="$(date -d "today $BACKUP_TIME" +%s)"

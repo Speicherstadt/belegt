@@ -248,4 +248,22 @@ describe.skipIf(!testDatenbankUrl || !hatWerkzeuge)("Backup und Test-Restore (Po
     });
     expect(bash.stdout.trim()).toBe("rest:https://backup.example/belegt");
   });
+
+  // restic liest die Adresse mit url.Parse von Go, das die Anmeldung am letzten @ vor dem Pfad trennt
+  it("nimmt auch ein Passwort mit @ ganz aus dem Ziel heraus, in backup_status und im Log des Zeitplans", () => {
+    const repo = "rest:https://nutzer:ge@heim@backup.example/belegt";
+    const bash = spawnSync("bash", ["-c", `. ${join(hier, "backup-status.sh")}; ziel_ohne_zugang`], {
+      encoding: "utf8",
+      env: { ...env, RESTIC_REPOSITORY: repo },
+    });
+    expect(bash.stdout.trim()).toBe("rest:https://backup.example/belegt");
+    // Der Zeitplan nennt das Ziel beim Start; sleep beendet ihn nach der ersten Zeile
+    const zeitplan = spawnSync("bash", [join(hier, "entrypoint.sh")], {
+      encoding: "utf8",
+      env: { ...env, RESTIC_REPOSITORY: repo, BACKUP_TIME: "03:15" },
+      timeout: 3_000,
+    });
+    expect(zeitplan.stdout).toContain("nach rest:https://backup.example/belegt");
+    expect(zeitplan.stdout).not.toContain("heim");
+  });
 });

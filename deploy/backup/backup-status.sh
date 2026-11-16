@@ -16,9 +16,10 @@ pg_bin() {
   if [ -x "/usr/lib/postgresql/$major/bin/$1" ]; then echo "/usr/lib/postgresql/$major/bin/$1"; else echo "$1"; fi
 }
 
-# Ziel ohne Zugangsdaten für die App, etwa rest:https://nutzer:passwort@host/ → rest:https://host/
+# Ziel ohne Zugangsdaten für die App, etwa rest:https://nutzer:passwort@host/ → rest:https://host/; bis zum letzten @
+# vor dem Pfad wie url.Parse von Go, das restic nutzt (ein Passwort darf @ enthalten)
 ziel_ohne_zugang() {
-  sed -E 's#(://)[^/@]*@#\1#' <<< "${RESTIC_REPOSITORY:-}"
+  sed -E 's#(://)[^/]*@#\1#' <<< "${RESTIC_REPOSITORY:-}"
 }
 
 zeitplan() {
