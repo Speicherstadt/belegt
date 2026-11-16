@@ -24,7 +24,7 @@ test("die Prüfung zeigt den Prüfbericht mit Prüfwert", async ({ page }) => {
   await page.goto("/pruefung");
   const bericht = page.getByRole("region", { name: "Prüfbericht" });
   await expect(bericht).toContainText("Kette intakt, alle Siegel stimmen.");
-  await expect(bericht).toContainText(/\d+ Dokumente \(davon \d+ gelöscht\)/);
+  await expect(bericht).toContainText(/\d+ Dokumente? \(davon \d+ gelöscht\)/);
   await expect(bericht.getByText(/[0-9a-f]{64}/)).toBeVisible();
   await expect(bericht.getByRole("button", { name: "Drucken oder als PDF sichern" })).toBeVisible();
 });

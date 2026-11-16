@@ -15,7 +15,7 @@ test.beforeAll(async () => {
       await tx`select set_config('belegt.actor', 'backup', true)`;
       await tx`insert into backup_status (art, ok, snapshot, bytes, meldung, ziel, zeitplan, am) values
         ('backup', true, 'e2e12345', 4096, 'Datenbank und 2 Dateien', '/backups', 'täglich um 03:15', now() - interval '2 hours'),
-        ('restore_check', false, 'e2e12345', null, '1 Befunde: dokumente x: Datei fehlt', '/backups', 'täglich um 03:15', now() - interval '1 hour')`;
+        ('restore_check', false, 'e2e12345', null, '1 Befund: dokumente x: Datei fehlt', '/backups', 'täglich um 03:15', now() - interval '1 hour')`;
     });
   } finally {
     await sql.end();
@@ -53,6 +53,6 @@ test("die Prüfung zeigt die wirksamen Rechte der App-Rolle und die Sicherung", 
   await expect(audit.getByRole("cell")).toHaveText(["audit_log", "ja", "nein", "nein", "nein", "nein"]);
   const sicherung = page.getByRole("region", { name: "Sicherung" });
   await expect(sicherung).toContainText("/backups");
-  await expect(sicherung.getByRole("alert")).toContainText("1 Befunde");
+  await expect(sicherung.getByRole("alert")).toContainText("1 Befund:");
   await axe(page);
 });
