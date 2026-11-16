@@ -31,6 +31,8 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
         kiModell: umgebung.kiModell,
         eingangsordner: umgebung.eingangsordner ?? false,
         trennblattCode: umgebung.trennblattCode,
+        erechnungPruefung: umgebung.erechnungPruefung ?? false,
+        mail: !!umgebung.mail,
       }),
     ),
   );

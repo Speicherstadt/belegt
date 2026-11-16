@@ -247,6 +247,47 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(mit).toContain("Unterordner „fehler“");
   });
 
+  it("nennt Duplikate, Prüfung der E-Rechnungen, Weitergabe und Benachrichtigungen, wo die Abläufe stehen", async () => {
+    const ohne = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+    expect(ohne).toContain("Dieselbe Datei (gleicher SHA-256) nimmt Belegt nur einmal auf");
+    expect(ohne).toContain("verweist die Mail auf dieses Dokument");
+    expect(ohne).not.toContain("KoSIT");
+    expect(ohne).toContain("Benachrichtigungen per Mail sind nicht eingerichtet");
+    const mit = JSON.stringify(
+      await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test", erechnungPruefung: true, mail: true }),
+    );
+    expect(mit).toContain("mit dem Validator der Koordinierungsstelle für IT-Standards (KoSIT)");
+    expect(mit).toMatch(/Belegt meldet per Mail an 1 Empfänger, wenn etwas Aufmerksamkeit braucht: Sicherung/);
+    expect(mit).toContain("fehlgeschlagene Workflows und aufgegebene Weitergaben");
+    expect(mit).not.toContain("zu viele Dokumente im Eingang");
+  });
+
+  it("beschreibt einen Workflow, der das Original sendet, mit Ziel und Dateifeld, ohne den Wert der Kopfzeile", async () => {
+    const res = await als(inhaber)(
+      "/api/workflows",
+      json({
+        name: "An Buchhaltung",
+        ausloeser: "eingeordnet",
+        aktionen: [
+          {
+            art: "senden",
+            url: "https://buchhaltung.example/api/v1/belege?x=1",
+            dateifeld: "datei",
+            kopfzeile: { name: "Authorization", wert: "Bearer geheim-123" },
+          },
+        ],
+      }),
+    );
+    expect(res.status).toBe(201);
+    const doku = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+    expect(doku).toContain(
+      "dann Original an https://buchhaltung.example/api/v1/belege senden (Feld „datei“, Anmeldung über die Kopfzeile Authorization)",
+    );
+    expect(doku).toContain("das Original an eine Adresse senden");
+    expect(doku).not.toContain("geheim-123");
+    await als(inhaber)(`/api/workflows/${(await res.json()).id}`, { method: "DELETE" });
+  });
+
   it("beschreibt das Teilen an Trennblättern mit dem eingestellten Code", async () => {
     const ohne = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
     expect(ohne).toContain("an Trennblättern (QR-Code oder Code 128 mit dem Inhalt „BELEGT-TRENNER“) beim Hochladen");

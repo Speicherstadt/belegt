@@ -25,6 +25,7 @@ import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
 import { rechteBeschreiben } from "./datenbank.ts";
+import { benachrichtigungenBeschreiben } from "./meldungen.ts";
 import { postfachAktion, postfachAktionenAbsatz } from "./postfach.ts";
 import { sicherungBeschreiben } from "./sicherung.ts";
 import { unveraenderbarkeit } from "./unveraenderbarkeit.ts";
@@ -93,6 +94,8 @@ export async function verfahrensdoku(
     kiModell,
     eingangsordner = false,
     trennblattCode = "BELEGT-TRENNER",
+    erechnungPruefung = false,
+    mail = false,
   }: {
     abrufMinuten: number;
     version: string;
@@ -103,6 +106,10 @@ export async function verfahrensdoku(
     eingangsordner?: boolean;
     /** Inhalt des Codes auf Trennblättern (TRENNBLATT_CODE) */
     trennblattCode?: string;
+    /** E-Rechnungen werden mit dem KoSIT-Validator geprüft (VALIDATOR_URL) */
+    erechnungPruefung?: boolean;
+    /** Benachrichtigungen per Mail sind eingerichtet (MAIL_SMTP_URL) */
+    mail?: boolean;
   },
 ): Promise<Verfahrensdoku> {
   const [
@@ -123,6 +130,7 @@ export async function verfahrensdoku(
     zugriff,
     sicherung,
     anmeldung,
+    meldungen,
   ] = await Promise.all([
     einstellungenLaden(db),
     zugaengeBeschreiben(db),
@@ -141,6 +149,7 @@ export async function verfahrensdoku(
     zugriffLesen(db.$client),
     backupStand(db, jetzt),
     anmeldungBeschreiben(db),
+    benachrichtigungenBeschreiben(db, mail),
   ]);
   const rechte = rechteBeschreiben(zugriff);
   const allgemein = angabenAbsaetze(e, ["rechtsform", "anschrift", "verantwortlich", "aufbewahrungsort"]);
@@ -160,8 +169,9 @@ export async function verfahrensdoku(
     {
       titel: "2. Erfassung",
       absaetze: [
-        "Jede Datei wird unverändert übernommen. Belegt berechnet beim Eingang den SHA-256 und speichert die Datei unter diesem Wert; den Dateityp erkennt es am Inhalt. Jedes Dokument bekommt dabei eine fortlaufende Archivnummer, die die Datenbank vergibt und versiegelt. Eine zweite Aufnahme derselben Datei legt ein weiteres Dokument an, schreibt die Datei aber nicht neu.",
-        "E-Mails werden als Original (.eml) archiviert, jeder Anhang zusätzlich als eigenes Dokument mit Verweis auf seine Mail. Eine Mail, deren Inhalt schon archiviert ist, wird nicht doppelt aufgenommen.",
+        "Jede Datei wird unverändert übernommen. Belegt berechnet beim Eingang den SHA-256 und speichert die Datei unter diesem Wert; den Dateityp erkennt es am Inhalt. Jedes Dokument bekommt dabei eine fortlaufende Archivnummer, die die Datenbank vergibt und versiegelt.",
+        `Dieselbe Datei (gleicher SHA-256) nimmt Belegt nur einmal auf: Beim Hochladen und über die Schnittstelle legt es nichts an und nennt das vorhandene Dokument (einem Mitarbeiter, der es nicht sehen darf, nur dass es vorliegt)${eingangsordner ? "; aus dem Eingangsordner entfernt es die Datei und schreibt den Treffer mit Archivnummer ins Log des Workers" : ""}. Dokumente, deren Löschung bestätigt ist, zählen dabei nicht. Abgeleitete Dokumente und Importe können dieselbe Datei ein weiteres Mal enthalten; sie wird dann nicht neu geschrieben.`,
+        "E-Mails werden als Original (.eml) archiviert, jeder Anhang zusätzlich als eigenes Dokument mit Verweis auf seine Mail. Liegt ein Anhang schon als Dokument im Archiv, verweist die Mail auf dieses Dokument, statt ein zweites anzulegen; der Verweis ist versiegelt wie ein Anhang. Eine Mail, deren Inhalt schon archiviert ist, wird nicht doppelt aufgenommen.",
         quellen.length
           ? `Postfächer werden alle ${abrufMinuten} Minuten abgerufen (IMAP oder JMAP). Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
           : "Es ist kein Postfach für den automatischen Abruf eingerichtet.",
@@ -175,6 +185,9 @@ export async function verfahrensdoku(
           : "",
         "Seiten eines archivierten PDFs lassen sich drehen, entfernen oder teilen, mehrere PDFs zu einem zusammenfügen. Das Original bleibt dabei unverändert; das Ergebnis ist ein neues Dokument mit eigener Archivnummer und der Quelle „abgeleitet“, das wie jedes andere eingeordnet wird. Woraus es entstand, mit welcher Operation und welchen Seiten, durch wen und wann, hält eine versiegelte Verknüpfung fest; sie steht im Protokoll und auf der Seite beider Dokumente.",
         "Aus manchen Originalen erzeugt Belegt abgeleitete Fassungen zum Lesen: für Scans (Bilder und PDFs ohne Textebene) mit der Texterkennung ein durchsuchbares PDF (PDF/A-2b, das Bild mit dem erkannten Text unsichtbar darüber), für Office-Dateien eine Ansicht als PDF und für die Liste Vorschaubilder. Sie entstehen aus dem Original, ändern es nicht und sind als abgeleitet gekennzeichnet; maßgeblich bleibt das Original. Sie sind nicht versiegelt, lassen sich jederzeit neu erzeugen, gehören nicht in den Z3-Export und gehen mit der Löschung des Dokuments mit.",
+        erechnungPruefung
+          ? "E-Rechnungen (XRechnung, ZUGFeRD, Factur-X) prüft Belegt nach dem Eingang mit dem Validator der Koordinierungsstelle für IT-Standards (KoSIT) und dessen Konfiguration für XRechnung gegen XRechnung oder EN 16931; der Prüfdienst läuft auf dem eigenen Server ohne Internet. Das Ergebnis (gültig oder ungültig, Szenario, die ersten Fehler und Warnungen) steht auf der Seite des Dokuments. Es ist abgeleitet wie die Fassungen oben, ändert weder Original noch Einordnung und geht mit der Löschung des Dokuments mit."
+          : "",
       ].filter(Boolean),
       liste: [
         ...quellen.map(
@@ -203,7 +216,7 @@ export async function verfahrensdoku(
           ? "Aktive Sperren (etwa wegen einer Außenprüfung oder eines Rechtsstreits) verhindern das Löschen der Dokumente ihres Zeitraums, auch nach Ablauf der Frist (Ablaufhemmung, § 147 Abs. 3 Satz 5 AO)."
           : "Sperren wegen einer Außenprüfung oder eines Rechtsstreits verhindern das Löschen der Dokumente ihres Zeitraums; derzeit ist keine aktiv.",
         workflows.texte.length
-          ? "Workflows führen nach dem Eingang oder der Einordnung eines Dokuments festgelegte Aktionen aus, wenn ihre Bedingungen zutreffen: Tags, Korrespondent, Dokumenttyp und Feldwerte setzen, eine Notiz anlegen, ein Webhook-Ereignis auslösen und, nur wenn der Inhaber es ausdrücklich gewählt hat, einordnen. Nur der Inhaber legt sie an. Jeder Workflow bearbeitet jedes Dokument genau einmal, gelöschte nie; das Ergebnis jedes Laufs (ausgeführt mit den Aktionen, trifft nicht, angehalten oder Fehler) hält eine Tabelle fest, die nur anwächst, und jede Änderung steht mit dem Akteur „workflow:<Name>“ im Protokoll. Die aktiven Workflows stehen in der Liste unten, in der Reihenfolge ihrer Ausführung."
+          ? "Workflows führen nach dem Eingang oder der Einordnung eines Dokuments festgelegte Aktionen aus, wenn ihre Bedingungen zutreffen: Tags, Korrespondent, Dokumenttyp und Feldwerte setzen, eine Notiz anlegen, ein Webhook-Ereignis auslösen, das Original an eine Adresse senden und, nur wenn der Inhaber es ausdrücklich gewählt hat, einordnen. Nur der Inhaber legt sie an. Jeder Workflow bearbeitet jedes Dokument genau einmal, gelöschte nie; das Ergebnis jedes Laufs (ausgeführt mit den Aktionen, trifft nicht, angehalten oder Fehler) hält eine Tabelle fest, die nur anwächst, und jede Änderung steht mit dem Akteur „workflow:<Name>“ im Protokoll. Die aktiven Workflows stehen in der Liste unten, in der Reihenfolge ihrer Ausführung. Das Senden des Originals (etwa an eine Buchhaltung) geschieht im Hintergrund an die Adresse, die der Inhaber im Workflow festgelegt hat, ohne Weiterleitungen zu folgen; die Anmeldung dafür liegt verschlüsselt. Je Dokument und Aktion geht das Original höchstens einmal erfolgreich hinaus; Zeitpunkt, HTTP-Status und Fehler jedes Versuchs stehen am Dokument und im Protokoll. Das Original im Archiv bleibt dabei unverändert."
           : "",
       ].filter(Boolean),
       liste: [
@@ -256,6 +269,7 @@ export async function verfahrensdoku(
         "Belegt läuft als Server mit PostgreSQL-Datenbank und einem Verzeichnis für die Dateien; der Abruf der Postfächer läuft in einem eigenen Prozess.",
         ...betrieb.absaetze,
         ...sicherungBeschreiben(sicherung),
+        meldungen,
       ],
       luecken: betrieb.luecken,
     }),

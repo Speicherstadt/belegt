@@ -9,9 +9,12 @@ description: >-
 Unter **Verfahrensdoku** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:
 Erfassung, Einordnung und Fristen, Unveränderbarkeit (mit der Datenbankanmeldung der App und ihren wirksamen
 Rechten je Art von Tabelle), Löschung, Zugriff und Betrieb mit der Datensicherung: Ziel, Rhythmus, letzte
-Sicherung und letzter Test-Restore, wie der [Backup-Container](betrieb.md#sichern) sie eingetragen hat. Was Belegt selbst tut, Postfächer,
+Sicherung und letzter Test-Restore, wie der [Backup-Container](betrieb.md#sichern) sie eingetragen hat, und die
+[Benachrichtigungen](betrieb.md#benachrichtigungen) mit ihren eingeschalteten Anlässen. Zur Erfassung gehören die
+Erkennung [doppelter Dateien](eingang.md#doppelte-dateien) und, wenn eingerichtet, die [Prüfung von
+E-Rechnungen](betrieb.md#erechnung-pruefen) mit dem KoSIT-Validator. Was Belegt selbst tut, Postfächer,
 Eingangsordner, Regeln, [Zuordnungsregeln und gelernte Vorschläge](ordnung.md#zuordnungsregeln) mit dem Stand des
-letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen, Sperren, Zugänge (Mitarbeiter mit Recht und [Sichtbereich](zugaenge.md#mitarbeiter), je Zugang der [zweite Faktor](zugaenge.md#zwei-faktor), dazu für welche Rollen er Pflicht ist) und API-Tokens stehen darin, wie sie gerade eingerichtet sind, dazu jeder
+letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen (beim [Senden des Originals](workflows.md#original-an-adresse-senden) mit Ziel und Dateifeld, nie dem Wert der Kopfzeile), Sperren, Zugänge (Mitarbeiter mit Recht und [Sichtbereich](zugaenge.md#mitarbeiter), je Zugang der [zweite Faktor](zugaenge.md#zwei-faktor), dazu für welche Rollen er Pflicht ist) und API-Tokens stehen darin, wie sie gerade eingerichtet sind, dazu jeder
 [Import aus Paperless-ngx](umzug.md) mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der Prüfsummen.
 
 Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):
