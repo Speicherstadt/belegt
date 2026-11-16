@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { anzahl } from "../../shared/zahl.ts";
 import { entschluesseln } from "../crypto.ts";
 import { mitAkteur } from "../db/akteur.ts";
 import { importe, paperlessQuellen } from "../db/schema.ts";
@@ -94,7 +95,9 @@ async function exportLauf(umgebung: Umgebung, lauf: typeof importe.$inferSelect,
     const v: Vorbereitet = await vorbereiten(umgebung.db, exp.felder);
     const hinweise = [
       ...v.hinweise,
-      ...(exp.papierkorb ? [`${exp.papierkorb} Dokumente im Papierkorb von Paperless-ngx nicht übernommen`] : []),
+      ...(exp.papierkorb
+        ? [`${anzahl(exp.papierkorb, "Dokument", "Dokumente")} im Papierkorb von Paperless-ngx nicht übernommen`]
+        : []),
     ];
     await setzen(umgebung, lauf.id, { gesamt: exp.dokumente.length, hinweise });
     const fertig = await erledigt(umgebung.db, lauf.id);

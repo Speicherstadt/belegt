@@ -114,7 +114,9 @@ export function korrespondentLoeschen(db: Datenbank, id: string, akteur: string)
       select count(*) as n from dokument_korrespondenten
        where korrespondent_id = ${id} and not ${geloescht}`);
     if (Number(genutzt?.n ?? 0) > 0)
-      throw konflikt(`Noch ${genutzt!.n} Dokumente haben diesen Korrespondenten; zusammenführen statt löschen`);
+      throw konflikt(
+        `Noch ${Number(genutzt!.n) === 1 ? "1 Dokument hat" : `${genutzt!.n} Dokumente haben`} diesen Korrespondenten; zusammenführen statt löschen`,
+      );
     await geloeschteLoesen(tx, id);
     await regelnUmhaengen(tx, id, null);
     return (

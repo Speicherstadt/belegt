@@ -14,7 +14,7 @@ Sicherung und letzter Test-Restore, wie der [Backup-Container](betrieb.md#sicher
 Erkennung [doppelter Dateien](eingang.md#doppelte-dateien) und, wenn eingerichtet, die [Prüfung von
 E-Rechnungen](betrieb.md#erechnung-pruefen) mit dem KoSIT-Validator. Was Belegt selbst tut, Postfächer,
 Eingangsordner, Regeln, [Zuordnungsregeln und gelernte Vorschläge](ordnung.md#zuordnungsregeln) mit dem Stand des
-letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen (beim [Senden des Originals](workflows.md#original-an-adresse-senden) mit Ziel und Dateifeld, nie dem Wert der Kopfzeile), Sperren, Zugänge (Mitarbeiter mit Recht und [Sichtbereich](zugaenge.md#mitarbeiter), je Zugang der [zweite Faktor](zugaenge.md#zwei-faktor), dazu für welche Rollen er Pflicht ist) und API-Tokens stehen darin, wie sie gerade eingerichtet sind, dazu jeder
+letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen (beim [Senden des Originals](workflows.md#original-an-adresse-senden) mit Ziel und Dateifeld, nie dem Wert der Kopfzeile), Sperren, die [tägliche Prüfung der Kette](pruefung.md#taegliche-pruefung) mit ihrem letzten Lauf, Zugänge (Mitarbeiter mit Recht und [Sichtbereich](zugaenge.md#mitarbeiter), je Zugang der [zweite Faktor](zugaenge.md#zwei-faktor), dazu für welche Rollen er Pflicht ist) und API-Tokens stehen darin, wie sie gerade eingerichtet sind, ebenso der [Download als ZIP](ordnung.md#zip) mit seinen Grenzen und jeder
 [Import aus Paperless-ngx](umzug.md) mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der Prüfsummen.
 
 Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):

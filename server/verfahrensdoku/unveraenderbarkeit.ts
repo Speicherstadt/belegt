@@ -5,13 +5,16 @@ import {
   tagInDeutschland,
   type VerfahrensdokuAbschnitt,
 } from "@firsttris/gobd-kern/verfahrensdoku";
+import { anzahl } from "../../shared/zahl.ts";
+import type { Kettenpruefung } from "../pruefung/kette.ts";
 
 /**
  * Abschnitt 4 der Verfahrensdokumentation: Sperren, Audit-Log, Hash-Kette, Siegel, Prüfung, Prüfwert und Dateispeicher
  * mit den Texten des GoBD-Kerns (kernAbschnitt). Belegt nutzt dessen SQL-Vorlage unverändert (drizzle/0000_gobd_kern.sql)
  * und den Dateispeicher des Kerns oder einen S3-Speicher mit denselben Zusagen (SHA-256 als Schlüssel, beim Lesen
  * geprüft). Was nur Belegt betrifft, steht hinter dem Kerntext, zu dem es gehört: Rechte der Anmeldung je Art von
- * Tabelle, Ort der Dateien, wo die Prüfung aufgerufen wird, Zeitstempel und Befunde bei Erstellung.
+ * Tabelle, Ort der Dateien, wo die Prüfung aufgerufen wird, tägliche gespeicherte Prüfung, Zeitstempel und Befunde bei
+ * Erstellung.
  */
 
 /** Versiegelte Tabellen (belegt_seal_table in den Migrationen), in Worten */
@@ -32,6 +35,7 @@ export function unveraenderbarkeit({
   objektsperre,
   stempel,
   befunde,
+  letzterLauf,
 }: {
   rechte: { absatz: string; liste: string[] };
   pruefwert: { seq: number; hash: string } | null;
@@ -39,6 +43,8 @@ export function unveraenderbarkeit({
   stempel?: { dienst: string; zeit: Date; seq: number };
   /** Befunde der Prüfung von Kette, Kopf und Siegeln, gerechnet bei Erstellung des Dokuments */
   befunde: number;
+  /** Der letzte gespeicherte Lauf der täglichen Prüfung (server/pruefung/kette.ts), null vor dem ersten */
+  letzterLauf: Kettenpruefung | null;
 }): VerfahrensdokuAbschnitt {
   const kern = kernAbschnitt("4. Unveränderbarkeit und Nachvollziehbarkeit", {
     versiegelt: VERSIEGELT,
@@ -50,6 +56,11 @@ export function unveraenderbarkeit({
     : "Die Dateien liegen im Dateisystem des Servers.";
   const pruefung = [
     "Aufrufen lässt sie sich unter „Prüfung“; dort vergleicht sie auf Wunsch auch jede Datei mit ihrem Hash.",
+    `Der Worker prüft Kette, Kopf und Siegel einmal am Tag und hält jeden Lauf mit Zeitpunkt, Ergebnis, Befunden und Zahl der Einträge in einer Tabelle fest, die nur anwächst; die Startseite zeigt den letzten Lauf, meldet er Befunde, geht eine Benachrichtigung hinaus, und der Inhaber kann einen Lauf sofort starten. ${
+      letzterLauf
+        ? `Der letzte gespeicherte Lauf vom ${tagInDeutschland(new Date(letzterLauf.geprueftAm))} meldete ${letzterLauf.ok ? "keine Befunde" : anzahl(letzterLauf.befunde, "Befund", "Befunde")}.`
+        : "Ein gespeicherter Lauf liegt noch nicht vor."
+    }`,
     stempel
       ? `Einmal am Tag lässt Belegt den Kopf der Kette von einem Zeitstempeldienst nach RFC 3161 bestätigen (${stempel.dienst}); der letzte Zeitstempel vom ${tagInDeutschland(stempel.zeit)} belegt den Stand bis Eintrag ${stempel.seq}.`
       : "",

@@ -9,6 +9,7 @@ import {
 } from "@firsttris/gobd-kern/verfahrensdoku";
 import { sql } from "drizzle-orm";
 import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts";
+import { anzahl } from "../../shared/zahl.ts";
 import { zuordnungsregelnBeschreiben } from "../abgleich/vorschlaege.ts";
 import { backupStand } from "../betrieb/backup.ts";
 import type { Datenbank } from "../db/client.ts";
@@ -16,11 +17,13 @@ import { zugriffLesen } from "../db/rollen.ts";
 import { pruefen } from "../dokumente/dokumente.ts";
 import { sperrenListen } from "../einordnung/einordnung.ts";
 import { laden as einstellungenLaden } from "../einstellungen/einstellungen.ts";
+import { ZIP_MAX_BYTES, ZIP_MAX_DOKUMENTE } from "../export/auswahl.ts";
 import { geteiltZahlen } from "../freigabe/teilen.ts";
 import { klassifikatorStand } from "../lernen/lernen.ts";
 import { listen as quellenListen } from "../mail/abruf.ts";
 import { listen as regelnListen } from "../mail/regeln.ts";
 import { laeufeFuerVerfahrensdoku } from "../paperless/laeufe.ts";
+import { letztePruefung } from "../pruefung/kette.ts";
 import { workflowsBeschreiben } from "../workflows/beschreibung.ts";
 import { listen as zeitstempelListen } from "../zeitstempel/zeitstempel.ts";
 import { listen as tokensListen } from "../zugang/tokens.ts";
@@ -131,6 +134,7 @@ export async function verfahrensdoku(
     sicherung,
     anmeldung,
     meldungen,
+    letzterLauf,
   ] = await Promise.all([
     einstellungenLaden(db),
     zugaengeBeschreiben(db),
@@ -150,6 +154,7 @@ export async function verfahrensdoku(
     backupStand(db, jetzt),
     anmeldungBeschreiben(db),
     benachrichtigungenBeschreiben(db, mail),
+    letztePruefung(db),
   ]);
   const rechte = rechteBeschreiben(zugriff);
   const allgemein = angabenAbsaetze(e, ["rechtsform", "anschrift", "verantwortlich", "aufbewahrungsort"]);
@@ -162,7 +167,7 @@ export async function verfahrensdoku(
       absaetze: [
         `${e.firma || "Der Betrieb"} archiviert steuerlich relevante Unterlagen elektronisch mit Belegt ${version}, einem selbst betriebenen Dokumentenarchiv. Archiviert werden hochgeladene Dateien, E-Mails mit ihren Anhängen und abgerufene Postfächer.`,
         ...allgemein.absaetze,
-        `Stand des Archivs: ${z.dokumente} Dokumente, davon ${z.mails} Mails und ${z.geloescht} nach Ablauf der Frist gelöscht; ${z.seq} Einträge im Protokoll.`,
+        `Stand des Archivs: ${anzahl(z.dokumente, "Dokument", "Dokumente")}, davon ${anzahl(z.mails, "Mail", "Mails")} und ${z.geloescht} nach Ablauf der Frist gelöscht; ${anzahl(z.seq, "Eintrag", "Einträge")} im Protokoll.`,
       ],
       luecken: [...fehlendeAngaben(e, ["firma"]), ...allgemein.luecken],
     }),
@@ -173,7 +178,7 @@ export async function verfahrensdoku(
         `Dieselbe Datei (gleicher SHA-256) nimmt Belegt nur einmal auf: Beim Hochladen und über die Schnittstelle legt es nichts an und nennt das vorhandene Dokument (einem Mitarbeiter, der es nicht sehen darf, nur dass es vorliegt)${eingangsordner ? "; aus dem Eingangsordner entfernt es die Datei und schreibt den Treffer mit Archivnummer ins Log des Workers" : ""}. Dokumente, deren Löschung bestätigt ist, zählen dabei nicht. Abgeleitete Dokumente und Importe können dieselbe Datei ein weiteres Mal enthalten; sie wird dann nicht neu geschrieben.`,
         "E-Mails werden als Original (.eml) archiviert, jeder Anhang zusätzlich als eigenes Dokument mit Verweis auf seine Mail. Liegt ein Anhang schon als Dokument im Archiv, verweist die Mail auf dieses Dokument, statt ein zweites anzulegen; der Verweis ist versiegelt wie ein Anhang. Eine Mail, deren Inhalt schon archiviert ist, wird nicht doppelt aufgenommen.",
         quellen.length
-          ? `Postfächer werden alle ${abrufMinuten} Minuten abgerufen (IMAP oder JMAP). Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
+          ? `Postfächer werden ${abrufMinuten === 1 ? "jede Minute" : `alle ${abrufMinuten} Minuten`} abgerufen (IMAP oder JMAP). Die Zugangsdaten liegen verschlüsselt (AES-256-GCM).`
           : "Es ist kein Postfach für den automatischen Abruf eingerichtet.",
         quellen.length ? postfachAktionenAbsatz(quellen) : "",
         eingangsordner
@@ -208,7 +213,7 @@ export async function verfahrensdoku(
       titel: "3. Einordnung und Aufbewahrung",
       absaetze: [
         `${kiModell ? `Ein Sprachmodell (${kiModell.modell} auf ${kiModell.host}) schlägt für Dokumente im Eingang eine Einordnung vor; es bekommt dafür Dateiname, Mailkopf und Text des Dokuments. ` : ""}Jedes Dokument wird von einer berechtigten Person eingeordnet; Regeln${kiModell ? " und das Sprachmodell" : ""} machen nur Vorschläge.${workflows.ordnenEin ? " Ausnahme: Workflows, bei denen der Inhaber das Einordnen ausdrücklich gewählt hat, ordnen Dokumente im Eingang ohne weitere Bestätigung ein; das Protokoll nennt sie als Akteur „workflow:<Name>“." : ""} Aus Art und Tag der Entstehung rechnet Belegt die Frist nach § 147 Abs. 3 und 4 AO: Sie beginnt mit dem Schluss des Kalenderjahres. Eine spätere Einordnung ersetzt die frühere nicht, beide bleiben erhalten; es gilt die neueste.`,
-        `Korrespondenten führt Belegt als Liste. Die Einordnung hält den Namen fest, den der Korrespondent beim Einordnen hatte, und ist versiegelt; umbenennen und zusammenführen ändern nur die Liste und die Zuordnung zum Dokument, jede Änderung steht im Protokoll. Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags (irgendein Wort, alle Wörter, genau, regulärer Ausdruck mit Zeitlimit, unscharf) prüft Belegt einmal gegen Dateiname, Mailkopf und gelesenen Text eines neuen Dokuments; das Ergebnis ist nur ein Vorschlag. Daneben lernt Belegt ohne fremden Dienst aus den eigenen eingeordneten Dokumenten (naiver Bayes-Klassifikator über deren Wörter) und schlägt Korrespondent, Dokumenttyp, Tags und Art vor, wenn es sich sicher genug ist; jeder Vorschlag nennt, aus wie vielen Dokumenten er gelernt ist. Das gelernte Modell ist abgeleitet, wird mit jeder bestätigten Löschung verworfen und ohne das gelöschte Dokument neu gelernt.${lernstand ? ` Zuletzt gelernt am ${tag(lernstand.am)} aus ${lernstand.beispiele} Dokumenten.` : ""}`,
+        `Korrespondenten führt Belegt als Liste. Die Einordnung hält den Namen fest, den der Korrespondent beim Einordnen hatte, und ist versiegelt; umbenennen und zusammenführen ändern nur die Liste und die Zuordnung zum Dokument, jede Änderung steht im Protokoll. Zuordnungsregeln an Korrespondenten, Dokumenttypen und Tags (irgendein Wort, alle Wörter, genau, regulärer Ausdruck mit Zeitlimit, unscharf) prüft Belegt einmal gegen Dateiname, Mailkopf und gelesenen Text eines neuen Dokuments; das Ergebnis ist nur ein Vorschlag. Daneben lernt Belegt ohne fremden Dienst aus den eigenen eingeordneten Dokumenten (naiver Bayes-Klassifikator über deren Wörter) und schlägt Korrespondent, Dokumenttyp, Tags und Art vor, wenn es sich sicher genug ist; jeder Vorschlag nennt, aus wie vielen Dokumenten er gelernt ist. Das gelernte Modell ist abgeleitet, wird mit jeder bestätigten Löschung verworfen und ohne das gelöschte Dokument neu gelernt.${lernstand ? ` Zuletzt gelernt am ${tag(lernstand.am)} aus ${anzahl(lernstand.beispiele, "Dokument", "Dokumenten")}.` : ""}`,
         e.aufsicht
           ? "Der Betrieb ist Kredit- oder Wertpapierinstitut oder steht unter Versicherungsaufsicht; Buchungsbelege werden deshalb zehn Jahre aufbewahrt (Art. 97 § 19a Abs. 3 EGAO)."
           : "Buchungsbelege werden acht Jahre aufbewahrt (§ 147 Abs. 3 AO in der Fassung ab 2025, Art. 97 § 19a EGAO).",
@@ -235,6 +240,7 @@ export async function verfahrensdoku(
       objektsperre,
       stempel: stempel[0],
       befunde: befunde.length,
+      letzterLauf,
     }),
     {
       titel: "5. Löschung",
@@ -249,9 +255,10 @@ export async function verfahrensdoku(
         "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest, kann Löschungen als zweite Person bestätigen und Notizen zu Dokumenten schreiben, die sich nicht ändern lassen und mit der Löschung des Dokuments entfernt werden; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
         "Mitarbeiter sehen nur die Dokumente ihres Sichtbereichs (Tags, Dokumenttypen, Korrespondenten, die der Inhaber festlegt). Mit dem Recht zu bearbeiten nehmen sie Dokumente auf, ordnen sie ein, setzen Tags, Typ, Korrespondent und Felder und schreiben Notizen, aber nur, solange das Dokument danach in ihrem Sichtbereich bleibt. Löschen, bestätigen, sperren, exportieren, teilen und Einstellungen, Zugänge, Tokens, Regeln, Workflows und Quellen ändern können sie nicht. Jede Änderung eines Sichtbereichs und jeder Entzug eines Zugangs stehen mit Akteur im Protokoll.",
         anmeldung,
+        `Wer Dokumente sieht, kann ihre Originale als ZIP herunterladen, höchstens ${ZIP_MAX_DOKUMENTE} Dokumente und ${ZIP_MAX_BYTES / 1024 ** 3} GB auf einmal; das ZIP enthält nur Dokumente aus Zeitraum oder Sichtbereich des Zugangs. Die Dateien sind unverändert und vor der Ausgabe gegen ihren Hash geprüft; gelöschte Dokumente und Originale, die fehlen oder nicht zu ihrem Hash passen, nennt die Datei „nicht-enthalten.txt“ im ZIP. Wie das Herunterladen eines einzelnen Originals steht der ZIP-Download nicht im Protokoll.`,
         "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
         geteilt.jemals
-          ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher wurden ${geteilt.jemals} Links angelegt, ${geteilt.aktiv} gelten derzeit.`
+          ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher ${geteilt.jemals === 1 ? "wurde 1 Link" : `wurden ${geteilt.jemals} Links`} angelegt, ${geteilt.aktiv} ${geteilt.aktiv === 1 ? "gilt" : "gelten"} derzeit.`
           : "",
       ].filter(Boolean),
       liste: [

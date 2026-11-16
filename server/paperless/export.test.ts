@@ -140,7 +140,7 @@ describe.skipIf(!testDatenbankUrl)("Import aus einem Export von Paperless-ngx", 
       hinweise: string[];
     }[];
     expect(stand).toMatchObject({ gesamt: 3, uebernommen: 1, fehler: 2 });
-    expect(stand!.hinweise).toContain("1 Dokumente im Papierkorb von Paperless-ngx nicht übernommen");
+    expect(stand!.hinweise).toContain("1 Dokument im Papierkorb von Paperless-ngx nicht übernommen");
     const fehler = await (await t.anfrage(`/api/paperless/importe/${l.id}/fehler`, {}, inhaber)).json();
     expect(fehler).toEqual([
       { paperlessId: 12, titel: "Kaputt", grund: "Prüfsumme passt nicht zum geladenen Original" },

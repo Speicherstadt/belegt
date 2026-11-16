@@ -1,3 +1,5 @@
+import { anzahl } from "../../shared/zahl.ts";
+
 /** Eine Zeile für Menschen: was geprüft ist, oder die ersten Befunde */
 export function alsText(e: {
   ok: boolean;
@@ -8,9 +10,9 @@ export function alsText(e: {
   dateienGeprueft: number;
 }): string {
   if (!e.ok)
-    return `${e.befunde.length} Befunde: ${e.befunde
+    return `${anzahl(e.befunde.length, "Befund", "Befunde")}: ${e.befunde
       .slice(0, 3)
       .map((b) => `${b.tabelle} ${b.zeile ?? b.seq ?? ""}: ${b.befund}`)
       .join("; ")}`;
-  return `${e.dokumente} Dokumente, ${e.siegel} Siegel und ${e.protokoll} Einträge der Kette geprüft, ${e.dateienGeprueft} Originale gegen ihren Hash geprüft`;
+  return `${anzahl(e.dokumente, "Dokument", "Dokumente")}, ${e.siegel} Siegel und ${anzahl(e.protokoll, "Eintrag", "Einträge")} der Kette geprüft, ${e.dateienGeprueft === 1 ? "1 Original gegen seinen" : `${e.dateienGeprueft} Originale gegen ihren`} Hash geprüft`;
 }

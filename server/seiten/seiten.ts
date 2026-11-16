@@ -75,7 +75,9 @@ export async function seitenBearbeiten(pdf: Uint8Array, op: SeitenOperation): Pr
     }
     case "teilen": {
       if (op.nach >= anzahl)
-        throw ungueltig(`Nach Seite ${op.nach} lässt sich ein PDF mit ${anzahl} Seiten nicht teilen`);
+        throw ungueltig(
+          `Nach Seite ${op.nach} lässt sich ein PDF mit ${anzahl === 1 ? "einer Seite" : `${anzahl} Seiten`} nicht teilen`,
+        );
       return [await auswahl(quelle, alle.slice(0, op.nach)), await auswahl(quelle, alle.slice(op.nach))];
     }
   }
