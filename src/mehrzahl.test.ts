@@ -208,4 +208,13 @@ describe("Einzahl und Mehrzahl", () => {
   it.each(FAELLE)("%s", (_, text, de1, de2, en1, en2) => {
     expect([text("1", "de"), text("2", "de"), text("1", "en"), text("2", "en")]).toEqual([de1, de2, en1, en2]);
   });
+
+  it("start_view_count: das Wort neben der großen Zahl der Kachel", () => {
+    expect(
+      ["1", "2"].flatMap((n) => [
+        m.start_view_count({ anzahl: n }, { locale: "de" }),
+        m.start_view_count({ anzahl: n }, { locale: "en" }),
+      ]),
+    ).toEqual(["Dokument", "document", "Dokumente", "documents"]);
+  });
 });

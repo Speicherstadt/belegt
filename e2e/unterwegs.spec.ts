@@ -124,7 +124,7 @@ test("geteilte Dateien kommen erst nach dem Klick in den Eingang", async ({ page
   await page.emulateMedia({ colorScheme: null });
 
   await page.getByRole("button", { name: "In den Eingang" }).click();
-  await expect(page.getByRole("status")).toContainText("Im Eingang: 1 Dateien.");
+  await expect(page.getByRole("status")).toContainText("Im Eingang: 1 Datei.");
   expect(await imEingang(page, name)).toBe(true);
   // Die Zwischenablage ist leer
   expect((await gecacht(page)).some((u) => u.startsWith("belegt-teilen"))).toBe(false);

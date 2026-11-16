@@ -47,7 +47,7 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
   await page.getByRole("checkbox", { name: ansicht }).check();
   await page.getByRole("button", { name: "Speichern", exact: true }).click();
   const kachel = page.getByRole("region", { name: ansicht });
-  await expect(kachel).toContainText("1 Dokumente");
+  await expect(kachel).toContainText("1 Dokument");
   await expect(kachel.getByRole("link", { name })).toBeVisible();
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
