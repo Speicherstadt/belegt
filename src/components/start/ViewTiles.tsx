@@ -32,7 +32,7 @@ function ViewTile({ ansicht }: { ansicht: GespeicherteAnsicht }) {
         <>
           <p className="m-0 text-sm">
             <span className="font-semibold text-2xl tabular-nums">{liste.data.gesamt}</span>{" "}
-            <span className="text-muted">{m.start_view_count()}</span>
+            <span className="text-muted">{m.start_view_count({ anzahl: String(liste.data.gesamt) })}</span>
           </p>
           <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
             {liste.data.eintraege.map((d) => (

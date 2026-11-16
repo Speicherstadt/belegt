@@ -852,7 +852,16 @@
   "start_views": "From saved views",
   "start_views_none": "Save a view in the archive, then you can show it here as a tile.",
   "start_views_choose": "Choose tiles",
-  "start_view_count": "documents",
+  "start_view_count": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "document",
+        "anzahlPlural=other": "documents"
+      }
+    }
+  ],
   "start_view_open": "All in “{name}”",
   "nav_workflows": "Workflows",
   "workflows_title": "Workflows",

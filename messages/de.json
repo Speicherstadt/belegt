@@ -774,7 +774,16 @@
   "start_views": "Aus gespeicherten Ansichten",
   "start_views_none": "Speichere im Archiv eine Ansicht, dann kannst du sie hier als Kachel zeigen.",
   "start_views_choose": "Kacheln wählen",
-  "start_view_count": "Dokumente",
+  "start_view_count": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Dokument",
+        "anzahlPlural=other": "Dokumente"
+      }
+    }
+  ],
   "start_view_open": "Alle in „{name}“",
   "nav_workflows": "Workflows",
   "workflows_title": "Workflows",
