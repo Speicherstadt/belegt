@@ -1,5 +1,7 @@
 import { nameVergeben } from "../archivansichten/archivansichten.ts";
+import { laden } from "../dokumente/dokumente.ts";
 import { istKonflikt } from "../ordnung/ordnung.ts";
+import { weitergabenZu } from "../weitergabe/weitergabe.ts";
 import {
   laeufeListen,
   Reihenfolge,
@@ -10,6 +12,7 @@ import {
   workflowsListen,
   workflowsOrdnen,
 } from "../workflows/workflows.ts";
+
 import { type App, type AppUmgebung, akteur, Id } from "./gemeinsam.ts";
 
 /*
@@ -27,12 +30,25 @@ export function workflowsRouten(app: App, umgebung: AppUmgebung) {
     const eingabe = WorkflowEingabe.safeParse(await c.req.json().catch(() => null));
     if (!eingabe.success) return c.json({ fehler: "Ungültiger Workflow", details: eingabe.error.issues }, 400);
     try {
-      return c.json(await workflowAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer"))), 201);
+      return c.json(
+        await workflowAnlegen(umgebung.db, eingabe.data, akteur(c.get("nutzer")), umgebung.schluessel),
+        201,
+      );
     } catch (err) {
+      if (err instanceof Error && "ohneSchluessel" in err)
+        return c.json({ fehler: "Ohne BELEGT_SCHLUESSEL lässt sich keine Kopfzeile speichern" }, 503);
       if (nameVergeben(err)) return c.json({ fehler: "Einen Workflow mit diesem Namen gibt es schon" }, 409);
       if (!istKonflikt(err)) throw err;
       return c.json({ fehler: err.message }, "ungueltig" in err ? 400 : 409);
     }
+  });
+
+  /** Was die Aktion „Original an Adresse senden“ mit einem Dokument getan hat (server/weitergabe/) */
+  app.get("/api/dokumente/:id/weitergaben", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const dokument = id.success ? await laden(umgebung.db, id.data) : null;
+    if (!dokument) return c.json({ fehler: "Nicht gefunden" }, 404);
+    return c.json(await weitergabenZu(umgebung.db, dokument.id));
   });
 
   app.post("/api/workflows/reihenfolge", async (c) => {

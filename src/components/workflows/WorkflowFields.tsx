@@ -4,6 +4,7 @@ import { m } from "../../paraglide/messages.js";
 import { feldLabel } from "../DocumentOrdnung.tsx";
 import { FieldInput, feldKlasse } from "../FieldInput.tsx";
 import { QUELLE_LABEL } from "./labels.ts";
+import { SendAction } from "./SendAction.tsx";
 
 /* Felder des Formulars für einen Workflow: Bedingungen und Aktionen. Die Namen liest WorkflowForm aus dem FormData */
 
@@ -179,6 +180,7 @@ export function WorkflowActions(p: {
         <input type="checkbox" name="webhook" className="size-4" />
         {m.workflow_webhook()}
       </label>
+      <SendAction />
       <ClassifyAction einordnen={p.einordnen} setEinordnen={p.setEinordnen} art={p.art} setArt={p.setArt} />
     </fieldset>
   );

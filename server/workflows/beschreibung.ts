@@ -72,6 +72,8 @@ function aktion(a: Aktion, n: Namen): string {
       return "Webhook-Ereignis dokument.workflow";
     case "notiz":
       return "Notiz anlegen";
+    case "senden":
+      return `Original an ${new URL(a.url).origin}${new URL(a.url).pathname} senden (Feld „${a.dateifeld}“${a.kopfzeile ? `, Anmeldung über die Kopfzeile ${a.kopfzeile.name}` : ""})`;
   }
 }
 

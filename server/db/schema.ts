@@ -28,6 +28,7 @@ export * from "./schema-erechnung.ts";
 export * from "./schema-import.ts";
 export * from "./schema-ordnung.ts";
 export * from "./schema-postfach.ts";
+export * from "./schema-weitergabe.ts";
 
 /*
  * Tabellen von Belegt. Audit-Log, Kopf der Kette, Siegel und sealed_tables legt die erste Migration aus der Vorlage

@@ -57,3 +57,41 @@ test("Workflow anlegen und seine Wirkung bei einem Upload sehen", async ({ page 
   await page.getByRole("button", { name: `Workflow „${workflow}“ löschen` }).click();
   await expect(page.getByRole("heading", { name: workflow })).toHaveCount(0);
 });
+
+test("Original an Adresse senden: Aktion anlegen, das Ergebnis steht am Dokument", async ({ page }, info) => {
+  const workflow = `An Buchhaltung ${info.project.name}`;
+  const kennung = `senden-${info.project.name}`;
+  const name = `${kennung}.pdf`;
+  await page.goto("/workflows");
+  const neu = page.getByRole("region", { name: "Neuer Workflow" });
+  await neu.getByLabel("Name", { exact: true }).fill(workflow);
+  await neu.getByLabel("Dateiname enthält").fill(kennung);
+  await neu.getByRole("checkbox", { name: "Original an Adresse senden" }).check();
+  await neu.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/api/v1/belege");
+  await expect(neu.getByLabel("Name des Dateifelds")).toHaveValue("datei");
+  await neu.getByLabel("Wert der Kopfzeile (wird verschlüsselt gespeichert)").fill("Bearer e2e-token");
+  await neu.getByLabel("Feste Felder, je Zeile name=wert").fill("externalSource=belegt\nexternalId={id}");
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(axe.violations, colorScheme).toEqual([]);
+  }
+  await neu.getByRole("button", { name: "Workflow anlegen" }).click();
+  const eintrag = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: workflow }) });
+  await expect(eintrag).toContainText("Original an buchhaltung.example senden");
+  // Der Wert der Kopfzeile kommt nie zurück
+  expect(JSON.stringify(await (await page.request.get("/api/workflows")).json())).not.toContain("e2e-token");
+
+  await page.goto("/eingang");
+  await page
+    .getByTestId("upload")
+    .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
+  await page.getByRole("link", { name }).click();
+  const weitergaben = page.getByRole("region", { name: "Weitergaben" });
+  await expect(async () => {
+    await page.reload();
+    await expect(weitergaben).toContainText("gesendet", { timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
+  await expect(weitergaben).toContainText(`${workflow} → buchhaltung.example`);
+  await expect(weitergaben).toContainText("HTTP 201");
+});

@@ -25,6 +25,7 @@ import { dateiTeilen } from "./trennen/trennen.ts";
 import { rasterVerfuegbar } from "./vorschaubild/raster.ts";
 import { vorschaubilderErzeugen } from "./vorschaubild/vorschaubild.ts";
 import { zustellen } from "./webhooks/webhooks.ts";
+import { weitergeben } from "./weitergabe/weitergabe.ts";
 import { workflowsAusfuehren } from "./workflows/ausfuehren.ts";
 import { zeitstempelSetzen } from "./zeitstempel/zeitstempel.ts";
 
@@ -72,6 +73,19 @@ async function webhooks() {
         console.log(`Webhook ${name}: ${e.zugestellt} zugestellt${e.fehler ? `, Fehler: ${e.fehler}` : ""}`);
     }
     await Bun.sleep(15_000);
+  }
+}
+
+/** Originale an Adressen senden (Workflow-Aktion), alle 15 Sekunden; bei vollem Stapel gleich weiter */
+async function weitergaben() {
+  for (;;) {
+    const r = await weitergeben({ db, speicher }, { schluessel, basisUrl: env.BETTER_AUTH_URL }).catch((err) => {
+      console.error(`Weitergaben fehlgeschlagen: ${meldung(err)}`);
+      return { gesendet: 0, fehler: 0 };
+    });
+    // Nur Zahlen: Adressen und Kopfzeilen gehören nicht ins Log
+    if (r.gesendet || r.fehler) console.log(`Weitergaben: ${r.gesendet} gesendet, ${r.fehler} fehlgeschlagen`);
+    if (r.gesendet + r.fehler < 10) await Bun.sleep(15_000);
   }
 }
 
@@ -315,6 +329,7 @@ await Promise.all([
   postfaecher(),
   paperless(),
   webhooks(),
+  weitergaben(),
   inhalte(),
   workflows(),
   zuordnungen(),

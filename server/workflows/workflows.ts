@@ -1,9 +1,10 @@
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { AUSLOESER, WORKFLOW_QUELLEN } from "../../shared/workflows.ts";
+import { verschluesseln } from "../crypto.ts";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { workflows } from "../db/schema.ts";
+import { workflowGeheimnisse, workflows } from "../db/schema.ts";
 import { ARTEN } from "../einordnung/einordnung.ts";
 import { konflikt } from "../ordnung/ordnung.ts";
 import { aenderungPruefen } from "../ordnung/zuordnung.ts";
@@ -40,6 +41,66 @@ export const Bedingungen = z
   })
   .strict();
 
+/** Kopfzeilen, die der Versand selbst setzt oder die die Verbindung betreffen; die Anmeldung braucht keine davon */
+const VERBOTENE_KOPFZEILEN = new Set([
+  "host",
+  "content-type",
+  "content-length",
+  "transfer-encoding",
+  "connection",
+  "upgrade",
+  "expect",
+  "te",
+  "trailer",
+  "keep-alive",
+  "proxy-authorization",
+  "cookie",
+]);
+
+/**
+ * „Original an Adresse senden“ (server/weitergabe/): multipart/form-data an url, das Original im Feld dateifeld, dazu
+ * feste Felder mit Platzhaltern und eine Kopfzeile für die Anmeldung. Der Wert der Kopfzeile kommt nur beim Anlegen
+ * herein; gespeichert ist er verschlüsselt in workflow_geheimnisse, in aktionen steht nur gesetzt: true.
+ */
+export const Senden = z
+  .object({
+    art: z.literal("senden"),
+    // Zugangsdaten gehören in die Kopfzeile, nicht in die Adresse: die steht im Klartext in aktionen und im Audit-Log
+    url: z
+      .url({ protocol: /^https?$/ })
+      .max(2000)
+      .refine((u) => !new URL(u).username && !new URL(u).password, "Zugangsdaten nicht in die Adresse"),
+    dateifeld: z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9_.[\]-]{1,100}$/),
+    kopfzeile: z
+      .object({
+        name: z
+          .string()
+          .trim()
+          .regex(/^[A-Za-z0-9-]{1,100}$/)
+          .refine((n) => !VERBOTENE_KOPFZEILEN.has(n.toLowerCase()), "Diese Kopfzeile setzt Belegt selbst"),
+        /** Nur beim Anlegen; danach nie mehr in einer Antwort */
+        wert: z.string().min(1).max(4000).optional(),
+        gesetzt: z.literal(true).optional(),
+      })
+      .optional(),
+    felder: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .trim()
+            .regex(/^[A-Za-z0-9_.[\]-]{1,100}$/),
+          wert: z.string().max(2000),
+        }),
+      )
+      .max(20)
+      .default([]),
+  })
+  .refine((a) => !a.kopfzeile || !!a.kopfzeile.wert, { message: "Die Kopfzeile braucht einen Wert" });
+
 export const Aktion = z.discriminatedUnion("art", [
   z.object({ art: z.literal("tagsHinzu"), tags: z.array(Id).min(1).max(50) }),
   z.object({ art: z.literal("tagsWeg"), tags: z.array(Id).min(1).max(50) }),
@@ -62,6 +123,7 @@ export const Aktion = z.discriminatedUnion("art", [
     .refine((a) => a.als !== "freiwillig" || !!a.freiwilligBis, { message: "freiwillig braucht freiwilligBis" }),
   z.object({ art: z.literal("webhook") }),
   z.object({ art: z.literal("notiz"), text: Text(5000) }),
+  Senden,
 ]);
 export type Aktion = z.infer<typeof Aktion>;
 export type Bedingungen = z.infer<typeof Bedingungen>;
@@ -103,15 +165,42 @@ export async function workflowsListen(db: Datenbank): Promise<Workflow[]> {
     .orderBy(asc(workflows.reihenfolge), asc(workflows.erstelltAm), asc(workflows.id))) as Workflow[];
 }
 
-/** Legt einen Workflow an, am Ende der Reihenfolge; wirft einen Konflikt bei unbekanntem Tag, Typ oder Feld */
-export async function workflowAnlegen(db: Datenbank, eingabe: z.infer<typeof WorkflowEingabe>, akteur: string) {
+/** Fehler, den die Route als 503 meldet: ohne BELEGT_SCHLUESSEL lässt sich der Wert einer Kopfzeile nicht speichern */
+export const ohneSchluessel = () => Object.assign(new Error("BELEGT_SCHLUESSEL fehlt"), { ohneSchluessel: true });
+
+/**
+ * Legt einen Workflow an, am Ende der Reihenfolge; wirft einen Konflikt bei unbekanntem Tag, Typ oder Feld. Werte von
+ * Kopfzeilen (Aktion senden) gehen verschlüsselt nach workflow_geheimnisse, in aktionen bleibt nur ihr Name.
+ */
+export async function workflowAnlegen(
+  db: Datenbank,
+  eingabe: z.infer<typeof WorkflowEingabe>,
+  akteur: string,
+  schluessel?: Buffer,
+) {
   await aktionenPruefen(db, eingabe.aktionen);
+  const geheim = eingabe.aktionen.flatMap((a, position) =>
+    a.art === "senden" && a.kopfzeile?.wert ? [{ position, wert: a.kopfzeile.wert }] : [],
+  );
+  if (geheim.length && !schluessel) throw ohneSchluessel();
+  const aktionen = eingabe.aktionen.map((a) =>
+    a.art === "senden" && a.kopfzeile
+      ? { ...a, kopfzeile: { name: a.kopfzeile.name, ...(a.kopfzeile.wert ? { gesetzt: true as const } : {}) } }
+      : a,
+  );
   const [neu] = await mitAkteur(db, akteur, async (tx) => {
     const [letzte] = await tx.execute<{ n: number | null }>(sql`select max(reihenfolge) as n from workflows`);
-    return tx
+    const zeilen = await tx
       .insert(workflows)
-      .values({ ...eingabe, reihenfolge: (letzte?.n ?? -1) + 1 })
+      .values({ ...eingabe, aktionen, reihenfolge: (letzte?.n ?? -1) + 1 })
       .returning();
+    for (const g of geheim)
+      await tx.insert(workflowGeheimnisse).values({
+        workflowId: zeilen[0]!.id,
+        position: g.position,
+        ciphertext: verschluesseln(schluessel!, Buffer.from(g.wert)),
+      });
+    return zeilen;
   });
   return neu as Workflow;
 }

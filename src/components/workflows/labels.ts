@@ -52,6 +52,15 @@ export function bedingungenText(w: Workflow, tags: Tag[], typen: Namen, korrespo
   return teile.length ? teile : [m.workflow_c_all()];
 }
 
+/** Host einer Adresse für die Anzeige; die ganze Adresse, wenn sie sich nicht lesen lässt */
+const zielVon = (url: string) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+};
+
 /** Eine Aktion in Worten */
 export function aktionText(a: WorkflowAktion, tags: Tag[], typen: Namen, korrespondenten: Namen = []): string {
   const tagNamen = (ids: string[]) => ids.map((id) => tags.find((t) => t.id === id)?.name ?? "?").join(", ");
@@ -72,5 +81,7 @@ export function aktionText(a: WorkflowAktion, tags: Tag[], typen: Namen, korresp
       return m.workflow_a_webhook();
     case "notiz":
       return m.workflow_a_note();
+    case "senden":
+      return m.workflow_a_send({ ziel: zielVon(a.url) });
   }
 }

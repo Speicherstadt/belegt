@@ -194,6 +194,9 @@ describe.skipIf(!testDatenbankUrl)("Benachrichtigungen gegen Postgres und SMTP",
     // Ein fehlgeschlagener Workflow
     await t.sql`insert into workflow_laeufe (workflow_id, workflow_name, dokument_id, ausloeser, ergebnis, fehler)
       values (gen_random_uuid(), 'Stromrechnungen', ${bald.id}, 'eingang', 'fehler', 'Tag fehlt')`;
+    // Und eine Weitergabe, bei der Belegt aufgegeben hat
+    await t.sql`insert into weitergaben (workflow_id, workflow_name, position, dokument_id, stand, versuche, letzter_versuch, fehler)
+      values (gen_random_uuid(), 'An Buchhaltung', 0, ${bald.id}, 'fehlgeschlagen', 1, now(), 'Antwort 401')`;
     // Ein Befund in der Kette: eine Zeile an den Triggern vorbei geändert (braucht einen Superuser)
     await t.sql.begin(async (tx) => {
       await tx`set local session_replication_role = replica`;
@@ -206,7 +209,7 @@ describe.skipIf(!testDatenbankUrl)("Benachrichtigungen gegen Postgres und SMTP",
       [
         "Belegt: 1 Frist endet in den nächsten 30 Tagen",
         "Belegt: 1 Löschantrag wartet auf dich",
-        "Belegt: 1 Workflow-Lauf fehlgeschlagen",
+        "Belegt: 2 Workflow-Läufe fehlgeschlagen",
         "Belegt: 3 Dokumente im Eingang",
         "Belegt: Aktion im Postfach „Rechnungen“ fehlgeschlagen",
         "Belegt: keine aktuelle Sicherung",

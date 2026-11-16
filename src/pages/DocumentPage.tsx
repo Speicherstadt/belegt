@@ -6,6 +6,7 @@ import { Deletion } from "../components/Deletion.tsx";
 import { Derivations, operationLabel } from "../components/Derivations.tsx";
 import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
+import { Forwardings } from "../components/Forwardings.tsx";
 import { MailSection } from "../components/MailSection.tsx";
 import { Notes } from "../components/Notes.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
@@ -132,6 +133,7 @@ export function DocumentPage() {
           <MailSection dokumentId={d.id} />
           <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
           <EInvoice dokumentId={d.id} />
+          {(ich.data?.role === "inhaber" || ich.data?.role === "steuerberatung") && <Forwardings dokumentId={d.id} />}
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
           {!geloescht && (

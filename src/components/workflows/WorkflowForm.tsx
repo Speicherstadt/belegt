@@ -3,6 +3,7 @@ import { type FormEvent, useState } from "react";
 import { type Art, api, type WorkflowAktion, type WorkflowBedingungen, type WorkflowQuelle } from "../../lib/api.ts";
 import { m } from "../../paraglide/messages.js";
 import { ausEingabe, feldKlasse } from "../FieldInput.tsx";
+import { sendenAus } from "./SendAction.tsx";
 import { WorkflowActions, WorkflowConditions } from "./WorkflowFields.tsx";
 
 const feld = "flex flex-col gap-1.5 font-medium";
@@ -68,6 +69,9 @@ export function WorkflowForm() {
     const notiz = text(f, "notiz");
     if (notiz) aktionen.push({ art: "notiz", text: notiz });
     if (f.get("webhook") === "on") aktionen.push({ art: "webhook" });
+    const senden = sendenAus(f);
+    if (senden === undefined) return setHinweis(m.workflow_send_fields_invalid());
+    if (senden) aktionen.push(senden);
     if (einordnen)
       aktionen.push({
         art: "einordnen",

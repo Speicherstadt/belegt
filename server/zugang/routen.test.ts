@@ -51,6 +51,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "POST /api/dokumente/:id/links/:link/widerrufen": "dokument",
   "GET /api/dokumente/:id/mail": "dokument",
   "GET /api/dokumente/:id/vorschlag": "dokument",
+  "GET /api/dokumente/:id/weitergaben": "dokument",
 
   "GET /api/ich": "sicht",
   "POST /api/dokumente": "sicht",

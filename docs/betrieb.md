@@ -191,7 +191,7 @@ Unter **Benachrichtigungen** (nur der Inhaber) schaltest du jeden Anlass an oder
 | Löschung | ein Antrag wartet auf die zweite Person; geht an Inhaber und Steuerberatung außer dem Antragsteller | an |
 | Fristen | wöchentlich: Fristen, die in den nächsten 30 Tagen enden | an |
 | Eingang | mehr als N Dokumente warten auf ihre Einordnung | aus, 50 |
-| Workflows | Läufe sind fehlgeschlagen, mit den Namen der Workflows | an |
+| Workflows | Läufe sind fehlgeschlagen oder Belegt hat das [Senden eines Originals](workflows.md#original-an-adresse-senden) aufgegeben, mit den Namen der Workflows | an |
 
 Empfänger sind der Inhaber und bis zu 20 weitere Adressen. Eine Mail enthält Zahlen, Namen von Postfächern und
 Workflows und Archivnummern, dazu einen Link auf die Seite in Belegt (`BETTER_AUTH_URL`); nie Titel, Dateinamen,

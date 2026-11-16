@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { type Ausloeser, bedingungenErfuellt, brauchtText, type DokumentMerkmale } from "../../shared/workflows.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { notizen, webhookEreignisse, workflowLaeufe } from "../db/schema.ts";
+import { notizen, webhookEreignisse, weitergaben, workflowLaeufe } from "../db/schema.ts";
 import { aktuelle, einordnenIn } from "../einordnung/einordnung.ts";
 import { LESBAR } from "../inhalt/inhalt.ts";
 import { ocrVerfuegbar } from "../inhalt/ocr.ts";
@@ -114,7 +114,13 @@ async function entstehung(tx: Tx, dokumentId: string, quelle: "eingang" | "erech
 const leer = { tagsHinzu: [], tagsWeg: [], felder: [] };
 
 /** Eine Aktion in der Transaktion des Workflows; gibt zurück, was geschah (für das Protokoll) */
-async function aktionAusfuehren(tx: Tx, w: Workflow, dokumentId: string, a: Aktion): Promise<Record<string, unknown>> {
+async function aktionAusfuehren(
+  tx: Tx,
+  w: Workflow,
+  dokumentId: string,
+  a: Aktion,
+  position: number,
+): Promise<Record<string, unknown>> {
   switch (a.art) {
     case "tagsHinzu":
       await aenderungAnwenden(tx, dokumentId, { ...leer, tagsHinzu: a.tags });
@@ -149,6 +155,13 @@ async function aktionAusfuehren(tx: Tx, w: Workflow, dokumentId: string, a: Akti
     case "notiz":
       await tx.insert(notizen).values({ dokumentId, text: a.text, erstelltVon: `workflow:${w.name}` });
       return { art: a.art };
+    // Gesendet wird im Hintergrund mit Wiederholung (server/weitergabe/); hier nur vorgemerkt, einmal je Aktion
+    case "senden":
+      await tx
+        .insert(weitergaben)
+        .values({ workflowId: w.id, workflowName: w.name, position, dokumentId })
+        .onConflictDoNothing();
+      return { art: a.art, ziel: new URL(a.url).host };
   }
 }
 
@@ -169,7 +182,8 @@ async function ausfuehren(db: Datenbank, w: Workflow, e: Ereignis): Promise<Erge
   try {
     await mitAkteur(db, `workflow:${w.name}`, async (tx) => {
       const getan = [];
-      for (const a of w.aktionen) getan.push(await aktionAusfuehren(tx, w, e.dokumentId, a));
+      for (const [position, a] of w.aktionen.entries())
+        getan.push(await aktionAusfuehren(tx, w, e.dokumentId, a, position));
       await tx.insert(workflowLaeufe).values({ ...lauf, ereignisId: e.id, ergebnis: "ausgefuehrt", aktionen: getan });
     });
     return "ausgefuehrt";

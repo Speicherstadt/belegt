@@ -2,7 +2,8 @@
 title: "Workflows"
 description: >-
   Workflows in Belegt: wenn ein Dokument ankommt oder eingeordnet wird und Bedingungen zutreffen, Tags, Korrespondent,
-  Dokumenttyp, Feldwerte, Notiz oder Webhook setzen, protokolliert und genau einmal je Dokument.
+  Dokumenttyp, Feldwerte, Notiz oder Webhook setzen oder das Original an eine Adresse senden, protokolliert und genau
+  einmal je Dokument.
 ---
 
 # Workflows
@@ -48,11 +49,55 @@ Braucht eine Bedingung den Text, wartet der Workflow, bis der Worker ihn gelesen
 - Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen
 - Notiz anlegen
 - Webhook-Ereignis `dokument.workflow` auslösen; die Nachricht nennt den Workflow ([Webhooks](schnittstelle.md#webhooks))
+- Original an eine Adresse senden, etwa an eine Buchhaltung ([unten](#original-an-adresse-senden))
 - Ohne Bestätigung einordnen (siehe unten)
 
 Die Aktionen eines Workflows laufen in einer Transaktion: Scheitert eine, etwa weil ein Tag inzwischen gelöscht ist,
 geschieht keine, und der Fehler steht in den letzten Läufen. Belegt versucht es nicht wieder. Im Audit-Log und im
 Verlauf des Dokuments steht jede Änderung mit dem Akteur `workflow:<Name>`.
+
+## Original an Adresse senden { #original-an-adresse-senden }
+
+Die Aktion schickt das Original an eine andere App, die Dateien über eine Schnittstelle annimmt: als
+`multipart/form-data` per `POST`, die Datei im Feld mit dem gewählten Namen, dazu feste Felder und eine Kopfzeile für
+die Anmeldung.
+
+| Angabe | Bedeutung |
+| --- | --- |
+| Adresse | `https://…` (oder `http://` im eigenen Netz); Zugangsdaten gehören nicht in die Adresse |
+| Name des Dateifelds | wie die App ihn erwartet, etwa `datei`, `file` oder `document` |
+| Kopfzeile | Name (Vorgabe `Authorization`) und Wert, etwa `Bearer …` oder `Token …`. Der Wert ist mit `BELEGT_SCHLUESSEL` verschlüsselt gespeichert und steht nie in der Oberfläche, der Schnittstelle, dem Protokoll oder dem Log |
+| Feste Felder | je Zeile `name=wert`; Platzhalter `{titel}` (sonst der Dateiname), `{asn}`, `{id}`, `{datum}` (Entstehung, sonst Eingang), `{eingang}`, `{dateiname}`, `{art}`, `{korrespondent}`, `{dokumenttyp}`, `{url}` (Link auf das Dokument in Belegt) |
+
+Gesendet wird im Hintergrund. Eine Antwort `2xx` ist ein Erfolg. Antwortet die App nicht, mit `408`, `429` oder `5xx`,
+versucht Belegt es nach 1, 5 und 15 Minuten, 1, 3, 6 und 12 Stunden und einem Tag wieder und gibt danach auf; eine
+andere Antwort (`4xx`) und jede Weiterleitung (`3xx`, der Belegt nicht folgt, damit das Original nicht an eine andere
+Adresse geht) beenden es sofort. Jedes Dokument geht je Aktion höchstens einmal erfolgreich hinaus; Postgres hält eine
+gesendete Weitergabe fest. Ein Dokument, das vorher gelöscht wird, geht nicht mehr hinaus. Auf der Seite des Dokuments
+stehen unter **Weitergaben** Workflow, Ziel, Stand, Zeitpunkt, HTTP-Status und Fehler (Inhaber und Steuerberatung);
+gibt Belegt auf, meldet es das mit den fehlgeschlagenen Workflows ([Benachrichtigungen](betrieb.md#benachrichtigungen)).
+
+Beispiel Buchhaltung mit Belege-API, hier [Haben](https://haben.app/) (`POST /api/v1/belege`, Datei im Feld `datei`,
+Token mit dem Recht `belege:anlegen`): Haben legt mit derselben Referenz nichts doppelt an.
+
+| Angabe | Wert |
+| --- | --- |
+| Adresse | `https://haben.example.de/api/v1/belege` |
+| Dateifeld | `datei` |
+| Kopfzeile | `Authorization` = `Bearer hb_…` |
+| Feste Felder | `externalSource=belegt`, `externalId={id}`, `note=Belegt ASN {asn}: {titel} {url}` |
+
+Beispiel [Paperless-ngx](https://docs.paperless-ngx.com/api/#file-uploads) (`POST /api/documents/post_document/`):
+
+| Angabe | Wert |
+| --- | --- |
+| Adresse | `https://paperless.example.de/api/documents/post_document/` |
+| Dateifeld | `document` |
+| Kopfzeile | `Authorization` = `Token …` (API-Token aus dem Profil) |
+| Feste Felder | `title={titel}`, `created={datum}` |
+
+Die Adresse wählt nur der Inhaber; wie bei den [Webhooks](schnittstelle.md#webhooks) gehen nur `http` und `https`,
+ohne Weiterleitung und mit Zeitlimit. Eine Adresse im eigenen Netz ist erlaubt, denn dort stehen die Apps meist.
 
 ## Reihenfolge und Anhalten
 

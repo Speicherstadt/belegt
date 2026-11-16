@@ -86,6 +86,7 @@ export type {
 } from "./api-stand.ts";
 export type {
   Ausloeser,
+  Weitergabe,
   Workflow,
   WorkflowAktion,
   WorkflowBedingungen,

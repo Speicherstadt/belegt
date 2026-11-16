@@ -38,7 +38,29 @@ export type WorkflowAktion =
       ausdruecklich: true;
     }
   | { art: "webhook" }
-  | { art: "notiz"; text: string };
+  | { art: "notiz"; text: string }
+  | {
+      art: "senden";
+      url: string;
+      dateifeld: string;
+      /** wert nur beim Anlegen; die Schnittstelle liefert stattdessen gesetzt */
+      kopfzeile?: { name: string; wert?: string; gesetzt?: true };
+      felder: { name: string; wert: string }[];
+    };
+
+/** Was die Aktion „Original an Adresse senden“ mit einem Dokument getan hat */
+export interface Weitergabe {
+  id: string;
+  workflowName: string;
+  ziel: string | null;
+  stand: "offen" | "gesendet" | "fehlgeschlagen" | "entfallen";
+  versuche: number;
+  letzterVersuch: string | null;
+  naechsterVersuch: string | null;
+  httpStatus: number | null;
+  fehler: string | null;
+  gesendetAm: string | null;
+}
 
 export interface Workflow {
   id: string;
@@ -72,4 +94,5 @@ export const workflowsApi = {
   workflowLoeschen: (id: string) => aufruf<unknown>(`/api/workflows/${id}`, { method: "DELETE" }),
   workflowsOrdnen: (ids: string[]) => aufruf<unknown>("/api/workflows/reihenfolge", json({ ids })),
   workflowLaeufe: () => aufruf<WorkflowLauf[]>("/api/workflows/laeufe"),
+  weitergaben: (dokumentId: string) => aufruf<Weitergabe[]>(`/api/dokumente/${dokumentId}/weitergaben`),
 };

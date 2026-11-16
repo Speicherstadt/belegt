@@ -21,6 +21,7 @@ import { imapOeffnen } from "../server/mail/imapflow.ts";
 import { naechsterImport } from "../server/paperless/ausfuehren.ts";
 import { testPaperless } from "../server/paperless/test-paperless.ts";
 import { vorschaubilderErzeugen } from "../server/vorschaubild/vorschaubild.ts";
+import { weitergeben } from "../server/weitergabe/weitergabe.ts";
 import { workflowsAusfuehren } from "../server/workflows/ausfuehren.ts";
 
 /*
@@ -119,6 +120,12 @@ function immerWieder(lauf: () => Promise<unknown>) {
 immerWieder(() => inhalteErzeugen({ db, speicher }));
 // Workflows
 immerWieder(() => workflowsAusfuehren(db));
+/** Nachgebauter Empfänger für „Original an Adresse senden“: nimmt mit dem richtigen Token an, sonst 401 */
+const empfaengerAbfragen = async (_url: string, init: RequestInit) =>
+  new Response(null, { status: new Headers(init.headers).get("authorization") === "Bearer e2e-token" ? 201 : 401 });
+immerWieder(() =>
+  weitergeben({ db, speicher }, { schluessel, basisUrl: "http://localhost:5185", abfragen: empfaengerAbfragen }),
+);
 // Zuordnungsregeln. Gelernte Vorschläge prüft Vitest gegen Postgres; hier tauchten sie je nach Reihenfolge der Specs
 // bei Dokumenten anderer Tests auf
 immerWieder(() => zuordnungVorschlaegeErzeugen(db));

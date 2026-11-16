@@ -210,21 +210,27 @@ async function eingang(db: Datenbank, { anzahl }: Anlaesse["eingang"]): Promise<
   ];
 }
 
-/** Fehlgeschlagene Workflows der letzten 24 Stunden, höchstens eine Mail am Tag */
+/**
+ * Fehlgeschlagene Workflows der letzten 24 Stunden, höchstens eine Mail am Tag; dazu Weitergaben (Aktion „Original an
+ * Adresse senden“), bei denen Belegt aufgegeben hat
+ */
 async function workflow(db: Datenbank, { jetzt, heute }: Lage): Promise<Meldung[]> {
+  const seit = new Date(jetzt.getTime() - 86_400_000).toISOString();
   const zeilen = await db.execute<{ name: string; anzahl: string }>(sql`
-    select workflow_name as name, count(*) as anzahl from workflow_laeufe
-     where ergebnis = 'fehler' and zeitpunkt > ${new Date(jetzt.getTime() - 86_400_000).toISOString()}::timestamptz
-     group by workflow_name order by workflow_name`);
+    select name, count(*) as anzahl from (
+      select workflow_name as name from workflow_laeufe where ergebnis = 'fehler' and zeitpunkt > ${seit}::timestamptz
+      union all
+      select workflow_name from weitergaben where stand = 'fehlgeschlagen' and letzter_versuch > ${seit}::timestamptz
+    ) f group by name order by name`);
   if (!zeilen.length) return [];
   const gesamt = [...zeilen].reduce((s, z) => s + Number(z.anzahl), 0);
   return [
     {
       anlass: "workflow",
       zustand: `tag:${heute}`,
-      betreff: `Belegt: ${gesamt} Workflow-Lauf${gesamt > 1 ? "e" : ""} fehlgeschlagen`,
+      betreff: `Belegt: ${gesamt} Workflow-${gesamt > 1 ? "Läufe" : "Lauf"} fehlgeschlagen`,
       zeilen: [
-        `In den letzten 24 Stunden ${gesamt > 1 ? "sind" : "ist"} ${gesamt} Lauf${gesamt > 1 ? "e" : ""} fehlgeschlagen:`,
+        `In den letzten 24 Stunden ${gesamt > 1 ? "sind" : "ist"} ${gesamt} ${gesamt > 1 ? "Läufe" : "Lauf"} fehlgeschlagen:`,
         ...[...zeilen].map((z) => `- „${z.name}“: ${z.anzahl}`),
       ],
       pfad: "/workflows",
