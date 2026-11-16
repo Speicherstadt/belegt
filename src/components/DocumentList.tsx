@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import type { ArchivAnsicht } from "../../shared/archivansicht.ts";
+import { type ArchivAnsicht, LEERE_ANSICHT } from "../../shared/archivansicht.ts";
 import { darfBearbeiten, darfSchreiben } from "../../shared/rollen.ts";
 import { api, type Doppelt, type Gruppe } from "../lib/api.ts";
 import { filterParameter } from "../lib/ordnung.ts";
@@ -88,6 +88,8 @@ export function DocumentList({
   useEffect(() => {
     if (leereSeite) setSeiteWahl({ seite: seiten, fuer: abfrage });
   }, [leereSeite, seiten, abfrage]);
+  // Suche oder Filter machen aus „leer“ ein „keine Treffer“ (DESIGN.md, Leerzustand); im Eingang gibt es keine
+  const filterAktiv = !!suche.trim() || (!feste && (gruppe !== "alle" || parameter !== ""));
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
   // Mails einlesen und PDFs zusammenfügen nur der Inhaber; hochladen und sammeln auch Mitarbeiter mit bearbeiten
@@ -301,7 +303,46 @@ export function DocumentList({
           {sammelMeldung}
         </p>
       )}
-      {liste.data?.length === 0 && seite === 1 && <EmptyState title={leer.title} text={leer.text} />}
+      {liste.data?.length === 0 && seite === 1 && (
+        <EmptyState
+          title={
+            !filterAktiv
+              ? leer.title
+              : suche.trim()
+                ? m.archive_no_match_title({ suche: suche.trim() })
+                : m.archive_no_match_title_filter()
+          }
+          text={filterAktiv ? m.archive_no_match_text() : leer.text}
+        >
+          {filterAktiv ? (
+            <button
+              type="button"
+              onClick={() =>
+                setAnsicht({
+                  ...LEERE_ANSICHT,
+                  sortierung: ansicht.sortierung,
+                  proSeite: ansicht.proSeite,
+                  darstellung: ansicht.darstellung,
+                })
+              }
+              className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+            >
+              {m.archive_reset_filter()}
+            </button>
+          ) : (
+            bearbeiten && (
+              <button
+                type="button"
+                onClick={() => eingabe.current?.click()}
+                disabled={hochladen.isPending}
+                className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+              >
+                {m.archive_empty_upload()}
+              </button>
+            )
+          )}
+        </EmptyState>
+      )}
       {!!liste.data?.length &&
         (darstellung === "kacheln" ? (
           <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} />

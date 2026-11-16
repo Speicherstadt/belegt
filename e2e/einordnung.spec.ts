@@ -17,6 +17,9 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
 
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await expect(einordnung).toContainText("Noch nicht eingeordnet");
+  // Offen: Die Einordnung steht als erste Karte der rechten Spalte, vor allen anderen
+  const spalte = einordnung.locator("..");
+  await expect(spalte.locator("> *").first()).toContainText("Einordnung");
   expect((await axe(page)).violations).toEqual([]);
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-15");

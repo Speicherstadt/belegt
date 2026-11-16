@@ -17,7 +17,7 @@ test("ein hochgeladenes Original erscheint im Archiv, mit Verlauf, Nachweis und 
   await page.getByLabel("Volltext in Dokumenten, Mails und Anhängen").fill(`-${info.project.name}`);
   await expect(link).toBeVisible();
   await page.getByLabel("Volltext in Dokumenten, Mails und Anhängen").fill("gibt-es-nicht");
-  await expect(page.getByText("Noch keine Dokumente")).toBeVisible();
+  await expect(page.getByText("Keine Treffer für „gibt-es-nicht“")).toBeVisible();
   await page.getByLabel("Volltext in Dokumenten, Mails und Anhängen").fill("");
 
   await link.click();
@@ -127,4 +127,34 @@ test("dieselbe Datei noch einmal hochgeladen: kein zweites Dokument, Link auf da
   }
   await hinweis.getByRole("link", { name: `ASN ${asn} öffnen` }).click();
   await expect(page).toHaveURL(new RegExp(`/dokumente/${id}$`));
+});
+
+test("Suche ohne Treffer sagt „Keine Treffer“, „Filter zurücksetzen“ leert Suche und Filter", async ({ page }) => {
+  await page.goto("/archiv");
+  const suche = page.getByLabel("Volltext in Dokumenten, Mails und Anhängen");
+  await suche.fill("gibt-es-nicht");
+  await page.getByRole("button", { name: "Pflicht" }).click();
+  await expect(page.getByRole("heading", { name: "Keine Treffer für „gibt-es-nicht“" })).toBeVisible();
+  await expect(page.getByText("Noch keine Dokumente")).toHaveCount(0);
+  const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+  expect(axe.violations).toEqual([]);
+
+  await page.getByRole("button", { name: "Filter zurücksetzen" }).click();
+  await expect(suche).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Alle", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: /Keine Treffer/ })).toHaveCount(0);
+});
+
+test("ein leeres Archiv sagt „Noch keine Dokumente“ und bietet das Hochladen an", async ({ page }) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  await page.goto("/archiv");
+  await expect(page.getByRole("heading", { name: "Noch keine Dokumente" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Keine Treffer/ })).toHaveCount(0);
+  const knopf = page.getByRole("button", { name: "Dokument hochladen" });
+  await expect(knopf).toBeVisible();
+  const dialog = page.waitForEvent("filechooser");
+  await knopf.click();
+  await dialog;
+  const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+  expect(axe.violations).toEqual([]);
 });

@@ -61,6 +61,16 @@ export function DocumentPage() {
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
   const d = dok.data;
   const geloescht = !!d.loeschung?.bestaetigtAm;
+  const einordnen = !geloescht && (
+    <Classification
+      key={d.einordnung?.id ?? "neu"}
+      dokumentId={d.id}
+      einordnung={d.einordnung}
+      eingang={d.eingegangenAm}
+      dokumenttyp={d.dokumenttyp}
+      korrespondent={d.korrespondent}
+    />
+  );
   // Bei Scans die durchsuchbare Fassung: Text lässt sich darin suchen und markieren
   const vorschau = geloescht
     ? null
@@ -130,22 +140,15 @@ export function DocumentPage() {
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
+          {/* Offen: Die Einordnung ist der nächste Schritt und steht zuerst */}
+          {!d.einordnung && einordnen}
           <MailSection dokumentId={d.id} />
           <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
           <EInvoice dokumentId={d.id} />
           {(ich.data?.role === "inhaber" || ich.data?.role === "steuerberatung") && <Forwardings dokumentId={d.id} />}
           <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
           {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
-          {!geloescht && (
-            <Classification
-              key={d.einordnung?.id ?? "neu"}
-              dokumentId={d.id}
-              einordnung={d.einordnung}
-              eingang={d.eingegangenAm}
-              dokumenttyp={d.dokumenttyp}
-              korrespondent={d.korrespondent}
-            />
-          )}
+          {d.einordnung && einordnen}
           {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
           {!geloescht && <Similar dokumentId={d.id} />}
           <DocumentOrdnung
