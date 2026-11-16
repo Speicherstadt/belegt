@@ -91,7 +91,9 @@ export function DocumentList({
   // Suche oder Filter machen aus „leer“ ein „keine Treffer“ (DESIGN.md, Leerzustand); im Eingang gibt es keine
   const filterAktiv = !!suche.trim() || (!feste && (gruppe !== "alle" || parameter !== ""));
   // Zeigt der Leerzustand „Dokument hochladen“, ist der Knopf in der Leiste nur zweitrangig: genau eine Hauptaktion
-  const leerMitUpload = liste.data?.length === 0 && seite === 1 && !filterAktiv;
+  // Platzhalter (keepPreviousData) gehören zur vorigen Abfrage und sagen nichts über den neuen Filter
+  const leer0 = liste.data?.length === 0 && seite === 1 && !abfrageDaten.isPlaceholderData;
+  const leerMitUpload = leer0 && !filterAktiv;
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
   // Mails einlesen und PDFs zusammenfügen nur der Inhaber; hochladen und sammeln auch Mitarbeiter mit bearbeiten
@@ -309,7 +311,7 @@ export function DocumentList({
           {sammelMeldung}
         </p>
       )}
-      {liste.data?.length === 0 && seite === 1 && (
+      {leer0 && (
         <EmptyState
           title={
             !filterAktiv

@@ -194,3 +194,27 @@ test("ein leeres Archiv sagt „Noch keine Dokumente“ und bietet das Hochladen
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(axe.violations).toEqual([]);
 });
+
+test("nach „Filter zurücksetzen“ erscheint „Noch keine Dokumente“ nicht, solange die Antwort aussteht", async ({
+  page,
+}) => {
+  let verzoegern = false;
+  let freigeben = () => {};
+  const frei = new Promise<void>((r) => {
+    freigeben = r;
+  });
+  await page.route("**/api/dokumente?*", async (route) => {
+    if (verzoegern) await frei;
+    await route.fulfill({ json: [], headers: { "x-gesamt": "0" } });
+  });
+  // Direkt mit Suche öffnen: Die Abfrage ohne Suche ist noch nicht im Zwischenspeicher, nur Platzhalterdaten wären da
+  await page.goto("/archiv?suche=gibt-es-nicht");
+  await expect(page.getByRole("heading", { name: "Keine Treffer für „gibt-es-nicht“" })).toBeVisible();
+  verzoegern = true;
+  await page.getByRole("button", { name: "Filter zurücksetzen" }).click();
+  await page.waitForTimeout(500);
+  await expect(page.getByText("Noch keine Dokumente")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Dokument hochladen" })).toHaveCount(0);
+  freigeben();
+  await expect(page.getByRole("heading", { name: "Noch keine Dokumente" })).toBeVisible();
+});
