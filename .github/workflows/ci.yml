@@ -144,6 +144,8 @@ jobs:
           echo "zweiter Scan" > b.pdf
           ok=; for i in $(seq 1 30); do curl -fsS --disable-epsv -T scan.pdf --user "scanner:$pw" ftp://127.0.0.1:2121/scan.pdf && ok=1 && break; sleep 1; done
           test -n "$ok"
+          # Herunterladen lehnt der Dienst ab (download_enable=NO), solange die Datei noch auf den Worker wartet
+          if curl -fsS --disable-epsv --user "scanner:$pw" ftp://127.0.0.1:2121/scan.pdf -o /dev/null; then echo "Herunterladen erlaubt"; exit 1; fi
           curl -fsS --ssl-reqd -k --ftp-create-dirs -T b.pdf --user "scanner:$pw" ftp://127.0.0.1:2121/Steuer/b.pdf
           if curl -fsS -T scan.pdf --user scanner:falsch ftp://127.0.0.1:2121/x.pdf; then echo "Falsches Passwort angenommen"; exit 1; fi
           q() { docker compose exec -T postgres psql -U belegt -d belegt -XAtc "$1"; }

@@ -38,7 +38,7 @@ kleinen FTP-Dienst mit (Profil `ftp`, Image `tristanteu/belegt-ftp`, [vsftpd](ht
 
 Der Dienst nimmt Port 21 (anders mit `FTP_PORT`) und die Ports 30000–30009 an. Er kennt nur den einen Benutzer, der in
 den Eingangsordner eingesperrt ist und dort als UID 1000 schreibt, damit der Worker aufgenommene Dateien entfernen
-darf. Punktdateien lehnt er ab. Jede Übertragung steht mit Dateiname im Log (`docker compose logs ftp`), das Passwort
+darf. Herunterladen geht nicht, Punktdateien lehnt er ab. Jede Übertragung steht mit Dateiname im Log (`docker compose logs ftp`), das Passwort
 nie.
 
 **FTPS:** `FTP_TLS=an` erlaubt TLS, `FTP_TLS=pflicht` verlangt es für Anmeldung und Daten. Ohne eigenes Zertifikat
