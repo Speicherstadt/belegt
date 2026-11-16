@@ -79,6 +79,10 @@ test("Original an Adresse senden: Aktion anlegen, das Ergebnis steht am Dokument
   await neu.getByRole("button", { name: "Workflow anlegen" }).click();
   const eintrag = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: workflow }) });
   await expect(eintrag).toContainText("Original an buchhaltung.example senden");
+  // Das Formular ist danach leer, auch die Aktion senden
+  await expect(neu.getByLabel("Name", { exact: true })).toHaveValue("");
+  await expect(neu.getByRole("checkbox", { name: "Original an Adresse senden" })).not.toBeChecked();
+  await expect(neu.getByLabel("Adresse (https://…)")).toHaveCount(0);
   // Der Wert der Kopfzeile kommt nie zurück
   expect(JSON.stringify(await (await page.request.get("/api/workflows")).json())).not.toContain("e2e-token");
 
