@@ -200,6 +200,24 @@ bun run e2e          # Playwright mit axe gegen einen echten Server
 Belegt nutzt den GoBD-Kern (`@firsttris/gobd-kern`) aus [Haben](https://github.com/firsttris/haben), der
 Open-Source-Buchhaltung desselben Projekts.
 
-## Lizenz
+## Sterne im Verlauf
 
-[AGPL-3.0](LICENSE). Keine Steuer- oder Rechtsberatung.
+<a href="https://www.star-history.com/#firsttris/belegt&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=firsttris/belegt&type=Date&theme=dark">
+    <img alt="Verlauf der GitHub-Sterne von Belegt" src="https://api.star-history.com/svg?repos=firsttris/belegt&type=Date">
+  </picture>
+</a>
+
+---
+
+<div align="center">
+
+⭐ Gefällt dir Belegt? Ein [Stern auf GitHub](https://github.com/firsttris/belegt) hilft anderen, es zu finden.<br>
+🐛 [Fehler melden](https://github.com/firsttris/belegt/issues/new) · 💡 [Idee vorschlagen](https://github.com/firsttris/belegt/issues/new) · 🔒 [Sicherheitslücke melden](SECURITY.md)
+
+<sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
+Wer Belegt für andere betreibt, muss ihnen den Quellcode anbieten.<br>
+Belegt ist keine Steuer- oder Rechtsberatung. Aufbewahrung und Verfahrensdokumentation vor dem Echtbetrieb mit deiner Steuerberatung abgleichen.</sub>
+
+</div>
