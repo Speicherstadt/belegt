@@ -29,6 +29,13 @@ describe("Namen im ZIP", () => {
     expect(namensteil("x".repeat(300))).toHaveLength(100);
   });
 
+  it("lässt keine Zeichen für die Schreibrichtung und kein halbes Zeichen stehen", () => {
+    // Ein Anhang „Rechnung\u202Efdp.exe“ zeigte sich sonst als „Rechnungexe.pdf“
+    expect(nameImZip({ ...basis, dateiname: "Rechnung\u202Efdp.exe" })).toBe("ASN0042-2026-03-14-Rechnung_fdp.exe");
+    expect(namensteil("a\u200Bb\u200Fc\u2066d\u2069e\uFEFFf")).toBe("a_b_c_d_e_f");
+    expect(namensteil(`${"x".repeat(99)}\u{1F600}y`)).toBe(`${"x".repeat(99)}\u{1F600}`);
+  });
+
   it("nummeriert gleiche Namen ohne Rücksicht auf Groß- und Kleinschreibung", () => {
     expect(eindeutig(["a.pdf", "A.pdf", "a.pdf", "b", "b"])).toEqual(["a.pdf", "A (2).pdf", "a (3).pdf", "b", "b (2)"]);
   });
@@ -93,6 +100,18 @@ describe.skipIf(!testDatenbankUrl)("ZIP-Download gegen Postgres", () => {
     expect(namen[0]).toMatch(/^ASN\d{4}-\d{4}-\d{2}-\d{2}-draussen\.pdf$/);
     expect(namen[1]).toMatch(/^ASN\d{4}-2026-03-14-Rechnung_ März_April\.pdf$/);
     expect(new TextDecoder().decode(zip[namen[1]!])).toBe("%PDF-1.7\n% drin\n");
+  });
+
+  it("hält die gewählte Reihenfolge auch für IDs in Großbuchstaben und nimmt jedes Dokument einmal", async () => {
+    for (const [erstes, zweites, name] of [
+      [drin, draussen, /Rechnung/],
+      [draussen, drin, /draussen/],
+    ] as const) {
+      const ids = [erstes.id.toUpperCase(), zweites.id.toUpperCase(), erstes.id];
+      const namen = Object.keys(await entpacken(await laden(inhaber, ids)));
+      expect(namen).toHaveLength(2);
+      expect(namen[0]).toMatch(name);
+    }
   });
 
   it("nennt ein fehlendes Original in nicht-enthalten.txt, statt es still wegzulassen", async () => {
