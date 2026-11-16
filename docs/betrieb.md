@@ -240,6 +240,9 @@ Dann in `compose.yml` beim Worker die Zeile `- ./eingang:/var/lib/belegt/eingang
 [Trennblättern](eingang.md#trennblätter) teilt der Worker; einen eigenen Code für die Trennblätter setzt
 `TRENNBLATT_CODE` in `.env`. Mit `EINGANG_ORDNER_TAGS=true` werden Unterordner zu Tags.
 
+Für einen Netzwerkscanner, der nur per FTP sendet, schreibt der FTP-Dienst im Profil `ftp` in denselben Ordner
+([Scannen](scannen.md)); nur im eigenen Netz.
+
 ## Umzug aus Paperless-ngx
 
 Ein hochgeladener Export liegt bis zum Ende seines Imports im Importordner (`IMPORT_ORDNER`, im Image

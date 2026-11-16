@@ -201,6 +201,26 @@ services:
     volumes:
       - caddy:/data
 
+  # FTP für Netzwerkscanner, nur mit: docker compose --profile ftp up -d (docs/scannen.md). Schreibt in denselben
+  # Eingangsordner wie der Worker; FTP_BENUTZER, FTP_PASSWORT und FTP_PASV_ADRESSE in .env. Nur im eigenen Netz
+  ftp:
+    build:
+      context: deploy/ftp
+      dockerfile: Containerfile
+    image: belegt-ftp:lokal
+    profiles: [ftp]
+    restart: unless-stopped
+    environment:
+      FTP_BENUTZER: ${FTP_BENUTZER:-}
+      FTP_PASSWORT: ${FTP_PASSWORT:-}
+      FTP_PASV_ADRESSE: ${FTP_PASV_ADRESSE:-}
+      FTP_TLS: ${FTP_TLS:-aus}
+    ports:
+      - "${FTP_PORT:-21}:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - ./eingang:/eingang
+
   # Sprachmodell für Vorschläge, nur mit: docker compose --profile ki up -d; KI_URL=http://ollama:11434 in .env
   ollama:
     image: docker.io/ollama/ollama:latest

@@ -22,6 +22,7 @@ nav:
       - Anmelden über einen Anbieter, Einbetten: einbetten.md
   - Arbeiten mit Belegt:
       - Eingang, Mails und Suche: eingang.md
+      - Scannen: scannen.md
       - Von Paperless-ngx zu Belegt: umzug.md
       - Korrespondenten, Tags, Typen und Felder: ordnung.md
       - Workflows: workflows.md

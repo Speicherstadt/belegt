@@ -64,3 +64,22 @@ jobs:
     permissions:
       contents: write
       packages: write
+
+  # FTP für Netzwerkscanner (deploy/ftp), mit denselben Tags wie die App
+  docker-ftp:
+    needs: [tested, checks]
+    if: ${{ !cancelled() && needs.tested.result == 'success' && needs.checks.result != 'failure' }}
+    uses: firsttris/workflows/.github/workflows/docker-release.yml@5011fb6bf2b7423d211ecffa82218ba067fb5fed # main
+    with:
+      image: tristanteu/belegt-ftp
+      description: "FTP für Netzwerkscanner: schreibt in den Eingangsordner von Belegt, nur im eigenen Netz"
+      context: deploy/ftp
+      dockerfile: deploy/ftp/Containerfile
+      ghcr: true
+      ghcr-image: firsttris/belegt-ftp
+      readme: deploy/ftp/README.md
+      github-release: false
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write

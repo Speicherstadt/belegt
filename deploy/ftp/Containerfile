@@ -1,0 +1,17 @@
+# Belegt – FTP für Netzwerkscanner („Scan to FTP“): vsftpd schreibt in den Eingangsordner, den der Worker überwacht
+# (docs/scannen.md). Nur im eigenen Netz gedacht; FTP ohne TLS überträgt Passwort und Dateien unverschlüsselt.
+#   docker build -t belegt-ftp deploy/ftp
+FROM docker.io/library/debian:trixie-slim
+# openssl nur für ein selbst signiertes Zertifikat, wenn FTPS an ist und keins eingehängt wurde
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends vsftpd openssl \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /var/run/vsftpd/empty
+COPY vsftpd.conf /etc/vsftpd.conf
+# Nur Benutzer und Passwort prüfen; die Vorgabe von Debian verlangt außerdem eine Login-Shell
+COPY pam /etc/pam.d/belegt-ftp
+COPY start.sh /usr/local/bin/start.sh
+# Steuerverbindung und der feste Bereich für den passiven Modus (in compose.yml veröffentlicht)
+EXPOSE 21 30000-30009
+VOLUME /eingang
+ENTRYPOINT ["/usr/local/bin/start.sh"]
