@@ -1,12 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PDF = Buffer.from("%PDF-1.7\n% erfundene Rechnung über 119,00 €\n");
+// Je Projekt eine eigene Datei: Dieselbe nimmt Belegt nur einmal auf, und Desktop und Handy teilen die Datenbank
+const pdfFuer = (projekt: string) => Buffer.from(`%PDF-1.7\n% erfundene Rechnung über 119,00 € (${projekt})\n`);
 
 test("ein hochgeladenes Original erscheint im Archiv, mit Verlauf, Nachweis und unveränderter Datei", async ({
   page,
 }, info) => {
   const name = `Rechnung-${info.project.name}.pdf`;
+  const PDF = pdfFuer(info.project.name);
   await page.goto("/archiv");
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: PDF });
   const link = page.getByRole("link", { name });
@@ -97,4 +99,32 @@ test("Archiv blättert in Seiten zu 50 und nennt „x von y“; „alle auf dies
   }
   await seiten.getByRole("button", { name: "Zurück" }).click();
   await expect(seiten).toContainText("1–50 von 52");
+});
+
+test("dieselbe Datei noch einmal hochgeladen: kein zweites Dokument, Link auf das vorhandene", async ({
+  page,
+}, info) => {
+  const name = `doppelt-${info.project.name}.pdf`;
+  const buffer = Buffer.from(`%PDF-1.7\n% ${name}\n`);
+  await page.goto("/archiv");
+  await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer });
+  const link = page.getByRole("link", { name, exact: true });
+  await expect(link).toBeVisible();
+  const id = (await link.getAttribute("href"))!.split("/").pop()!;
+  const { asn } = (await (await page.request.get(`/api/dokumente/${id}`)).json()) as { asn: number };
+
+  await page.getByTestId("upload").setInputFiles({ name: "nochmal.pdf", mimeType: "application/pdf", buffer });
+  const hinweis = page.getByRole("status", { name: "Schon im Archiv" });
+  await expect(hinweis).toContainText("„nochmal.pdf“ liegt schon im Archiv, nichts Neues angelegt:");
+  await expect(page.getByRole("link", { name: "nochmal.pdf" })).toHaveCount(0);
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    const axe = await new AxeBuilder({ page })
+      .exclude("iframe")
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(axe.violations, colorScheme).toEqual([]);
+  }
+  await hinweis.getByRole("link", { name: `ASN ${asn} öffnen` }).click();
+  await expect(page).toHaveURL(new RegExp(`/dokumente/${id}$`));
 });

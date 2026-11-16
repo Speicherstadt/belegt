@@ -63,7 +63,7 @@ test("der Vorschlag des Sprachmodells füllt die Einordnung vor, eingeordnet wir
   await page.goto("/eingang");
   await page
     .getByTestId("upload")
-    .setInputFiles({ name, mimeType: "text/plain", buffer: Buffer.from("Unser Angebot") });
+    .setInputFiles({ name, mimeType: "text/plain", buffer: Buffer.from(`Unser Angebot (${info.project.name})`) });
   const link = page.getByRole("link", { name });
   await expect(link).toBeVisible();
   const id = (await link.getAttribute("href"))!.split("/").pop()!;

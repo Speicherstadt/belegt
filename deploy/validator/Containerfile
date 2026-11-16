@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+# Belegt – Prüfdienst für E-Rechnungen: der Validator der KoSIT als HTTP-Dienst (Daemon) mit der Konfiguration für
+# XRechnung, die auch EN 16931 ohne XRechnung prüft (ZUGFeRD, Factur-X). Belegt schickt das XML an VALIDATOR_URL
+# (docs/betrieb.md, „E-Rechnungen prüfen“).
+#   docker build -t belegt-validator deploy/validator
+# Quellen: https://github.com/itplr-kosit/validator (docs/daemon.md) und
+# https://github.com/itplr-kosit/validator-configuration-xrechnung (docs/usage.md); beide Apache-2.0.
+ARG VALIDATOR_VERSION=1.6.3
+ARG KONFIGURATION_STAND=2026-08-31
+ARG XRECHNUNG_VERSION=3.0.2
+
+FROM docker.io/library/alpine:3.22 AS konfiguration
+ARG KONFIGURATION_STAND
+ARG XRECHNUNG_VERSION
+ADD --checksum=sha256:2530cd107c414511c5d0462ec10f886910395abfca820db82e83d70bf01221a8 \
+  https://github.com/itplr-kosit/validator-configuration-xrechnung/releases/download/v${KONFIGURATION_STAND}/xrechnung-${XRECHNUNG_VERSION}-validator-configuration-${KONFIGURATION_STAND}.zip \
+  /konfiguration.zip
+RUN mkdir /konfiguration && unzip -q /konfiguration.zip -d /konfiguration && test -f /konfiguration/scenarios.xml
+
+FROM docker.io/library/eclipse-temurin:21-jre
+ARG VALIDATOR_VERSION
+ADD --checksum=sha256:799e64befca97d4080e03608c80b85dd5a5ecc5f4ae4f35d1116ec2855b9a7c9 \
+  https://repo1.maven.org/maven2/org/kosit/validator/${VALIDATOR_VERSION}/validator-${VALIDATOR_VERSION}-standalone.jar \
+  /opt/validator/validator.jar
+COPY --from=konfiguration /konfiguration /opt/validator/konfiguration
+# Ohne Rechte und ohne Oberfläche; die Konfiguration liegt nur lesbar im Image
+RUN chmod -R a+rX /opt/validator
+USER 65534:65534
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/opt/validator/validator.jar", \
+  "-s", "/opt/validator/konfiguration/scenarios.xml", "-r", "/opt/validator/konfiguration", \
+  "-D", "-H", "0.0.0.0", "-P", "8080", "--disable-gui"]

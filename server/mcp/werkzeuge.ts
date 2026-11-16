@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Angemeldet } from "../auth.ts";
-import { aufnehmen, laden, listen, type Umgebung } from "../dokumente/dokumente.ts";
+import { laden, listen, type Umgebung } from "../dokumente/dokumente.ts";
+import { aufnehmenEinmal } from "../dokumente/doppelt.ts";
 import { aktuelle, EinordnungEingabe, einordnen, Gruppe } from "../einordnung/einordnung.ts";
 import { akteur, heute, MAX_UPLOAD } from "../http/gemeinsam.ts";
 import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
@@ -196,7 +197,7 @@ export const WERKZEUGE: Werkzeug[] = [
     name: "dokument_aufnehmen",
     title: "Dokument aufnehmen",
     description:
-      "Nimmt eine Datei unverändert ins Archiv auf (inhalt als Base64, höchstens 100 MB). Danach liegt sie im Eingang und wartet auf die Einordnung. Braucht ein Token mit dem Recht schreiben.",
+      "Nimmt eine Datei unverändert ins Archiv auf (inhalt als Base64, höchstens 100 MB). Danach liegt sie im Eingang und wartet auf die Einordnung. Liegt dieselbe Datei schon im Archiv, legt es nichts an und nennt das vorhandene Dokument. Braucht ein Token mit dem Recht schreiben.",
     inputSchema: {
       type: "object",
       required: ["dateiname", "inhalt"],
@@ -214,7 +215,17 @@ export const WERKZEUGE: Werkzeug[] = [
     ausfuehren: async (umgebung, nutzer, e: { dateiname: string; inhalt: string }) => {
       const bytes = new Uint8Array(Buffer.from(e.inhalt, "base64"));
       if (!bytes.byteLength) throw werkzeugFehler("Die Datei ist leer");
-      return aufnehmen(umgebung, { bytes, dateiname: e.dateiname, quelle: "api", akteur: akteur(nutzer) });
+      const r = await aufnehmenEinmal(umgebung, {
+        bytes,
+        dateiname: e.dateiname,
+        quelle: "api",
+        akteur: akteur(nutzer),
+      });
+      if (r.vorhanden)
+        throw werkzeugFehler(
+          `Diese Datei liegt schon im Archiv: ASN ${r.vorhanden.asn}, Dokument ${r.vorhanden.id}; nichts Neues angelegt`,
+        );
+      return r.dokument;
     },
   },
   {

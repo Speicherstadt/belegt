@@ -16,7 +16,9 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
     const datei = `api-${info.project.name}.pdf`;
     const res = await programm.request.post("/api/dokumente", {
       headers: { authorization: `Bearer ${token}` },
-      multipart: { datei: { name: datei, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7\n% per API\n") } },
+      multipart: {
+        datei: { name: datei, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% per API ${datei}\n`) },
+      },
     });
     expect(res.status()).toBe(201);
 

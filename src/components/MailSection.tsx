@@ -41,12 +41,14 @@ export function MailSection({ dokumentId }: { dokumentId: string }) {
         <div className="flex flex-col gap-1">
           <h3 className="m-0 font-medium text-sm">{m.mail_attachments()}</h3>
           <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
-            {d.anhaenge.map((a) => (
-              <li key={a.dokumentId}>
+            {d.anhaenge.map((a, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Derselbe Anhang kann zweimal in einer Mail stecken und dann zweimal auf ein Dokument verweisen; die Liste ändert sich nicht
+              <li key={`${i}-${a.dokumentId}`}>
                 <Link to="/dokumente/$id" params={{ id: a.dokumentId }} className="underline underline-offset-2">
                   {a.dateiname ?? m.unnamed()}
                 </Link>{" "}
                 <span className="text-muted">{a.mimeType}</span>
+                {a.vorhanden && <span className="text-muted"> · {m.mail_attachment_existing()}</span>}
               </li>
             ))}
           </ul>

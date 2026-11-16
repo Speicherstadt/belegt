@@ -2,7 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { useEffect, useRef, useState } from "react";
 import type { ArchivAnsicht } from "../../shared/archivansicht.ts";
 import { darfBearbeiten, darfSchreiben } from "../../shared/rollen.ts";
-import { api, type Gruppe } from "../lib/api.ts";
+import { api, type Doppelt, type Gruppe } from "../lib/api.ts";
 import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
@@ -13,6 +13,7 @@ import { MergePdfs } from "./MergePdfs.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { Pagination } from "./Pagination.tsx";
+import { UploadDuplicates } from "./UploadDuplicates.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -133,8 +134,14 @@ export function DocumentList({
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["dokumente"] }),
   });
   const hochladen = useMutation({
+    // Dateien, die schon im Archiv liegen, legt der Server nicht noch einmal an; sie stehen danach mit Link da
     mutationFn: async (dateien: File[]) => {
-      for (const datei of dateien) await api.hochladen(datei);
+      const doppelt: Doppelt[] = [];
+      for (const datei of dateien) {
+        const r = await api.hochladen(datei);
+        if (r.doppelt) doppelt.push(r.doppelt);
+      }
+      return doppelt;
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["dokumente"] }),
   });
@@ -261,6 +268,7 @@ export function DocumentList({
           {m.upload_failed({ meldung: hochladen.error.message })}
         </p>
       )}
+      {hochladen.data && <UploadDuplicates doppelt={hochladen.data} />}
       {bearbeiten && ausgewaehlt.length > 0 && liste.data && (
         <BulkEdit
           gewaehlt={ausgewaehlt}

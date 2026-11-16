@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { api } from "../lib/api.ts";
+import { api, type Doppelt } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
+import { UploadDuplicates } from "./UploadDuplicates.tsx";
 
 /**
  * „Foto aufnehmen“: öffnet auf dem Handy die Kamera (capture, auch auf dem iPhone), am Rechner die Dateiauswahl für
@@ -14,10 +15,14 @@ export function CameraButton() {
   const [anzahl, setAnzahl] = useState(0);
   const hochladen = useMutation({
     mutationFn: async (dateien: File[]) => {
-      for (const datei of dateien) await api.hochladen(datei);
-      return dateien.length;
+      const doppelt: Doppelt[] = [];
+      for (const datei of dateien) {
+        const r = await api.hochladen(datei);
+        if (r.doppelt) doppelt.push(r.doppelt);
+      }
+      return { neu: dateien.length - doppelt.length, doppelt };
     },
-    onSuccess: (n) => setAnzahl((a) => a + n),
+    onSuccess: (r) => setAnzahl((a) => a + r.neu),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["dokumente"] }),
   });
   return (
@@ -55,6 +60,7 @@ export function CameraButton() {
           {m.upload_failed({ meldung: hochladen.error.message })}
         </span>
       )}
+      {hochladen.data && <UploadDuplicates doppelt={hochladen.data.doppelt} />}
     </>
   );
 }

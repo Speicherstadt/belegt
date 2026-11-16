@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { darfBearbeiten } from "../../shared/rollen.ts";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
-import { api } from "../lib/api.ts";
+import { UploadDuplicates } from "../components/UploadDuplicates.tsx";
+import { api, type Doppelt } from "../lib/api.ts";
 import { groesse } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { geteilteDateien, geteilteVerwerfen, geteiltHochladen } from "../pwa/teilen.ts";
@@ -21,7 +22,15 @@ export function SharePage() {
   };
   const hochladen = useMutation({
     // Jede angekommene Datei verschwindet sofort aus der Zwischenablage; ein zweiter Versuch lädt nur den Rest hoch
-    mutationFn: () => geteiltHochladen(api.hochladen),
+    // Was schon im Archiv liegt, legt der Server nicht an; es zählt trotzdem als erledigt und verlässt die Ablage
+    mutationFn: async () => {
+      const doppelt: Doppelt[] = [];
+      const anzahl = await geteiltHochladen(async (datei) => {
+        const r = await api.hochladen(datei);
+        if (r.doppelt) doppelt.push(r.doppelt);
+      });
+      return { anzahl, doppelt };
+    },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ["geteilt"] });
       await queryClient.invalidateQueries({ queryKey: ["dokumente"] });
@@ -36,12 +45,13 @@ export function SharePage() {
       <PageHeader title={m.share_title()} intro={m.share_intro()} />
       {hochladen.isSuccess && (
         <p role="status" className="m-0 flex flex-wrap items-center gap-3 text-sm">
-          {m.share_done({ anzahl: String(hochladen.data) })}
+          {m.share_done({ anzahl: String(hochladen.data.anzahl - hochladen.data.doppelt.length) })}
           <Link to="/eingang" className="font-medium underline underline-offset-2">
             {m.share_to_inbox()}
           </Link>
         </p>
       )}
+      {hochladen.data && <UploadDuplicates doppelt={hochladen.data.doppelt} />}
       {dateien.isSuccess && liste.length === 0 && !hochladen.isSuccess && (
         <EmptyState title={m.share_empty_title()} text={m.share_empty_text()} />
       )}

@@ -2,12 +2,13 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, request, test } from "@playwright/test";
 import { strToU8, zipSync } from "fflate";
 
-const docx = () =>
+// Je Name eine eigene Datei: Dieselbe nimmt Belegt nur einmal auf, und Desktop und Handy teilen die Datenbank
+const docx = (name: string) =>
   Buffer.from(
     zipSync({
       "[Content_Types].xml": strToU8("<Types/>"),
       "word/document.xml": strToU8(
-        "<w:document><w:body><w:p><w:r><w:t>Angebot</w:t></w:r></w:p></w:body></w:document>",
+        `<w:document><w:body><w:p><w:r><w:t>Angebot ${name}</w:t></w:r></w:p></w:body></w:document>`,
       ),
     }),
   );
@@ -17,7 +18,7 @@ test("eine Word-Datei zeigt ihre Ansicht als PDF und sagt, dass das Original ma�
 }, info) => {
   const name = `angebot-${info.project.name}.docx`;
   await page.goto("/eingang");
-  await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/octet-stream", buffer: docx() });
+  await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/octet-stream", buffer: docx(name) });
   const link = page.getByRole("link", { name });
   const id = (await link.getAttribute("href"))!.split("/").pop()!;
   // Der Worker (hier der E2E-Server mit nachgebautem Dienst) erzeugt die Ansicht kurz nach dem Hochladen
@@ -41,7 +42,7 @@ test("„Öffnen mit …“ öffnet die App in einem neuen Tab mit einem Link au
 }, info) => {
   const name = `vertrag-${info.project.name}.docx`;
   // Einmal gebaut: das ZIP enthält die Uhrzeit
-  const original = docx();
+  const original = docx(name);
   await context.route("https://office.example/**", (route) =>
     route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Office</title><p>Office</p>" }),
   );

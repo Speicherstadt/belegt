@@ -9,6 +9,8 @@ export class ApiFehler extends Error {
     message: string,
     /** Antwort der Sammelbearbeitung bei 409: das Ergebnis je Dokument */
     readonly ergebnis?: { ok: boolean; ergebnisse: SammelErgebnis[] },
+    /** Beim Hochladen 409: das Dokument mit derselben Datei (id und asn null, wenn der Zugang es nicht sieht) */
+    readonly vorhanden?: { id: string | null; asn: number | null },
   ) {
     super(message);
   }
@@ -25,17 +27,20 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
     const text = await res.text();
     let meldung = text;
     let ergebnis: ApiFehler["ergebnis"];
+    let vorhanden: ApiFehler["vorhanden"];
     try {
       const json = JSON.parse(text) as {
         fehler?: string;
         message?: string;
         ok?: boolean;
         ergebnisse?: SammelErgebnis[];
+        vorhanden?: ApiFehler["vorhanden"];
       };
       meldung = json.fehler ?? json.message ?? text;
       if (json.ergebnisse) ergebnis = { ok: false, ergebnisse: json.ergebnisse };
+      vorhanden = json.vorhanden;
     } catch {}
-    throw new ApiFehler(res.status, meldung, ergebnis);
+    throw new ApiFehler(res.status, meldung, ergebnis, vorhanden);
   }
   return res;
 }

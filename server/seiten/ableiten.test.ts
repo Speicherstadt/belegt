@@ -6,8 +6,11 @@ import { testDatenbankUrl } from "../test-db.ts";
 import { tokenAnlegen, zugangAnlegen } from "../test-zugaenge.ts";
 import { rasterVerfuegbar } from "../vorschaubild/raster.ts";
 
+// Dieselbe Datei nimmt Belegt nur einmal auf (server/dokumente/doppelt.ts); der Titel macht jedes PDF zu einem eigenen
+let zaehler = 0;
 async function pdf(seiten: number) {
   const doc = await PDFDocument.create();
+  doc.setTitle(`Test ${++zaehler}`);
   for (let i = 1; i <= seiten; i++) doc.addPage([100 + i, 200]);
   return new Uint8Array(await doc.save());
 }

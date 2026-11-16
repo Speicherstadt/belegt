@@ -78,7 +78,8 @@ Ableitungen und Mails zeigen nur, was in seinem Sichtbereich liegt. Von Tags, Ty
 erlaubten, oder alle außer den ausgeschlossenen Tags, wenn für die Art nichts gewählt ist; Vorschläge nennen nur diese.
 
 Mail und Anhänge gibt es nur gemeinsam: Die Datei einer Mail (`.eml`) enthält ihre Anhänge, deshalb sieht er eine Mail
-nur, wenn auch jeder ihrer Anhänge in seinem Sichtbereich liegt. Einen sichtbaren Anhang einer Mail außerhalb findet die
+nur, wenn auch jeder ihrer Anhänge in seinem Sichtbereich liegt, auch einer, der als schon vorhandenes Dokument
+[verweist](eingang.md#doppelte-dateien). Einen sichtbaren Anhang einer Mail außerhalb findet die
 Suche nur über seinen eigenen Text, nicht über Absender und Betreff der Mail. Für Prüfer gilt dasselbe mit ihrem
 Zeitraum.
 
@@ -86,7 +87,8 @@ Mit dem Recht **lesen** öffnet und lädt er Dokumente herunter und liest Notize
 zusätzlich Dokumente auf, ordnet sie ein, setzt Tags, Typ, Korrespondent und Felder (auch für mehrere zugleich) und
 schreibt Notizen. Eine Änderung, nach der das Dokument außerhalb seines Sichtbereichs läge, lehnt Belegt ab und ändert
 nichts; das darf nur der Inhaber. Was er selbst hochlädt, sieht er, bis es eine Ordnung bekommt; danach gilt sein
-Sichtbereich wie für alle anderen Dokumente.
+Sichtbereich wie für alle anderen Dokumente. Lädt er eine Datei hoch, die schon im Archiv liegt, erfährt er bei einem Dokument
+außerhalb seines Sichtbereichs nur, dass sie vorliegt, ohne Archivnummer.
 
 Nie: Löschung beantragen oder bestätigen, Sperren, Fristen, Prüfung, Z3-Export, Seiten bearbeiten, teilen per Link,
 „Öffnen mit …“, Mails importieren, Tags und andere Listen anlegen oder ändern, Regeln, Workflows, Quellen, Import aus

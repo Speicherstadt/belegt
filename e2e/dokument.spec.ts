@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { degrees, PDFDocument, StandardFonts } from "pdf-lib";
@@ -15,6 +16,8 @@ async function axeHellUndDunkel(page: Page) {
 /** Ein echtes PDF mit Text auf jeder Seite; die erste Seite optional gedreht */
 async function pdf(text: string, seiten = 1, drehung = 0) {
   const doc = await PDFDocument.create();
+  // Jedes PDF eine eigene Datei, auch bei gleichem Text: Dieselbe nimmt Belegt nur einmal auf
+  doc.setSubject(randomUUID());
   const font = await doc.embedFont(StandardFonts.Helvetica);
   for (let i = 1; i <= seiten; i++) {
     const seite = doc.addPage();

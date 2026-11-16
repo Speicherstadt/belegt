@@ -19,6 +19,15 @@ export interface Dokument {
   eingegangenAm: string;
 }
 
+/** Eine Datei, die schon im Archiv lag; id und asn null, wenn der Zugang das vorhandene Dokument nicht sieht */
+export interface Doppelt {
+  dateiname: string;
+  id: string | null;
+  asn: number | null;
+}
+
+export type Hochgeladen = { dokument: Dokument; doppelt?: undefined } | { dokument?: undefined; doppelt: Doppelt };
+
 export interface Eintrag extends Dokument {
   art: Art | null;
   fristBis: string | null;
@@ -71,7 +80,14 @@ export interface MailAnsicht {
   betreff: string;
   gesendetAm: string | null;
   text: string;
-  anhaenge: { dokumentId: string; dateiname: string | null; mimeType: string; eingebettet: boolean }[];
+  /** vorhanden: lag schon als Dokument im Archiv, als die Mail kam */
+  anhaenge: {
+    dokumentId: string;
+    dateiname: string | null;
+    mimeType: string;
+    eingebettet: boolean;
+    vorhanden: boolean;
+  }[];
   unterhaltung: { dokumentId: string; betreff: string; von: string | null; gesendetAm: string | null }[];
   ausMail: string | null;
 }
@@ -164,10 +180,17 @@ export const dokumenteApi = {
           archivfassung: boolean;
         }
     >(`/api/dokumente/${id}`),
-  hochladen: (datei: File) => {
+  /** Liegt dieselbe Datei schon im Archiv, legt der Server nichts an (409); dann das vorhandene Dokument */
+  hochladen: async (datei: File): Promise<Hochgeladen> => {
     const form = new FormData();
     form.append("datei", datei);
-    return aufruf<Dokument>("/api/dokumente", { method: "POST", body: form });
+    try {
+      return { dokument: await aufruf<Dokument>("/api/dokumente", { method: "POST", body: form }) };
+    } catch (err) {
+      if (err instanceof ApiFehler && err.status === 409 && err.vorhanden)
+        return { doppelt: { dateiname: datei.name, ...err.vorhanden } };
+      throw err;
+    }
   },
   verlauf: (id: string) => aufruf<{ ereignisse: Ereignis[]; siegel: string | null }>(`/api/dokumente/${id}/verlauf`),
   inhalt: (id: string) =>

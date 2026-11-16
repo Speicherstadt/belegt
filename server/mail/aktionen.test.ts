@@ -49,7 +49,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
   it("tut ohne eingestellte Aktion nichts im Postfach und merkt nichts vor", async () => {
     const id = await quelle("keine@example.org");
     p.einliefern("keine@example.org", mailRoh(1, "keine"));
-    expect(await abholen(id)).toEqual({ neu: 1, doppelt: 0, fehler: null });
+    expect(await abholen(id)).toEqual({ neu: 1, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });
     expect(await eintraege(id)).toEqual([]);
     expect(p.konto("keine@example.org").aufrufe).toEqual([]);
@@ -72,7 +72,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
     expect(p.konto("gelesen@example.org").aufrufe).toEqual(["flagge 1 \\Seen", "flagge 2 \\Seen"]);
     // Ein zweiter Lauf und ein zweiter Abruf ändern nichts mehr
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });
-    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 0, fehler: null });
+    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });
     expect(p.konto("gelesen@example.org").aufrufe).toHaveLength(2);
     expect(await eintraege(id)).toMatchObject([
@@ -95,7 +95,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
     form.append("datei", new File([mailRoh(1, "flagge")], "flagge.eml"));
     expect((await anfrage("/api/mails", { method: "POST", body: form })).status).toBe(201);
     p.einliefern("flagge@example.org", mailRoh(1, "flagge"));
-    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 1, fehler: null });
+    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 1, anhaengeVorhanden: 0, fehler: null });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 1, entfallen: 0, fehler: 0 });
     expect(p.konto("flagge@example.org").aufrufe).toEqual(["flagge 1 \\Flagged"]);
   });
@@ -169,7 +169,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 2, fehler: 0 });
     expect(p.konto(benutzer).aufrufe).toEqual([]);
     // Der nächste Abruf beginnt von vorn, erkennt die Mail als doppelt und merkt sie mit der neuen UID vor
-    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 1, fehler: null });
+    expect(await abholen(id)).toEqual({ neu: 0, doppelt: 1, anhaengeVorhanden: 0, fehler: null });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 1, entfallen: 0, fehler: 0 });
     expect(p.konto(benutzer).aufrufe).toEqual(["flagge 1 \\Flagged"]);
     const neu = p.konto(benutzer).ordner.get("INBOX")!.mails.get(1)!;
@@ -188,7 +188,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
       },
     };
     const r = await abrufen({ db: t.db, speicher: kaputt }, t.schluessel, id, p.oeffnen);
-    expect(r).toEqual({ neu: 0, doppelt: 0, fehler: "Platte voll" });
+    expect(r).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: "Platte voll" });
     expect(await eintraege(id)).toEqual([]);
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });
     expect(p.konto(benutzer).aufrufe).toEqual([]);

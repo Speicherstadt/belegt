@@ -106,7 +106,7 @@ describe.skipIf(!testDatenbankUrl)("Mail-Import gegen Postgres", () => {
     const roh = mail({ id: "<doppelt@x>", betreff: "Zweimal" });
     const erst = await (await importieren(roh)).json();
     const zweit = await (await importieren(roh)).json();
-    expect(zweit).toEqual({ neu: [], doppelt: erst.neu });
+    expect(zweit).toEqual({ neu: [], doppelt: erst.neu, anhaengeVorhanden: 0 });
   });
 
   it("nimmt eine Mail mit Nullzeichen in Text, Betreff und Dateiname des Anhangs auf (Postgres speichert sie nicht)", async () => {

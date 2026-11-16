@@ -24,7 +24,8 @@ test("ein Scan bekommt ein durchsuchbares PDF; die Seite sagt, dass das Original
   test.slow();
   const name = `quittung-${info.project.name}.png`;
   await page.goto("/eingang");
-  const png = await scanPng(page, "Quittung Werkstatt Beispiel");
+  // Je Projekt eine eigene Datei: Dieselbe nimmt Belegt nur einmal auf, und Desktop und Handy teilen die Datenbank
+  const png = Buffer.concat([await scanPng(page, "Quittung Werkstatt Beispiel"), Buffer.from(info.project.name)]);
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "image/png", buffer: png });
   const link = page.getByRole("link", { name });
   const id = (await link.getAttribute("href"))!.split("/").pop()!;

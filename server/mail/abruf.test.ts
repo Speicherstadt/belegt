@@ -80,7 +80,7 @@ describe.skipIf(!testDatenbankUrl)("IMAP-Abruf gegen Postgres", () => {
   it("holt neue Mails, merkt sich die letzte UID und holt beim nächsten Mal nur Neueres", async () => {
     p.zustand.nachrichten.set(1, roh(1));
     p.zustand.nachrichten.set(2, roh(2));
-    expect(await abrufen()).toEqual({ neu: 2, doppelt: 0, fehler: null });
+    expect(await abrufen()).toEqual({ neu: 2, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     expect(p.zustand.zuletzt).toMatchObject({
       host: "imap.example.org",
       benutzer: "rechnung@example.org",
@@ -88,7 +88,7 @@ describe.skipIf(!testDatenbankUrl)("IMAP-Abruf gegen Postgres", () => {
       ordner: "INBOX",
     });
     p.zustand.nachrichten.set(5, roh(5));
-    expect(await abrufen()).toEqual({ neu: 1, doppelt: 0, fehler: null });
+    expect(await abrufen()).toEqual({ neu: 1, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     const [q] = await t.sql`select letzte_uid, letzter_fehler from quellen where id = ${quelle}`;
     expect(q).toEqual({ letzte_uid: "5", letzter_fehler: null });
     const [eintrag] = await t.sql`select actor from audit_log where table_name = 'dokumente' order by seq desc limit 1`;
@@ -103,12 +103,12 @@ describe.skipIf(!testDatenbankUrl)("IMAP-Abruf gegen Postgres", () => {
       [3, roh(5)],
       [4, roh(6)],
     ]);
-    expect(await abrufen()).toEqual({ neu: 1, doppelt: 3, fehler: null });
+    expect(await abrufen()).toEqual({ neu: 1, doppelt: 3, anhaengeVorhanden: 0, fehler: null });
   });
 
   it("notiert einen Fehler, ohne Zugangsdaten preiszugeben", async () => {
     p.zustand.fehler = "Anmeldung abgelehnt";
-    expect(await abrufen()).toEqual({ neu: 0, doppelt: 0, fehler: "Anmeldung abgelehnt" });
+    expect(await abrufen()).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: "Anmeldung abgelehnt" });
     const [q] = await t.sql`select letzter_fehler from quellen where id = ${quelle}`;
     expect(q!.letzter_fehler).toBe("Anmeldung abgelehnt");
     p.zustand.fehler = null;

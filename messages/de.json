@@ -70,6 +70,10 @@
   "upload": "Hochladen",
   "upload_busy": "Lädt hoch …",
   "upload_failed": "Hochladen fehlgeschlagen: {meldung}",
+  "upload_duplicates_label": "Schon im Archiv",
+  "upload_duplicate": "„{name}“ liegt schon im Archiv, nichts Neues angelegt:",
+  "upload_duplicate_link": "ASN {asn} öffnen",
+  "upload_duplicate_hidden": "„{name}“ liegt schon im Archiv, nichts Neues angelegt.",
   "list_label": "Dokumente",
   "col_asn": "ASN",
   "col_name": "Name",
@@ -934,5 +938,6 @@
   "notify_test_sent": "Testmail an {empfaenger} gesendet.",
   "notify_sent": "Zuletzt gesendet",
   "notify_sent_none": "Noch nichts gesendet.",
-  "notify_failed": "Nicht zugestellt: {fehler}"
+  "notify_failed": "Nicht zugestellt: {fehler}",
+  "mail_attachment_existing": "lag schon im Archiv"
 }

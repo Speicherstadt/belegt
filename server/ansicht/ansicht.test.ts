@@ -9,12 +9,14 @@ import { testDatenbankUrl } from "../test-db.ts";
 import { type Abfragen, ansichtenErzeugen, MAX_ANSICHT, zuPdf } from "./ansicht.ts";
 
 /** Eine alte Office-Datei mit ihrem Hauptstream unter der Wurzel */
-const cfb = (strom: string) => cfbDatei([{ name: strom, typ: 2 }]);
+// Mit inhalt eine eigene Datei: Dieselbe nimmt Belegt nur einmal auf (server/dokumente/doppelt.ts)
+const cfb = (strom: string, inhalt?: string) =>
+  cfbDatei([{ name: strom, typ: 2, ...(inhalt ? { daten: strToU8(inhalt) } : {}) }]);
 
-const docx = () =>
+const docx = (text = "Neu") =>
   zipSync({
     "[Content_Types].xml": strToU8("<Types/>"),
-    "word/document.xml": strToU8("<w:document><w:body><w:p><w:r><w:t>Neu</w:t></w:r></w:p></w:body></w:document>"),
+    "word/document.xml": strToU8(`<w:document><w:body><w:p><w:r><w:t>${text}</w:t></w:r></w:p></w:body></w:document>`),
   });
 
 async function pdfMit(text: string) {
@@ -122,7 +124,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
     // Einmal gebaut: fflate schreibt die Uhrzeit in das ZIP
     const original = docx();
     const neu = await hoch(original, "angebot.docx");
-    const alt = await hoch(cfb("WordDocument"), "altvertrag.doc");
+    const alt = await hoch(cfb("WordDocument", "altvertrag"), "altvertrag.doc");
     expect(alt.mimeType).toBe(ALTE_OFFICE_TYPEN.doc);
     await hoch(await pdfMit("schon ein PDF"), "rechnung.pdf");
 
@@ -158,7 +160,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
   });
 
   it("hält nichts fest, wenn die Warteschlange voll ist oder der Speicher kurz fehlt", async () => {
-    const d = await hoch(cfb("Workbook"), "warten.xls");
+    const d = await hoch(cfb("Workbook", "warten"), "warten.xls");
     const voll = dienst(() => new Response("", { status: 429 }));
     expect(await ansichtenErzeugen(t, "http://vorschau", { abfragen: voll.abfragen })).toMatchObject({
       erzeugt: 0,
@@ -182,7 +184,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
   });
 
   it("hält fest, was nicht umwandelbar ist, und fragt dafür nicht wieder", async () => {
-    const kaputt = await hoch(cfb("PowerPoint Document"), "kaputt.ppt");
+    const kaputt = await hoch(cfb("PowerPoint Document", "kaputt"), "kaputt.ppt");
     const d = dienst(() => new Response("Fehler beim Umwandeln", { status: 400 }));
     expect(await ansichtenErzeugen(t, "http://vorschau", { abfragen: d.abfragen })).toEqual({ erzeugt: 0, fehler: 1 });
     expect(await ansichtenErzeugen(t, "http://vorschau", { abfragen: d.abfragen })).toEqual({ erzeugt: 0, fehler: 0 });
@@ -190,7 +192,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
   });
 
   it("löscht die Ansicht mit dem Dokument", async () => {
-    const d = await hoch(cfb("Workbook"), "liste.xls");
+    const d = await hoch(cfb("Workbook", "liste"), "liste.xls");
     const pdf = await pdfMit("Inventurliste Sägewerk");
     await ansichtenErzeugen(t, "http://vorschau", { abfragen: dienst(() => new Response(pdf)).abfragen });
     expect((await als(`/api/dokumente/${d.id}/ansicht`)).status).toBe(200);
@@ -242,7 +244,7 @@ describe.skipIf(!testDatenbankUrl)("Ansichten gegen Postgres", () => {
   it("hält eine Datei fest, an der der Dienst sein Zeitlimit überschreitet, statt alle späteren aufzuhalten", async () => {
     // Gotenberg antwortet 503, wenn eine Umwandlung länger als --api-timeout dauert (pkg/modules/api/middlewares.go)
     const schwer = await hoch(strToU8("{\\rtf1\\ansi Riesige Tabelle}"), "schwer.rtf");
-    const leicht = await hoch(docx(), "leicht.docx");
+    const leicht = await hoch(docx("Leicht"), "leicht.docx");
     const pdf = await pdfMit("Leicht");
     const d = dienst((name) => (name === "dokument.rtf" ? new Response("", { status: 503 }) : new Response(pdf)));
     for (let lauf = 0; lauf < 3; lauf++) await ansichtenErzeugen(t, "http://vorschau", { abfragen: d.abfragen });

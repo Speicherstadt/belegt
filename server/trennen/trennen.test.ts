@@ -74,11 +74,15 @@ describe("begrenzt", () => {
   });
 });
 
-/** Ein Stapel: Seite A, Trennblatt, Seiten B und C */
-async function stapel(trennblatt?: Uint8Array): Promise<Uint8Array> {
+/**
+ * Ein Stapel: Seite A, Trennblatt, Seiten B und C. kennung steht auf jeder Seite; damit ist es ein anderer Stapel mit
+ * anderen Teilen, denn dieselbe Datei nimmt Belegt nur einmal auf (server/dokumente/doppelt.ts)
+ */
+async function stapel(trennblatt?: Uint8Array, kennung = ""): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
-  const seite = (text: string) => doc.addPage([595, 842]).drawText(text, { x: 50, y: 700, font, size: 24 });
+  const seite = (text: string) =>
+    doc.addPage([595, 842]).drawText(`${text}${kennung}`, { x: 50, y: 700, font, size: 24 });
   seite("Rechnung A");
   if (trennblatt) {
     const [blatt] = await doc.copyPages(await PDFDocument.load(trennblatt), [0]);
@@ -232,7 +236,9 @@ describe.skipIf(!trennenVerfuegbar())("Trennblätter (pdftoppm)", { timeout: 60_
       const ohne = await hochladen(mitTrenner, "upload.pdf");
       expect(ohne.status).toBe(201);
       expect((await ohne.json()).dateiname).toBe("upload.pdf");
-      const res = await hochladen(mitTrenner, "geteilt.pdf", "?trennen=1");
+      // Liegt der Stapel schon ungeteilt im Archiv, wird er nicht noch einmal geteilt
+      expect((await hochladen(mitTrenner, "geteilt.pdf", "?trennen=1")).status).toBe(409);
+      const res = await hochladen(await stapel(await trennblattPdf(), " (Upload)"), "geteilt.pdf", "?trennen=1");
       expect(res.status).toBe(201);
       const { dokumente: teile } = await res.json();
       expect(teile.map((d: { dateiname: string; quelle: string }) => [d.dateiname, d.quelle])).toEqual([
@@ -241,7 +247,9 @@ describe.skipIf(!trennenVerfuegbar())("Trennblätter (pdftoppm)", { timeout: 60_
       ]);
       expect(teile[1].asn).toBe(teile[0].asn + 1);
       // Ohne Trennblatt: ein Dokument, unverändert
-      const einzeln = await (await hochladen(await stapel(), "einzeln.pdf", "?trennen=1")).json();
+      const einzeln = await (
+        await hochladen(await stapel(undefined, " (einzeln)"), "einzeln.pdf", "?trennen=1")
+      ).json();
       expect(einzeln.dokumente.map((d: { dateiname: string }) => d.dateiname)).toEqual(["einzeln.pdf"]);
     });
 

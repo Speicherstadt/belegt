@@ -3,7 +3,8 @@ import { z } from "zod";
 import { SORTIERUNGEN } from "../../shared/archivansicht.ts";
 import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
 import { archivfassungZu, hatArchivfassung } from "../archivfassung/archivfassung.ts";
-import { anzahl, aufnehmen, laden, listen, verlauf } from "../dokumente/dokumente.ts";
+import { anzahl, laden, listen, verlauf } from "../dokumente/dokumente.ts";
+import { aufnehmenEinmal, sha256Von, type Vorhanden, vorhandenes } from "../dokumente/doppelt.ts";
 import {
   aktuelle,
   EinordnungEingabe,
@@ -60,8 +61,17 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
         akteur: akteur(nutzer),
         einlieferer: nutzer.role === "mitarbeiter" ? nutzer.id : undefined,
       };
-      if (c.req.query("trennen") !== "1")
-        return c.json(await aufnehmen(umgebung, { ...eingang, bytes, dateiname: datei.name || null }), 201);
+      // Dieselbe Datei liegt schon im Archiv: nichts Neues, 409 mit dem vorhandenen Dokument; sieht der Zugang es
+      // nicht, ohne ID und Archivnummer (server/dokumente/doppelt.ts)
+      const sicht = sichtVon(nutzer);
+      const doppelt = (vorhanden: Vorhanden) => c.json({ fehler: "Diese Datei liegt schon im Archiv", vorhanden }, 409);
+      if (c.req.query("trennen") !== "1") {
+        const r = await aufnehmenEinmal(umgebung, { ...eingang, bytes, dateiname: datei.name || null }, sicht);
+        return r.dokument ? c.json(r.dokument, 201) : doppelt(r.vorhanden);
+      }
+      // Ein Stapel, der schon ungeteilt im Archiv liegt, wird nicht noch einmal geteilt
+      const schon = await vorhandenes(umgebung.db, sha256Von(bytes), sicht);
+      if (schon) return doppelt(schon);
       // Ein Stapel mit Trennblättern: jedes Teil ein eigenes Original. Geteilt wird in einem eigenen Prozess; scheitert
       // es (kaputtes PDF, Zeitlimit), kommt die Datei unverändert ins Archiv, wie ohne Trennblatt
       const name = datei.name || "scan.pdf";
@@ -77,9 +87,14 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
         });
       const { teile } = geteilt;
       const dokumente = [];
-      for (const teil of teile ?? [{ bytes, dateiname: datei.name || null }])
-        dokumente.push(await aufnehmen(umgebung, { ...eingang, ...teil }));
-      return c.json({ dokumente }, 201);
+      const vorhanden: Vorhanden[] = [];
+      for (const teil of teile ?? [{ bytes, dateiname: datei.name || null }]) {
+        const r = await aufnehmenEinmal(umgebung, { ...eingang, ...teil }, sicht);
+        if (r.dokument) dokumente.push(r.dokument);
+        else vorhanden.push(r.vorhanden);
+      }
+      if (!dokumente.length) return doppelt(vorhanden[0]!);
+      return c.json({ dokumente, vorhanden }, 201);
     },
   );
 

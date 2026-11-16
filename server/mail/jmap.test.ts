@@ -168,7 +168,7 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
     s.anlegen("m1", 1);
     s.anlegen("m2", 2);
     s.anlegen("x1", 99, "spam");
-    expect(await holen()).toEqual({ neu: 2, doppelt: 0, fehler: null });
+    expect(await holen()).toEqual({ neu: 2, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     const [q] = await t.sql`select jmap_stand, letzter_fehler from quellen where id = ${quelle}`;
     expect(q).toEqual({ jmap_stand: "4", letzter_fehler: null });
     const [e] = await t.sql`select actor from audit_log where table_name = 'dokumente' order by seq desc limit 1`;
@@ -180,21 +180,21 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
     s.anlegen("m3", 3);
     s.verschieben("x1", "posteingang");
     s.anlegen("x2", 98, "spam");
-    expect(await holen()).toEqual({ neu: 2, doppelt: 0, fehler: null });
+    expect(await holen()).toEqual({ neu: 2, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     expect(s.zustand.aufrufe).toContain("Email/changes");
     expect(s.zustand.aufrufe).not.toContain("Email/query");
-    expect(await holen()).toEqual({ neu: 0, doppelt: 0, fehler: null });
+    expect(await holen()).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
   });
 
   it("holt den Ordner neu, wenn der Server die Änderungen nicht mehr kennt; doppelte zählen nur", async () => {
     s.zustand.keineAenderungen = true;
-    expect(await holen()).toEqual({ neu: 0, doppelt: 4, fehler: null });
+    expect(await holen()).toEqual({ neu: 0, doppelt: 4, anhaengeVorhanden: 0, fehler: null });
     s.zustand.keineAenderungen = false;
   });
 
   it("hält einen Fehler fest, etwa ein falsches Passwort", async () => {
     await t.sql`update quellen set ciphertext = ${(await import("../crypto.ts")).verschluesseln(t.schluessel, Buffer.from("falsch"))} where id = ${quelle}`;
-    expect(await holen()).toEqual({ neu: 0, doppelt: 0, fehler: "JMAP: Antwort 401" });
+    expect(await holen()).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: "JMAP: Antwort 401" });
     const [q] = await t.sql`select letzter_fehler from quellen where id = ${quelle}`;
     expect(q!.letzter_fehler).toBe("JMAP: Antwort 401");
   });

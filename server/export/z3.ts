@@ -188,7 +188,9 @@ const zeilenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
     union all select x.id::text from loeschungen x where x.dokument_id in (select id from dok)
     union all select x.id::text from mails x where x.dokument_id in (select id from dok)
     union all select x.id::text from mail_anhaenge x
-               where x.mail_dokument_id in (select id from dok) and x.anhang_dokument_id in (select id from dok)`;
+               where x.mail_dokument_id in (select id from dok) and x.anhang_dokument_id in (select id from dok)
+    union all select x.id::text from mail_verweise x
+               where x.mail_dokument_id in (select id from dok) and x.dokument_id in (select id from dok)`;
 
 /** Korrespondenten der Liste, die Dokumente des Zeitraums haben: Umbenennungen gehören zu deren Nachweis */
 const korrespondentenDerFreigabe = ({ von, bis }: Zeitraum) => sql`
@@ -221,7 +223,7 @@ async function protokollCsv({ db }: Umgebung, { von, bis }: Zeitraum, nurFreigab
      where (at at time zone 'Europe/Berlin')::date between ${von}::date and ${bis}::date
        ${
          nurFreigabe
-           ? sql`and ((table_name in ('dokumente', 'archivnummern', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge')
+           ? sql`and ((table_name in ('dokumente', 'archivnummern', 'einordnungen', 'loeschungen', 'mails', 'mail_anhaenge', 'mail_verweise')
                        and row_id in (${zeilenDerFreigabe({ von, bis })}))
                    or (table_name = 'seals' and new_value ->> 'row_id' in (${zeilenDerFreigabe({ von, bis })}))
                    or (table_name = 'korrespondenten' and row_id in (${korrespondentenDerFreigabe({ von, bis })}))

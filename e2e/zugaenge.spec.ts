@@ -40,7 +40,7 @@ test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoc
 test("ein Prüfer sieht nur Archiv und Prüfung und nur Dokumente seines Zeitraums", async ({ page, browser }, info) => {
   const name = `pruefung-2001-${info.project.name}.pdf`;
   const hochgeladen = await page.request.post("/api/dokumente", {
-    multipart: { datei: { name, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7\n% erfunden\n") } },
+    multipart: { datei: { name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% erfunden ${name}\n`) } },
   });
   const { id } = await hochgeladen.json();
   await page.request.post(`/api/dokumente/${id}/einordnung`, { data: { art: "beleg", entstanden: "2001-06-01" } });

@@ -143,6 +143,8 @@ export async function aktivSetzen(db: Datenbank, id: string, aktiv: boolean, akt
 export interface AbrufErgebnis {
   neu: number;
   doppelt: number;
+  /** Anhänge neuer Mails, die schon als Dokument im Archiv lagen (server/dokumente/doppelt.ts) */
+  anhaengeVorhanden: number;
   fehler: string | null;
 }
 
@@ -194,10 +196,11 @@ export async function abrufen(
   const [q] = await db.select().from(quellen).where(eq(quellen.id, quelleId));
   if (!q) throw new Error("Quelle nicht gefunden");
   const akteur = quellenAkteur(q);
-  const ergebnis: AbrufErgebnis = { neu: 0, doppelt: 0, fehler: null };
+  const ergebnis: AbrufErgebnis = { neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: null };
   // Erst nach der Aufnahme (Transaktion festgeschrieben) vorgemerkt; scheitert die Aufnahme, gibt es keine Aktion
   const aufnehmen = async (roh: Uint8Array, adresse: Adresse) => {
-    const { id, neu } = await mailAufnehmen(umgebung, roh, "mail", akteur);
+    const { id, neu, anhaengeVorhanden } = await mailAufnehmen(umgebung, roh, "mail", akteur);
+    ergebnis.anhaengeVorhanden += anhaengeVorhanden;
     if (neu) ergebnis.neu++;
     else ergebnis.doppelt++;
     if (q.aktion !== "keine") await vormerken(db, akteur, { quelleId: q.id, dokumentId: id, roh, ...adresse });

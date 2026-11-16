@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { aufnehmen } from "../dokumente/dokumente.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { entfernenNachholen } from "./loeschung.ts";
@@ -101,7 +102,13 @@ describe.skipIf(!testDatenbankUrl)("Löschlauf gegen Postgres", () => {
 
   it("löscht frei Abgelegtes sofort, behält aber eine Datei, die ein anderes Dokument noch braucht", async () => {
     const erst = await dokument("gleicher-inhalt", "frei", "2026-01-01");
-    const zweit = await dokument("gleicher-inhalt", "beleg", "2026-01-01");
+    // Über die Schnittstelle kommt dieselbe Datei nicht zweimal (server/dokumente/doppelt.ts); im Archiv kann es sie
+    // trotzdem zweimal geben, etwa aus der Zeit davor oder abgeleitet. aufnehmen nimmt sie ohne diese Prüfung auf.
+    const zweit = await aufnehmen(
+      { db: t.db, speicher: t.speicher },
+      { bytes: new TextEncoder().encode("gleicher-inhalt"), dateiname: "zweit.pdf", quelle: "upload", akteur: "test" },
+    );
+    await als(inhaber)(`/api/dokumente/${zweit.id}/einordnung`, json({ art: "beleg", entstanden: "2026-01-01" }));
     expect(zweit.sha256).toBe(erst.sha256);
     const res = await als(inhaber)(`/api/dokumente/${erst.id}/loeschung`, { method: "POST" });
     expect(res.status).toBe(201);

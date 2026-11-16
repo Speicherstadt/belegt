@@ -161,7 +161,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über JMAP", () => {
     const id = await quelle("jmap-gelesen");
     await einstellen(id, { aktion: "gelesen" });
     j.anlegen("m1", mailRoh(1, "jmap-aktion"));
-    expect(await abholen(id)).toEqual({ neu: 1, doppelt: 0, fehler: null });
+    expect(await abholen(id)).toEqual({ neu: 1, doppelt: 0, anhaengeVorhanden: 0, fehler: null });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 1, entfallen: 0, fehler: 0 });
     expect(j.zustand.mails.get("m1")!.keywords).toEqual({ $seen: true });
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });

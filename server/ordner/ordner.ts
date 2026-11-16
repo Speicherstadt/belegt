@@ -1,9 +1,8 @@
-import { createHash } from "node:crypto";
 import { constants, type Dirent } from "node:fs";
 import { lstat, mkdir, open, readdir, realpath, rename, stat, unlink } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, sep } from "node:path";
-import { sql } from "drizzle-orm";
-import { aufnehmen, type Umgebung } from "../dokumente/dokumente.ts";
+import type { Umgebung } from "../dokumente/dokumente.ts";
+import { aufnehmenEinmal } from "../dokumente/doppelt.ts";
 
 /*
  * Überwachter Eingangsordner (etwa das Ziel eines Scanners): Der Worker schaut alle paar Sekunden hinein, nimmt jede
@@ -144,15 +143,6 @@ async function nachFehler(wurzel: string, rel: string): Promise<void> {
   }
 }
 
-/** Ob eine Datei mit diesem Hash schon im Archiv liegt (nicht gelöscht) */
-async function schonImArchiv(db: Umgebung["db"], sha256: string): Promise<boolean> {
-  const zeilen = await db.execute(sql`
-    select 1 from dokumente d where d.sha256 = ${sha256}
-       and not exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)
-     limit 1`);
-  return zeilen.length > 0;
-}
-
 /** Ein Teil, das als eigenes Dokument aufgenommen wird */
 export interface Teil {
   bytes: Uint8Array;
@@ -168,6 +158,8 @@ export type Teilen = (bytes: Uint8Array, dateiname: string) => Promise<Teil[] | 
 export interface Ergebnis {
   neu: number;
   doppelt: number;
+  /** Je Datei, die schon im Archiv lag, die Archivnummer des vorhandenen Dokuments (fürs Log) */
+  treffer: { datei: string; asn: number }[];
   /** Nach fehler/ verschoben */
   fehler: { datei: string; meldung: string }[];
   /** Liegt noch im Ordner, der nächste Blick versucht es wieder (Datenbank oder Speicher nicht erreichbar) */
@@ -191,27 +183,36 @@ export function unterordner(rel: string): string[] {
     .filter((n) => n && n !== ".");
 }
 
-/** Nimmt die Teile auf, die noch nicht im Archiv liegen */
+/** Nimmt die Teile auf, die noch nicht im Archiv liegen; für die anderen merkt es das vorhandene Dokument */
 async function teileAufnehmen(
   umgebung: Umgebung,
   teile: Teil[],
   ergebnis: Ergebnis,
-  { tags, akteur }: { tags: string[]; akteur: string },
+  { tags, akteur, rel }: { tags: string[]; akteur: string; rel: string },
 ): Promise<void> {
   for (const teil of teile) {
-    const sha256 = createHash("sha256").update(teil.bytes).digest("hex");
-    if (await schonImArchiv(umgebung.db, sha256)) {
-      ergebnis.doppelt++;
+    const r = await aufnehmenEinmal(umgebung, {
+      bytes: teil.bytes,
+      dateiname: teil.dateiname,
+      quelle: "ordner",
+      akteur,
+      tags,
+    });
+    if (r.dokument) {
+      ergebnis.neu++;
       continue;
     }
-    await aufnehmen(umgebung, { bytes: teil.bytes, dateiname: teil.dateiname, quelle: "ordner", akteur, tags });
-    ergebnis.neu++;
+    ergebnis.doppelt++;
+    // Ohne Sicht hat das vorhandene Dokument immer eine Archivnummer
+    const datei = teile.length > 1 ? `${anzeige(rel)} (${teil.dateiname})` : anzeige(rel);
+    ergebnis.treffer.push({ datei, asn: r.vorhanden.asn ?? 0 });
   }
 }
 
 /**
  * Ein Blick in den Ordner: nimmt auf, was seit dem letzten Blick unverändert ist, und gibt den neuen Zustand für den
- * nächsten Blick zurück. Eine Datei, die schon im Archiv liegt, wird nur entfernt. Scheitert die Aufnahme selbst
+ * nächsten Blick zurück. Eine Datei, die schon im Archiv liegt, wird nur entfernt; ergebnis.treffer nennt das vorhandene
+ * Dokument. Scheitert die Aufnahme selbst
  * (Datenbank, Speicher), bleibt die Datei liegen; nichts geht verloren, weil sie erst danach entfernt wird. Mit
  * ordnerTags (EINGANG_ORDNER_TAGS) bekommt ein neues Dokument die Namen seiner Unterordner als Tags.
  */
@@ -235,7 +236,7 @@ export async function ordnerEinlesen(
   },
 ): Promise<{ zustand: Zustand; ergebnis: Ergebnis }> {
   const { zustand: jetzt, uebersprungen } = await auflisten(ordner, lesen);
-  const ergebnis: Ergebnis = { neu: 0, doppelt: 0, fehler: [], spaeter: [], uebersprungen };
+  const ergebnis: Ergebnis = { neu: 0, doppelt: 0, treffer: [], fehler: [], spaeter: [], uebersprungen };
   for (const rel of stabile(zustand, jetzt)) {
     const pfad = join(ordner, rel);
     const name = basename(rel);
@@ -255,6 +256,7 @@ export async function ordnerEinlesen(
       await teileAufnehmen(umgebung, (await teilen?.(bytes, name)) ?? [{ bytes, dateiname: name }], ergebnis, {
         tags: ordnerTags ? unterordner(rel) : [],
         akteur: akteurFuer(rel),
+        rel,
       });
     } catch (err) {
       ergebnis.spaeter.push({ datei: anzeige(rel), meldung: meldung(err) });

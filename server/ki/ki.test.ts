@@ -158,7 +158,9 @@ describe.skipIf(!testDatenbankUrl)("Vorschläge im Eingang gegen Postgres", () =
   it("wartet bei alten Office-Formaten auf den Text aus der Ansicht, aber nur mit Vorschau-Dienst", async () => {
     const hoch = async (name: string) => {
       const f = new FormData();
-      f.append("datei", new File([new Uint8Array(cfbDatei([{ name: "WordDocument", typ: 2 }]))], name));
+      // Je Name eine eigene Datei: Dieselbe nimmt Belegt nur einmal auf
+      const bytes = cfbDatei([{ name: "WordDocument", typ: 2, daten: new TextEncoder().encode(name) }]);
+      f.append("datei", new File([new Uint8Array(bytes)], name));
       return (await (await anfrage("/api/dokumente", { method: "POST", body: f })).json()).id as string;
     };
     // Nachgebauter Vorschau-Dienst: ein PDF mit Text, für „kaputt.doc“ ein Fehler der Datei

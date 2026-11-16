@@ -46,7 +46,10 @@ const { speicher, sperrbar } = speicherAusEnv(env);
 async function runde() {
   const ergebnisse = await alleAbrufen({ db, speicher }, schluessel, imapOeffnen, { oauth: oauthAusEnv(env) });
   for (const [name, e] of Object.entries(ergebnisse)) {
-    console.log(`Abruf ${name}: ${e.neu} neu, ${e.doppelt} doppelt${e.fehler ? `, Fehler: ${e.fehler}` : ""}`);
+    const vorhanden = e.anhaengeVorhanden ? `, ${e.anhaengeVorhanden} Anhänge schon im Archiv` : "";
+    console.log(
+      `Abruf ${name}: ${e.neu} neu, ${e.doppelt} doppelt${vorhanden}${e.fehler ? `, Fehler: ${e.fehler}` : ""}`,
+    );
     const a = e.aktionen;
     if (a.ausgefuehrt || a.entfallen || a.fehler)
       console.log(
@@ -231,6 +234,8 @@ async function eingangsordner(ordner: string) {
       letzterFehler = "";
       const { neu, doppelt, fehler, spaeter } = r.ergebnis;
       if (neu || doppelt) console.log(`Eingangsordner: ${neu} aufgenommen, ${doppelt} schon im Archiv`);
+      for (const t of r.ergebnis.treffer)
+        console.log(`Eingangsordner: ${t.datei} liegt schon als ASN ${t.asn} im Archiv, nicht neu aufgenommen`);
       for (const f of fehler) console.error(`Eingangsordner: ${f.datei} nach fehler/ verschoben: ${f.meldung}`);
       for (const f of spaeter) console.error(`Eingangsordner: ${f.datei} später noch einmal: ${f.meldung}`);
       const uebersprungen = r.ergebnis.uebersprungen.map((u) => `${u.ordner} (${u.meldung})`).join(", ");

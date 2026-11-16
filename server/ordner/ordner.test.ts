@@ -111,10 +111,18 @@ describe.skipIf(!testDatenbankUrl)("Eingangsordner gegen Postgres", () => {
     await writeFile(join(ordner, "erst.pdf"), "%PDF-1.7\n% gleich\n");
     await blick();
     await blick();
-    await writeFile(join(ordner, "nochmal.pdf"), "%PDF-1.7\n% gleich\n");
+    const [erst] = await t.sql`select a.nummer from dokumente d join archivnummern a on a.dokument_id = d.id
+      where d.dateiname = 'erst.pdf'`;
+    await mkdir(join(ordner, "Steuer"));
+    await writeFile(join(ordner, "Steuer", "nochmal.pdf"), "%PDF-1.7\n% gleich\n");
     await blick();
-    expect(await blick()).toMatchObject({ neu: 0, doppelt: 1 });
-    expect(await readdir(ordner)).toEqual([]);
+    // Der Treffer nennt Datei und Archivnummer des vorhandenen Dokuments; der Worker schreibt ihn ins Log
+    expect(await blick()).toMatchObject({
+      neu: 0,
+      doppelt: 1,
+      treffer: [{ datei: "Steuer/nochmal.pdf", asn: Number(erst!.nummer) }],
+    });
+    expect(await readdir(ordner)).toEqual(["Steuer"]);
     expect(await dokumente("nochmal.pdf")).toHaveLength(0);
   });
 

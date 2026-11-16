@@ -11,6 +11,8 @@ const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
   "base64",
 );
+/** Das Bild mit dem Namen hinter dem Ende (IEND): eine eigene Datei je Name, denn dieselbe nimmt Belegt nur einmal auf */
+const png = (name: string) => Buffer.concat([PNG, Buffer.from(name)]);
 
 /** Wartet, bis der Service Worker die Seite steuert */
 async function workerBereit(page: Page) {
@@ -78,7 +80,7 @@ test("der Service Worker cacht nur die Hinweisseite und zeigt sie ohne Verbindun
   await page.getByTestId("upload").setInputFiles({
     name: `sw-${info.project.name}.png`,
     mimeType: "image/png",
-    buffer: PNG,
+    buffer: png(`sw-${info.project.name}`),
   });
   await page.getByRole("link", { name: `sw-${info.project.name}.png` }).click();
   await expect(page.getByRole("img", { name: `sw-${info.project.name}.png` })).toBeVisible();
@@ -107,7 +109,7 @@ test("geteilte Dateien kommen erst nach dem Klick in den Eingang", async ({ page
   const name = `geteilt-${info.project.name}.pdf`;
   await page.goto("/");
   await workerBereit(page);
-  await teilen(page, { name, mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%geteilt\n") });
+  await teilen(page, { name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.4\n%${name}\n`) });
 
   const liste = page.getByRole("list", { name: "Geteilte Dateien" });
   await expect(liste).toContainText(name);
@@ -191,7 +193,7 @@ test("Foto aufnehmen lädt jedes Bild sofort in den Eingang, eines nach dem ande
   await expect(page.getByRole("button", { name: "Foto aufnehmen" })).toBeVisible();
   for (const n of [1, 2]) {
     const name = `foto-${n}-${info.project.name}.png`;
-    await foto.setInputFiles({ name, mimeType: "image/png", buffer: PNG });
+    await foto.setInputFiles({ name, mimeType: "image/png", buffer: png(name) });
     await expect(page.getByRole("status")).toContainText(`Fotos im Eingang: ${n}`);
     await expect(page.getByRole("link", { name })).toBeVisible();
   }

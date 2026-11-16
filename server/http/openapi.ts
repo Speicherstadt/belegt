@@ -36,6 +36,13 @@ const dokument = {
   },
 } as const;
 
+/** Ein Dokument mit derselben Datei; id und asn null, wenn der Zugang (Mitarbeiter) es nicht sehen darf */
+const vorhanden = {
+  type: "object",
+  required: ["id", "asn"],
+  properties: { id: { ...uuid, type: ["string", "null"] }, asn: { type: ["integer", "null"] } },
+} as const;
+
 const json = (schema: object) => ({ "application/json": { schema } });
 
 export const openapi = {
@@ -48,7 +55,7 @@ export const openapi = {
   },
   components: {
     securitySchemes: { token: { type: "http", scheme: "bearer" } },
-    schemas: { Dokument: dokument, Feldwert: feldwert },
+    schemas: { Dokument: dokument, Feldwert: feldwert, Vorhanden: vorhanden },
   },
   security: [{ token: [] }],
   paths: {
@@ -113,7 +120,7 @@ export const openapi = {
             in: "query",
             schema: { type: "string", enum: ["1"] },
             description:
-              "Ein PDF an Trennblättern teilen; jedes Teil wird ein eigenes Dokument. Antwort dann `{dokumente: [...]}`",
+              "Ein PDF an Trennblättern teilen; jedes Teil wird ein eigenes Dokument. Antwort dann `{dokumente: [...], vorhanden: [...]}`; vorhanden sind Teile, die schon im Archiv lagen",
           },
         ],
         requestBody: {
@@ -130,15 +137,27 @@ export const openapi = {
         },
         responses: {
           "201": {
-            description: "Aufgenommen; mit trennen=1 alle Teile",
+            description: "Aufgenommen; mit trennen=1 alle neuen Teile",
             content: json({
               oneOf: [
                 { $ref: "#/components/schemas/Dokument" },
                 {
                   type: "object",
-                  properties: { dokumente: { type: "array", items: { $ref: "#/components/schemas/Dokument" } } },
+                  properties: {
+                    dokumente: { type: "array", items: { $ref: "#/components/schemas/Dokument" } },
+                    vorhanden: { type: "array", items: { $ref: "#/components/schemas/Vorhanden" } },
+                  },
                 },
               ],
+            }),
+          },
+          "409": {
+            description:
+              "Dieselbe Datei (SHA-256) liegt schon im Archiv und nicht gelöscht; nichts Neues angelegt. Mit trennen=1, wenn jedes Teil schon da ist",
+            content: json({
+              type: "object",
+              required: ["fehler", "vorhanden"],
+              properties: { fehler: { type: "string" }, vorhanden: { $ref: "#/components/schemas/Vorhanden" } },
             }),
           },
           "413": fehler,
@@ -376,7 +395,14 @@ export const openapi = {
             description: "Neu und doppelt (Dokument-IDs)",
             content: json({
               type: "object",
-              properties: { neu: { type: "array", items: uuid }, doppelt: { type: "array", items: uuid } },
+              properties: {
+                neu: { type: "array", items: uuid },
+                doppelt: { type: "array", items: uuid },
+                anhaengeVorhanden: {
+                  type: "integer",
+                  description: "Anhänge neuer Mails, die schon als Dokument im Archiv lagen; die Mail verweist darauf",
+                },
+              },
             }),
           },
         },

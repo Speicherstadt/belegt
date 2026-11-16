@@ -85,6 +85,10 @@ describe.skipIf(!testDatenbankUrl)("MCP gegen Postgres", () => {
     const id = neu.structuredContent.id as string;
     const [eintrag] = await t.sql`select actor from audit_log where table_name = 'dokumente' and row_id = ${id}`;
     expect(eintrag!.actor).toBe("token:Ablage");
+    // Dieselbe Datei noch einmal: nichts Neues, der Assistent erfährt das vorhandene Dokument
+    const doppelt = await aufruf(schreiben, "dokument_aufnehmen", { dateiname: "nochmal.pdf", inhalt });
+    expect(doppelt.isError).toBe(true);
+    expect(JSON.stringify(doppelt.content)).toContain(`Dokument ${id}`);
 
     const e = await aufruf(schreiben, "dokument_einordnen", {
       id,

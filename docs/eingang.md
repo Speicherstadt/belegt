@@ -53,6 +53,24 @@ Teilen an eine Web-App nicht; dort lädst du über **Hochladen** hoch.
 Auswahl für Bilder. Jedes Foto geht sofort in den Eingang, danach nimmst du das nächste auf. Für mehrseitige Belege ist
 ein Scan als PDF besser ([Trennblätter](#trennblätter)).
 
+## Doppelte Dateien { #doppelte-dateien }
+
+Dieselbe Datei (gleicher SHA-256 des Originals) kommt nur einmal ins Archiv, gleich ob hochgeladen, vom Handy geteilt,
+aus dem Eingangsordner, über die Schnittstelle oder als Anhang einer Mail. Was mit dem zweiten Exemplar geschieht:
+
+| Weg | Was passiert |
+| --- | --- |
+| Hochladen, Foto, Teilen | nichts Neues; unter der Liste steht „liegt schon im Archiv“ mit Link auf die Archivnummer |
+| Schnittstelle, MCP | `409` mit `vorhanden` (ID und Archivnummer, [REST-API](api.md)); das MCP-Werkzeug meldet einen Fehler mit beidem |
+| Eingangsordner | nichts Neues; die Datei verschwindet aus dem Ordner, und der Worker schreibt Datei und Archivnummer ins Log |
+| Mail | die Mail selbst kommt ins Archiv; ihr Anhang wird kein zweites Dokument, sondern verweist auf das vorhandene (auf der Seite der Mail „lag schon im Archiv“). Der Verweis ist versiegelt wie ein Anhang |
+
+Ein Dokument, dessen Löschung bestätigt ist, zählt nicht: Dieselbe Datei kommt danach wieder neu ins Archiv. Ein
+[Mitarbeiter](zugaenge.md#mitarbeiter), der das vorhandene Dokument nicht sehen darf, erfährt nur, dass die Datei schon
+vorliegt, ohne Archivnummer und Link. Eine Mail, deren Anhang auf ein Dokument außerhalb seines Sichtbereichs verweist,
+sieht er nicht, denn die `.eml` enthält die Datei. Abgeleitete Dokumente ([Seiten bearbeiten](dokument.md#seiten-bearbeiten))
+und der [Umzug aus Paperless-ngx](umzug.md) prüfen auf ihre eigene Weise.
+
 ## Eingangsordner
 
 Mit `EINGANG_ORDNER` überwacht der Worker einen Ordner, etwa das Ziel eines Scanners oder eine Netzwerkfreigabe
@@ -60,7 +78,7 @@ Mit `EINGANG_ORDNER` überwacht der Worker einen Ordner, etwa das Ziel eines Sca
 letzten Blick nicht verändert hat; was der Scanner noch schreibt, wartet bis zum nächsten Blick. Die Quelle des
 Dokuments ist dann „Ordner“. Netzwerkscanner, die nur per FTP senden, schreiben über den FTP-Dienst von Belegt in den Ordner
 ([Scannen](scannen.md)). Erst wenn die Datei im Archiv liegt, entfernt Belegt sie aus dem Ordner; eine Datei, die
-schon im Archiv liegt, entfernt es nur. Schreibt der Scanner nach einer Pause weiter, während Belegt die Datei aufnimmt,
+schon im Archiv liegt, entfernt es nur ([Doppelte Dateien](#doppelte-dateien)). Schreibt der Scanner nach einer Pause weiter, während Belegt die Datei aufnimmt,
 bleibt sie liegen und kommt vollständig ins Archiv, sobald sie sich nicht mehr ändert; der zuerst aufgenommene Teil
 bleibt als eigenes Dokument.
 
@@ -98,7 +116,8 @@ ihrer Unterhaltung.
 
 Mails importierst du im Eingang oder Archiv mit „Mails importieren“, als `.eml` oder als MBOX (Export aus
 Thunderbird oder Google Takeout); Belegt teilt ein Archiv in einzelne Mails. Jede Mail wird ein Dokument
-(`message/rfc822`), jeder Anhang ein eigenes Dokument mit Verweis auf seine Mail; beides ist versiegelt. Eine Mail mit
+(`message/rfc822`), jeder Anhang ein eigenes Dokument mit Verweis auf seine Mail; beides ist versiegelt. Liegt ein Anhang
+schon im Archiv, verweist die Mail auf das vorhandene Dokument ([Doppelte Dateien](#doppelte-dateien)). Eine Mail mit
 denselben Rohdaten nimmt Belegt nicht zweimal auf, ein wiederholter Import desselben Archivs ist also harmlos. Auf der
 Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 

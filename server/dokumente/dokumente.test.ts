@@ -16,6 +16,8 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
   afterAll(() => t?.aufraeumen());
 
   const pdf = new TextEncoder().encode("%PDF-1.7\n% erfundene Rechnung über 119,00 €\n");
+  // Dieselbe Datei nimmt Belegt nur einmal auf (server/dokumente/doppelt.ts); jeder Test braucht also eine eigene
+  const einzeln = (zusatz: string) => new TextEncoder().encode(`%PDF-1.7\n% erfundene Rechnung ${zusatz}\n`);
 
   async function hochladen(bytes: Uint8Array, name: string) {
     const form = new FormData();
@@ -56,7 +58,7 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
   });
 
   it("zeigt PDFs mit ?ansicht=1 im Browser an, anderes wird immer heruntergeladen", async () => {
-    const pdfDok = await (await hochladen(pdf, "ansicht.pdf")).json();
+    const pdfDok = await (await hochladen(einzeln("ansicht"), "ansicht.pdf")).json();
     expect(
       (await app.request(`/api/dokumente/${pdfDok.id}/datei?ansicht=1`)).headers.get("content-disposition"),
     ).toMatch(/^inline;/);
@@ -73,7 +75,7 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
 
   it("kodiert den Dateinamen im Header nach RFC 8187, auch mit Klammern und Apostroph", async () => {
     const name = "Max's Rechnung (1) *.pdf";
-    const dok = await (await hochladen(pdf, name)).json();
+    const dok = await (await hochladen(einzeln(name), name)).json();
     const header = (await app.request(`/api/dokumente/${dok.id}/datei`)).headers.get("content-disposition")!;
     const wert = header.match(/filename\*=UTF-8''(.*)$/)![1]!;
     // attr-char nach RFC 8187, Abschnitt 3.2.1; alles andere als %XX
@@ -101,7 +103,7 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
   });
 
   it("lehnt Ändern und Löschen eines Originals in der Datenbank ab", async () => {
-    const dok = await (await hochladen(pdf, "fest.pdf")).json();
+    const dok = await (await hochladen(einzeln("fest"), "fest.pdf")).json();
     await expect(t.sql`update dokumente set dateiname = 'anders.pdf' where id = ${dok.id}`).rejects.toThrow(
       /darf nur ergänzt werden/,
     );
@@ -179,7 +181,7 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
 
   it("meldet eine gültige Kette und findet eine an den Triggern vorbei geänderte Zeile", async () => {
     expect(await (await app.request("/api/pruefung")).json()).toMatchObject({ ok: true, befunde: [] });
-    const dok = await (await hochladen(pdf, "später-geändert.pdf")).json();
+    const dok = await (await hochladen(einzeln("später"), "später-geändert.pdf")).json();
     await t.sql.begin(async (tx) => {
       await tx`set local session_replication_role = replica`;
       await tx`update dokumente set dateiname = 'gefälscht.pdf' where id = ${dok.id}`;

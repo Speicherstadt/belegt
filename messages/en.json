@@ -70,6 +70,10 @@
   "upload": "Upload",
   "upload_busy": "Uploading …",
   "upload_failed": "Upload failed: {meldung}",
+  "upload_duplicates_label": "Already in the archive",
+  "upload_duplicate": "“{name}” is already in the archive, nothing new was added:",
+  "upload_duplicate_link": "open ASN {asn}",
+  "upload_duplicate_hidden": "“{name}” is already in the archive, nothing new was added.",
   "list_label": "Documents",
   "col_asn": "ASN",
   "col_name": "Name",
@@ -934,5 +938,6 @@
   "notify_test_sent": "Test email sent to {empfaenger}.",
   "notify_sent": "Recently sent",
   "notify_sent_none": "Nothing sent yet.",
-  "notify_failed": "Not delivered: {fehler}"
+  "notify_failed": "Not delivered: {fehler}",
+  "mail_attachment_existing": "was already in the archive"
 }
