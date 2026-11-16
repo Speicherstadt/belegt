@@ -197,6 +197,33 @@ describe.skipIf(!testDatenbankUrl)("E-Rechnungen prüfen gegen Postgres", () => 
     expect(await erechnungenPruefen(t, "http://v", { abfragen: validator() })).toMatchObject({ geprueft: 1 });
   });
 
+  it("hält eine Datei, an der der gesunde Validator scheitert (500), fest, statt alle späteren aufzuhalten", async () => {
+    // Der Validator antwortet 500 bei einer Ausnahme während der Prüfung (CheckHandler.java, „Internal error“): Das kann
+    // an der Datei liegen. Ist er dabei gesund, stünde sie sonst in jedem Lauf vorn und keine spätere würde geprüft.
+    const kaputt = await hoch(beispiel("xrechnung-gueltig.xml").replace("2026-0815", "kaputt"), "kaputt.xml");
+    const danach = await hoch(beispiel("xrechnung-gueltig.xml").replace("2026-0815", "danach"), "danach.xml");
+    await inhalteErzeugen(t);
+    const abfragen: Abfragen = async (url, init) => {
+      if (url.endsWith("/server/health")) return new Response("<health/>", { status: 200 });
+      if (String(init.body).includes("kaputt")) return new Response("Internal error: x", { status: 500 });
+      return validator()(url, init);
+    };
+    for (let i = 0; i < 3; i++) await erechnungenPruefen(t, "http://v", { abfragen });
+    expect(await t.sql`select 1 from erechnung_pruefungen where dokument_id = ${danach.id}`).toHaveLength(1);
+    expect((await (await als(`/api/dokumente/${kaputt.id}/inhalt`)).json()).pruefung).toMatchObject({
+      gueltig: false,
+      meldungen: [{ stufe: "fehler", text: "Der Validator konnte die Datei nicht prüfen (500)" }],
+    });
+
+    // Ist er dagegen krank, bleibt es vorübergehend: nichts festhalten
+    const spaeter = await hoch(beispiel("xrechnung-gueltig.xml").replace("2026-0815", "kaputt-2"), "kaputt2.xml");
+    await inhalteErzeugen(t);
+    const krank: Abfragen = async (url, init) =>
+      url.endsWith("/server/health") ? new Response("", { status: 503 }) : abfragen(url, init);
+    expect(await erechnungenPruefen(t, "http://v", { abfragen: krank })).toMatchObject({ geprueft: 0 });
+    expect(await t.sql`select 1 from erechnung_pruefungen where dokument_id = ${spaeter.id}`).toHaveLength(0);
+  });
+
   it("entfernt die Prüfung mit der bestätigten Löschung, und danach kommt keine mehr hinein", async () => {
     const d = await hoch(beispiel("xrechnung-gueltig.xml").replace("2026-0815", "weg"), "weg.xml");
     await inhalteErzeugen(t);
