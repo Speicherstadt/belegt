@@ -58,6 +58,8 @@ der rechteste Eintrag, der selbst kein solcher Proxy ist. Compose setzt dafür d
 `proxy`. Für einen eigenen Proxy trägst du die Adresse ein, von der er den Server erreicht; ohne Eintrag zählt die
 Verbindung, und hinter einem Proxy teilen sich dann alle einen Zähler.
 
+Belegt zu Hause, Caddy auf einem VPS und dazwischen ein Tunnel: [Zu Hause betreiben](zuhause.md).
+
 ## Getrennte Datenbankrollen
 
 Server, Worker und SMTP-Journal melden sich mit der Rolle `belegt_app` an (`DATABASE_URL`). Sie besitzt keine Tabelle,

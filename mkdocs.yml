@@ -19,6 +19,7 @@ nav:
   - Start: index.md
   - Betrieb:
       - Installation und Betrieb: betrieb.md
+      - Zu Hause betreiben: zuhause.md
       - Anmelden über einen Anbieter, Einbetten: einbetten.md
   - Arbeiten mit Belegt:
       - Eingang, Mails und Suche: eingang.md
