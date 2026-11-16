@@ -5,7 +5,7 @@ import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { zugangAnlegen } from "../test-zugaenge.ts";
 import { workflowsAusfuehren } from "../workflows/ausfuehren.ts";
-import { platzhalterErsetzen, voruebergehend, weitergeben } from "./weitergabe.ts";
+import { type Abfragen, platzhalterErsetzen, voruebergehend, weitergeben } from "./weitergabe.ts";
 
 /** Ein nachgebauter Empfänger: merkt sich jede Anfrage mit Kopfzeilen und Formular, antwortet nach antwort */
 async function empfaenger(antwort: (n: number) => Response = () => new Response("{}", { status: 201 })) {
@@ -291,6 +291,33 @@ describe.skipIf(!testDatenbankUrl)("Original an Adresse senden gegen Postgres", 
     expect((await weitergabenVon(weg.id))[0]).toMatchObject({ stand: "entfallen", fehler: "Dokument gelöscht" });
     expect(e.anfragen).toHaveLength(0);
     e.stoppen();
+  });
+
+  it("sendet nichts doppelt, wenn ein zweiter Worker läuft, während der erste auf langsame Antworten wartet", async () => {
+    // Zehn Dokumente, jede Anfrage des ersten Workers dauert das volle Zeitlimit (60 s): Die Uhr der Datenbank rückt
+    // dafür je Anfrage 60 s vor (naechster_versuch 60 s früher). Während jeder Anfrage läuft ein zweiter Worker.
+    await workflow("parallel-e", {
+      url: "http://parallel.example/belege",
+      dateifeld: "datei",
+      felder: [{ name: "id", wert: "{id}" }],
+    });
+    for (let i = 0; i < 10; i++) await hochladen(`parallel-e-${i}.pdf`);
+    await workflowsAusfuehren(t.db, { ocr: false });
+    const gesendet: string[] = [];
+    const empfangen = (init: RequestInit) => {
+      gesendet.push(String((init.body as FormData).get("id")));
+      return new Response("{}", { status: 201 });
+    };
+    const zweiter: Abfragen = async (_url, init) => empfangen(init);
+    const erster: Abfragen = async (_url, init) => {
+      await t.sql`update weitergaben set naechster_versuch = naechster_versuch - interval '60 seconds'
+                   where workflow_name = 'parallel-e' and stand = 'offen'`;
+      await weitergeben(t, { schluessel: t.schluessel, basisUrl: "https://belegt.example", abfragen: zweiter });
+      return empfangen(init);
+    };
+    await weitergeben(t, { schluessel: t.schluessel, basisUrl: "https://belegt.example", abfragen: erster });
+    expect(gesendet).toHaveLength(10);
+    expect(new Set(gesendet).size).toBe(10);
   });
 
   it("zeigt Weitergaben Inhaber und Steuerberatung, nicht Mitarbeitern", async () => {
