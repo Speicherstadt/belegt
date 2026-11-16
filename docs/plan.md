@@ -94,7 +94,7 @@ Vorlage für Einbetten und Anmeldung ist Schreibzeug (`docs/kontext.de.md` dort)
 
 ## Noch offen gegenüber Paperless-ngx
 
-Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug und Alltag.
+Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und F1 bis F3. Belegt zu Hause mit einem VPS davor: [Zu Hause betreiben](zuhause.md).
 
 | Funktion | Wichtig | Stand |
 | --- | --- | --- |
@@ -102,12 +102,12 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug und Alltag.
 | Korrespondenten als Liste mit Zuordnungsregeln (Wort, alle Wörter, exakt, regulärer Ausdruck, unscharf) und Vorschläge, die aus den eigenen Einordnungen lernen | mittel | erledigt |
 | Benutzer mit eingeschränkten Rechten (Mitarbeiter sehen nur bestimmte Tags oder Typen) | mittel | erledigt |
 | Aktionen im Postfach nach dem Abholen (verschieben, markieren, löschen) | niedrig bis mittel | erledigt |
-| Mehrere Dokumente als ZIP herunterladen oder per Mail verschicken | niedrig | offen |
+| Mehrere Dokumente als ZIP herunterladen ([Als ZIP herunterladen](ordnung.md#zip)); per Mail verschicken nicht: Der Mailversand ist für [Benachrichtigungen](betrieb.md#benachrichtigungen) ohne Inhalte gebaut, Originale an beliebige Adressen wären ein Weg aus dem Archiv ohne Protokoll | niedrig | erledigt |
 | Ablage mit lesbaren Namen und Ordnern (storage paths) | niedrig | offen |
 | Workflow-Auslöser „geändert“ und „Zeitplan“; Workflows bearbeiten | niedrig | offen |
 | Weitere Sprachen der Oberfläche (heute Deutsch und Englisch) | niedrig | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
-| Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf | niedrig | offen |
+| Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 
 ## Etappen F
 
