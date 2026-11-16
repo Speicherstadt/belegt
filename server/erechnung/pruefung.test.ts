@@ -87,6 +87,30 @@ describe("Prüfbericht des KoSIT-Validators", () => {
     ).toMatchObject({ gueltig: false, fehler: 1 });
   });
 
+  it("liest eine übergroße Antwort des Validators nicht ganz ein", async () => {
+    // Ein gültiger Bericht, aufgebläht auf 100 MB: ohne Grenze läge er ganz im Speicher und gälte als Ergebnis
+    const bericht = beispiel("bericht-gueltig.xml").replace(
+      "<rep:report",
+      `<!--${" ".repeat(100 * 1024 * 1024)}--><rep:report`,
+    );
+    let gelesen = 0;
+    const gross = () => {
+      const bytes = new TextEncoder().encode(bericht);
+      return new Response(
+        new ReadableStream({
+          pull(c) {
+            if (gelesen >= bytes.length) return c.close();
+            c.enqueue(bytes.subarray(gelesen, gelesen + 1024 * 1024));
+            gelesen += 1024 * 1024;
+          },
+        }),
+        { status: 200 },
+      );
+    };
+    await expect(beimDienstPruefen("<x/>", "http://v", { abfragen: validator(gross) })).rejects.toThrow(/zu groß/);
+    expect(gelesen).toBeLessThanOrEqual(40 * 1024 * 1024);
+  });
+
   it("schickt das XML als application/xml und folgt keiner Weiterleitung", async () => {
     let gesendet: RequestInit | undefined;
     await beimDienstPruefen("<x/>", "http://validator:8080", {
