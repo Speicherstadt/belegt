@@ -51,7 +51,7 @@ test("die Prüfung meldet eine intakte Kette", async ({ page }) => {
   await page.goto("/pruefung");
   await expect(page.getByRole("status")).toHaveText("Kette intakt, alle Siegel stimmen.");
   await page.getByRole("button", { name: "Auch alle Dateien prüfen" }).click();
-  await expect(page.getByRole("status")).toContainText(/\d+ Dateien? gegen ihren Hash geprüft\./);
+  await expect(page.getByRole("status")).toContainText(/\d+ (Datei|Dateien) gegen ihren Hash geprüft\./);
 });
 
 test("Archiv blättert in Seiten zu 50 und nennt „x von y“; „alle auf dieser Seite“ wählt nur die Seite", async ({
