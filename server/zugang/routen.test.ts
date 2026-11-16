@@ -57,6 +57,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "POST /api/dokumente": "sicht",
   "GET /api/dokumente": "sicht",
   "POST /api/dokumente/sammeln": "sicht",
+  "GET /api/dokumente/zip": "sicht",
   "GET /api/trennblatt.pdf": "sicht",
   "GET /api/ansichten": "sicht",
   "POST /api/ansichten": "sicht",

@@ -298,6 +298,9 @@ export const dokumenteApi = {
 export const exportUrl = (von: string, bis: string) =>
   `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
 
+/** Mehrere Originale als ZIP (GET /api/dokumente/zip) */
+export const zipUrl = (ids: string[]) => `/api/dokumente/zip?ids=${ids.join(",")}`;
+
 export const trennblattUrl = "/api/trennblatt.pdf";
 export const seiteUrl = (id: string, nr: number) => `/api/dokumente/${id}/seiten/${nr}`;
 export const vorschaubildUrl = (id: string) => `/api/dokumente/${id}/vorschaubild`;

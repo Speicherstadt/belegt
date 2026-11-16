@@ -17,6 +17,7 @@ import {
   uebersicht,
 } from "../einordnung/einordnung.ts";
 import { pruefungZu } from "../erechnung/pruefung.ts";
+import { auswahlZip, ZIP_MAX_BYTES, ZIP_MAX_DOKUMENTE } from "../export/auswahl.ts";
 import { inhaltZu } from "../inhalt/inhalt.ts";
 import {
   beantragen,
@@ -142,6 +143,28 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     ]);
     c.header("X-Gesamt", String(gesamt));
     return c.json(eintraege);
+  });
+
+  // Mehrere Dokumente als ZIP (server/export/auswahl.ts); vor /api/dokumente/:id, sonst wäre „zip“ eine ID. GET, damit
+  // der Browser die Datei selbst herunterlädt und jede lesende Rolle sie bekommt
+  app.get("/api/dokumente/zip", async (c) => {
+    const ids = z
+      .array(Id)
+      .min(1)
+      .max(ZIP_MAX_DOKUMENTE)
+      .safeParse((c.req.query("ids") ?? "").split(",").filter(Boolean));
+    if (!ids.success)
+      return c.json({ fehler: `ids: 1 bis ${ZIP_MAX_DOKUMENTE} Dokument-IDs, mit Komma getrennt` }, 400);
+    const zip = await auswahlZip(umgebung, ids.data, sichtVon(c.get("nutzer")));
+    if (!zip.ok)
+      return zip.grund === "zu_gross"
+        ? c.json({ fehler: `Zusammen größer als ${ZIP_MAX_BYTES / 1024 ** 3} GB; bitte weniger wählen` }, 413)
+        : c.json({ fehler: "Nicht gefunden" }, 404);
+    return c.body(zip.stream, 200, {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="belegt-${heute()}.zip"`,
+      "X-Content-Type-Options": "nosniff",
+    });
   });
 
   app.get("/api/dokumente/:id", async (c) => {

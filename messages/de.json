@@ -969,5 +969,7 @@
   "forward_tries": "{anzahl} Versuche",
   "forward_next": "nächster Versuch {zeit}",
   "workflow_send_url_example": "https://buchhaltung.example/api/belege",
-  "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}"
+  "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
+  "zip_download": "{anzahl} als ZIP herunterladen ({groesse})",
+  "zip_too_large": "Zusammen {groesse}: zu groß für ein ZIP (höchstens 2 GB). Bitte weniger wählen."
 }

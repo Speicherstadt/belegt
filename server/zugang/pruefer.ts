@@ -29,7 +29,7 @@ export const prueferDarf = (methode: string, pfad: string): boolean =>
   ((methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad)));
 
 /** Sammelaufrufe unter /api/dokumente/, die kein einzelnes Dokument meinen; ihre IDs prüft die Route selbst */
-const SAMMEL = new Set(["sammeln", "zusammenfuegen"]);
+const SAMMEL = new Set(["sammeln", "zusammenfuegen", "zip"]);
 
 /** Die Dokument-ID eines Pfads unter /api/dokumente/:id, sonst null */
 export const dokumentImPfad = (pfad: string): string | null => {

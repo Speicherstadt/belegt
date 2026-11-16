@@ -13,9 +13,9 @@ export function aufbewahrung(d: Eintrag): string {
   return `${artLabel(d.art)}, ${m.retention_until({ datum: tag(d.fristBis) })}`;
 }
 
-/** Was Tabelle und Kacheln zur Auswahl brauchen; ohne schreiben gibt es keine Kästchen */
+/** Was Tabelle und Kacheln zur Auswahl brauchen; ohne waehlbar gibt es keine Kästchen */
 export interface Auswahl {
-  schreiben: boolean;
+  waehlbar: boolean;
   gewaehlt: Set<string>;
   umschalten: (id: string) => void;
   alleGewaehlt: boolean;
@@ -45,7 +45,7 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
       <table className="w-full min-w-[720px] border-collapse text-sm">
         <thead>
           <tr className="border-border border-b text-left text-muted">
-            {auswahl.schreiben && (
+            {auswahl.waehlbar && (
               <th className="w-10 px-3 py-2.5">
                 <input
                   type="checkbox"
@@ -70,7 +70,7 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
         <tbody>
           {eintraege.map((d) => (
             <tr key={d.id} className="border-border border-b last:border-b-0 hover:bg-subtle">
-              {auswahl.schreiben && (
+              {auswahl.waehlbar && (
                 <td className="px-3 py-3">
                   <input
                     type="checkbox"
@@ -107,7 +107,7 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
 export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; auswahl: Auswahl }) {
   return (
     <section aria-label={m.list_label()} className="flex flex-col gap-3">
-      {auswahl.schreiben && (
+      {auswahl.waehlbar && (
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={auswahl.alleGewaehlt} onChange={auswahl.alleUmschalten} className="size-4" />
           {m.bulk_select_page()}
@@ -118,7 +118,7 @@ export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; aus
           <li key={d.id} className="relative flex flex-col gap-2 rounded-lg border border-border p-2 hover:bg-subtle">
             <Thumbnail dokument={d} gross />
             <div className="flex items-start gap-2">
-              {auswahl.schreiben && (
+              {auswahl.waehlbar && (
                 <input
                   type="checkbox"
                   checked={auswahl.gewaehlt.has(d.id)}

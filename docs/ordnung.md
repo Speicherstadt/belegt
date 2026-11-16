@@ -144,6 +144,17 @@ Eingang ein und überspringt die übrigen; mit dem Häkchen kommt bei jedem eine
 Eine Sammelbearbeitung ist eine Transaktion: Geht es bei einem Dokument nicht, etwa weil es gelöscht ist, ändert sich
 bei keinem etwas, und Belegt nennt das Dokument und den Grund.
 
+### Als ZIP herunterladen { #zip }
+
+Jede Rolle kann wählen und die gewählten Dokumente mit „… als ZIP herunterladen“ in einer Datei laden. Darin liegen die
+Originale unverändert unter lesbaren Namen: Archivnummer, Tag (Entstehung, sonst Eingang), Titel (sonst Dateiname)
+und die Endung des Originals, etwa `ASN0042-2026-03-14-Rechnung Telekom.pdf`. Zeichen, die Dateisysteme nicht
+erlauben, werden zu `_`, gleiche Namen bekommen „ (2)“. Gelöschte Dokumente und Originale, die fehlen oder nicht mehr
+zu ihrem Hash passen, stehen statt der Datei in `nicht-enthalten.txt`. Ein Mitarbeiter oder Prüfer bekommt nur, was er
+sieht. Höchstens eine Seite der Liste (200 Dokumente) und zusammen 2 GB; für einen ganzen Zeitraum ist der
+[Z3-Export](pruefung.md) da. Wie beim einzelnen Original schreibt das Herunterladen nichts ins Audit-Log, das
+Änderungen festhält, keine Zugriffe.
+
 ## Nach der Löschung
 
 Korrespondent, Tags, Dokumenttyp und Feldwerte eines gelöschten Dokuments bleiben als Teil des Löschnachweises, neue

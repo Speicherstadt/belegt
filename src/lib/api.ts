@@ -59,6 +59,7 @@ export {
   seiteUrl,
   trennblattUrl,
   vorschaubildUrl,
+  zipUrl,
 } from "./api-dokumente.ts";
 export type { Konto, ZweiterSchritt } from "./api-konto.ts";
 export type {

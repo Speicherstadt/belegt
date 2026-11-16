@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { unzipSync } from "fflate";
 import { degrees, PDFDocument, StandardFonts } from "pdf-lib";
 
 const axe = (page: Page) =>
@@ -105,6 +107,27 @@ test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", asyn
   const ableitungen = page.getByRole("region", { name: "Ableitungen" });
   await expect(ableitungen.getByRole("link")).toHaveText([erstes, zweites]);
   await expect(page.getByRole("region", { name: "Seiten" }).getByRole("img")).toHaveCount(3);
+});
+
+test("Mehrere Dokumente als ZIP herunterladen", async ({ page }, info) => {
+  const erstes = `zip-a-${info.project.name}.pdf`;
+  const zweites = `zip-b-${info.project.name}.pdf`;
+  const inhalt = await pdf("ZIP A");
+  await hochladen(page, erstes, inhalt);
+  await hochladen(page, zweites, await pdf("ZIP B"));
+  await page.getByRole("checkbox", { name: `${erstes} auswählen` }).check();
+  await page.getByRole("checkbox", { name: `${zweites} auswählen` }).check();
+  const link = page.getByRole("link", { name: /^2 als ZIP herunterladen/ });
+  await axeHellUndDunkel(page);
+  const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+  expect(download.suggestedFilename()).toMatch(/^belegt-\d{4}-\d{2}-\d{2}\.zip$/);
+  const zip = unzipSync(new Uint8Array(await readFile((await download.path())!)));
+  const namen = Object.keys(zip);
+  expect(namen).toEqual([
+    expect.stringMatching(new RegExp(`^ASN\\d{4,}-\\d{4}-\\d{2}-\\d{2}-zip-b-${info.project.name}\\.pdf$`)),
+    expect.stringMatching(new RegExp(`^ASN\\d{4,}-\\d{4}-\\d{2}-\\d{2}-zip-a-${info.project.name}\\.pdf$`)),
+  ]);
+  expect(Buffer.from(zip[namen[1]!]!).equals(inhalt)).toBe(true);
 });
 
 test("Notiz anlegen und über die Suche finden", async ({ page }, info) => {

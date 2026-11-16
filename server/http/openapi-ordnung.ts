@@ -1,5 +1,5 @@
 /*
- * OpenAPI für Tags, Dokumenttypen, Korrespondenten, eigene Felder und die Sammelbearbeitung (docs/ordnung.md); nur, was ein API-Token
+ * OpenAPI für Tags, Dokumenttypen, Korrespondenten, eigene Felder, die Sammelbearbeitung und den ZIP-Download (docs/ordnung.md); nur, was ein API-Token
  * erreicht: lesen und zuweisen, nicht anlegen.
  */
 
@@ -140,6 +140,26 @@ export const ordnungPfade = {
         "400": fehler,
         "404": fehler,
         "409": fehler,
+      },
+    },
+  },
+  "/api/dokumente/zip": {
+    get: {
+      summary: "Mehrere Originale als ZIP unter lesbaren Namen (ASN-Tag-Titel); nur sichtbare, höchstens 200 und 2 GB",
+      parameters: [
+        {
+          name: "ids",
+          in: "query",
+          required: true,
+          description: "Dokument-IDs, mit Komma getrennt",
+          schema: { type: "string" },
+        },
+      ],
+      responses: {
+        "200": { description: "ZIP", content: { "application/zip": {} } },
+        "400": fehler,
+        "404": fehler,
+        "413": fehler,
       },
     },
   },

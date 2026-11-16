@@ -14,6 +14,7 @@ import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { Pagination } from "./Pagination.tsx";
 import { UploadDuplicates } from "./UploadDuplicates.tsx";
+import { ZipDownload } from "./ZipDownload.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -93,7 +94,8 @@ export function DocumentList({
   const schreiben = darfSchreiben(ich.data?.role);
   const bearbeiten = darfBearbeiten(ich.data);
   // Gewählt ist nur, was die Liste gerade zeigt; ein anderer Filter oder eine andere Seite nimmt nichts Unsichtbares mit
-  const ausgewaehlt = (liste.data ?? []).filter((d) => auswahl.has(d.id)).map((d) => d.id);
+  const gewaehlteEintraege = (liste.data ?? []).filter((d) => auswahl.has(d.id));
+  const ausgewaehlt = gewaehlteEintraege.map((d) => d.id);
   const alleGewaehlt = !!liste.data?.length && ausgewaehlt.length === liste.data.length;
   const umschalten = (id: string) => {
     setSammelMeldung(null);
@@ -112,8 +114,9 @@ export function DocumentList({
       localStorage.setItem(DARSTELLUNG, d);
     } catch {}
   };
+  // Wählen darf jede Rolle: herunterladen als ZIP darf jede, sammeln nur, wer bearbeitet
   const auswahlFuerListe: Auswahl = {
-    schreiben: bearbeiten,
+    waehlbar: true,
     gewaehlt: auswahl,
     umschalten,
     alleGewaehlt,
@@ -273,6 +276,7 @@ export function DocumentList({
         </p>
       )}
       {hochladen.data && <UploadDuplicates doppelt={hochladen.data} />}
+      {ausgewaehlt.length > 0 && <ZipDownload gewaehlt={gewaehlteEintraege} />}
       {bearbeiten && ausgewaehlt.length > 0 && liste.data && (
         <BulkEdit
           gewaehlt={ausgewaehlt}
@@ -285,7 +289,7 @@ export function DocumentList({
       )}
       {schreiben && liste.data && (
         <MergePdfs
-          gewaehlt={liste.data.filter((d) => auswahl.has(d.id))}
+          gewaehlt={gewaehlteEintraege}
           fertig={(meldung) => {
             setAuswahl(new Set());
             setSammelMeldung(meldung);
