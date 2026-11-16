@@ -104,7 +104,7 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
     const benutzer = "verschieben@example.org";
     const id = await quelle(benutzer);
     const ordner = await (await anfrage(`/api/quellen/${id}/ordner`)).json();
-    expect(ordner).toEqual({ ordner: ["INBOX"] });
+    expect(ordner).toEqual({ ordner: [{ id: "INBOX", pfad: "INBOX" }] });
     const fehlt = await einstellen(id, { aktion: "verschieben", ziel: "Archiv" });
     expect(fehlt.status).toBe(400);
     expect((await fehlt.json()).fehler).toContain("Archiv");

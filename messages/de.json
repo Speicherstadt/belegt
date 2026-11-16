@@ -790,6 +790,7 @@
   "mailbox_action_delete_after": "löschen, frühestens {stunden} h nach der Archivierung",
   "mailbox_action_delete_after_lock": "löschen, frühestens {stunden} h nach der Archivierung und erst mit Sperre im Bucket",
   "mailbox_action_target": "Zielordner",
+  "mailbox_action_target_loading": "Ordner werden geladen …",
   "mailbox_action_change": "Aktion ändern",
   "mailbox_action_save": "Aktion speichern",
   "mailbox_action_cancel": "Abbrechen",

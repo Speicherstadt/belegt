@@ -17,10 +17,16 @@ export interface Postfach {
   /** Nachrichten mit UID größer als seitUid, aufsteigend */
   neue(seitUid: number): AsyncIterable<{ uid: number; roh: Uint8Array }>;
   schliessen(): Promise<void>;
-  /** Alle Ordner des Kontos (Pfade), für die Wahl des Zielordners */
-  ordner?(): Promise<string[]>;
+  /** Alle Ordner des Kontos, für die Wahl des Zielordners */
+  ordner?(): Promise<Ordner[]>;
   /** Nur mit schreiben geöffnet: Aktionen nach dem Abholen (server/mail/aktionen-ausfuehren.ts), je Mail über die UID */
   bearbeiten?: Bearbeiten;
+}
+
+/** Ein Ordner des Kontos: id ist bei IMAP der volle Pfad, bei JMAP die Mailbox-ID; pfad zum Anzeigen */
+export interface Ordner {
+  id: string;
+  pfad: string;
 }
 
 /** Aktionen an einer Mail im geöffneten Ordner; jede wirft, wenn der Server sie ablehnt */

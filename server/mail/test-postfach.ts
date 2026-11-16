@@ -95,7 +95,7 @@ export function testPostfaecher() {
         for (const [uid, m] of [...o.mails].sort(([a], [b]) => a - b)) if (uid > seit) yield { uid, roh: m.roh };
       },
       async ordner() {
-        return [...k.ordner.keys()];
+        return [...k.ordner.keys()].map((name) => ({ id: name, pfad: name }));
       },
       async schliessen() {},
       ...(zugang.schreiben

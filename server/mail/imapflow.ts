@@ -62,7 +62,7 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
       }
     },
     async ordner() {
-      return (await client.list()).map((o) => o.path);
+      return (await client.list()).map((o) => ({ id: o.path, pfad: o.path }));
     },
     ...(zugang.schreiben ? { bearbeiten } : {}),
     async schliessen() {

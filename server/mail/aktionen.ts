@@ -5,7 +5,7 @@ import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumente, postfachAktionen, postfachMails, quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { type AbrufOptionen, type Oeffnen, quellenAkteur, zugangZu } from "./abruf.ts";
+import { type AbrufOptionen, type Oeffnen, type Ordner, quellenAkteur, zugangZu } from "./abruf.ts";
 import { jmapOrdner } from "./jmap.ts";
 
 /*
@@ -21,7 +21,7 @@ export type Aktion = (typeof AKTIONEN)[number];
 export const AktionEingabe = z
   .object({
     aktion: z.enum(AKTIONEN),
-    /** Zielordner für verschieben */
+    /** Zielordner für verschieben: bei IMAP der volle Pfad, bei JMAP die Mailbox-ID (aus ordnerListen) */
     ziel: z.string().trim().min(1).max(200).nullable().default(null),
     /** Löschen frühestens so viele Stunden nach der Archivierung (1 bis 90 Tage) */
     warteStunden: z.number().int().min(1).max(2160).default(24),
@@ -42,6 +42,8 @@ export async function aktionEinstellen(
   quelleId: string,
   e: z.infer<typeof AktionEingabe>,
   akteur: string,
+  /** Der Zielordner aus ordnerListen, beim Verschieben */
+  ziel: Ordner | null = null,
 ) {
   const loeschen = e.aktion === "loeschen";
   const [q] = await mitAkteur(db, akteur, (tx) =>
@@ -50,6 +52,7 @@ export async function aktionEinstellen(
       .set({
         aktion: e.aktion,
         aktionZiel: e.aktion === "verschieben" ? e.ziel : null,
+        aktionZielPfad: e.aktion === "verschieben" ? (ziel?.pfad ?? e.ziel) : null,
         loeschenWarteStunden: e.warteStunden,
         loeschenNachSperre: loeschen && e.nachSperre,
         loeschenBestaetigtVon: loeschen ? akteur : null,
@@ -102,7 +105,7 @@ export async function ordnerListen(
   quelleId: string,
   oeffnen: Oeffnen,
   optionen: AbrufOptionen = {},
-): Promise<string[] | null> {
+): Promise<Ordner[] | null> {
   const [q] = await db.select().from(quellen).where(eq(quellen.id, quelleId));
   if (!q) return null;
   const zugang = await zugangZu(db, schluessel, q, quellenAkteur(q), optionen);

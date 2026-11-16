@@ -137,8 +137,8 @@ wie ein Passwort; vor jedem Abruf holt Belegt damit ein Access-Token.
 Je Postfach stellst du unter Quellen mit „Aktion ändern“ ein, was mit einer Mail im Postfach geschieht, sobald sie im
 Archiv liegt: keine Aktion (Vorgabe), als gelesen markieren, markieren (Flagge, in Gmail ein Stern), in einen Ordner
 verschieben oder löschen. Das geht bei IMAP, JMAP, Microsoft 365 und Google gleich; einstellen darf das nur der
-Inhaber. Den Zielordner zum Verschieben wählst du aus den Ordnern des Postfachs; einen, den es nicht gibt, nimmt Belegt
-nicht an.
+Inhaber. Den Zielordner zum Verschieben wählst du aus den Ordnern des Postfachs, angezeigt mit vollem Pfad (bei JMAP gilt die
+Wahl dem Ordner selbst, auch wenn es den Namen mehrfach gibt); einen, den es nicht gibt, nimmt Belegt nicht an.
 
 Die Aktion läuft im Worker nach dem Abruf, und nur für eine Mail, die nachweislich im Archiv liegt: Die Aufnahme ist in
 der Datenbank festgeschrieben, die Mail ist im Archiv nicht gelöscht, und vor der Aktion liest Belegt das Original aus

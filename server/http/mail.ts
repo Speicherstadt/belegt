@@ -7,6 +7,7 @@ import { gelerntInSicht, gelerntVorschlagZu } from "../lernen/lernen.ts";
 import { gelerntOhneDoppelte } from "../lernen/reihenfolge.ts";
 import {
   abrufen,
+  type Ordner,
   QuelleEingabe,
   anlegen as quelleAnlegen,
   listen as quellenListen,
@@ -196,10 +197,11 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
     // Ohne S3 mit Object Lock gibt es keine Sperre, auf die das Löschen warten könnte; es würde nie gelöscht
     if (eingabe.data.aktion === "loeschen" && eingabe.data.nachSperre && !umgebung.objektsperre)
       return c.json({ fehler: "„Erst nach Sperre“ geht nur mit S3 und Object Lock" }, 400);
+    let ziel: Ordner | null = null;
     if (eingabe.data.aktion === "verschieben") {
       if (!umgebung.schluessel || !umgebung.oeffnen)
         return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
-      let ordner: string[] | null;
+      let ordner: Ordner[] | null;
       try {
         ordner = await ordnerListen(umgebung, umgebung.schluessel, id.data, umgebung.oeffnen, {
           oauth: umgebung.oauth,
@@ -212,10 +214,10 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
         );
       }
       if (!ordner) return c.json({ fehler: "Nicht gefunden" }, 404);
-      if (!ordner.includes(eingabe.data.ziel!))
-        return c.json({ fehler: `Den Ordner „${eingabe.data.ziel}“ gibt es im Postfach nicht` }, 400);
+      ziel = ordner.find((o) => o.id === eingabe.data.ziel) ?? null;
+      if (!ziel) return c.json({ fehler: `Den Ordner „${eingabe.data.ziel}“ gibt es im Postfach nicht` }, 400);
     }
-    const q = await aktionEinstellen(umgebung.db, id.data, eingabe.data, akteur(c.get("nutzer")));
+    const q = await aktionEinstellen(umgebung.db, id.data, eingabe.data, akteur(c.get("nutzer")), ziel);
     if (!q) return c.json({ fehler: "Nicht gefunden" }, 404);
     return c.json((await quellenListen(umgebung.db)).find((x) => x.id === q.id));
   });

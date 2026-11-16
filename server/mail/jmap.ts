@@ -1,4 +1,4 @@
-import type { Zugang } from "./abruf.ts";
+import type { Ordner, Zugang } from "./abruf.ts";
 
 /**
  * Abruf über JMAP (RFC 8620, RFC 8621), etwa von Stalwart. Beim ersten Abruf alle Mails des Ordners, danach nur, was
@@ -24,6 +24,7 @@ interface Mailbox {
   id: string;
   name: string;
   role: string | null;
+  parentId?: string | null;
 }
 
 /** Sitzung, Konto und Aufrufe an den eingetragenen Server; Zugangsdaten gehen an keinen anderen Host */
@@ -67,7 +68,9 @@ async function verbinden(zugang: Zugang, abfragen: Abfragen) {
   }
 
   async function mailboxen(): Promise<Mailbox[]> {
-    const { a } = await aufrufen([["Mailbox/get", { accountId: konto, properties: ["name", "role"] }, "a"]]);
+    const { a } = await aufrufen([
+      ["Mailbox/get", { accountId: konto, properties: ["name", "role", "parentId"] }, "a"],
+    ]);
     return (a?.list as Mailbox[] | undefined) ?? [];
   }
 
@@ -152,9 +155,23 @@ export async function jmapHolen(
   }
 }
 
-/** Namen aller Ordner des Kontos */
-export async function jmapOrdner(zugang: Zugang, abfragen: Abfragen = fetch): Promise<string[]> {
-  return (await (await verbinden(zugang, abfragen)).mailboxen()).map((m) => m.name);
+/** Pfad einer Mailbox aus den Namen ihrer Eltern; Namen sind nur unter Geschwistern eindeutig (RFC 8621, 2) */
+function pfadVon(liste: Mailbox[], m: Mailbox): string {
+  const teile = [m.name];
+  const gesehen = new Set([m.id]);
+  for (let p = liste.find((x) => x.id === m.parentId); p && !gesehen.has(p.id); ) {
+    gesehen.add(p.id);
+    teile.unshift(p.name);
+    const eltern = p.parentId;
+    p = liste.find((x) => x.id === eltern);
+  }
+  return teile.join("/");
+}
+
+/** Alle Ordner des Kontos mit Mailbox-ID und Pfad */
+export async function jmapOrdner(zugang: Zugang, abfragen: Abfragen = fetch): Promise<Ordner[]> {
+  const liste = await (await verbinden(zugang, abfragen)).mailboxen();
+  return liste.map((m) => ({ id: m.id, pfad: pfadVon(liste, m) }));
 }
 
 /**
@@ -189,7 +206,8 @@ export async function jmapBearbeiten(zugang: Zugang, abfragen: Abfragen = fetch)
   const aendern = (id: string, patch: Record<string, unknown>) => setzen({ update: { [id]: patch } }, id, "notUpdated");
 
   return {
-    zielId: (name: string) => finden(liste, name)?.id ?? null,
+    /** Den Zielordner gibt es (über die Mailbox-ID) */
+    gibtZiel: (id: string) => liste.some((m) => m.id === id),
     gibtEs: async (id: string) => Boolean(await imOrdner(id)),
     roh: async (id: string) => {
       const e = await imOrdner(id);

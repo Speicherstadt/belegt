@@ -9,7 +9,7 @@ const tagUndZeit = (d: Date) =>
 export function postfachAktion(q: QuelleOhneGeheimnis): string {
   if (q.aktion === "gelesen") return "als gelesen markieren";
   if (q.aktion === "markieren") return "markieren (Flagge)";
-  if (q.aktion === "verschieben") return `in den Ordner „${q.aktionZiel}“ verschieben`;
+  if (q.aktion === "verschieben") return `in den Ordner „${q.aktionZielPfad ?? q.aktionZiel}“ verschieben`;
   if (q.aktion === "loeschen")
     return `löschen, frühestens ${q.loeschenWarteStunden === 1 ? "1 Stunde" : `${q.loeschenWarteStunden} Stunden`} nach der Archivierung${q.loeschenNachSperre ? " und erst mit Sperre im Bucket" : ""}; ausdrücklich bestätigt von ${q.loeschenBestaetigtVon ?? "?"} am ${q.loeschenBestaetigtAm ? tagUndZeit(q.loeschenBestaetigtAm) : "?"}`;
   return "keine Aktion, nur lesend";

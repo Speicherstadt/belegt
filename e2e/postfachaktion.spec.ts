@@ -18,12 +18,10 @@ test("Aktion nach dem Abholen einstellen, Löschen nur mit Bestätigung", async 
   const eintrag = postfaecher.getByRole("listitem").filter({ hasText: name });
   await expect(eintrag).toContainText("Nach dem Abholen: keine Aktion");
 
-  // Verschieben prüft den Zielordner im Postfach; der Server ist nicht erreichbar, also wird nichts gespeichert
+  // Verschieben wählt aus den Ordnern des Postfachs; der Server ist nicht erreichbar, also gibt es keinen zur Wahl
   await eintrag.getByRole("button", { name: "Aktion ändern" }).click();
   await eintrag.getByLabel("Aktion nach dem Abholen").selectOption("verschieben");
-  await eintrag.getByLabel("Zielordner").fill("Archiv");
-  await eintrag.getByRole("button", { name: "Aktion speichern" }).click();
-  await expect(eintrag.getByRole("alert")).toContainText("Postfach nicht erreichbar");
+  await expect(eintrag.getByLabel("Zielordner")).toHaveAccessibleDescription(/Postfach nicht erreichbar/);
 
   // Löschen: Hinweis, Wartezeit, und ohne Bestätigung lässt sich nicht speichern
   await eintrag.getByLabel("Aktion nach dem Abholen").selectOption("loeschen");

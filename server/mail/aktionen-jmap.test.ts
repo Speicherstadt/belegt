@@ -29,6 +29,9 @@ function jmapServer() {
     { id: "posteingang", name: "Posteingang", role: "inbox" },
     { id: "archiv", name: "Archiv", role: "archive" },
     { id: "wichtig", name: "Wichtig", role: null },
+    // Gleichnamige Ordner unter verschiedenen Eltern (RFC 8621, 2: eindeutig nur unter Geschwistern)
+    { id: "projekte", name: "Projekte", role: null },
+    { id: "projekte-archiv", name: "Archiv", role: null, parentId: "projekte" },
   ];
   const anlegen = (id: string, blob: Uint8Array, weitere: string[] = []) => {
     const mailboxIds: Record<string, true> = { posteingang: true };
@@ -177,14 +180,37 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über JMAP", () => {
     j.zustand.mails.clear();
     const id = await quelle("jmap-verschieben");
     expect(await (await anfrage(`/api/quellen/${id}/ordner`)).json()).toEqual({
-      ordner: ["Posteingang", "Archiv", "Wichtig"],
+      ordner: [
+        { id: "posteingang", pfad: "Posteingang" },
+        { id: "archiv", pfad: "Archiv" },
+        { id: "wichtig", pfad: "Wichtig" },
+        { id: "projekte", pfad: "Projekte" },
+        { id: "projekte-archiv", pfad: "Projekte/Archiv" },
+      ],
     });
-    expect((await einstellen(id, { aktion: "verschieben", ziel: "Papierkorb" })).status).toBe(400);
-    expect((await einstellen(id, { aktion: "verschieben", ziel: "Archiv" })).status).toBe(200);
+    expect((await einstellen(id, { aktion: "verschieben", ziel: "gibtesnicht" })).status).toBe(400);
+    // Der Name allein reicht nicht, gewählt wird über die Mailbox-ID
+    expect((await einstellen(id, { aktion: "verschieben", ziel: "Archiv" })).status).toBe(400);
+    expect((await einstellen(id, { aktion: "verschieben", ziel: "archiv" })).status).toBe(200);
     j.anlegen("m3", mailRoh(3, "jmap-aktion"), ["wichtig"]);
     await abholen(id);
     expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 1, entfallen: 0, fehler: 0 });
     expect(j.zustand.mails.get("m3")!.mailboxIds).toEqual({ wichtig: true, archiv: true });
+  });
+
+  it("wählt den Zielordner über seine ID, auch wenn es den Namen mehrfach gibt", async () => {
+    j.zustand.mails.clear();
+    const id = await quelle("jmap-gleichnamig");
+    const { ordner } = await (await anfrage(`/api/quellen/${id}/ordner`)).json();
+    expect(ordner).toContainEqual(expect.objectContaining({ id: "projekte-archiv", pfad: "Projekte/Archiv" }));
+    expect(ordner).toContainEqual(expect.objectContaining({ id: "archiv", pfad: "Archiv" }));
+    expect((await einstellen(id, { aktion: "verschieben", ziel: "projekte-archiv" })).status).toBe(200);
+    j.anlegen("m10", mailRoh(10, "jmap-aktion"));
+    await abholen(id);
+    expect(await ausfuehren(id)).toEqual({ ausgefuehrt: 1, entfallen: 0, fehler: 0 });
+    expect(j.zustand.mails.get("m10")!.mailboxIds).toEqual({ "projekte-archiv": true });
+    const [e] = await t.sql`select ziel from postfach_aktionen where quelle_id = ${id}`;
+    expect(e!.ziel).toBe("Projekte/Archiv");
   });
 
   it("hält eine abgelehnte Änderung als Fehler fest und lässt eine verschwundene Mail aus", async () => {

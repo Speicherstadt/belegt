@@ -244,8 +244,10 @@ export const quellen = pgTable(
     aktion: text("aktion", { enum: ["keine", "gelesen", "markieren", "verschieben", "loeschen"] })
       .notNull()
       .default("keine"),
-    /** Zielordner für verschieben */
+    /** Zielordner für verschieben: bei IMAP der volle Pfad, bei JMAP die Mailbox-ID (Namen gibt es mehrfach) */
     aktionZiel: text("aktion_ziel"),
+    /** Pfad des Zielordners zum Anzeigen, bei JMAP aus den Namen der Eltern */
+    aktionZielPfad: text("aktion_ziel_pfad"),
     /** Löschen frühestens so viele Stunden nach der Archivierung, damit eine Sicherung dazwischen liegt */
     loeschenWarteStunden: integer("loeschen_warte_stunden").notNull().default(24),
     /** Löschen erst, wenn die Datei im S3-Bucket bis zum Fristende gesperrt ist (objektsperren) */

@@ -790,6 +790,7 @@
   "mailbox_action_delete_after": "delete, at the earliest {stunden} h after archiving",
   "mailbox_action_delete_after_lock": "delete, at the earliest {stunden} h after archiving and only once locked in the bucket",
   "mailbox_action_target": "Target folder",
+  "mailbox_action_target_loading": "Loading folders …",
   "mailbox_action_change": "Change action",
   "mailbox_action_save": "Save action",
   "mailbox_action_cancel": "Cancel",

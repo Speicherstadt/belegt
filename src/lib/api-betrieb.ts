@@ -31,11 +31,19 @@ export interface Quelle {
   letzterFehler: string | null;
   aktiv: boolean;
   aktion: PostfachAktion;
+  /** Zielordner: bei IMAP der Pfad, bei JMAP die Mailbox-ID */
   aktionZiel: string | null;
+  aktionZielPfad: string | null;
   loeschenWarteStunden: number;
   loeschenNachSperre: boolean;
   loeschenBestaetigtVon: string | null;
   loeschenBestaetigtAm: string | null;
+}
+
+/** Ordner eines Postfachs: id ist bei IMAP der Pfad, bei JMAP die Mailbox-ID */
+export interface PostfachOrdner {
+  id: string;
+  pfad: string;
 }
 
 /** Aktion im Postfach nach dem Abholen (docs/eingang.md#nach-dem-abholen) */
@@ -164,7 +172,7 @@ export const betriebApi = {
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
   quelleAktion: ({ id, ...e }: AktionEingabe & { id: string }) => aufruf<Quelle>(`/api/quellen/${id}/aktion`, json(e)),
-  quelleOrdner: (id: string) => aufruf<{ ordner: string[] }>(`/api/quellen/${id}/ordner`),
+  quelleOrdner: (id: string) => aufruf<{ ordner: PostfachOrdner[] }>(`/api/quellen/${id}/ordner`),
   quelleAktionen: (id: string) => aufruf<AktionenProtokoll>(`/api/quellen/${id}/aktionen`),
   oauthAnbieter: () => aufruf<{ anbieter: ("microsoft" | "google")[] }>("/api/oauth"),
   webhooks: () => aufruf<Webhook[]>("/api/webhooks"),

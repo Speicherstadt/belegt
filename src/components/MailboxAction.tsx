@@ -10,7 +10,7 @@ const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 export function aktionText(q: Quelle): string {
   if (q.aktion === "gelesen") return m.mailbox_action_read();
   if (q.aktion === "markieren") return m.mailbox_action_flag();
-  if (q.aktion === "verschieben") return m.mailbox_action_move_to({ ordner: q.aktionZiel ?? "" });
+  if (q.aktion === "verschieben") return m.mailbox_action_move_to({ ordner: q.aktionZielPfad ?? q.aktionZiel ?? "" });
   if (q.aktion === "loeschen")
     return q.loeschenNachSperre
       ? m.mailbox_action_delete_after_lock({ stunden: String(q.loeschenWarteStunden) })
@@ -68,6 +68,7 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
   const queryClient = useQueryClient();
   const id = useId();
   const [aktion, setAktion] = useState<PostfachAktion>(quelle.aktion);
+  const [ziel, setZiel] = useState(quelle.aktionZiel ?? "");
   const ordner = useQuery({
     queryKey: ["quelle-ordner", quelle.id],
     queryFn: () => api.quelleOrdner(quelle.id),
@@ -93,7 +94,7 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
     speichern.mutate({
       id: quelle.id,
       aktion,
-      ziel: aktion === "verschieben" ? String(f.get("ziel")) : null,
+      ziel: aktion === "verschieben" ? ziel : null,
       warteStunden: aktion === "loeschen" ? Number(f.get("warten")) : quelle.loeschenWarteStunden,
       nachSperre: f.get("sperre") === "on",
       loeschenBestaetigt: f.get("bestaetigt") === "on",
@@ -115,20 +116,27 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
       {aktion === "verschieben" && (
         <label className="flex flex-col gap-1.5 font-medium">
           {m.mailbox_action_target()}
-          <input
+          {/* Über die ID gewählt: bei JMAP gibt es denselben Namen unter verschiedenen Eltern */}
+          <select
             name="ziel"
             required
-            list={`${id}-ordner`}
-            defaultValue={quelle.aktionZiel ?? ""}
-            autoComplete="off"
+            value={ziel}
+            onChange={(e) => setZiel(e.target.value)}
+            aria-describedby={ordner.error ? `${id}-ordner-fehler` : undefined}
             className={feld}
-          />
-          <datalist id={`${id}-ordner`}>
+          >
+            <option value="">{ordner.isPending ? m.mailbox_action_target_loading() : ""}</option>
             {ordner.data?.ordner.map((o) => (
-              <option key={o} value={o} />
+              <option key={o.id} value={o.id}>
+                {o.pfad}
+              </option>
             ))}
-          </datalist>
-          {ordner.error && <span className="font-normal text-red-700 dark:text-red-400">{ordner.error.message}</span>}
+          </select>
+          {ordner.error && (
+            <span id={`${id}-ordner-fehler`} className="font-normal text-red-700 dark:text-red-400">
+              {ordner.error.message}
+            </span>
+          )}
         </label>
       )}
       {aktion === "loeschen" && (

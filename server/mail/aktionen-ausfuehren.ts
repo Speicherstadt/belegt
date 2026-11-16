@@ -34,7 +34,8 @@ export interface AktionenErgebnis {
 interface Adapter {
   /** Grund, aus dem der Eintrag in diesem Postfach nicht mehr adressierbar ist (UIDVALIDITY) */
   unpassend(e: Eintrag): string | null;
-  ordnerGibtEs(name: string): Promise<boolean>;
+  /** Den Zielordner gibt es: IMAP über den Pfad, JMAP über die Mailbox-ID */
+  ordnerGibtEs(id: string): Promise<boolean>;
   gibtEs(e: Eintrag): Promise<boolean>;
   roh(e: Eintrag): Promise<Uint8Array | null>;
   gelesen(e: Eintrag): Promise<void>;
@@ -117,7 +118,7 @@ async function festhalten(
       quelleId: q.id,
       dokumentId: e.dokumentId,
       aktion: q.aktion,
-      ziel: q.aktion === "verschieben" ? q.aktionZiel : null,
+      ziel: q.aktion === "verschieben" ? (q.aktionZielPfad ?? q.aktionZiel) : null,
       ordner: e.ordner,
       uidValidity: e.uidValidity,
       uid: e.uid,
@@ -146,7 +147,8 @@ async function anwenden(
 ) {
   // Wie Paperless-ngx (_handle_mail_rule): beim Verschieben zuerst prüfen, ob es den Zielordner gibt
   if (q.aktion === "verschieben" && !(await a.ordnerGibtEs(q.aktionZiel!))) {
-    for (const e of eintraege) await melden(e, "fehler", `Zielordner „${q.aktionZiel}“ gibt es nicht`);
+    for (const e of eintraege)
+      await melden(e, "fehler", `Zielordner „${q.aktionZielPfad ?? q.aktionZiel}“ gibt es nicht`);
     return;
   }
   for (const e of eintraege) {
@@ -198,7 +200,7 @@ async function imapAdapter(oeffnen: Oeffnen, zugang: Zugang): Promise<Adapter> {
       e.uidValidity === postfach.uidValidity
         ? null
         : "UIDVALIDITY des Ordners hat sich geändert; der nächste Abruf ordnet die Mail neu zu",
-    ordnerGibtEs: async (name) => (await postfach.ordner?.())?.includes(name) ?? false,
+    ordnerGibtEs: async (id) => (await postfach.ordner?.())?.some((o) => o.id === id) ?? false,
     gibtEs: (e) => b.gibtEs(e.uid!),
     roh: (e) => b.roh(e.uid!),
     gelesen: (e) => b.flagge(e.uid!, "\\Seen"),
@@ -213,12 +215,12 @@ async function jmapAdapter(zugang: Zugang, abfragen: AbrufOptionen["abfragen"]):
   const j = await jmapBearbeiten(zugang, abfragen);
   return {
     unpassend: (e) => (e.jmapId ? null : "Keine Email-ID"),
-    ordnerGibtEs: async (name) => j.zielId(name) !== null,
+    ordnerGibtEs: async (id) => j.gibtZiel(id),
     gibtEs: (e) => j.gibtEs(e.jmapId!),
     roh: (e) => j.roh(e.jmapId!),
     gelesen: (e) => j.schluesselwort(e.jmapId!, "$seen"),
     markieren: (e) => j.schluesselwort(e.jmapId!, "$flagged"),
-    verschieben: async (e, ziel) => j.verschieben(e.jmapId!, j.zielId(ziel)!),
+    verschieben: (e, ziel) => j.verschieben(e.jmapId!, ziel),
     loeschen: (e) => j.loeschen(e.jmapId!),
     schliessen: async () => {},
   };
