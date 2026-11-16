@@ -114,8 +114,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug und Alltag.
 | Etappe | Inhalt | Stand |
 | --- | --- | --- |
 | F1 · Zwei-Faktor und Benachrichtigungen | TOTP mit Backup-Codes und Passkeys, Pflicht je Rolle, Zurücksetzen durch den Inhaber und Notfall-Skript ([Zugänge](zugaenge.md#zwei-faktor)); Benachrichtigungen per Mail mit Anlässen, Entprellen und Protokoll ([Betrieb](betrieb.md#benachrichtigungen)) | erledigt |
-| F2 · Scanner, Duplikate, E-Rechnung prüfen | FTP-Container für den Eingangsordner mit Anleitung für Netzwerkscanner, doppelte Uploads erkennen, E-Rechnungen mit KoSIT prüfen (zuschaltbarer Dienst wie Gotenberg) | offen |
-| F3 · Verbindung zu Buchhaltungen | Eingang über eine offene Schnittstelle der Buchhaltung, Ausgang über die Workflow-Aktion „Original an Adresse senden“ (allgemeiner multipart-POST mit Token und Feldname); umgekehrt nimmt Belegt Dateien über `POST /api/dokumente` an | offen |
+| F2 · Scanner, Duplikate, E-Rechnung prüfen | FTP-Container für den Eingangsordner mit Anleitung für Netzwerkscanner ([Scannen](scannen.md)), doppelte Uploads erkennen ([Doppelte Dateien](eingang.md#doppelte-dateien)), E-Rechnungen mit KoSIT prüfen, zuschaltbarer Dienst wie Gotenberg ([E-Rechnungen prüfen](betrieb.md#erechnung-pruefen)) | erledigt |
+| F3 · Verbindung zu Buchhaltungen | Eingang über eine offene Schnittstelle der Buchhaltung, Ausgang über die Workflow-Aktion „Original an Adresse senden“ (allgemeiner multipart-POST mit Token und Feldname, Wiederholung, höchstens einmal je Dokument, Ergebnis am Dokument: [Workflows](workflows.md#original-an-adresse-senden)); umgekehrt nimmt Belegt Dateien über `POST /api/dokumente` an | Belegt: erledigt; Seite der Buchhaltung offen |
 
 ## Offene Entscheidungen
 
