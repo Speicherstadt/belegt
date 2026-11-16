@@ -20,6 +20,9 @@ export interface Kettenpruefung {
   ausgeloestVon: string;
 }
 
+/** Name der Sperre in Postgres, die ein Lauf bis zum Ende seiner Transaktion hält */
+export const KETTE_SPERRE = "belegt_kettenpruefung";
+
 /** Abstand der Läufe im Worker */
 export const PRUEF_ABSTAND_STUNDEN = 24;
 
@@ -46,7 +49,7 @@ export async function kettePruefen(
 ): Promise<Kettenpruefung | null> {
   return mitAkteur(db, akteur, async (tx) => {
     const [sperre] = await tx.execute<{ frei: boolean }>(
-      sql`select pg_try_advisory_xact_lock(hashtextextended('belegt_kettenpruefung', 0)) as frei`,
+      sql`select pg_try_advisory_xact_lock(hashtextextended(${KETTE_SPERRE}, 0)) as frei`,
     );
     if (!sperre?.frei) return null;
     if (faelligAm && !pruefungFaellig(await letztePruefung(tx), faelligAm)) return null;

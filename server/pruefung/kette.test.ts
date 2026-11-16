@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { zugangAnlegen } from "../test-zugaenge.ts";
-import { type Kettenpruefung, kettePruefen, letztePruefung, pruefungFaellig } from "./kette.ts";
+import { KETTE_SPERRE, type Kettenpruefung, kettePruefen, letztePruefung, pruefungFaellig } from "./kette.ts";
 
 describe("pruefungFaellig", () => {
   const lauf = (geprueftAm: string) => ({ geprueftAm }) as Kettenpruefung;
@@ -42,13 +42,26 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
     expect(await letztePruefung(t.db)).toMatchObject({ ausgeloestVon: "nutzer:anna@example.org" });
   });
 
-  it("startet bei gleichzeitigen Anfragen nur einen Lauf; die anderen hören, dass schon geprüft wird", async () => {
+  it("startet keinen zweiten Lauf, solange einer prüft; der Knopf hört es mit 409", async () => {
     const zahl = async () => (await t.sql`select count(*)::int as n from kettenpruefungen`)[0]!.n as number;
     const vorher = await zahl();
-    const antworten = await Promise.all(
-      Array.from({ length: 5 }, () => t.anfrage("/api/kette/pruefen", { method: "POST" }, inhaber)),
-    );
-    expect(antworten.map((r) => r.status).sort()).toEqual([201, 409, 409, 409, 409]);
+    // Ein Lauf in einem anderen Prozess hält die Sperre
+    const anderer = await t.sql.reserve();
+    await anderer`select pg_advisory_lock(hashtextextended(${KETTE_SPERRE}, 0))`;
+    try {
+      const antworten = await Promise.all(
+        Array.from({ length: 5 }, () => t.anfrage("/api/kette/pruefen", { method: "POST" }, inhaber)),
+      );
+      expect(antworten.map((r) => r.status)).toEqual([409, 409, 409, 409, 409]);
+      expect(
+        await kettePruefen(t.db, "system:worker", { faelligAm: new Date(Date.now() + 25 * 3_600_000) }),
+      ).toBeNull();
+      expect(await zahl()).toBe(vorher);
+    } finally {
+      await anderer`select pg_advisory_unlock(hashtextextended(${KETTE_SPERRE}, 0))`;
+      anderer.release();
+    }
+    expect((await t.anfrage("/api/kette/pruefen", { method: "POST" }, inhaber)).status).toBe(201);
     expect(await zahl()).toBe(vorher + 1);
   });
 
