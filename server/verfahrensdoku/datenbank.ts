@@ -1,21 +1,25 @@
-import { type Datenbankzugriff, problemText } from "../db/rollen.ts";
+import { datenbankRollenText } from "@firsttris/gobd-kern/verfahrensdoku";
+import { type Datenbankzugriff, PROBLEME } from "../db/rollen.ts";
 
 /**
  * Datenbankrollen für die Verfahrensdokumentation (Abschnitt 4): mit welcher Anmeldung die Anwendung arbeitet und welche
- * Rechte sie je Art von Tabelle wirksam hat, gelesen aus der Datenbank, nicht aus der Konfiguration.
+ * Rechte sie je Art von Tabelle wirksam hat, gelesen aus der Datenbank, nicht aus der Konfiguration. Den Satz zur
+ * Anmeldung liefert der GoBD-Kern (datenbankRollenText); er sagt nur zu, was zugriffLesen prüft (Eigentum, Superuser-
+ * und Rollenrechte, Anlegen von Objekten und Triggern, Replikationsmodus).
  */
 export function rechteBeschreiben(z: Datenbankzugriff): { absatz: string; liste: string[] } {
-  if (!z.eingeschraenkt)
-    return {
-      absatz: `Die Anwendung meldet sich derzeit als „${z.anmeldung}“ an, mit mehr Rechten als nötig: ${problemText(z.probleme)} Die Sperren in der Datenbank gelten für jede Änderung, die die Anwendung macht; mit diesen Rechten könnte sie sie aber abschalten. Getrennte Rollen sind noch einzurichten.`,
-      liste: [],
-    };
+  const kern = datenbankRollenText({
+    anmeldung: z.anmeldung,
+    eingeschraenkt: z.eingeschraenkt,
+    probleme: z.probleme.map((p) => PROBLEME[p]),
+  });
+  if (!z.eingeschraenkt) return { absatz: kern, liste: [] };
   const art = (name: string, wahl: (t: Datenbankzugriff["tabellen"][number]) => boolean) => {
     const tabellen = z.tabellen.filter(wahl).map((t) => t.tabelle);
     return tabellen.length ? [`${name} (${tabellen.length}): ${tabellen.join(", ")}`] : [];
   };
   return {
-    absatz: `Die Anwendung (Server, Worker, SMTP-Journal) meldet sich als „${z.anmeldung}“ an, eine eigene Rolle ohne Eigentum an Tabellen, ohne Superuser- und Rollenrechte und ohne das Recht, Tabellen zu leeren, Trigger anzulegen oder abzuschalten oder den Replikationsmodus zu setzen. Nur die Migrationen beim Start laufen mit der Eigentümerrolle; sie vergeben danach genau diese Rechte. Die wirksamen Rechte der Anwendung je Art von Tabelle stehen in der Liste unten.`,
+    absatz: `${kern} Mit dieser Anmeldung arbeiten Server, Worker und SMTP-Journal; Tabellen leeren kann sie auch nicht. Die Migrationen laufen beim Start mit der Eigentümerrolle und vergeben danach genau die Rechte, die die Liste unten je Art von Tabelle nennt.`,
     liste: [
       ...art("Nur lesen", (t) => t.select && !t.insert && !t.update && !t.delete),
       ...art("Nur ergänzen (lesen und einfügen)", (t) => t.insert && !t.update && !t.delete),

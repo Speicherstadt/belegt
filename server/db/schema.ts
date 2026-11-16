@@ -292,9 +292,17 @@ export const einstellungen = pgTable(
     aufsicht: boolean("aufsicht").notNull().default(false),
     /** Wie, wohin und wie oft gesichert wird, und wer die Wiederherstellung prüft */
     datensicherung: text("datensicherung").notNull().default(""),
-    /** Papier nach dem Scannen: aufbewahrt oder vernichtet, wer scannt, wer prüft */
-    scannen: text("scannen").notNull().default(""),
+    /**
+     * Papierbelege und Scannen: wer scannt, wer prüft, was mit dem Papier geschieht. Die Spalte heißt aus der ersten
+     * Fassung „scannen“; so bleiben Werte und Einträge im Audit-Log unter demselben Namen.
+     */
+    papierbelege: text("scannen").notNull().default(""),
     ergaenzungen: text("ergaenzungen").notNull().default(""),
+    /** Die übrigen Angaben zum Betrieb aus dem Schema des GoBD-Kerns (ANGABEN_FELDER) */
+    rechtsform: text("rechtsform").notNull().default(""),
+    aufbewahrungsort: text("aufbewahrungsort").notNull().default(""),
+    serverbetrieb: text("serverbetrieb").notNull().default(""),
+    schluesselablage: text("schluesselablage").notNull().default(""),
     geaendertAm: timestamp("geaendert_am", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check("einstellungen_eine_zeile", sql`${t.id} = 1`)],

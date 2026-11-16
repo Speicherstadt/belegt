@@ -1,3 +1,12 @@
+import {
+  abschnitt,
+  angabenAbsaetze,
+  fehlendeAngaben,
+  tagInDeutschland as tag,
+  type Verfahrensdoku,
+  type VerfahrensdokuAbschnitt,
+  verfahrensdoku as zusammensetzen,
+} from "@firsttris/gobd-kern/verfahrensdoku";
 import { sql } from "drizzle-orm";
 import { type Aufbewahrungsart, gesetzlicheJahre } from "../../shared/fristen.ts";
 import { zuordnungsregelnBeschreiben } from "../abgleich/vorschlaege.ts";
@@ -18,28 +27,20 @@ import { listen as tokensListen } from "../zugang/tokens.ts";
 import { rechteBeschreiben } from "./datenbank.ts";
 import { postfachAktion, postfachAktionenAbsatz } from "./postfach.ts";
 import { sicherungBeschreiben } from "./sicherung.ts";
+import { unveraenderbarkeit } from "./unveraenderbarkeit.ts";
 import { zugaengeBeschreiben } from "./zugaenge.ts";
 
 /**
  * Verfahrensdokumentation (GoBD Rz. 151 ff.): allgemeine Beschreibung, Anwender-, System- und Betriebsdokumentation.
  * Was Belegt tut, steht hier aus dem Code und dem aktuellen Stand der Datenbank; was nur der Betrieb wissen kann
- * (Firma, Verantwortliche, Datensicherung, Scannen), kommt aus den Einstellungen. Fehlt davon etwas, nennt das
- * Dokument die Lücke, statt sie zu füllen. Der Text ist Deutsch, weil er für die deutsche Finanzverwaltung ist.
+ * (Angaben zum Betrieb), kommt aus den Einstellungen. Fehlt davon etwas, nennt das Dokument die Lücke, statt sie zu
+ * füllen. Datenmodell, Angaben, Texte zum Kern (Abschnitt 4) und Markdown kommen aus @firsttris/gobd-kern. Der Text ist
+ * Deutsch, weil er für die deutsche Finanzverwaltung ist.
  */
 
-export interface Abschnitt {
-  titel: string;
-  absaetze: string[];
-  liste?: string[];
-  /** Angaben, die der Betrieb noch machen muss */
-  luecken?: string[];
-}
+export type { Verfahrensdoku };
 
-export interface Verfahrensdoku {
-  stand: string;
-  abschnitte: Abschnitt[];
-  vollstaendig: boolean;
-}
+type Abschnitt = VerfahrensdokuAbschnitt;
 
 const ART: Record<Aufbewahrungsart, string> = {
   buecher: "Bücher, Aufzeichnungen, Inventare, Jahresabschlüsse (§ 147 Abs. 1 Nr. 1 AO)",
@@ -59,19 +60,26 @@ const STATUS: Record<string, string> = {
   wartet: "wartet",
 };
 
-const tag = (d: Date) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
-
 async function zahlen(db: Datenbank) {
-  const [z] = await db.execute<{ dokumente: string; geloescht: string; mails: string; seq: string | null }>(sql`
+  const [z] = await db.execute<{
+    dokumente: string;
+    geloescht: string;
+    mails: string;
+    seq: string | null;
+    hash: string | null;
+  }>(sql`
     select (select count(*) from dokumente) as dokumente,
            (select count(*) from loeschungen where bestaetigt_am is not null) as geloescht,
            (select count(*) from mails) as mails,
-           (select seq from audit_chain where id = 1) as seq`);
+           k.seq, encode(k.hash, 'hex') as hash
+      from (select 1) x left join audit_chain k on k.id = 1`);
+  const seq = z?.seq ? Number(z.seq) : 0;
   return {
     dokumente: Number(z?.dokumente ?? 0),
     geloescht: Number(z?.geloescht ?? 0),
     mails: Number(z?.mails ?? 0),
-    seq: z?.seq ? Number(z.seq) : 0,
+    seq,
+    pruefwert: seq && z?.hash ? { seq, hash: z.hash } : null,
   };
 }
 
@@ -133,23 +141,20 @@ export async function verfahrensdoku(
     backupStand(db, jetzt),
   ]);
   const rechte = rechteBeschreiben(zugriff);
-  const fehlt = (wert: string, was: string) => (wert ? [] : [was]);
+  const allgemein = angabenAbsaetze(e, ["rechtsform", "anschrift", "verantwortlich", "aufbewahrungsort"]);
+  const betrieb = angabenAbsaetze(e, ["serverbetrieb", "datensicherung", "schluesselablage"]);
+  const papier = angabenAbsaetze(e, ["papierbelege"]);
+  const ergaenzungen = angabenAbsaetze(e, ["ergaenzungen"]).absaetze;
 
   const abschnitte: Abschnitt[] = [
-    {
-      titel: "1. Allgemeine Beschreibung",
+    abschnitt("1. Allgemeine Beschreibung", {
       absaetze: [
         `${e.firma || "Der Betrieb"} archiviert steuerlich relevante Unterlagen elektronisch mit Belegt ${version}, einem selbst betriebenen Dokumentenarchiv. Archiviert werden hochgeladene Dateien, E-Mails mit ihren Anhängen und abgerufene Postfächer.`,
-        e.anschrift ? `Anschrift: ${e.anschrift}` : "",
-        e.verantwortlich ? `Verantwortlich für das Archiv: ${e.verantwortlich}` : "",
+        ...allgemein.absaetze,
         `Stand des Archivs: ${z.dokumente} Dokumente, davon ${z.mails} Mails und ${z.geloescht} nach Ablauf der Frist gelöscht; ${z.seq} Einträge im Protokoll.`,
-      ].filter(Boolean),
-      luecken: [
-        ...fehlt(e.firma, "Name des Betriebs"),
-        ...fehlt(e.anschrift, "Anschrift"),
-        ...fehlt(e.verantwortlich, "verantwortliche Person"),
       ],
-    },
+      luecken: [...fehlendeAngaben(e, ["firma"]), ...allgemein.luecken],
+    }),
     {
       titel: "2. Erfassung",
       absaetze: [
@@ -209,25 +214,13 @@ export async function verfahrensdoku(
         ...workflows.texte,
       ],
     },
-    {
-      titel: "4. Unveränderbarkeit und Nachvollziehbarkeit",
-      absaetze: [
-        "Die Unveränderbarkeit liegt in der Datenbank (PostgreSQL), nicht nur in der Anwendung: Dokumente, Archivnummern, Einordnungen, Mails und Löschnachweise sind ab dem Einfügen versiegelt, Ändern, Löschen und Leeren der Tabellen lehnt die Datenbank ab.",
-        "Jede Änderung an protokollierten Tabellen schreibt die Datenbank in ein Protokoll, das nur anwächst. Jeder Eintrag enthält den SHA-256 seines Vorgängers (Hash-Kette); Akteur und Zeitpunkt stehen in jedem Eintrag.",
-        rechte.absatz,
-        objektsperre
-          ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
-          : "Die Dateien liegen unter ihrem SHA-256 im Dateisystem des Servers; eine Änderung fällt beim Lesen und bei der Prüfung auf.",
-        "Die Prüfung unter „Prüfung“ rechnet Kette, Kopf und Siegel nach und vergleicht auf Wunsch jede Datei mit ihrem Hash.",
-        stempel[0]
-          ? `Einmal am Tag lässt Belegt den Kopf der Kette von einem Zeitstempeldienst nach RFC 3161 bestätigen (${stempel[0].dienst}); der letzte Zeitstempel vom ${tag(stempel[0].zeit)} belegt den Stand bis Eintrag ${stempel[0].seq}.`
-          : "",
-        befunde.length
-          ? `Bei Erstellung dieses Dokuments meldete die Prüfung ${befunde.length} Befunde.`
-          : "Bei Erstellung dieses Dokuments meldete die Prüfung von Kette und Siegeln keine Befunde.",
-      ].filter(Boolean),
-      liste: rechte.liste,
-    },
+    unveraenderbarkeit({
+      rechte,
+      pruefwert: z.pruefwert,
+      objektsperre,
+      stempel: stempel[0],
+      befunde: befunde.length,
+    }),
     {
       titel: "5. Löschung",
       absaetze: [
@@ -255,34 +248,21 @@ export async function verfahrensdoku(
           ),
       ],
     },
-    {
-      titel: "7. Betrieb und Datensicherung",
+    abschnitt("7. Betrieb und Datensicherung", {
       absaetze: [
         "Belegt läuft als Server mit PostgreSQL-Datenbank und einem Verzeichnis für die Dateien; der Abruf der Postfächer läuft in einem eigenen Prozess.",
-        e.datensicherung,
+        ...betrieb.absaetze,
         ...sicherungBeschreiben(sicherung),
-      ].filter(Boolean),
-      luecken: fehlt(
-        e.datensicherung,
-        "Beschreibung der Datensicherung (wie, wohin, wie oft, wer die Wiederherstellung prüft)",
-      ),
-    },
-    {
-      titel: "8. Scannen von Papierbelegen",
-      absaetze: e.scannen
-        ? [e.scannen]
-        : ["Für gescannte Papierbelege beschreibt der Betrieb hier Ablauf, Kontrolle und den Umgang mit dem Papier."],
-      luecken: fehlt(
-        e.scannen,
-        "Ablauf beim Scannen (wer scannt, wer prüft, was mit dem Papier geschieht) oder der Hinweis, dass nicht gescannt wird",
-      ),
-    },
-    ...(e.ergaenzungen ? [{ titel: "9. Ergänzungen", absaetze: e.ergaenzungen.split(/\n{2,}/) }] : []),
+      ],
+      luecken: betrieb.luecken,
+    }),
+    abschnitt("8. Papierbelege und Scannen", papier),
+    ...(ergaenzungen.length ? [abschnitt("9. Ergänzungen", { absaetze: ergaenzungen })] : []),
   ];
 
-  return {
-    stand: tag(jetzt),
+  return zusammensetzen({
+    titel: e.firma ? `Verfahrensdokumentation ${e.firma}` : "Verfahrensdokumentation",
+    stand: { datum: tag(jetzt), programm: "Belegt", version },
     abschnitte,
-    vollstaendig: abschnitte.every((a) => !a.luecken?.length),
-  };
+  });
 }

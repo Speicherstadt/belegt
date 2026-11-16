@@ -57,6 +57,7 @@ Was GoBD betrifft (Sperren, Kette, Löschlauf), wird immer gegen Postgres getest
 Der Kern wird in Haben als Paket `packages/gobd-kern` herausgelöst ([firsttris/haben#935](https://github.com/firsttris/haben/issues/935)). Er erscheint nicht auf npm, sondern als Datei an einem Release von Haben (Tag `gobd-kern-vX.Y.Z`); Belegt installiert ihn über deren URL, `bun.lock` hält den Hash fest.
 
 - **TypeScript** (Speicher unter SHA-256, `withActor`, Prüfung von Kette und Siegeln, `index.xml` nach dem Beschreibungsstandard) gibt es einmal; Belegt installiert das Paket mit fester Version.
+- **Verfahrensdokumentation** (Datenmodell, Angaben zum Betrieb, Texte zum Kern, Markdown) kommt ab Version 0.2.0 aus dem Paket; Belegt ergänzt seine eigenen Abschnitte.
 - **SQL** (Trigger, Kette, Siegel, Sperre gegen `TRUNCATE`) kommt als Vorlage aus dem Paket und wird einmal in die erste Migration von Belegt übernommen. Haben behält seine bestehenden Migrationen unverändert.
 - **E-Rechnung:** Belegt liest die Kopfdaten selbst (EN 16931, CII und UBL, auch in ZUGFeRD); geprüft wird die Rechnung nicht.
 

@@ -87,8 +87,8 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |
 | `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
 | `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp, Korrespondent und Feldwerte, mit `detail`: deren Name; Einordnungen mit `detail`: ihr Korrespondent, wie er beim Einordnen hieß; Ableitungen mit `detail`: Operation und `richtung`: `aus` oder `daraus`) und sein Siegel |
-| `GET /api/einstellungen`, `POST /api/einstellungen` (`firma`, `anschrift`, `verantwortlich`, `aufsicht`, `datensicherung`, `scannen`, `ergaenzungen`) | Angaben zum Betrieb; ändern nur der Inhaber |
-| `GET /api/verfahrensdoku` | Verfahrensdokumentation als Abschnitte, mit `luecken` und `vollstaendig` ([`verfahrensdoku.md`](verfahrensdoku.md)) |
+| `GET /api/einstellungen`, `POST /api/einstellungen` (`firma`, `rechtsform`, `anschrift`, `verantwortlich`, `aufbewahrungsort`, `serverbetrieb`, `datensicherung`, `schluesselablage`, `papierbelege`, `ergaenzungen`, `aufsicht`) | Angaben zum Betrieb; ändern nur der Inhaber |
+| `GET /api/verfahrensdoku` | Verfahrensdokumentation mit `titel`, `stand` (`datum`, `programm`, `version`), Abschnitten mit ihren `luecken`, Zahl der `luecken` und `vollstaendig` ([`verfahrensdoku.md`](verfahrensdoku.md)) |
 | `GET /api/export?von=JJJJ-MM-TT&bis=JJJJ-MM-TT` | Datenträger (Z3) als ZIP, gestreamt; Inhalt in [`pruefung.md`](pruefung.md) |
 | `GET /api/zeitstempel`, `GET /api/zeitstempel/:id/token` | Zeitstempel nach RFC 3161 über die Kette und das Token zum Prüfen mit openssl (auch für Prüfer) |
 | `GET /api/pruefung` | Befunde zu Hash-Kette, Kopf und Siegeln, `ok: true`, wenn es keine gibt; mit `?dateien=1` auch jede Datei gegen ihren Hash; `bericht` mit Zeitpunkt, Prüfwert und Zahlen |

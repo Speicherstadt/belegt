@@ -1,3 +1,4 @@
+import type { AngabenZumBetrieb, Verfahrensdoku } from "@firsttris/gobd-kern/verfahrensdoku";
 import type { Feldwert } from "../../shared/ordnung.ts";
 import { aufruf, json } from "./api-aufruf.ts";
 import type { Art } from "./api-dokumente.ts";
@@ -130,21 +131,10 @@ export interface Bericht {
   zeitstempel: { seq: number; zeit: string; dienst: string } | null;
 }
 
-export interface Einstellungen {
-  firma: string;
-  anschrift: string;
-  verantwortlich: string;
-  aufsicht: boolean;
-  datensicherung: string;
-  scannen: string;
-  ergaenzungen: string;
-}
+/** Angaben zum Betrieb nach dem Schema des GoBD-Kerns, dazu die Aufsicht, die die Frist für Buchungsbelege verlängert */
+export type Einstellungen = AngabenZumBetrieb & { aufsicht: boolean };
 
-export interface Verfahrensdoku {
-  stand: string;
-  vollstaendig: boolean;
-  abschnitte: { titel: string; absaetze: string[]; liste?: string[]; luecken?: string[] }[];
-}
+export type { Verfahrensdoku };
 
 export const betriebApi = {
   regeln: () => aufruf<Regel[]>("/api/regeln"),

@@ -1,11 +1,25 @@
+import { alsMarkdown } from "@firsttris/gobd-kern/verfahrensdoku";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { ProcedureSettings } from "../components/ProcedureSettings.tsx";
-import { api } from "../lib/api.ts";
+import { api, type Verfahrensdoku } from "../lib/api.ts";
 import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
-/** Verfahrensdokumentation: erzeugt vom Server aus Code, Datenbank und den Angaben zum Betrieb; drucken ergibt das PDF */
+/**
+ * Verfahrensdokumentation: erzeugt vom Server aus Code, Datenbank und den Angaben zum Betrieb; drucken ergibt das PDF,
+ * „Als Markdown“ dieselbe Fassung als Text (alsMarkdown aus dem GoBD-Kern, im Browser aus der Antwort des Servers)
+ */
+
+function markdownSichern(doku: Verfahrensdoku) {
+  const url = URL.createObjectURL(new Blob([alsMarkdown(doku)], { type: "text/markdown;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `verfahrensdokumentation-${doku.stand.datum}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /**
  * Schlüssel für Zeilen, die gleich lauten können: Zwei Postfächer mit demselben Namen, Benutzer und Server ergeben
  * dieselbe Zeile; die zweite bekommt einen Zähler, sonst verwechselte React die beiden.
@@ -35,6 +49,13 @@ export function ProcedurePage() {
           >
             {m.procedure_print()}
           </button>
+          <button
+            type="button"
+            onClick={() => markdownSichern(doku.data)}
+            className="h-9 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle"
+          >
+            {m.procedure_markdown()}
+          </button>
           <p role="status" className="m-0 text-sm">
             {doku.data.vollstaendig ? m.procedure_complete() : m.procedure_incomplete()}
           </p>
@@ -43,7 +64,13 @@ export function ProcedurePage() {
       {werte.data && ich.data && <ProcedureSettings werte={werte.data} darfAendern={ich.data.role === "inhaber"} />}
       {doku.data && (
         <article lang="de" className="flex max-w-3xl flex-col gap-5 text-sm leading-relaxed">
-          <p className="m-0 text-muted">{m.procedure_stand({ datum: tag(doku.data.stand) })}</p>
+          <p className="m-0 text-muted">
+            {m.procedure_stand({
+              datum: tag(doku.data.stand.datum),
+              programm: doku.data.stand.programm,
+              version: doku.data.stand.version,
+            })}
+          </p>
           {doku.data.abschnitte.map((a) => (
             <section key={a.titel} className="flex flex-col gap-2">
               <h2 className="m-0 font-semibold text-base">{a.titel}</h2>

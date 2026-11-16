@@ -33,7 +33,7 @@ roten Test und blieb als Test erhalten.
 
 ## Was der Betrieb beiträgt
 
-- Verfahrensdokumentation vollständig ausfüllen und aktuell halten (Datensicherung, Scannen, Verantwortliche).
+- Verfahrensdokumentation vollständig ausfüllen und aktuell halten (alle Angaben zum Betrieb).
 - Datenbank, Dateien oder Bucket und `.env` sichern und die Wiederherstellung prüfen, danach „Prüfung“ mit Dateien.
 - Zugänge pflegen: Einladungen nur an die richtigen Personen, ausgeschiedene Zugänge und Tokens widerrufen.
 - Dokumente zeitnah einordnen und Sperren bei Außenprüfungen oder Rechtsstreit anlegen.

@@ -84,8 +84,12 @@ async function vorbereiten(page: Page) {
       verantwortlich: "Anna Muster",
       aufsicht: false,
       datensicherung: "Täglich verschlüsselt auf ein zweites Gerät, monatlich Wiederherstellung geprüft.",
-      scannen: "Papier wird nach dem Scannen ein Jahr aufbewahrt.",
+      papierbelege: "Papier wird nach dem Scannen ein Jahr aufbewahrt.",
       ergaenzungen: "",
+      rechtsform: "GmbH",
+      aufbewahrungsort: "Server und Sicherungen im Büro in Musterstadt, Deutschland.",
+      serverbetrieb: "Anna Muster betreibt den Server selbst und spielt Updates monatlich ein.",
+      schluesselablage: "Im Tresor des Büros.",
     }),
   );
   // Der E2E-Server liest Inhalte jede Sekunde; die XRechnung soll erkannt sein

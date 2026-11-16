@@ -1,7 +1,10 @@
+import { formatPruefwert } from "@firsttris/gobd-kern/pruefwert";
+import { alsMarkdown, fehlendeAngaben, KERN_TEXTE, LEERE_ANGABEN } from "@firsttris/gobd-kern/verfahrensdoku";
 import { unzipSync } from "fflate";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
+import { prueferDarf } from "../zugang/pruefer.ts";
 import { verfahrensdoku } from "./verfahrensdoku.ts";
 
 describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation gegen Postgres", () => {
@@ -23,8 +26,19 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     verantwortlich: "Anna Muster",
     aufsicht: false,
     datensicherung: "Täglich verschlüsselt auf ein zweites Gerät, monatlich Wiederherstellung geprüft.",
-    scannen: "Es wird nicht gescannt.",
+    papierbelege: "Es wird nicht gescannt.",
     ergaenzungen: "",
+    rechtsform: "GmbH",
+    aufbewahrungsort: "Server und Sicherungen im Büro in Musterstadt, Deutschland",
+    serverbetrieb: "Anna Muster betreibt den Server selbst und spielt Updates monatlich ein.",
+    schluesselablage: "Im Tresor des Büros; im Notfall hat der Steuerberater Zugang.",
+  };
+  type Doku = {
+    titel: string;
+    stand: { datum: string; programm: string; version: string };
+    luecken: number;
+    vollstaendig: boolean;
+    abschnitte: { titel: string; absaetze: string[]; liste?: string[]; luecken?: string[] }[];
   };
 
   beforeAll(async () => {
@@ -40,16 +54,20 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
   afterAll(() => t?.aufraeumen());
 
   it("nennt ohne Angaben die Lücken, statt sie zu füllen", async () => {
-    const doku = await (await als(inhaber)("/api/verfahrensdoku")).json();
+    const doku: Doku = await (await als(inhaber)("/api/verfahrensdoku")).json();
     expect(doku.vollstaendig).toBe(false);
-    const luecken = doku.abschnitte.flatMap((a: { luecken?: string[] }) => a.luecken ?? []);
+    const luecken = doku.abschnitte.flatMap((a) => a.luecken ?? []);
     expect(luecken).toEqual(
       expect.arrayContaining([
         "Name des Betriebs",
-        "verantwortliche Person",
+        "verantwortliche Person (und wer vertritt)",
         expect.stringMatching(/^Beschreibung der Datensicherung/),
       ]),
     );
+    // Jede Angabe zum Betrieb aus dem Schema des Kerns fehlt genau einmal, die Ergänzungen nie
+    expect([...luecken].sort()).toEqual(fehlendeAngaben(LEERE_ANGABEN).sort());
+    expect(doku.luecken).toBe(luecken.length);
+    expect(doku.titel).toBe("Verfahrensdokumentation");
     expect(JSON.stringify(doku)).toContain("Buchungsbelege werden acht Jahre aufbewahrt");
     expect(JSON.stringify(doku)).toContain("im Dateisystem des Servers");
     expect(JSON.stringify(doku)).toContain("ein durchsuchbares PDF (PDF/A-2b");
@@ -68,15 +86,107 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
 
   it("beschreibt Betrieb, Regeln und Zugänge und ist mit allen Angaben vollständig", async () => {
     await als(inhaber)("/api/regeln", json({ name: "Telefon", wenn: { domain: "telefon.example" }, dann: "beleg" }));
-    const doku = await (await als(kanzlei)("/api/verfahrensdoku")).json();
+    const doku: Doku = await (await als(kanzlei)("/api/verfahrensdoku")).json();
     expect(doku.vollstaendig).toBe(true);
+    expect(doku.luecken).toBe(0);
     const text = JSON.stringify(doku);
     expect(text).toContain("Muster & Söhne GmbH archiviert");
-    expect(text).toContain("Verantwortlich für das Archiv: Anna Muster");
+    expect(text).toContain("Verantwortlich: Anna Muster");
     expect(text).toContain("Täglich verschlüsselt");
     expect(text).toContain("Regel „Telefon“ schlägt vor: Buchungsbelege");
     expect(text).toContain("kanzlei@example.org: Steuerberatung");
-    expect(doku.stand).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(doku.titel).toBe("Verfahrensdokumentation Muster & Söhne GmbH");
+    expect(doku.stand).toEqual({
+      datum: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      programm: "Belegt",
+      version: expect.any(String),
+    });
+    // Jede Angabe steht mit ihrer Beschriftung im Abschnitt, in den sie gehört
+    const abschnitt = (nr: string) => doku.abschnitte.find((a) => a.titel.startsWith(nr))!.absaetze;
+    expect(abschnitt("1.")).toEqual(
+      expect.arrayContaining([
+        "Rechtsform: GmbH",
+        "Anschrift: Musterweg 1, 12345 Musterstadt",
+        "Verantwortlich: Anna Muster",
+        `Ort der Aufbewahrung: ${angaben.aufbewahrungsort}`,
+      ]),
+    );
+    expect(abschnitt("7.")).toEqual(
+      expect.arrayContaining([
+        `Betrieb des Servers: ${angaben.serverbetrieb}`,
+        `Datensicherung: ${angaben.datensicherung}`,
+        `Ablage von Schlüsseln und Passwörtern: ${angaben.schluesselablage}`,
+      ]),
+    );
+    expect(doku.abschnitte.find((a) => a.titel === "8. Papierbelege und Scannen")!.absaetze).toEqual([
+      "Papierbelege und Scannen: Es wird nicht gescannt.",
+    ]);
+  });
+
+  it("nimmt die Texte zum Kern und ergänzt sie um das, was nur Belegt betrifft", async () => {
+    const doku: Doku = await (await als(kanzlei)("/api/verfahrensdoku")).json();
+    const kern = doku.abschnitte.find((a) => a.titel === "4. Unveränderbarkeit und Nachvollziehbarkeit")!;
+    const nach = (kerntext: string) => kern.absaetze[kern.absaetze.findIndex((a) => a.startsWith(kerntext)) + 1];
+    for (const text of [KERN_TEXTE.unveraenderbarkeit, KERN_TEXTE.auditLog, KERN_TEXTE.hashKette, KERN_TEXTE.dateien])
+      expect(kern.absaetze).toContain(text);
+    expect(kern.absaetze).toContain(`${KERN_TEXTE.siegel} ${KERN_TEXTE.korrektur}`);
+    // Den Satz zur Anmeldung liefert der Kern (datenbankRollenText); die Fälle prüft datenbank.test.ts
+    expect(nach(KERN_TEXTE.siegel)).toMatch(/^Die Anwendung meldet sich bei der Datenbank als „.+“ an/);
+    expect(nach(KERN_TEXTE.dateien)).toBe("Die Dateien liegen im Dateisystem des Servers.");
+    expect(nach(KERN_TEXTE.pruefung)).toBe(
+      "Aufrufen lässt sie sich unter „Prüfung“; dort vergleicht sie auf Wunsch auch jede Datei mit ihrem Hash.",
+    );
+    expect(kern.absaetze).toContain(
+      "Bei Erstellung dieses Dokuments meldete die Prüfung von Kette, Kopf und Siegeln keine Befunde.",
+    );
+    const [kopf] = await t.sql`select seq, encode(hash, 'hex') as hash from audit_chain where id = 1`;
+    expect(kern.absaetze.at(-1)).toBe(
+      `${KERN_TEXTE.pruefwert} Bei Erstellung dieses Dokuments: ${formatPruefwert({ seq: Number(kopf!.seq), hash: kopf!.hash })}.`,
+    );
+    expect(kern.liste).toEqual(
+      expect.arrayContaining([
+        "Versiegelt: Dokumente, ab dem Einfügen",
+        "Versiegelt: Archivnummern, ab dem Einfügen",
+        "Versiegelt: Löschnachweise, sobald die Löschung bestätigt ist",
+      ]),
+    );
+  });
+
+  it("gibt dieselbe Fassung als Markdown aus, für alle, die sie lesen dürfen", async () => {
+    const doku: Doku = await (await als(kanzlei)("/api/verfahrensdoku")).json();
+    // Die Oberfläche erzeugt die Datei mit alsMarkdown aus genau dieser Antwort
+    const md = alsMarkdown(doku);
+    expect(md.startsWith("# Verfahrensdokumentation Muster & Söhne GmbH\n\n")).toBe(true);
+    expect(md).toContain(`Stand: ${doku.stand.datum} · Belegt ${doku.stand.version} · vollständig`);
+    for (const a of doku.abschnitte) expect(md).toContain(`\n## ${a.titel.replace(/^(\d+)\./, "$1\\.")}\n`);
+    expect(md).toContain("\n- Regel „Telefon“ schlägt vor: Buchungsbelege");
+    expect(md).toContain("Verantwortlich: Anna Muster");
+    expect(md).not.toContain("Fehlt:");
+    // Wer die Verfahrensdokumentation nicht lesen darf, bekommt auch kein Markdown
+    expect(prueferDarf("GET", "/api/verfahrensdoku")).toBe(false);
+  });
+
+  it("nennt im Markdown jede offene Lücke", async () => {
+    await als(inhaber)("/api/einstellungen", json({ ...angaben, schluesselablage: "", rechtsform: "" }));
+    const doku: Doku = await (await als(inhaber)("/api/verfahrensdoku")).json();
+    expect(doku.luecken).toBe(2);
+    const md = alsMarkdown(doku);
+    expect(md).toContain("unvollständig, 2 Angaben fehlen");
+    expect(md).toContain("> **Fehlt:** Rechtsform");
+    expect(md).toContain("> **Fehlt:** wo Schlüssel, Passwörter und Zertifikate verwahrt werden (nur der Ort)");
+    await als(inhaber)("/api/einstellungen", json(angaben));
+  });
+
+  it("übernimmt Werte aus der ersten Fassung der Einstellungen (Spalte scannen) als Papierbelege", async () => {
+    await t.sql`update einstellungen set scannen = 'Scans prüft die Buchhaltung am selben Tag.' where id = 1`;
+    expect(await (await als(inhaber)("/api/einstellungen")).json()).toMatchObject({
+      papierbelege: "Scans prüft die Buchhaltung am selben Tag.",
+    });
+    const doku: Doku = await (await als(inhaber)("/api/verfahrensdoku")).json();
+    expect(doku.abschnitte.find((a) => a.titel.startsWith("8."))!.absaetze).toEqual([
+      "Papierbelege und Scannen: Scans prüft die Buchhaltung am selben Tag.",
+    ]);
+    await als(inhaber)("/api/einstellungen", json(angaben));
   });
 
   it("nennt im Zugriff die API-Tokens, die schreiben oder lesen, ohne ihr Geheimnis", async () => {

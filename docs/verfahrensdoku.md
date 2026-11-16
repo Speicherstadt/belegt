@@ -15,11 +15,17 @@ letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und
 [Import aus Paperless-ngx](umzug.md) mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der Prüfsummen.
 
 Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):
-Name, Anschrift, wer verantwortlich ist, Datensicherung und Scannen. Fehlt davon etwas, steht im Dokument „Fehlt: …“.
-Jede Änderung steht im Protokoll.
+Name, Rechtsform, Anschrift, wer verantwortlich ist und wer vertritt, Ort der Aufbewahrung, Betrieb des Servers,
+Datensicherung, Ablage von Schlüsseln und Passwörtern (nur der Ort), Papierbelege und Scannen, dazu Ergänzungen. Fehlt
+davon etwas, steht im Dokument „Fehlt: …“. Jede Änderung steht im Protokoll.
 
 „Kredit- oder Wertpapierinstitut oder unter Versicherungsaufsicht“ verlängert die Frist für Buchungsbelege von 8 auf
 10 Jahre (Art. 97 § 19a Abs. 3 EGAO), für Einordnungen ab dann; frühere behalten ihre Frist. Name und Anschrift stehen
 auch als Datenlieferant in der `index.xml` des Z3-Exports.
 
-Zum Weitergeben druckst du die Seite oder sicherst sie als PDF; Navigation und Formular erscheinen dabei nicht.
+Zum Weitergeben druckst du die Seite oder sicherst sie als PDF; Navigation und Formular erscheinen dabei nicht. **Als
+Markdown** lädt dieselbe Fassung als Textdatei herunter, mit Stand (Tag, Programm und Version) und jeder offenen Lücke.
+
+Gliederung, Angaben zum Betrieb, die Texte zu Sperren, Audit-Log, Hash-Kette, Siegeln, Prüfung, Prüfwert, Dateispeicher
+und Datenbankanmeldung sowie die Markdown-Ausgabe kommen aus dem GoBD-Kern (`@firsttris/gobd-kern`), dessen SQL-Vorlage
+auch Belegts Datenbank schützt; was nur Belegt betrifft, steht dahinter.
