@@ -210,11 +210,13 @@ services:
 
 # Nur beim ersten Start mit leerem Volume (docker-entrypoint-initdb.d); bestehende Installationen legen die Rolle von
 # Hand an (docs/betrieb.md, „Getrennte Datenbankrollen“). Das Skript wird eingelesen, nicht ausgeführt: kein exit.
+# Das Passwort liest psql mit \getenv aus der Umgebung; als Argument stünde es in der Prozessliste.
 configs:
   app-rolle:
     content: |
       if [ -n "$${BELEGT_APP_PASSWORT:-}" ]; then
-        psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" -v pw="$$BELEGT_APP_PASSWORT" <<'SQL'
+        psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" <<'SQL'
+      \getenv pw BELEGT_APP_PASSWORT
       CREATE ROLE belegt_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT PASSWORD :'pw';
       SQL
       fi
