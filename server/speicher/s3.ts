@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { Dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
+import type { Dateispeicher, PruefenAlleErgebnis } from "@firsttris/gobd-kern/dateispeicher";
 import { sha256Of } from "@firsttris/gobd-kern/dateispeicher";
 import { AwsClient } from "aws4fetch";
 import { XMLParser } from "fast-xml-parser";
@@ -71,8 +71,39 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
     throw new Error(`S3 ${was}: ${res.status}${code ? ` ${code}` : ""}`);
   };
 
+  /** Liest die Datei gestreamt und vergleicht ihren Hash; andere Fehler als eine fehlende Datei wirft sie */
+  async function dateiPruefen(sha256: string): Promise<"ok" | "fehlt" | "beschädigt"> {
+    const res = await senden(adresse(schluessel(sha256)));
+    if (res.status === 404) {
+      await res.body?.cancel();
+      return "fehlt";
+    }
+    await pruefen(res, "Lesen");
+    const hash = createHash("sha256");
+    if (res.body) for await (const teil of res.body) hash.update(teil);
+    return hash.digest("hex") === sha256 ? "ok" : "beschädigt";
+  }
+
   return {
     pfad: (sha256) => `s3://${k.bucket}/${schluessel(sha256)}`,
+
+    pruefen: dateiPruefen,
+
+    // Wie der Dateispeicher des Kerns: nacheinander, eine Datei, die sich nicht lesen lässt, ist ein Befund
+    async pruefenAlle(hashes, { nochGenutzt, maxBefunde = Number.POSITIVE_INFINITY } = {}) {
+      const ergebnis: PruefenAlleErgebnis = { dateien: 0, befundAnzahl: 0, befunde: [] };
+      for (const sha256 of hashes) {
+        ergebnis.dateien++;
+        const befund = await dateiPruefen(sha256).then(
+          (b) => (b === "ok" ? null : { befund: b }),
+          (fehler: unknown) => ({ befund: "nicht lesbar" as const, ursache: String(fehler) }),
+        );
+        if (!befund || (befund.befund === "fehlt" && nochGenutzt && !(await nochGenutzt(sha256)))) continue;
+        ergebnis.befundAnzahl++;
+        if (ergebnis.befunde.length < maxBefunde) ergebnis.befunde.push({ sha256, ...befund });
+      }
+      return ergebnis;
+    },
 
     async speichern(bytes) {
       const sha256 = sha256Of(bytes);

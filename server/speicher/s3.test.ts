@@ -131,6 +131,29 @@ describe("S3 mit Object Lock", () => {
     await expect(speicher.laden(sha)).rejects.toThrow("Datei passt nicht zu ihrem Hash");
   });
 
+  it("prüft Dateien gestreamt wie der Dateispeicher des Kerns: ok, fehlt, beschädigt", async () => {
+    const speicher = s3Speicher(k);
+    const gut = await speicher.speichern(new TextEncoder().encode("bleibt, wie es ist"));
+    const schlecht = await speicher.speichern(new TextEncoder().encode("wird später verändert"));
+    s.objekte.get(schluessel(schlecht))!.at(-1)!.bytes = Buffer.from("anders");
+    const weg = "b".repeat(64);
+    expect(await speicher.pruefen(gut)).toBe("ok");
+    expect(await speicher.pruefen(schlecht)).toBe("beschädigt");
+    expect(await speicher.pruefen(weg)).toBe("fehlt");
+    expect(await speicher.pruefenAlle([gut, schlecht, weg])).toEqual({
+      dateien: 3,
+      befundAnzahl: 2,
+      befunde: [
+        { sha256: schlecht, befund: "beschädigt" },
+        { sha256: weg, befund: "fehlt" },
+      ],
+    });
+    // Eine fehlende Datei, die niemand mehr braucht, ist kein Befund; gezählt wird jeder, genannt höchstens maxBefunde
+    expect(await speicher.pruefenAlle([gut, schlecht, weg], { nochGenutzt: async () => false, maxBefunde: 0 })).toEqual(
+      { dateien: 3, befundAnzahl: 1, befunde: [] },
+    );
+  });
+
   it("verlängert die Sperre und löscht erst nach ihrem Ende, jede Version", async () => {
     const speicher = s3Speicher({ ...k, sperreTage: 0 });
     const sha = await speicher.speichern(new TextEncoder().encode("frist läuft"));
