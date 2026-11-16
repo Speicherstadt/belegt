@@ -196,9 +196,9 @@ export function DocumentList({
             <button
               ref={uploadKnopf}
               type="button"
-              onClick={() => eingabe.current?.click()}
-              disabled={hochladen.isPending}
-              className={`h-10 rounded-md px-4 font-medium text-sm disabled:opacity-60 ${leerMitUpload ? "border border-border hover:bg-subtle" : "bg-primary text-onprimary"}`}
+              onClick={() => !hochladen.isPending && eingabe.current?.click()}
+              aria-busy={hochladen.isPending}
+              className={`h-10 rounded-md px-4 font-medium text-sm ${leerMitUpload ? "border border-border hover:bg-subtle" : "bg-primary text-onprimary"}`}
             >
               {hochladen.isPending ? m.upload_busy() : m.upload()}
             </button>
@@ -348,8 +348,7 @@ export function DocumentList({
                   uploadKnopf.current?.focus();
                   eingabe.current?.click();
                 }}
-                disabled={hochladen.isPending}
-                className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+                className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
               >
                 {m.archive_empty_upload()}
               </button>

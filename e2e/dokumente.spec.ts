@@ -218,3 +218,20 @@ test("nach „Filter zurücksetzen“ erscheint „Noch keine Dokumente“ nicht
   freigeben();
   await expect(page.getByRole("heading", { name: "Noch keine Dokumente" })).toBeVisible();
 });
+
+test("nach dem Hochladen aus dem Leerzustand steht der Fokus auf „Hochladen“ in der Leiste", async ({ page }, info) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  await page.goto("/archiv");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Dokument hochladen" }).click();
+  const antwort = page.waitForResponse((r) => r.request().method() === "POST" && r.url().endsWith("/api/dokumente"));
+  await (await chooser).setFiles({
+    name: `Fokus-${info.project.name}.pdf`,
+    mimeType: "application/pdf",
+    buffer: Buffer.from(`%PDF-1.7\n% Fokus ${info.project.name} ${Date.now()}\n`),
+  });
+  await antwort;
+  const knopf = page.getByRole("button", { name: "Hochladen", exact: true });
+  await expect(knopf).not.toHaveAttribute("aria-busy", "true");
+  await expect(knopf).toBeFocused();
+});
