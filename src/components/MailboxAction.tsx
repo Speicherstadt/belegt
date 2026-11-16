@@ -68,7 +68,7 @@ function Protokoll({ quelle }: { quelle: Quelle }) {
 }
 
 /** Formular für die Aktion; Löschen verlangt eine eigene Bestätigung mit Hinweis */
-function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
+export function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
   const queryClient = useQueryClient();
   const id = useId();
   const [aktion, setAktion] = useState<PostfachAktion>(quelle.aktion);
@@ -179,7 +179,8 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          disabled={speichern.isPending}
+          // Ob es „erst nach Sperre“ gibt, steht erst mit dem Protokoll fest; vorher fiele die Sperre still weg
+          disabled={speichern.isPending || (wieLoeschen && !protokoll.data)}
           className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
         >
           {m.mailbox_action_save()}
