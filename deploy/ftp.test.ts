@@ -39,6 +39,13 @@ describe("FTP-Dienst für Scanner", () => {
     expect(dienst(text, "worker")).toContain("# - ./eingang:/var/lib/belegt/eingang");
   });
 
+  it("lässt das Konto des Scanners nur hochladen, nicht herunterladen und nicht anonym", () => {
+    // Ohne TLS geht das Passwort im Klartext durchs LAN; wer es mitliest, käme sonst an jede Datei, die im Ordner auf die
+    // Aufnahme wartet oder in fehler/ liegt (vsftpd.conf(5): download_enable)
+    expect(konf).toMatch(/^download_enable=NO$/m);
+    expect(konf).toMatch(/^anonymous_enable=NO$/m);
+  });
+
   it("nennt denselben Bereich im Containerfile", () => {
     expect(lesen("deploy/ftp/Containerfile")).toContain(`EXPOSE 21 ${von}-${bis}`);
   });
