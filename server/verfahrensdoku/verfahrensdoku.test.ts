@@ -2,6 +2,7 @@ import { formatPruefwert } from "@firsttris/gobd-kern/pruefwert";
 import { alsMarkdown, fehlendeAngaben, KERN_TEXTE, LEERE_ANGABEN } from "@firsttris/gobd-kern/verfahrensdoku";
 import { unzipSync } from "fflate";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { kettePruefen } from "../pruefung/kette.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { prueferDarf } from "../zugang/pruefer.ts";
@@ -307,6 +308,52 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     const mit = JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
     expect(mit).toContain("per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage");
     expect(mit).toContain("ohne IP-Adresse");
-    expect(mit).toContain("Bisher wurden 1 Links angelegt, 1 gelten derzeit.");
+    expect(mit).toContain("Bisher wurde 1 Link angelegt, 1 gilt derzeit.");
+  });
+});
+
+describe.skipIf(!testDatenbankUrl)("Verfahrensdokumentation eines frischen Archivs gegen Postgres", () => {
+  let t: Awaited<ReturnType<typeof testApp>>;
+  let inhaber: string;
+  const doku = async () => JSON.stringify(await verfahrensdoku(t.db, { abrufMinuten: 5, version: "test" }));
+
+  beforeAll(async () => {
+    t = await testApp();
+    inhaber = (await t.registrieren("anna@example.org")).cookie;
+  });
+  afterAll(() => t?.aufraeumen());
+
+  it("zählt ein Dokument und eine Mail in der Einzahl", async () => {
+    const mail = [
+      "From: a@example.org",
+      "To: b@example.org",
+      "Subject: Hallo",
+      "Message-ID: <1@example.org>",
+      "",
+      "Text",
+      "",
+    ];
+    const form = new FormData();
+    form.append("datei", new File([mail.join("\r\n")], "m.eml"));
+    expect((await t.anfrage("/api/mails", { method: "POST", body: form }, inhaber)).status).toBe(201);
+    expect(await doku()).toMatch(
+      /Stand des Archivs: 1 Dokument, davon 1 Mail und 0 nach Ablauf der Frist gelöscht; \d+ Einträge im Protokoll\./,
+    );
+  });
+
+  it("nennt die tägliche gespeicherte Prüfung der Kette mit dem letzten Lauf", async () => {
+    const vorher = await doku();
+    expect(vorher).toContain("Der Worker prüft Kette, Kopf und Siegel einmal am Tag und hält jeden Lauf");
+    expect(vorher).toContain("Ein gespeicherter Lauf liegt noch nicht vor.");
+    const lauf = await kettePruefen(t.db, "system:worker");
+    expect(lauf).not.toBeNull();
+    expect(await doku()).toMatch(/Der letzte gespeicherte Lauf vom \d{4}-\d{2}-\d{2} meldete keine Befunde\./);
+  });
+
+  it("beschreibt den ZIP-Download mit Sicht, Grenzen und den nicht enthaltenen Dokumenten", async () => {
+    const text = await doku();
+    expect(text).toContain("als ZIP herunterladen");
+    expect(text).toContain("höchstens 200 Dokumente und 2 GB");
+    expect(text).toContain("nicht-enthalten.txt");
   });
 });
