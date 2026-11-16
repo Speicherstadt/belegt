@@ -214,6 +214,32 @@ describe.skipIf(!testDatenbankUrl)("Original an Adresse senden gegen Postgres", 
     }
   });
 
+  it("lehnt Zeilenumbrüche und Steuerzeichen im Wert der Kopfzeile ab, statt sie zu speichern", async () => {
+    // Ein solcher Wert ließe sich nie senden (fetch: „invalid header value“) und wäre ein Versuch, Kopfzeilen einzuschleusen
+    for (const wert of ["Bearer a\r\nX-Evil: 1", "Bearer a\nb", "Bearer a\rb", "Bearer a\u0000b"]) {
+      const res = await als(
+        inhaber,
+        "/api/workflows",
+        json({
+          name: `kopf-${Math.random()}`,
+          ausloeser: "eingang",
+          bedingungen: { dateinameEnthaelt: "trifft-nie-zu" },
+          aktionen: [
+            {
+              art: "senden",
+              url: "http://empfaenger.example/x",
+              dateifeld: "datei",
+              kopfzeile: { name: "X-Api-Key", wert },
+            },
+          ],
+        }),
+      );
+      expect(res.status, JSON.stringify(wert)).toBe(400);
+      expect(await res.text()).not.toContain("Bearer a");
+    }
+    expect(await t.sql`select 1 from workflows where name like 'kopf-%'`).toHaveLength(0);
+  });
+
   it("folgt keiner Weiterleitung und gibt bei einer Ablehnung (4xx) sofort auf", async () => {
     const ziel = await empfaenger();
     const weiter = await empfaenger(
