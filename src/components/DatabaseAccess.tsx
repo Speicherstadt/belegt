@@ -15,6 +15,7 @@ export const PROBLEM: Record<DatenbankProblem, () => string> = {
   dateien: () => m.db_problem_dateien(),
   leeren: () => m.db_problem_leeren(),
   schreiben: () => m.db_problem_schreiben(),
+  vorgaben: () => m.db_problem_vorgaben(),
 };
 
 const ja = (wert: boolean) => (wert ? m.db_yes() : m.db_no());

@@ -41,6 +41,8 @@ export const PROBLEME = {
   replikation: "Die Anmeldung kann den Replikationsmodus und damit die Trigger abschalten.",
   dateien: "Die Anmeldung hat Zugriff auf Dateien oder Programme des Datenbankservers.",
   leeren: "Die Anmeldung kann Tabellen leeren (TRUNCATE) oder Trigger anlegen.",
+  vorgaben:
+    "Für die Anmeldung sind Vorgaben per ALTER ROLE … SET hinterlegt (etwa search_path); der Migrationsschritt setzt sie zurück.",
   schreiben:
     "Die Anmeldung darf Tabellen schreiben, die sie nur lesen oder ergänzen soll (etwa über pg_write_all_data oder ein Recht für PUBLIC).",
 } as const;
@@ -86,6 +88,7 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
       temporaer: boolean;
       replikation: boolean;
       dateien: boolean;
+      vorgaben: boolean;
     }[]
   >`with erreichbar as (
       select r.* from pg_roles r join pg_roles a on a.rolname = ${wer.anmeldung}
@@ -107,7 +110,10 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
               where has_parameter_privilege(r.oid, 'session_replication_role', 'SET,ALTER SYSTEM')) as replikation,
       exists(select 1 from erreichbar r cross join pg_roles f
               where f.rolname in ('pg_read_server_files', 'pg_write_server_files', 'pg_execute_server_program')
-                and pg_has_role(r.oid, f.oid, 'USAGE')) as dateien`;
+                and pg_has_role(r.oid, f.oid, 'USAGE')) as dateien,
+      exists(select 1 from pg_db_role_setting s join pg_roles a on a.oid = s.setrole
+              where a.rolname = ${wer.anmeldung}
+                and s.setdatabase in (0, (select oid from pg_database where datname = current_database()))) as vorgaben`;
   // Über alle per SET erreichbaren Rollen: pg_write_all_data oder ein Recht für PUBLIC zählen mit
   const tabellen = await sql<TabellenRechte[]>`
     with erreichbar as (
@@ -131,6 +137,7 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
     if (r!.temporaer) probleme.push("temporaer");
     if (r!.replikation) probleme.push("replikation");
     if (r!.dateien) probleme.push("dateien");
+    if (r!.vorgaben) probleme.push("vorgaben");
     if (tabellen.some((t) => t.truncate || t.trigger)) probleme.push("leeren");
     const zuViel = (t: TabellenRechte) =>
       (["insert", "update", "delete"] as const).some((r) => t[r] && !soll.get(t.tabelle)?.includes(r));
@@ -218,6 +225,7 @@ async function tabellenRechte(tx: Leser): Promise<{ tabelle: string; rechte: str
 export async function rechteVergeben(eigentuemer: postgres.Sql, app: Identitaet): Promise<Datenbankzugriff> {
   return eigentuemer.begin(async (tx) => {
     const rolle = tx(app.anmeldung);
+    await vorgabenZuruecksetzen(tx, app);
     await tx`revoke create on schema public from public`;
     await tx`revoke temporary on database ${tx(app.datenbank)} from public`;
     await tx`grant connect on database ${tx(app.datenbank)} to ${rolle}`;
@@ -244,6 +252,26 @@ export async function rechteVergeben(eigentuemer: postgres.Sql, app: Identitaet)
       throw new Error(`Die App-Anmeldung ist nicht eingeschränkt: ${problemText(zugriff.probleme)}`);
     return zugriff;
   });
+}
+
+/**
+ * Vorgaben der App-Rolle per ALTER ROLE … SET (pg_db_role_setting) wirken bei jeder Anmeldung: ein Suchpfad ohne public,
+ * nur lesende Transaktionen oder eine andere Isolationsstufe legen Belegt lahm. Die App kann sie für sich selbst setzen;
+ * der Migrationsschritt nimmt sie zurück und nennt die Namen, nie die Werte. session_replication_role bricht schon vorher
+ * ab (appAnmeldungPruefen), weil nur ein Superuser sie setzen kann.
+ * https://www.postgresql.org/docs/16/catalog-pg-db-role-setting.html
+ */
+async function vorgabenZuruecksetzen(tx: postgres.TransactionSql, app: Identitaet): Promise<void> {
+  const vorgaben = await tx<{ alle: boolean; namen: string[] }[]>`
+    select s.setdatabase = 0 as alle, array(select split_part(c, '=', 1) from unnest(s.setconfig) c) as namen
+      from pg_db_role_setting s join pg_roles a on a.oid = s.setrole
+     where a.rolname = ${app.anmeldung}
+       and s.setdatabase in (0, (select oid from pg_database where datname = current_database()))`;
+  for (const v of vorgaben) {
+    if (v.alle) await tx`alter role ${tx(app.anmeldung)} reset all`;
+    else await tx`alter role ${tx(app.anmeldung)} in database ${tx(app.datenbank)} reset all`;
+    console.warn(`Vorgaben der App-Anmeldung ${app.anmeldung} zurückgesetzt: ${v.namen.join(", ")}`);
+  }
 }
 
 /** Bezeichner in doppelten Anführungszeichen, wie quote_ident */

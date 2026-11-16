@@ -228,6 +228,33 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     }
   });
 
+  // Vorgaben per ALTER ROLE … SET wirken bei jeder Anmeldung, etwa ein Suchpfad ohne public oder nur lesende Transaktionen
+  it("setzt Vorgaben der App-Rolle im Migrationsschritt zurück", async () => {
+    const [z] = await admin<{ db: string }[]>`select current_database() as db`;
+    await admin.unsafe(`alter role "${appRolle}" set search_path = pg_catalog`);
+    await admin.unsafe(`alter role "${appRolle}" in database "${z!.db}" set default_transaction_read_only = on`);
+    try {
+      await expect(migrierenMitRechten(testDatenbankUrl!, appUrl)).resolves.toMatchObject({ eingeschraenkt: true });
+      expect(
+        await admin`select 1 from pg_db_role_setting where setrole = (select oid from pg_roles where rolname = ${appRolle})`,
+      ).toEqual([]);
+    } finally {
+      await admin.unsafe(`alter role "${appRolle}" reset all`);
+      await admin.unsafe(`alter role "${appRolle}" in database "${z!.db}" reset all`);
+    }
+  });
+
+  it("warnt ohne Migrationsschritt vor Vorgaben der App-Rolle und startet trotzdem", async () => {
+    await admin.unsafe(`alter role "${appRolle}" set statement_timeout = '1s'`);
+    try {
+      const z = await datenbankVorbereiten({ appUrl });
+      expect(z).toMatchObject({ eingeschraenkt: false, probleme: ["vorgaben"] });
+      expect(zugriffWarnung(z)).toMatch(/ALTER ROLE/);
+    } finally {
+      await admin.unsafe(`alter role "${appRolle}" reset all`);
+    }
+  });
+
   it("lehnt eine App-Rolle mit Rechten zum Anlegen von Rollen ab", async () => {
     await admin.unsafe(`alter role "${appRolle}" createrole`);
     try {

@@ -823,6 +823,7 @@
   "db_problem_dateien": "Die Anmeldung hat Zugriff auf Dateien oder Programme des Datenbankservers.",
   "db_problem_leeren": "Die Anmeldung kann Tabellen leeren oder Trigger anlegen.",
   "db_problem_schreiben": "Die Anmeldung darf Tabellen schreiben, die sie nur lesen oder ergänzen soll.",
+  "db_problem_vorgaben": "Für die Anmeldung sind eigene Vorgaben hinterlegt (ALTER ROLE … SET); der nächste Start mit MIGRATION_DATABASE_URL setzt sie zurück.",
   "db_link": "Getrennte Datenbankrollen einrichten",
   "db_rights_show": "Rechte je Tabelle",
   "db_col_table": "Tabelle",

@@ -61,7 +61,7 @@ export async function migrationenAktuell(sql: postgres.Sql, ordner = MIGRATIONEN
 /**
  * Was der Server vor dem Start mit der Datenbank tut:
  * - mit MIGRATION_DATABASE_URL: migrieren und Rechte vergeben (getrennte Rollen);
- * - ohne, aber mit eingeschränkter Anmeldung: Das Startskript hat schon migriert (server/start.sh); fehlt eine
+ * - ohne, mit einer Anmeldung ohne Eigentum und Adminrechte: Das Startskript hat schon migriert (server/start.sh); fehlt eine
  *   Migration, startet der Server nicht;
  * - ohne und mit Eigentümer-Anmeldung (bestehende Installationen): migrieren wie bisher, mit Warnung im Log.
  * Gibt die Warnung für Log und Oberfläche zurück.
@@ -74,7 +74,8 @@ export async function datenbankVorbereiten(
   const sql = postgres(appUrl, { max: 1, onnotice: () => {} });
   try {
     const zugriff = await zugriffLesen(sql);
-    if (zugriff.eingeschraenkt) {
+    // Migrieren kann nur eine Anmeldung mit Eigentum oder Adminrechten; jede andere ist eine App-Anmeldung, auch mit Befunden
+    if (!zugriff.probleme.some((p) => p === "admin" || p === "eigentuemer")) {
       if (!(await migrationenAktuell(sql, ordner)))
         throw new Error(
           "Migrationen fehlen und die App-Anmeldung darf sie nicht anwenden: MIGRATION_DATABASE_URL setzen (Eigentümer der Datenbank).",

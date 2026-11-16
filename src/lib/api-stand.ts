@@ -12,7 +12,8 @@ export type DatenbankProblem =
   | "replikation"
   | "dateien"
   | "leeren"
-  | "schreiben";
+  | "schreiben"
+  | "vorgaben";
 
 export interface TabellenRechte {
   tabelle: string;
