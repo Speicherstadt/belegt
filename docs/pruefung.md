@@ -18,7 +18,9 @@ Der Prüfer liest nur: Eingang, Archiv und Prüfung, und von den Dokumenten nur 
 Eingang) im Zeitraum liegt. Mail und Anhänge sieht er nur gemeinsam: die Mail nur, wenn auch jeder Anhang darin liegt
 (ihre Datei enthält die Anhänge), und einen Anhang findet die Suche nicht über Absender und Betreff einer Mail außerhalb
 (Regel wie bei [Mitarbeitern](zugaenge.md#mitarbeiter)). Seinen Z3-Export schneidet
-Belegt auf diesen Zeitraum zu, im Protokoll stehen nur die Einträge zu diesen Dokumenten. Fristen, Sperren, Löschungen,
+Belegt auf diesen Zeitraum zu, im Protokoll stehen nur die Einträge zu diesen Dokumenten. Eine Mail im Zeitraum geht dabei
+vollständig als Original mit allen Anhängen in den Export, auch wenn ein Anhang einem anderen Tag zugeordnet ist: Sie ist
+ein Geschäftsbrief, und das Original wird unverändert übergeben. Fristen, Sperren, Löschungen,
 Regeln, Postfächer und Notizen sieht er nicht. Den Zeitraum ändern geht nicht; für einen anderen lädst du neu ein und entziehst den alten Zugang.
 
 ## Datenträger für die Betriebsprüfung (Z3)
