@@ -36,7 +36,16 @@
   "kind_other": "Sonstige steuerlich bedeutsame Unterlagen",
   "kind_voluntary": "Freiwillig mit Frist",
   "kind_free": "Frei",
-  "period_years": "{years} Jahre",
+  "period_years": [
+    {
+      "declarations": ["input years", "local yearsPlural = years: plural"],
+      "selectors": ["yearsPlural"],
+      "match": {
+        "yearsPlural=one": "{years} Jahr",
+        "yearsPlural=other": "{years} Jahre"
+      }
+    }
+  ],
   "period_chosen": "bis zum gewählten Tag",
   "period_none": "keine",
   "basis_books": "§ 147 Abs. 1 Nr. 1 AO",
@@ -103,7 +112,16 @@
   "doc_not_found": "Dieses Dokument gibt es nicht.",
   "audit_check": "Jetzt prüfen",
   "audit_ok": "Kette intakt, alle Siegel stimmen.",
-  "audit_problems": "{anzahl} Befunde",
+  "audit_problems": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Befund",
+        "anzahlPlural=other": "{anzahl} Befunde"
+      }
+    }
+  ],
   "audit_col_kind": "Art",
   "audit_col_table": "Tabelle",
   "audit_col_row": "Zeile",
@@ -230,7 +248,16 @@
   "mailboxes_result": "{neu} neu, {doppelt} schon vorhanden",
   "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}",
   "audit_check_files": "Auch alle Dateien prüfen",
-  "audit_files_checked": "{anzahl} Dateien gegen ihren Hash geprüft.",
+  "audit_files_checked": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Datei gegen ihren Hash geprüft.",
+        "anzahlPlural=other": "{anzahl} Dateien gegen ihren Hash geprüft."
+      }
+    }
+  ],
   "export_title": "Datenträger für die Betriebsprüfung (Z3)",
   "export_intro": "Ein ZIP mit den Originalen des Zeitraums, Tabellen zu Dokumenten, Mails und Protokoll, index.xml nach dem Beschreibungsstandard, Prüfwert und Prüfsummen.",
   "export_from": "Von",
@@ -299,7 +326,16 @@
   "einvoice_check_title": "Prüfung (KoSIT-Validator)",
   "einvoice_check_valid": "Gültig",
   "einvoice_check_invalid": "Ungültig: {anzahl} Fehler",
-  "einvoice_check_warnings": "{anzahl} Warnungen",
+  "einvoice_check_warnings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Warnung",
+        "anzahlPlural=other": "{anzahl} Warnungen"
+      }
+    }
+  ],
   "einvoice_check_no_scenario": "kein passendes Prüfszenario",
   "einvoice_check_messages": "Meldungen der Prüfung",
   "einvoice_check_error": "Fehler",
@@ -314,7 +350,28 @@
   "report_time": "Geprüft am",
   "report_result": "Ergebnis",
   "report_checked": "Geprüft",
-  "report_counts": "{dokumente} Dokumente (davon {geloescht} gelöscht), {siegel} Siegel, {protokoll} Einträge im Protokoll.",
+  "report_documents": [
+    {
+      "declarations": ["input dokumente", "input geloescht", "local dokumentePlural = dokumente: plural"],
+      "selectors": ["dokumentePlural"],
+      "match": {
+        "dokumentePlural=one": "{dokumente} Dokument (davon {geloescht} gelöscht)",
+        "dokumentePlural=other": "{dokumente} Dokumente (davon {geloescht} gelöscht)"
+      }
+    }
+  ],
+  "report_seals": "{siegel} Siegel",
+  "report_entries": [
+    {
+      "declarations": ["input protokoll", "local protokollPlural = protokoll: plural"],
+      "selectors": ["protokollPlural"],
+      "match": {
+        "protokollPlural=one": "{protokoll} Eintrag im Protokoll",
+        "protokollPlural=other": "{protokoll} Einträge im Protokoll"
+      }
+    }
+  ],
+  "report_counts": "{dokumente}, {siegel}, {protokoll}.",
   "report_value": "Prüfwert",
   "report_hint": "Der Prüfwert ist der Kopf der Hash-Kette. Wer ihn notiert, kann später zeigen, dass bis zu diesem Eintrag nichts verändert wurde.",
   "mailboxes_kind": "Art",
@@ -397,12 +454,30 @@
   "tag_remove": "Tag {name} entfernen",
   "order_color": "Farbe",
   "order_name": "Name",
-  "order_count": "{anzahl} Dokumente",
+  "order_count": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument",
+        "anzahlPlural=other": "{anzahl} Dokumente"
+      }
+    }
+  ],
   "order_edit": "Ändern",
   "order_edit_named": "{name} ändern",
   "order_delete": "Löschen",
   "order_delete_named": "{name} löschen",
-  "order_tag_excluded_warning": "Ausgeschlossen bei {anzahl} Mitarbeitern oder Einladungen: Ohne den Tag sehen sie seine Dokumente.",
+  "order_tag_excluded_warning": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Ausgeschlossen bei {anzahl} Mitarbeiter oder {anzahl} Einladung: Ohne den Tag sieht dieser Zugang seine Dokumente.",
+        "anzahlPlural=other": "Ausgeschlossen bei {anzahl} Mitarbeitern oder Einladungen: Ohne den Tag sehen sie seine Dokumente."
+      }
+    }
+  ],
   "order_delete_confirm": "{name} wirklich löschen",
   "order_doctypes": "Dokumenttypen",
   "order_doctypes_intro": "Höchstens einer je Dokument, etwa Vertrag oder Kontoauszug. Die Vorgabe-Art schlägt beim Einordnen eine Art vor; maßgeblich für die Frist bleibt die Art der Einordnung.",
@@ -439,7 +514,16 @@
   "bulk_reclassify": "Auch schon eingeordnete neu einordnen",
   "bulk_classify_hint": "Ohne Häkchen ordnet Belegt nur Dokumente im Eingang ein und überspringt die übrigen. Eine neue Einordnung kommt als Version dazu; gelöschte lassen sich nicht einordnen.",
   "bulk_apply": "Auf {anzahl} anwenden",
-  "bulk_done": "{anzahl} Dokumente geändert, davon {eingeordnet} eingeordnet.",
+  "bulk_done": [
+    {
+      "declarations": ["input anzahl", "input eingeordnet", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument geändert, davon {eingeordnet} eingeordnet.",
+        "anzahlPlural=other": "{anzahl} Dokumente geändert, davon {eingeordnet} eingeordnet."
+      }
+    }
+  ],
   "bulk_rolled_back": "Nichts geändert: Bei mindestens einem Dokument ging es nicht.",
   "bulk_failed_item": "{name}: {fehler}",
   "bulk_select_page": "Alle auf dieser Seite auswählen",
@@ -463,7 +547,16 @@
   "share_upload": "In den Eingang",
   "share_busy": "Wird hochgeladen …",
   "share_discard": "Verwerfen",
-  "share_done": "Im Eingang: {anzahl} Dateien.",
+  "share_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Im Eingang: {anzahl} Datei.",
+        "anzahlPlural=other": "Im Eingang: {anzahl} Dateien."
+      }
+    }
+  ],
   "share_to_inbox": "Zum Eingang",
   "share_owner_only": "Nur wer Dokumente aufnehmen darf, kann Dateien aufnehmen.",
   "share_failed": "Hochladen fehlgeschlagen: {meldung}",
@@ -528,7 +621,16 @@
   "merge_hint": "Ein neues PDF mit allen Seiten in dieser Reihenfolge; die Originale bleiben unverändert.",
   "merge_up": "{name} nach oben",
   "merge_down": "{name} nach unten",
-  "merge_button": "{anzahl} PDFs zusammenfügen",
+  "merge_button": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} PDF zusammenfügen",
+        "anzahlPlural=other": "{anzahl} PDFs zusammenfügen"
+      }
+    }
+  ],
   "merge_done": "Zusammengefügt als neues Dokument „{name}“ im Eingang.",
   "notes_title": "Notizen",
   "notes_empty": "Noch keine Notizen.",
@@ -614,9 +716,27 @@
   "start_deletion_requests": "Offene Löschanträge",
   "start_retention_link": "Zu den Fristen",
   "start_holds": "Aktive Sperren",
-  "start_holds_hint": "{anzahl} Dokumente darunter",
+  "start_holds_hint": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument darunter",
+        "anzahlPlural=other": "{anzahl} Dokumente darunter"
+      }
+    }
+  ],
   "start_storage": "Speicher für Originale",
-  "start_storage_hint": "{anzahl} Dateien, ohne gelöschte",
+  "start_storage_hint": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Datei, ohne gelöschte",
+        "anzahlPlural=other": "{anzahl} Dateien, ohne gelöschte"
+      }
+    }
+  ],
   "start_retention_title": "Fristen der nächsten 90 Tage",
   "start_retention_count": "Dokumente, deren Frist endet",
   "start_deletable_from": "löschbar ab {tag}",
@@ -637,7 +757,16 @@
   "start_chain_busy": "Die Kette wird geprüft …",
   "start_chain_result": "Hash-Kette und Siegel",
   "start_chain_ok": "in Ordnung",
-  "start_chain_findings": "{anzahl} Befunde",
+  "start_chain_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Befund",
+        "anzahlPlural=other": "{anzahl} Befunde"
+      }
+    }
+  ],
   "start_timestamp": "Letzter Zeitstempel",
   "start_timestamp_value": "{zeit} von {dienst}",
   "start_timestamp_none": "noch keiner",
@@ -762,8 +891,26 @@
   "suggest_match_skipped": "Nicht geprüft (Zeitlimit oder ungültig): {namen}",
   "suggest_learned": "Gelernt aus deinen Einordnungen:",
   "suggest_learned_kind": "Art {art}",
-  "suggest_learned_reason": "(wie {anzahl} Dokumente)",
-  "suggest_learned_reason_words": "(wie {anzahl} Dokumente; Wörter: {woerter})",
+  "suggest_learned_reason": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "(wie {anzahl} Dokument)",
+        "anzahlPlural=other": "(wie {anzahl} Dokumente)"
+      }
+    }
+  ],
+  "suggest_learned_reason_words": [
+    {
+      "declarations": ["input anzahl", "input woerter", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "(wie {anzahl} Dokument; Wörter: {woerter})",
+        "anzahlPlural=other": "(wie {anzahl} Dokumente; Wörter: {woerter})"
+      }
+    }
+  ],
   "suggest_party_short": "Korrespondent {name}",
   "workflow_set_party": "Korrespondent setzen",
   "workflow_c_party": "Korrespondent {name}",
@@ -966,7 +1113,16 @@
   "forward_dropped": "entfallen",
   "forward_last_try": "letzter Versuch {zeit}",
   "forward_status": "HTTP {status}",
-  "forward_tries": "{anzahl} Versuche",
+  "forward_tries": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Versuch",
+        "anzahlPlural=other": "{anzahl} Versuche"
+      }
+    }
+  ],
   "forward_next": "nächster Versuch {zeit}",
   "workflow_send_url_example": "https://buchhaltung.example/api/belege",
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
@@ -974,7 +1130,16 @@
   "zip_too_large": "Zusammen {groesse}: zu groß für ein ZIP (höchstens 2 GB). Bitte weniger wählen.",
   "start_chain_never": "noch nicht geprüft; der Worker prüft einmal am Tag",
   "start_chain_checked": "Zuletzt geprüft",
-  "start_chain_checked_value": "{zeit}, {eintraege} Einträge",
+  "start_chain_checked_value": [
+    {
+      "declarations": ["input zeit", "input eintraege", "local eintraegePlural = eintraege: plural"],
+      "selectors": ["eintraegePlural"],
+      "match": {
+        "eintraegePlural=one": "{zeit}, {eintraege} Eintrag",
+        "eintraegePlural=other": "{zeit}, {eintraege} Einträge"
+      }
+    }
+  ],
   "start_chain_stale": "Seit zwei Tagen keine Prüfung: Läuft der Worker?",
   "start_chain_now": "Jetzt prüfen"
 }

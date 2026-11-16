@@ -65,10 +65,12 @@ export function AuditPage() {
             <dt className="text-muted">{m.report_checked()}</dt>
             <dd className="m-0 tabular-nums">
               {m.report_counts({
-                dokumente: String(pruefung.data.bericht.dokumente),
-                geloescht: String(pruefung.data.bericht.geloescht),
-                siegel: String(pruefung.data.bericht.siegel),
-                protokoll: String(pruefung.data.bericht.protokoll),
+                dokumente: m.report_documents({
+                  dokumente: String(pruefung.data.bericht.dokumente),
+                  geloescht: String(pruefung.data.bericht.geloescht),
+                }),
+                siegel: m.report_seals({ siegel: String(pruefung.data.bericht.siegel) }),
+                protokoll: m.report_entries({ protokoll: String(pruefung.data.bericht.protokoll) }),
               })}
               {pruefung.data.dateienGeprueft !== undefined &&
                 ` ${m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })}`}

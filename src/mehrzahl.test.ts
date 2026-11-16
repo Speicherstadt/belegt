@@ -75,7 +75,16 @@ const FAELLE: Fall[] = [
   ],
   [
     "report_counts",
-    (n, locale) => m.report_counts({ dokumente: n, geloescht: "0", siegel: n, protokoll: n }, { locale }),
+    // Drei Zahlen in einem Satz: je Zahl ein Text, report_counts setzt sie zusammen (src/pages/AuditPage.tsx)
+    (n, locale) =>
+      m.report_counts(
+        {
+          dokumente: m.report_documents({ dokumente: n, geloescht: "0" }, { locale }),
+          siegel: m.report_seals({ siegel: n }, { locale }),
+          protokoll: m.report_entries({ protokoll: n }, { locale }),
+        },
+        { locale },
+      ),
     "1 Dokument (davon 0 gelöscht), 1 Siegel, 1 Eintrag im Protokoll.",
     "2 Dokumente (davon 0 gelöscht), 2 Siegel, 2 Einträge im Protokoll.",
     "1 document (0 deleted), 1 seal, 1 log entry.",

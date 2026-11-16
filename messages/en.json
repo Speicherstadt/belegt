@@ -36,7 +36,16 @@
   "kind_other": "Other records relevant for tax",
   "kind_voluntary": "Voluntary with deadline",
   "kind_free": "Free",
-  "period_years": "{years} years",
+  "period_years": [
+    {
+      "declarations": ["input years", "local yearsPlural = years: plural"],
+      "selectors": ["yearsPlural"],
+      "match": {
+        "yearsPlural=one": "{years} year",
+        "yearsPlural=other": "{years} years"
+      }
+    }
+  ],
   "period_chosen": "until the chosen day",
   "period_none": "none",
   "basis_books": "§ 147 (1) no. 1 AO",
@@ -103,7 +112,16 @@
   "doc_not_found": "This document does not exist.",
   "audit_check": "Check now",
   "audit_ok": "Chain intact, all seals match.",
-  "audit_problems": "{anzahl} findings",
+  "audit_problems": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} finding",
+        "anzahlPlural=other": "{anzahl} findings"
+      }
+    }
+  ],
   "audit_col_kind": "Kind",
   "audit_col_table": "Table",
   "audit_col_row": "Row",
@@ -230,7 +248,16 @@
   "mailboxes_result": "{neu} new, {doppelt} already there",
   "mailboxes_failed": "Mailbox failed: {meldung}",
   "audit_check_files": "Also check all files",
-  "audit_files_checked": "{anzahl} files checked against their hash.",
+  "audit_files_checked": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} file checked against its hash.",
+        "anzahlPlural=other": "{anzahl} files checked against their hash."
+      }
+    }
+  ],
   "export_title": "Data medium for the tax audit (Z3)",
   "export_intro": "A ZIP with the originals of the period, tables of documents, mails and log, index.xml following the description standard, check value and checksums.",
   "export_from": "From",
@@ -298,23 +325,89 @@
   "einvoice_hint": "Read from the invoice XML; the original remains authoritative.",
   "einvoice_check_title": "Validation (KoSIT validator)",
   "einvoice_check_valid": "Valid",
-  "einvoice_check_invalid": "Invalid: {anzahl} errors",
-  "einvoice_check_warnings": "{anzahl} warnings",
+  "einvoice_check_invalid": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Invalid: {anzahl} error",
+        "anzahlPlural=other": "Invalid: {anzahl} errors"
+      }
+    }
+  ],
+  "einvoice_check_warnings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} warning",
+        "anzahlPlural=other": "{anzahl} warnings"
+      }
+    }
+  ],
   "einvoice_check_no_scenario": "no matching validation scenario",
   "einvoice_check_messages": "Validation messages",
   "einvoice_check_error": "Error",
   "einvoice_check_warning": "Warning",
   "tokens_mcp": "AI assistants connect via MCP (Streamable HTTP) with the same header at",
   "doc_text": "Text",
-  "doc_text_file": "{anzahl} characters from the file",
-  "doc_text_ocr": "{anzahl} characters from text recognition",
+  "doc_text_file": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} character from the file",
+        "anzahlPlural=other": "{anzahl} characters from the file"
+      }
+    }
+  ],
+  "doc_text_ocr": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} character from text recognition",
+        "anzahlPlural=other": "{anzahl} characters from text recognition"
+      }
+    }
+  ],
   "doc_text_error": "not readable",
   "report_title": "Audit report",
   "report_print": "Print or save as PDF",
   "report_time": "Checked at",
   "report_result": "Result",
   "report_checked": "Checked",
-  "report_counts": "{dokumente} documents ({geloescht} deleted), {siegel} seals, {protokoll} log entries.",
+  "report_documents": [
+    {
+      "declarations": ["input dokumente", "input geloescht", "local dokumentePlural = dokumente: plural"],
+      "selectors": ["dokumentePlural"],
+      "match": {
+        "dokumentePlural=one": "{dokumente} document ({geloescht} deleted)",
+        "dokumentePlural=other": "{dokumente} documents ({geloescht} deleted)"
+      }
+    }
+  ],
+  "report_seals": [
+    {
+      "declarations": ["input siegel", "local siegelPlural = siegel: plural"],
+      "selectors": ["siegelPlural"],
+      "match": {
+        "siegelPlural=one": "{siegel} seal",
+        "siegelPlural=other": "{siegel} seals"
+      }
+    }
+  ],
+  "report_entries": [
+    {
+      "declarations": ["input protokoll", "local protokollPlural = protokoll: plural"],
+      "selectors": ["protokollPlural"],
+      "match": {
+        "protokollPlural=one": "{protokoll} log entry",
+        "protokollPlural=other": "{protokoll} log entries"
+      }
+    }
+  ],
+  "report_counts": "{dokumente}, {siegel}, {protokoll}.",
   "report_value": "Check value",
   "report_hint": "The check value is the head of the hash chain. Whoever notes it can later show that nothing was changed up to that entry.",
   "mailboxes_kind": "Type",
@@ -397,12 +490,30 @@
   "tag_remove": "Remove tag {name}",
   "order_color": "Color",
   "order_name": "Name",
-  "order_count": "{anzahl} documents",
+  "order_count": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document",
+        "anzahlPlural=other": "{anzahl} documents"
+      }
+    }
+  ],
   "order_edit": "Edit",
   "order_edit_named": "Edit {name}",
   "order_delete": "Delete",
   "order_delete_named": "Delete {name}",
-  "order_tag_excluded_warning": "Excluded for {anzahl} staff members or invitations: without the tag they will see its documents.",
+  "order_tag_excluded_warning": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Excluded for {anzahl} staff member or invitation: without the tag they will see its documents.",
+        "anzahlPlural=other": "Excluded for {anzahl} staff members or invitations: without the tag they will see its documents."
+      }
+    }
+  ],
   "order_delete_confirm": "Really delete {name}",
   "order_doctypes": "Document types",
   "order_doctypes_intro": "At most one per document, such as contract or bank statement. The default kind suggests a kind when classifying; the retention period still follows the kind of the classification.",
@@ -439,7 +550,16 @@
   "bulk_reclassify": "Also reclassify documents already classified",
   "bulk_classify_hint": "Without the checkbox Belegt only classifies documents in the inbox and skips the others. A new classification is added as a version; deleted documents cannot be classified.",
   "bulk_apply": "Apply to {anzahl}",
-  "bulk_done": "{anzahl} documents changed, {eingeordnet} of them classified.",
+  "bulk_done": [
+    {
+      "declarations": ["input anzahl", "input eingeordnet", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document changed, {eingeordnet} of them classified.",
+        "anzahlPlural=other": "{anzahl} documents changed, {eingeordnet} of them classified."
+      }
+    }
+  ],
   "bulk_rolled_back": "Nothing changed: at least one document could not be changed.",
   "bulk_failed_item": "{name}: {fehler}",
   "bulk_select_page": "Select all on this page",
@@ -463,7 +583,16 @@
   "share_upload": "Add to inbox",
   "share_busy": "Uploading …",
   "share_discard": "Discard",
-  "share_done": "In the inbox: {anzahl} files.",
+  "share_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "In the inbox: {anzahl} file.",
+        "anzahlPlural=other": "In the inbox: {anzahl} files."
+      }
+    }
+  ],
   "share_to_inbox": "Go to inbox",
   "share_owner_only": "Only accounts that may add documents can add files.",
   "share_failed": "Upload failed: {meldung}",
@@ -485,7 +614,16 @@
   "share_link_once": "The link is shown only now; it is not stored.",
   "share_link_active": "Valid links",
   "share_link_until": "Valid until {datum}",
-  "share_link_fetched": "Downloaded {anzahl} times, last {zeit}",
+  "share_link_fetched": [
+    {
+      "declarations": ["input anzahl", "input zeit", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Downloaded {anzahl} time, last {zeit}",
+        "anzahlPlural=other": "Downloaded {anzahl} times, last {zeit}"
+      }
+    }
+  ],
   "share_link_not_fetched": "Not downloaded yet",
   "share_link_revoke": "Revoke",
   "share_link_revoke_label": "Revoke link valid until {datum}",
@@ -528,7 +666,16 @@
   "merge_hint": "A new PDF with all pages in this order; the originals stay unchanged.",
   "merge_up": "Move {name} up",
   "merge_down": "Move {name} down",
-  "merge_button": "Merge {anzahl} PDFs",
+  "merge_button": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Merge {anzahl} PDF",
+        "anzahlPlural=other": "Merge {anzahl} PDFs"
+      }
+    }
+  ],
   "merge_done": "Merged into the new document “{name}” in the inbox.",
   "notes_title": "Notes",
   "notes_empty": "No notes yet.",
@@ -557,8 +704,26 @@
   "paperless_runs": "Imports",
   "paperless_run_api": "{quelle} through the API",
   "paperless_run_export": "Export {datei}",
-  "paperless_progress": "{uebernommen} of {gesamt} taken over, {fehler} errors",
-  "paperless_progress_open": "{uebernommen} taken over, {fehler} errors",
+  "paperless_progress": [
+    {
+      "declarations": ["input uebernommen", "input gesamt", "input fehler", "local fehlerPlural = fehler: plural"],
+      "selectors": ["fehlerPlural"],
+      "match": {
+        "fehlerPlural=one": "{uebernommen} of {gesamt} taken over, {fehler} error",
+        "fehlerPlural=other": "{uebernommen} of {gesamt} taken over, {fehler} errors"
+      }
+    }
+  ],
+  "paperless_progress_open": [
+    {
+      "declarations": ["input uebernommen", "input fehler", "local fehlerPlural = fehler: plural"],
+      "selectors": ["fehlerPlural"],
+      "match": {
+        "fehlerPlural=one": "{uebernommen} taken over, {fehler} error",
+        "fehlerPlural=other": "{uebernommen} taken over, {fehler} errors"
+      }
+    }
+  ],
   "paperless_duplicates": "{doppelt} of them already in the archive and only linked",
   "paperless_status_wartet": "waiting",
   "paperless_status_laeuft": "running",
@@ -614,9 +779,27 @@
   "start_deletion_requests": "Open deletion requests",
   "start_retention_link": "Go to retention",
   "start_holds": "Active holds",
-  "start_holds_hint": "{anzahl} documents covered",
+  "start_holds_hint": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document covered",
+        "anzahlPlural=other": "{anzahl} documents covered"
+      }
+    }
+  ],
   "start_storage": "Storage for originals",
-  "start_storage_hint": "{anzahl} files, without deleted ones",
+  "start_storage_hint": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} file, without deleted ones",
+        "anzahlPlural=other": "{anzahl} files, without deleted ones"
+      }
+    }
+  ],
   "start_retention_title": "Retention ending in the next 90 days",
   "start_retention_count": "documents whose retention ends",
   "start_deletable_from": "deletable from {tag}",
@@ -631,13 +814,37 @@
   "start_folder_last": "last document {zeit}",
   "start_folder_never": "no document yet",
   "start_paperless": "Migration from Paperless-ngx",
-  "start_paperless_run": "{status}: {uebernommen} taken over, {fehler} errors, {zeit}",
+  "start_paperless_run": [
+    {
+      "declarations": [
+        "input status",
+        "input uebernommen",
+        "input fehler",
+        "input zeit",
+        "local fehlerPlural = fehler: plural"
+      ],
+      "selectors": ["fehlerPlural"],
+      "match": {
+        "fehlerPlural=one": "{status}: {uebernommen} taken over, {fehler} error, {zeit}",
+        "fehlerPlural=other": "{status}: {uebernommen} taken over, {fehler} errors, {zeit}"
+      }
+    }
+  ],
   "start_sources_link": "Go to sources",
   "start_chain": "Immutability",
   "start_chain_busy": "Checking the chain …",
   "start_chain_result": "Hash chain and seals",
   "start_chain_ok": "in order",
-  "start_chain_findings": "{anzahl} findings",
+  "start_chain_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} finding",
+        "anzahlPlural=other": "{anzahl} findings"
+      }
+    }
+  ],
   "start_timestamp": "Latest timestamp",
   "start_timestamp_value": "{zeit} from {dienst}",
   "start_timestamp_none": "none yet",
@@ -762,8 +969,26 @@
   "suggest_match_skipped": "Not checked (time limit or invalid): {namen}",
   "suggest_learned": "Learned from your classifications:",
   "suggest_learned_kind": "Kind {art}",
-  "suggest_learned_reason": "(like {anzahl} documents)",
-  "suggest_learned_reason_words": "(like {anzahl} documents; words: {woerter})",
+  "suggest_learned_reason": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "(like {anzahl} document)",
+        "anzahlPlural=other": "(like {anzahl} documents)"
+      }
+    }
+  ],
+  "suggest_learned_reason_words": [
+    {
+      "declarations": ["input anzahl", "input woerter", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "(like {anzahl} document; words: {woerter})",
+        "anzahlPlural=other": "(like {anzahl} documents; words: {woerter})"
+      }
+    }
+  ],
   "suggest_party_short": "Correspondent {name}",
   "workflow_set_party": "Set correspondent",
   "workflow_c_party": "correspondent {name}",
@@ -966,7 +1191,16 @@
   "forward_dropped": "dropped",
   "forward_last_try": "last attempt {zeit}",
   "forward_status": "HTTP {status}",
-  "forward_tries": "{anzahl} attempts",
+  "forward_tries": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} attempt",
+        "anzahlPlural=other": "{anzahl} attempts"
+      }
+    }
+  ],
   "forward_next": "next attempt {zeit}",
   "workflow_send_url_example": "https://accounting.example/api/receipts",
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
@@ -974,7 +1208,16 @@
   "zip_too_large": "{groesse} in total: too large for one ZIP (at most 2 GB). Please select fewer.",
   "start_chain_never": "not checked yet; the worker checks once a day",
   "start_chain_checked": "Last checked",
-  "start_chain_checked_value": "{zeit}, {eintraege} entries",
+  "start_chain_checked_value": [
+    {
+      "declarations": ["input zeit", "input eintraege", "local eintraegePlural = eintraege: plural"],
+      "selectors": ["eintraegePlural"],
+      "match": {
+        "eintraegePlural=one": "{zeit}, {eintraege} entry",
+        "eintraegePlural=other": "{zeit}, {eintraege} entries"
+      }
+    }
+  ],
   "start_chain_stale": "No check for two days: is the worker running?",
   "start_chain_now": "Check now"
 }
