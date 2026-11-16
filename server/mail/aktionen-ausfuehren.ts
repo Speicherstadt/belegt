@@ -70,13 +70,22 @@ async function faellige({ db }: Umgebung, q: QuelleZeile, jetzt: Date) {
     .limit(STAPEL);
 }
 
-/** Liegt die Mail nachweislich im Archiv? Dokument als Mail mit diesem Hash, Datei gelesen und Hash gleich */
+/**
+ * Liegt die Mail nachweislich im Archiv? Dokument als Mail mit diesem Hash, nicht gelöscht, Datei gelesen und Hash
+ * gleich. Nach einer bestätigten Löschung bleibt die Zeile in dokumente als Nachweis, und die Datei kann noch im
+ * Speicher liegen (Entfernen gescheitert oder nachgeholt, server/loeschung/loeschung.ts); im Archiv ist die Mail nicht.
+ */
 async function imArchiv({ db, speicher }: Umgebung, e: Eintrag) {
   const [d] = await db
     .select({ sha256: dokumente.sha256 })
     .from(dokumente)
     .innerJoin(mails, eq(mails.dokumentId, dokumente.id))
-    .where(eq(dokumente.id, e.dokumentId));
+    .where(
+      and(
+        eq(dokumente.id, e.dokumentId),
+        sql`not exists (select 1 from loeschungen l where l.dokument_id = ${dokumente.id} and l.bestaetigt_am is not null)`,
+      ),
+    );
   if (!d || d.sha256 !== e.sha256) throw new Error("Die Mail liegt nicht im Archiv");
   const bytes = await speicher.laden(e.sha256).catch((err) => {
     throw new Error(`Original im Speicher nicht lesbar: ${meldungVon(err)}`);

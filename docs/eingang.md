@@ -141,8 +141,8 @@ Inhaber. Den Zielordner zum Verschieben wählst du aus den Ordnern des Postfachs
 nicht an.
 
 Die Aktion läuft im Worker nach dem Abruf, und nur für eine Mail, die nachweislich im Archiv liegt: Die Aufnahme ist in
-der Datenbank festgeschrieben, und vor der Aktion liest Belegt das Original aus dem Speicher und vergleicht seinen
-SHA-256. Scheitert das, bleibt die Mail im Postfach unberührt. Eine Mail, die schon vorher im Archiv lag (doppelt), gilt
+der Datenbank festgeschrieben, die Mail ist im Archiv nicht gelöscht, und vor der Aktion liest Belegt das Original aus
+dem Speicher und vergleicht seinen SHA-256. Scheitert das, bleibt die Mail im Postfach unberührt. Eine Mail, die schon vorher im Archiv lag (doppelt), gilt
 als archiviert und bekommt die Aktion auch. Jede Mail bekommt die Aktion einmal: Ist sie inzwischen weg oder hat der
 Server den Ordner neu nummeriert (UIDVALIDITY), entfällt sie, und der nächste Abruf ordnet die Mail neu zu. Einen
 Fehler (Zielordner fehlt, Verbindung bricht ab) hält Belegt fest und versucht es höchstens fünfmal, nach 15, 30, 60 und

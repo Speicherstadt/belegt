@@ -115,6 +115,23 @@ describe.skipIf(!testDatenbankUrl)("Löschen im Postfach über IMAP", () => {
     expect(p.konto(benutzer).aufrufe).toEqual([]);
   });
 
+  it("löscht nicht, wenn die Mail im Archiv gelöscht ist, auch wenn die Datei noch im Speicher liegt", async () => {
+    const benutzer = "archivgeloescht@example.org";
+    const id = await quelle(benutzer);
+    await einstellen(id, { aktion: "loeschen", warteStunden: 1, loeschenBestaetigt: true });
+    const roh = mailRoh(1, "archivgeloescht");
+    p.einliefern(benutzer, roh);
+    await abholen(id);
+    const [e] = await t.sql`select dokument_id from postfach_mails where quelle_id = ${id}`;
+    await anfrage(`/api/dokumente/${e!.dokument_id}/einordnung`, json({ art: "frei", entstanden: "2026-01-02" }));
+    expect((await anfrage(`/api/dokumente/${e!.dokument_id}/loeschung`, { method: "POST" })).status).toBe(201);
+    // Das Entfernen der Datei läuft nach der Löschung und kann scheitern (offene Entfernung, S3 noch gesperrt)
+    await t.speicher.speichern(roh);
+    expect(await ausfuehren(id, new Date(Date.now() + 2 * STUNDE))).toMatchObject({ ausgefuehrt: 0 });
+    expect(p.konto(benutzer).aufrufe).toEqual([]);
+    expect(p.konto(benutzer).ordner.get("INBOX")!.mails.size).toBe(1);
+  });
+
   it("löscht mit „erst nach Sperre“ erst, wenn die Datei im Bucket gesperrt ist", async () => {
     const benutzer = "sperre@example.org";
     const id = await quelle(benutzer);
