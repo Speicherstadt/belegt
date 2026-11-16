@@ -185,6 +185,29 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     }
   });
 
+  // pg_write_all_data gibt INSERT, UPDATE und DELETE auf jede Tabelle, auch auf backup_status und sealed_tables
+  // (https://www.postgresql.org/docs/16/predefined-roles.html); geerbt oder per SET ROLE erreichbar
+  it.each([
+    ["geerbt", "with inherit true, set false"],
+    ["per SET ROLE", "with inherit false, set true"],
+  ])("lehnt eine App-Rolle mit pg_write_all_data (%s) ab", async (_wie, option) => {
+    await admin.unsafe(`grant pg_write_all_data to "${appRolle}" ${option}`);
+    try {
+      await expect(migrierenMitRechten(testDatenbankUrl!, appUrl)).rejects.toThrow(/nicht eingeschränkt/);
+    } finally {
+      await admin.unsafe(`revoke pg_write_all_data from "${appRolle}"`);
+    }
+  });
+
+  it("lehnt eine App-Rolle ab, die über PUBLIC den Stand der Sicherung schreiben darf", async () => {
+    await admin.unsafe("grant insert on backup_status to public");
+    try {
+      await expect(migrierenMitRechten(testDatenbankUrl!, appUrl)).rejects.toThrow(/nicht eingeschränkt/);
+    } finally {
+      await admin.unsafe("revoke insert on backup_status from public");
+    }
+  });
+
   it("lehnt eine App-Rolle mit Rechten zum Anlegen von Rollen ab", async () => {
     await admin.unsafe(`alter role "${appRolle}" createrole`);
     try {

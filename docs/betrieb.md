@@ -81,9 +81,10 @@ docker compose up -d
 ```
 
 Ohne die beiden Adressen läuft Belegt wie bisher mit dem Eigentümer weiter; Log, Startseite und „Prüfung“ warnen dann.
-Mit `MIGRATION_DATABASE_URL` bricht der Start ab, wenn die App-Anmeldung zu viele Rechte hat, dieselbe wie die des
-Eigentümers ist, auf eine andere Datenbank zeigt oder mit `session_replication_role = replica` startet. Fehlt eine
-Migration und ist nur die App-Anmeldung da, startet der Server nicht.
+Mit `MIGRATION_DATABASE_URL` bricht der Start ab, wenn die App-Anmeldung zu viele Rechte hat (auch geerbte, etwa über
+`pg_write_all_data`), dieselbe wie die des Eigentümers ist, auf eine andere Datenbank zeigt oder mit
+`session_replication_role = replica` startet. Fehlt eine Migration und ist nur die App-Anmeldung da, startet der Server
+nicht.
 
 Die Trennung schützt vor einer übernommenen App, nicht vor dem Betreiber mit Eigentümer- oder Serverzugang; dafür
 bleiben Zeitstempel, notierte Prüfwerte und Sicherungen an einem zweiten Ort.

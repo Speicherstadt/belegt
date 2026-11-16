@@ -14,6 +14,7 @@ export const PROBLEM: Record<DatenbankProblem, () => string> = {
   replikation: () => m.db_problem_replikation(),
   dateien: () => m.db_problem_dateien(),
   leeren: () => m.db_problem_leeren(),
+  schreiben: () => m.db_problem_schreiben(),
 };
 
 const ja = (wert: boolean) => (wert ? m.db_yes() : m.db_no());

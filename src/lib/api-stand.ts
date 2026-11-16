@@ -11,7 +11,8 @@ export type DatenbankProblem =
   | "temporaer"
   | "replikation"
   | "dateien"
-  | "leeren";
+  | "leeren"
+  | "schreiben";
 
 export interface TabellenRechte {
   tabelle: string;

@@ -822,6 +822,7 @@
   "db_problem_replikation": "The login can change the replication mode and thereby disable triggers.",
   "db_problem_dateien": "The login can access files or programs of the database server.",
   "db_problem_leeren": "The login can empty tables or create triggers.",
+  "db_problem_schreiben": "The login can write to tables it should only read or append to.",
   "db_link": "Set up separate database roles",
   "db_rights_show": "Privileges per table",
   "db_col_table": "Table",

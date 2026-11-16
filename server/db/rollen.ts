@@ -41,6 +41,8 @@ export const PROBLEME = {
   replikation: "Die Anmeldung kann den Replikationsmodus und damit die Trigger abschalten.",
   dateien: "Die Anmeldung hat Zugriff auf Dateien oder Programme des Datenbankservers.",
   leeren: "Die Anmeldung kann Tabellen leeren (TRUNCATE) oder Trigger anlegen.",
+  schreiben:
+    "Die Anmeldung darf Tabellen schreiben, die sie nur lesen oder ergänzen soll (etwa über pg_write_all_data oder ein Recht für PUBLIC).",
 } as const;
 
 export type Problem = keyof typeof PROBLEME;
@@ -104,14 +106,19 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
       exists(select 1 from erreichbar r cross join pg_roles f
               where f.rolname in ('pg_read_server_files', 'pg_write_server_files', 'pg_execute_server_program')
                 and pg_has_role(r.oid, f.oid, 'USAGE')) as dateien`;
+  // Über alle per SET erreichbaren Rollen: pg_write_all_data oder ein Recht für PUBLIC zählen mit
   const tabellen = await sql<TabellenRechte[]>`
-    select c.relname as tabelle,
-           has_table_privilege(${wer.anmeldung}, c.oid, 'SELECT') as select, has_table_privilege(${wer.anmeldung}, c.oid, 'INSERT') as insert,
-           has_table_privilege(${wer.anmeldung}, c.oid, 'UPDATE') as update, has_table_privilege(${wer.anmeldung}, c.oid, 'DELETE') as delete,
-           has_table_privilege(${wer.anmeldung}, c.oid, 'TRUNCATE') as truncate, has_table_privilege(${wer.anmeldung}, c.oid, 'TRIGGER') as trigger
-      from pg_class c
+    with erreichbar as (
+      select r.oid from pg_roles r join pg_roles a on a.rolname = ${wer.anmeldung} where pg_has_role(a.oid, r.oid, 'SET')
+    ) select c.relname as tabelle,
+           bool_or(has_table_privilege(r.oid, c.oid, 'SELECT')) as select, bool_or(has_table_privilege(r.oid, c.oid, 'INSERT')) as insert,
+           bool_or(has_table_privilege(r.oid, c.oid, 'UPDATE')) as update, bool_or(has_table_privilege(r.oid, c.oid, 'DELETE')) as delete,
+           bool_or(has_table_privilege(r.oid, c.oid, 'TRUNCATE')) as truncate, bool_or(has_table_privilege(r.oid, c.oid, 'TRIGGER')) as trigger
+      from pg_class c cross join erreichbar r
      where c.relnamespace = 'public'::regnamespace and c.relkind in ('r', 'p')
+     group by c.relname
      order by c.relname`;
+  const soll = new Map((await tabellenRechte(sql)).map((t) => [t.tabelle, t.rechte]));
   const probleme: Problem[] = [];
   if (wer.rolle !== wer.anmeldung) probleme.push("rollenwechsel");
   if (wer.replikation === "replica") probleme.push("replika");
@@ -123,6 +130,9 @@ async function zugriffFuer(sql: Leser, wer: Identitaet): Promise<Datenbankzugrif
     if (r!.replikation) probleme.push("replikation");
     if (r!.dateien) probleme.push("dateien");
     if (tabellen.some((t) => t.truncate || t.trigger)) probleme.push("leeren");
+    const zuViel = (t: TabellenRechte) =>
+      (["insert", "update", "delete"] as const).some((r) => t[r] && !soll.get(t.tabelle)?.includes(r));
+    if (tabellen.some(zuViel)) probleme.push("schreiben");
   }
   return { rolle: wer.rolle, anmeldung: wer.anmeldung, eingeschraenkt: probleme.length === 0, probleme, tabellen };
 }
