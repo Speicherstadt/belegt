@@ -155,7 +155,8 @@ Verfahrensdokumentation. Gelöscht wird frühestens nach einer Wartezeit ab der 
 für Byte dem Original im Archiv gleicht. Mit [S3 und Object Lock](betrieb.md#dateien-in-s3-mit-object-lock) kannst du
 zusätzlich verlangen, dass die Datei im Bucket bis zum Fristende gesperrt ist; das ist sie erst, wenn die Mail
 eingeordnet ist. Gmail behandelt Löschen über IMAP nach seinen eigenen Einstellungen (oft nur Archivieren); bei IMAP
-ohne UIDPLUS entfernt das Löschen auch andere Mails im Ordner, die schon als gelöscht markiert waren.
+ohne UIDPLUS löscht Belegt nicht und verschiebt nur mit MOVE, weil der Server sonst auch andere Mails im Ordner
+entfernen würde, die als gelöscht markiert sind; das Protokoll nennt den Fehler.
 
 ## Regeln
 

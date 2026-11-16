@@ -22,6 +22,15 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
   const pruefen = (ok: unknown, was: string) => {
     if (!ok) throw new Error(`IMAP: ${was} abgelehnt`);
   };
+  // Ohne UIDPLUS (RFC 4315) schickt imapflow ein einfaches EXPUNGE, das alle als \Deleted markierten Mails des Ordners
+  // entfernt, auch nie archivierte (imapflow commands/expunge.js); ohne MOVE (RFC 6851) gilt das auch fürs Verschieben
+  // (commands/move.js: COPY und messageDelete). Dann lieber nichts tun.
+  const nurDieseUid = (was: string, auchMitMove = false) => {
+    if (client.capabilities.has("UIDPLUS") || (auchMitMove && client.capabilities.has("MOVE"))) return;
+    throw new Error(
+      `IMAP: ${was} abgelehnt, der Server kann kein UIDPLUS; es würde auch andere als gelöscht markierte Mails entfernen`,
+    );
+  };
   const bearbeiten: Bearbeiten = {
     async gibtEs(uid) {
       const treffer = await client.search({ uid: String(uid) }, { uid: true });
@@ -35,10 +44,12 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
       pruefen(await client.messageFlagsAdd(String(uid), [flagge], { uid: true }), "Markieren");
     },
     async verschieben(uid, ziel) {
+      nurDieseUid("Verschieben", true);
       pruefen(await client.messageMove(String(uid), ziel, { uid: true }), "Verschieben");
     },
-    // \Deleted und EXPUNGE; mit UIDPLUS (RFC 4315) nur diese UID, sonst alle als gelöscht markierten im Ordner
+    // \Deleted und UID EXPUNGE (RFC 4315): nur diese UID
     async loeschen(uid) {
+      nurDieseUid("Löschen");
       pruefen(await client.messageDelete(String(uid), { uid: true }), "Löschen");
     },
   };
