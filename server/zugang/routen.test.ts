@@ -69,12 +69,18 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/dokumenttypen": "sicht",
   "GET /api/korrespondenten": "sicht",
   "GET /api/felder": "sicht",
+  // Das eigene Konto (zweiter Faktor): jede Rolle für sich selbst
+  "GET /api/konto": "sicht",
+  "POST /api/konto/qr": "sicht",
 
   "GET /api/zugaenge": "verboten",
   "POST /api/einladungen": "verboten",
   "POST /api/einladungen/:id/zurueckziehen": "verboten",
   "PATCH /api/zugaenge/:id": "verboten",
   "POST /api/zugaenge/:id/entziehen": "verboten",
+  "POST /api/zugaenge/:id/zwei-faktor-zuruecksetzen": "verboten",
+  "GET /api/zwei-faktor": "verboten",
+  "PUT /api/zwei-faktor": "verboten",
   "GET /api/tokens": "verboten",
   "POST /api/tokens": "verboten",
   "POST /api/tokens/:id/widerrufen": "verboten",

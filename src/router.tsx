@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/re
 import { EmbedBridge } from "./components/EmbedBridge.tsx";
 import { Shell } from "./components/Shell.tsx";
 import { AccessPage } from "./pages/AccessPage.tsx";
+import { AccountPage } from "./pages/AccountPage.tsx";
 import { ArchivePage } from "./pages/ArchivePage.tsx";
 import { AuditPage } from "./pages/AuditPage.tsx";
 import { DocumentPage } from "./pages/DocumentPage.tsx";
@@ -49,6 +50,7 @@ const seiten = [
   createRoute({ getParentRoute: () => app, path: "/fristen", component: RetentionPage }),
   createRoute({ getParentRoute: () => app, path: "/pruefung", component: AuditPage }),
   createRoute({ getParentRoute: () => app, path: "/zugaenge", component: AccessPage }),
+  createRoute({ getParentRoute: () => app, path: "/konto", component: AccountPage }),
   createRoute({ getParentRoute: () => app, path: "/quellen", component: SourcesPage }),
   createRoute({ getParentRoute: () => app, path: "/workflows", component: WorkflowsPage }),
   // Ziel des Teilens vom Handy (share_target im Manifest, src/pwa/)

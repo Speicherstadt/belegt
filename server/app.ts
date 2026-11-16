@@ -7,6 +7,7 @@ import { mitClientIp } from "./http/client-ip.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
 import { type App, type AppUmgebung, MAX_UPLOAD, VERSION } from "./http/gemeinsam.ts";
+import { kontoRouten } from "./http/konto.ts";
 import { mailRouten } from "./http/mail.ts";
 import { notizenRouten } from "./http/notizen.ts";
 import { oauthRouten } from "./http/oauth.ts";
@@ -71,6 +72,7 @@ export function createApp(umgebung?: AppUmgebung) {
 
     // Zuerst die Anmeldung (Middleware), dann die Bereiche
     zugangRouten(app, umgebung);
+    kontoRouten(app, umgebung);
     dokumenteRouten(app, umgebung);
     archivansichtenRouten(app, umgebung);
     startRouten(app, umgebung);

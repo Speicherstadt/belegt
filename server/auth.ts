@@ -1,14 +1,17 @@
 import { timingSafeEqual } from "node:crypto";
+import { passkey } from "@better-auth/passkey";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
-import { genericOAuth } from "better-auth/plugins";
+import { deleteSessionCookie } from "better-auth/cookies";
+import { genericOAuth, twoFactor } from "better-auth/plugins";
 import type { Recht, Rolle, Sichtbereich } from "../shared/rollen.ts";
 import type { Datenbank } from "./db/client.ts";
 import * as schema from "./db/schema.ts";
 import { eingerichtet } from "./db/status.ts";
 import { CLIENT_IP_HEADER } from "./http/client-ip.ts";
 import { EINLADUNG_HEADER, EINRICHTUNGSCODE_HEADER, einloesen, offen, zugangLaden } from "./zugang/einladungen.ts";
+import { anmeldewegAus, nurPasskey } from "./zugang/zwei-faktor.ts";
 
 const verboten = (message: string) => new APIError("FORBIDDEN", { message });
 
@@ -58,7 +61,9 @@ export function createAuth({
   begrenzen?: boolean;
   oidc?: OidcKonfig;
 }) {
+  const herkunft = new URL(baseURL);
   return betterAuth({
+    appName: "Belegt",
     baseURL,
     secret,
     basePath: "/api/auth",
@@ -77,33 +82,52 @@ export function createAuth({
         trustedProviders: [OIDC_ANBIETER],
       },
     },
-    plugins: oidc
-      ? [
-          genericOAuth({
-            config: [
-              {
-                providerId: OIDC_ANBIETER,
-                discoveryUrl: `${oidc.issuer.replace(/\/$/, "")}/.well-known/openid-configuration`,
-                clientId: oidc.clientId,
-                clientSecret: oidc.clientSecret,
-                scopes: ["openid", "profile", "email"],
-                pkce: true,
-                authentication: "basic",
-                requireIdTokenVerification: true,
-                disableImplicitSignUp: true,
-                mapProfileToUser: (profile) => ({ emailVerified: profile.email_verified === true }),
-                // Ein sub gilt nur beim Anbieter, der es vergibt: nach einem Wechsel von OIDC_ISSUER passt kein altes Konto
-                // Ohne sub gibt es keine Kennung ("" lehnt Better Auth ab), sonst teilten sich alle ohne sub ein Konto
-                accountSubject: ({ profile }) =>
-                  typeof profile.sub === "string" && profile.sub
-                    ? oidcKennung(oidc.issuer.replace(/\/$/, ""), profile.sub)
-                    : "",
-              },
-            ],
-          }),
-        ]
-      : [],
-    rateLimit: { enabled: begrenzen, storage: "memory", window: 60, max: 20 },
+    plugins: [
+      // TOTP mit Backup-Codes (node_modules/better-auth/dist/plugins/two-factor/): Geheimnis und Backup-Codes verschlüsselt
+      // Better Auth mit BETTER_AUTH_SECRET. Nach dem Passwort verlangt der Hook des Plugins den zweiten Schritt; je
+      // Anmeldung fünf Versuche, nach zehn Fehlern ist der Zugang 15 Minuten gesperrt, dazu die Grenze unten
+      twoFactor({ issuer: "Belegt", backupCodeOptions: { amount: 10, length: 10 } }),
+      // Passkeys (node_modules/@better-auth/passkey/dist/index.mjs): Herkunft und Name der Seite fest aus BETTER_AUTH_URL,
+      // nicht aus dem Origin-Header der Anfrage
+      passkey({ rpID: herkunft.hostname, rpName: "Belegt", origin: herkunft.origin }),
+      ...(oidc
+        ? [
+            genericOAuth({
+              config: [
+                {
+                  providerId: OIDC_ANBIETER,
+                  discoveryUrl: `${oidc.issuer.replace(/\/$/, "")}/.well-known/openid-configuration`,
+                  clientId: oidc.clientId,
+                  clientSecret: oidc.clientSecret,
+                  scopes: ["openid", "profile", "email"],
+                  pkce: true,
+                  authentication: "basic",
+                  requireIdTokenVerification: true,
+                  disableImplicitSignUp: true,
+                  mapProfileToUser: (profile) => ({ emailVerified: profile.email_verified === true }),
+                  // Ein sub gilt nur beim Anbieter, der es vergibt: nach einem Wechsel von OIDC_ISSUER passt kein altes Konto
+                  // Ohne sub gibt es keine Kennung ("" lehnt Better Auth ab), sonst teilten sich alle ohne sub ein Konto
+                  accountSubject: ({ profile }) =>
+                    typeof profile.sub === "string" && profile.sub
+                      ? oidcKennung(oidc.issuer.replace(/\/$/, ""), profile.sub)
+                      : "",
+                },
+              ],
+            }),
+          ]
+        : []),
+    ],
+    // Der zweite Schritt: höchstens 5 Codes je Minute und Adresse, zusätzlich zu den Grenzen des Plugins
+    rateLimit: {
+      enabled: begrenzen,
+      storage: "memory",
+      window: 60,
+      max: 20,
+      customRules: {
+        "/two-factor/verify-totp": { window: 60, max: 5 },
+        "/two-factor/verify-backup-code": { window: 60, max: 5 },
+      },
+    },
     // Nur die Adresse, die Belegt aus der Verbindung ermittelt; X-Forwarded-For wertet server/http/client-ip.ts aus
     advanced: { ipAddress: { ipAddressHeaders: [CLIENT_IP_HEADER] } },
     user: {
@@ -117,6 +141,8 @@ export function createAuth({
         sichtbereich: { type: "json", input: false, required: false },
       },
     },
+    // Wie die Sitzung entstand, für die Pflicht zum zweiten Faktor (server/zugang/zwei-faktor.ts)
+    session: { additionalFields: { anmeldeweg: { type: "string", input: false, required: false } } },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
         // Name, Bild und E-Mail ändert Belegt nicht über Better Auth: das schriebe ohne Akteur und an der Rollenprüfung vorbei
@@ -132,6 +158,18 @@ export function createAuth({
           throw verboten("Der Einrichtungscode stimmt nicht.");
         }
       }),
+      // Wer Passkeys, aber kein TOTP hat, meldet sich mit dem Passkey an: das Passwort allein wäre ein Faktor weniger,
+      // als der Zugang eingerichtet hat. Erst nach dem richtigen Passwort, sonst verriete die Antwort, wer Passkeys hat
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/sign-in/email") return;
+        const neu = ctx.context.newSession;
+        if (!neu || (neu.user as { twoFactorEnabled?: boolean }).twoFactorEnabled) return;
+        if (!(await nurPasskey(db, neu.user.id))) return;
+        await ctx.context.internalAdapter.deleteSession(neu.session.token);
+        ctx.context.setNewSession(null);
+        deleteSessionCookie(ctx, true);
+        throw verboten("Dieser Zugang meldet sich mit seinem Passkey an.");
+      }),
     },
     databaseHooks: {
       // Tokens des Anbieters braucht Belegt nach der Anmeldung nicht; gespeichert wären sie ein Geheimnis im Klartext
@@ -140,10 +178,12 @@ export function createAuth({
         update: { before: async (account) => ({ data: ohneTokens(account) }) },
       },
       // Ein entzogener Zugang meldet sich nicht mehr an, auch nicht über den OIDC-Anbieter
+      // Jede Sitzung merkt sich ihren Anmeldeweg (Passwort, zweiter Faktor, Passkey, OIDC)
       session: {
         create: {
-          before: async (sitzung) => {
+          before: async (sitzung, ctx) => {
             if ((await zugangLaden(db, sitzung.userId))?.entzogenAm) throw verboten("Dieser Zugang ist entzogen.");
+            return { data: { ...sitzung, anmeldeweg: anmeldewegAus(ctx?.path) } };
           },
         },
       },
@@ -193,6 +233,8 @@ export interface Angemeldet {
   /** Nur beim Mitarbeiter: was er sehen darf und ob er darin bearbeitet (server/zugang/sicht.ts) */
   sichtbereich?: Sichtbereich;
   recht?: Recht;
+  /** Die Pflicht zum zweiten Faktor gilt, und diese Sitzung hat keinen: erst einrichten (server/zugang/zwei-faktor.ts) */
+  zweiFaktorEinrichten?: boolean;
   /** Nur bei einem Programm mit API-Token */
   token?: { name: string; recht: "lesen" | "schreiben" };
 }

@@ -1,4 +1,5 @@
 import type { Recht } from "../../shared/rollen.ts";
+import { EIGENES_KONTO } from "./konto.ts";
 
 /*
  * Was ein Mitarbeiter aufrufen darf (docs/zugaenge.md): eine Liste wie beim Prüfer (server/zugang/pruefer.ts), alles
@@ -27,7 +28,7 @@ const BEARBEITEN = [
 const EIGENE_ANSICHTEN = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/;
 
 export function mitarbeiterDarf(recht: Recht, methode: string, pfad: string): boolean {
-  if (EIGENE_ANSICHTEN.test(pfad)) return true;
+  if (EIGENE_ANSICHTEN.test(pfad) || EIGENES_KONTO.test(pfad)) return true;
   if (methode === "GET" || methode === "HEAD")
     return LESEN.some((r) => r.test(pfad)) || (recht === "bearbeiten" && BEARBEITEN_LESEN.some((r) => r.test(pfad)));
   return recht === "bearbeiten" && methode === "POST" && BEARBEITEN.some((r) => r.test(pfad));

@@ -1,6 +1,7 @@
 import { alltagApi } from "./api-alltag.ts";
 import { betriebApi } from "./api-betrieb.ts";
 import { dokumenteApi } from "./api-dokumente.ts";
+import { kontoApi } from "./api-konto.ts";
 import { ordnungApi } from "./api-ordnung.ts";
 import { paperlessApi } from "./api-paperless.ts";
 import { standApi } from "./api-stand.ts";
@@ -54,6 +55,7 @@ export {
   trennblattUrl,
   vorschaubildUrl,
 } from "./api-dokumente.ts";
+export type { Konto, ZweiterSchritt } from "./api-konto.ts";
 export type {
   Abgleich,
   Dokumenttyp,
@@ -89,6 +91,7 @@ export type { ApiToken, Ich, Zugaenge } from "./api-zugang.ts";
 
 export const api = {
   ...zugangApi,
+  ...kontoApi,
   ...dokumenteApi,
   ...ordnungApi,
   ...betriebApi,

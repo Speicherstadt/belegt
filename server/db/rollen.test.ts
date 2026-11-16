@@ -104,6 +104,7 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     ["die Migrationen ändern", "delete from drizzle.__drizzle_migrations"],
     ["den Stand der Sicherung fälschen", "insert into backup_status (art, ok) values ('backup', true)"],
     ["die Rolle wechseln", "set role postgres"],
+    ["die Pflicht zum zweiten Faktor löschen", "delete from anmeldung_einstellungen"],
   ])("verbietet der App-Rolle: %s", async (_was, befehl) => {
     expect(await alsApp(befehl)).not.toBeNull();
   });
@@ -139,6 +140,11 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     // Festschreibung über eine Spalte: ändern, solange nicht festgeschrieben, prüft der Trigger
     expect(t("loeschungen")).toMatchObject({ select: true, insert: true, update: true, delete: true });
     expect(t("einstellungen")).toMatchObject({ select: true, insert: true, update: true, delete: true });
+    // Zweiter Faktor: Better Auth legt an, ändert (Fehlversuche, Zähler) und löscht; die Pflicht nur ändern
+    const alles = { select: true, insert: true, update: true, delete: true };
+    expect(t("two_factor")).toMatchObject(alles);
+    expect(t("passkey")).toMatchObject(alles);
+    expect(t("anmeldung_einstellungen")).toMatchObject({ select: true, insert: true, update: true, delete: false });
     expect(tabellen.every((x) => !x.truncate && !x.trigger)).toBe(true);
   });
 

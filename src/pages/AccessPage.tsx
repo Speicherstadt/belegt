@@ -9,6 +9,7 @@ import {
   sichtbereichText,
   useNamen,
 } from "../components/ScopeEditor.tsx";
+import { TwoFactorPolicy } from "../components/TwoFactorPolicy.tsx";
 import { api } from "../lib/api.ts";
 import { tag, zeitpunkt } from "../lib/format.ts";
 import { rolleLabel } from "../lib/rollen.ts";
@@ -66,6 +67,7 @@ export function AccessPage() {
         </h2>
         {daten.data && <AccessUsers zugaenge={daten.data.zugaenge} />}
       </section>
+      <TwoFactorPolicy />
       <section aria-labelledby="einladungen" className="flex flex-col gap-3">
         <h2 id="einladungen" className="m-0 font-semibold text-base">
           {m.access_invites()}

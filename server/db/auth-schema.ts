@@ -1,5 +1,18 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { RECHTE, ROLLEN, type Sichtbereich } from "../../shared/rollen.ts";
 
 /* Tabellen für Better Auth (Kern), wie in Haben, mit der Rolle am Zugang */
@@ -24,6 +37,8 @@ export const user = pgTable(
     sichtbereich: jsonb("sichtbereich").$type<Sichtbereich>(),
     /** Der Inhaber hat den Zugang entzogen; danach meldet er sich nicht mehr an */
     entzogenAm: timestamp("entzogen_am", { withTimezone: true }),
+    /** TOTP ist eingerichtet und bestätigt (Plugin twoFactor von Better Auth) */
+    twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
   },
   // Genau ein Inhaber, auch bei zwei gleichzeitigen Einrichtungen
   (t) => [
@@ -53,6 +68,8 @@ export const session = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
+    /** Wie die Sitzung entstand: passwort, zwei_faktor, passkey oder oidc (server/zugang/zwei-faktor.ts) */
+    anmeldeweg: text("anmeldeweg"),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -122,6 +139,68 @@ export const einladungen = pgTable(
     check(
       "einladungen_mitarbeiter",
       sql`case when ${t.rolle} = 'mitarbeiter' then coalesce(${t.recht} in ('lesen', 'bearbeiten') and jsonb_typeof(${t.sichtbereich}) = 'object', false) else ${t.recht} is null and ${t.sichtbereich} is null end`,
+    ),
+  ],
+);
+
+/**
+ * TOTP und Backup-Codes eines Zugangs (Plugin twoFactor von Better Auth, Modell twoFactor). Geheimnis und Backup-Codes
+ * verschlüsselt Better Auth mit BETTER_AUTH_SECRET; beide stehen nicht im Audit-Log.
+ */
+export const twoFactor = pgTable(
+  "two_factor",
+  {
+    id: text("id").primaryKey(),
+    secret: text("secret").notNull(),
+    backupCodes: text("backup_codes").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    /** Erst nach dem ersten richtigen Code bestätigt; vorher gilt TOTP nicht */
+    verified: boolean("verified").notNull().default(true),
+    failedVerificationCount: integer("failed_verification_count").notNull().default(0),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("two_factor_user_id_unique").on(t.userId)],
+);
+
+/** Passkeys (WebAuthn) eines Zugangs (Plugin passkey von Better Auth); gespeichert ist nur der öffentliche Schlüssel */
+export const passkey = pgTable(
+  "passkey",
+  {
+    id: text("id").primaryKey(),
+    name: text("name"),
+    publicKey: text("public_key").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    credentialID: text("credential_id").notNull(),
+    counter: integer("counter").notNull(),
+    deviceType: text("device_type").notNull(),
+    backedUp: boolean("backed_up").notNull(),
+    transports: text("transports"),
+    createdAt: timestamp("created_at", { withTimezone: true }),
+    aaguid: text("aaguid"),
+  },
+  (t) => [index("passkey_user_id_idx").on(t.userId), uniqueIndex("passkey_credential_id_unique").on(t.credentialID)],
+);
+
+/**
+ * Einstellungen der Anmeldung, genau eine Zeile, protokolliert: für welche Rollen ein zweiter Faktor Pflicht ist
+ * (docs/zugaenge.md#zwei-faktor)
+ */
+export const anmeldungEinstellungen = pgTable(
+  "anmeldung_einstellungen",
+  {
+    id: smallint("id").primaryKey().default(1),
+    zweiFaktorPflicht: text("zwei_faktor_pflicht").array().notNull().default(sql`'{}'::text[]`),
+    geaendertAm: timestamp("geaendert_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("anmeldung_einstellungen_eine_zeile", sql`${t.id} = 1`),
+    check(
+      "anmeldung_einstellungen_rollen",
+      sql`${t.zweiFaktorPflicht} <@ array['inhaber', 'steuerberatung', 'pruefer', 'mitarbeiter']::text[]`,
     ),
   ],
 );

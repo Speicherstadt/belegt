@@ -8,6 +8,7 @@ import {
   zugangLaden,
   zurueckziehen,
 } from "../zugang/einladungen.ts";
+import { EIGENES_KONTO } from "../zugang/konto.ts";
 import { mitarbeiterDarf } from "../zugang/mitarbeiter.ts";
 import { dokumentImPfad, prueferDarf, prueferZeitraum } from "../zugang/pruefer.ts";
 import { sichtbareIds, sichtVon } from "../zugang/sicht.ts";
@@ -19,6 +20,7 @@ import {
   listen as tokensListen,
   widerrufen,
 } from "../zugang/tokens.ts";
+import { einrichtungNoetig, pflichtLaden, staende } from "../zugang/zwei-faktor.ts";
 
 import {
   type App,
@@ -74,10 +76,19 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
     const bereich = role === "mitarbeiter" ? SichtbereichEingabe.safeParse(frisch?.sichtbereich) : null;
     if (bereich && (!bereich.success || !frisch?.recht))
       return c.json({ fehler: "Sichtbereich ungültig; bitte den Inhaber fragen" }, 403);
+    // Pflicht zum zweiten Faktor: Ohne ihn erreicht die Sitzung nur das eigene Konto, bis er eingerichtet ist
+    const einrichten = einrichtungNoetig(
+      await pflichtLaden(umgebung.db),
+      role,
+      (sitzung.session as { anmeldeweg?: unknown }).anmeldeweg,
+    );
+    if (einrichten && !EIGENES_KONTO.test(c.req.path))
+      return c.json({ fehler: "Zuerst den zweiten Faktor einrichten (Konto)", zweiFaktorEinrichten: true }, 403);
     const nutzer: Angemeldet = {
       id: sitzung.user.id,
       email: sitzung.user.email,
       role,
+      ...(einrichten ? { zweiFaktorEinrichten: true } : {}),
       ...(role === "pruefer" ? { zeitraum: prueferZeitraum(u.zeitraumVon, u.zeitraumBis) } : {}),
       ...(bereich?.success && frisch?.recht ? { sichtbereich: bereich.data, recht: frisch.recht } : {}),
     };
@@ -97,9 +108,9 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       nutzer.role === "steuerberatung" &&
       c.req.method === "POST" &&
       /^\/api\/dokumente\/[^/]+\/notizen(\/[^/]+\/zurueckziehen)?$/.test(c.req.path);
-    // Eigene gespeicherte Ansichten und Kacheln der Startseite legt jede Rolle an: Einstellungen, keine Änderung an
-    // Dokumenten
-    const ansicht = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/.test(c.req.path);
+    // Eigene gespeicherte Ansichten, Kacheln der Startseite und das eigene Konto pflegt jede Rolle: Einstellungen, keine
+    // Änderung an Dokumenten
+    const ansicht = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/.test(c.req.path) || EIGENES_KONTO.test(c.req.path);
     // Der Mitarbeiter hat eine eigene Liste erlaubter Aufrufe, die auch das Schreiben regelt
     if (nutzer.role === "mitarbeiter") {
       if (!nutzer.recht || !mitarbeiterDarf(nutzer.recht, c.req.method, c.req.path))
@@ -125,7 +136,15 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
   // Zugänge verwaltet nur der Inhaber; die Liste zeigt keine Tokens
   app.get("/api/zugaenge", async (c) => {
     if (c.get("nutzer").role !== "inhaber") return c.json({ fehler: "Nur für den Inhaber" }, 403);
-    return c.json(await zugaengeListen(umgebung.db));
+    const liste = await zugaengeListen(umgebung.db);
+    const zweiFaktor = await staende(
+      umgebung.db,
+      liste.zugaenge.map((z) => z.id),
+    );
+    return c.json({
+      ...liste,
+      zugaenge: liste.zugaenge.map((z) => ({ ...z, zweiFaktor: zweiFaktor.get(z.id) ?? { totp: false, passkeys: 0 } })),
+    });
   });
 
   app.post("/api/einladungen", async (c) => {

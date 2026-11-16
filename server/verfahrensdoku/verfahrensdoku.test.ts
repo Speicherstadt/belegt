@@ -94,7 +94,8 @@ describe.skipIf(!testDatenbankUrl)("Einstellungen und Verfahrensdokumentation ge
     expect(text).toContain("Verantwortlich: Anna Muster");
     expect(text).toContain("Täglich verschlüsselt");
     expect(text).toContain("Regel „Telefon“ schlägt vor: Buchungsbelege");
-    expect(text).toContain("kanzlei@example.org: Steuerberatung");
+    expect(text).toMatch(/kanzlei@example\.org: Steuerberatung, seit [\d-]+, ohne zweiten Faktor/);
+    expect(text).toContain("Ein zweiter Faktor ist für keine Rolle Pflicht.");
     expect(doku.titel).toBe("Verfahrensdokumentation Muster & Söhne GmbH");
     expect(doku.stand).toEqual({
       datum: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),

@@ -19,6 +19,37 @@ Rolle:
 Bei jedem Konto außer dem Inhaber steht **Entziehen**: Seine Sitzungen enden, anmelden kann er sich nicht mehr, im
 Protokoll und in der [Verfahrensdokumentation](verfahrensdoku.md) bleibt er mit dem Tag des Entzugs stehen.
 
+## Zwei-Faktor { #zwei-faktor }
+
+Unter **Konto** (unten in der Seitenleiste) richtet jede Person ihren zweiten Faktor selbst ein:
+
+- **Authenticator-App (TOTP)**: Passwort eingeben, den QR-Code scannen (Belegt erzeugt ihn selbst) und mit einem Code
+  bestätigen. Danach zeigt Belegt zehn Backup-Codes einmal an, zum Herunterladen als Textdatei; jeder gilt einmal, wenn
+  die App fehlt. Neue Backup-Codes und Entfernen verlangen das Passwort.
+- **Passkey**: mit Namen hinzufügen (Fingerabdruck, Gesicht, Sicherheitsschlüssel), umbenennen, entfernen.
+
+Bei der Anmeldung fragt Belegt nach dem Passwort den Code aus der App oder einen Backup-Code; „Passkey verwenden“
+meldet ohne Passwort an. Wer Passkeys, aber kein TOTP hat, meldet sich nur mit dem Passkey an. Je Anmeldung gelten fünf
+Codes, je Adresse fünf in der Minute; nach zehn falschen ist der zweite Faktor 15 Minuten gesperrt.
+
+Unter **Zugänge → Zwei-Faktor-Anmeldung** legt der Inhaber fest, für welche Rollen ein zweiter Faktor Pflicht ist. Wer
+dann keinen hat, sieht nach der Anmeldung nur die Einrichtung, bis TOTP oder ein Passkey eingerichtet ist; alle anderen
+Aufrufe lehnt der Server ab. Wer sich über den OIDC-Anbieter anmeldet ([Einbetten](einbetten.md)), braucht keinen
+eigenen zweiten Faktor; dafür ist der Anbieter zuständig.
+
+Hat jemand Telefon und Backup-Codes verloren, setzt der Inhaber unter **Zugänge** seinen zweiten Faktor zurück: TOTP,
+Backup-Codes und Passkeys sind weg, die Sitzungen enden, im Protokoll steht der Inhaber. Seinen eigenen setzt er mit
+einem Backup-Code zurück, im Notfall mit dem Eigentümerzugang der Datenbank auf dem Server:
+
+```sh
+docker compose exec server bun server/zugang/notfall.ts inhaber@firma.de
+```
+
+Das Skript läuft nur mit `MIGRATION_DATABASE_URL` ([getrennte Rollen](betrieb.md#getrennte-datenbankrollen)) und steht
+als `system:notfall` im Protokoll. TOTP-Geheimnis und Backup-Codes speichert Belegt verschlüsselt mit
+`BETTER_AUTH_SECRET` und nie im Protokoll; von einem Passkey nur den öffentlichen Schlüssel. Die
+[Verfahrensdokumentation](verfahrensdoku.md) nennt je Zugang den zweiten Faktor und die Pflicht.
+
 ## Mitarbeiter { #mitarbeiter }
 
 Für Mitarbeiter wählst du beim Einladen ein Recht und einen Sichtbereich; beides lässt sich später mit
@@ -59,7 +90,7 @@ Sichtbereich wie für alle anderen Dokumente.
 
 Nie: Löschung beantragen oder bestätigen, Sperren, Fristen, Prüfung, Z3-Export, Seiten bearbeiten, teilen per Link,
 „Öffnen mit …“, Mails importieren, Tags und andere Listen anlegen oder ändern, Regeln, Workflows, Quellen, Import aus
-Paperless-ngx, Einstellungen, Zugänge, API-Tokens, Webhooks und MCP. API-Tokens gehören dem Inhaber und sehen alle
+Paperless-ngx, Einstellungen, Zugänge, API-Tokens, Webhooks und MCP. Das eigene Konto (zweiter Faktor) pflegt jede Rolle. API-Tokens gehören dem Inhaber und sehen alle
 Dokumente; Mitarbeiter bekommen keine.
 
 ## Wie Belegt das durchsetzt

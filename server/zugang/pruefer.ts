@@ -1,4 +1,5 @@
 import type { Zeitraum } from "./einladungen.ts";
+import { EIGENES_KONTO } from "./konto.ts";
 
 /**
  * Prüferzugang (Z1, GoBD Rz. 165): nur lesen, nur Dokumente des freigegebenen Zeitraums, nur Archiv und Prüfung.
@@ -23,7 +24,9 @@ const ERLAUBT = [
 const EIGENE_ANSICHTEN = /^\/api\/(ansichten(\/[^/]+)?|start\/kacheln)$/;
 
 export const prueferDarf = (methode: string, pfad: string): boolean =>
-  EIGENE_ANSICHTEN.test(pfad) || ((methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad)));
+  EIGENE_ANSICHTEN.test(pfad) ||
+  EIGENES_KONTO.test(pfad) ||
+  ((methode === "GET" || methode === "HEAD") && ERLAUBT.some((r) => r.test(pfad)));
 
 /** Sammelaufrufe unter /api/dokumente/, die kein einzelnes Dokument meinen; ihre IDs prüft die Route selbst */
 const SAMMEL = new Set(["sammeln", "zusammenfuegen"]);

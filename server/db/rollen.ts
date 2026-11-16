@@ -191,6 +191,12 @@ export async function appAnmeldungPruefen(
 export const NUR_LESEN = ["sealed_tables", "backup_status", "audit_log", "seals", "audit_chain"];
 
 /**
+ * Einstellungen in genau einer Zeile, die die App ändert, aber nie löscht: Ohne die Zeile fiele etwa die Pflicht zum
+ * zweiten Faktor still weg (server/zugang/zwei-faktor.ts)
+ */
+export const OHNE_LOESCHEN = ["anmeldung_einstellungen"];
+
+/**
  * Rechte je Tabelle aus ihren Triggern: Wer per belegt_append_only nur ergänzt werden darf (versiegelte Tabellen ohne
  * Festschreibungsspalte, Freigaben, Postfach-Aktionen …), bekommt kein UPDATE oder DELETE. TRUNCATE, TRIGGER und
  * REFERENCES gibt es nie.
@@ -209,9 +215,10 @@ async function tabellenRechte(tx: Leser): Promise<{ tabelle: string; rechte: str
      order by c.relname`;
   return zeilen.map((z) => {
     if (NUR_LESEN.includes(z.tabelle)) return { tabelle: z.tabelle, rechte: ["select"] };
+    const ohneDelete = z.ohne_delete || OHNE_LOESCHEN.includes(z.tabelle);
     return {
       tabelle: z.tabelle,
-      rechte: ["select", "insert", ...(z.ohne_update ? [] : ["update"]), ...(z.ohne_delete ? [] : ["delete"])],
+      rechte: ["select", "insert", ...(z.ohne_update ? [] : ["update"]), ...(ohneDelete ? [] : ["delete"])],
     };
   });
 }

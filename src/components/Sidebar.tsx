@@ -105,6 +105,9 @@ export function Sidebar({
         <div className="mt-auto flex flex-col gap-2 px-2 text-sm">
           <Darstellung />
           <span className="truncate text-muted">{ich.email}</span>
+          <Link to="/konto" className={`${eintrag} -mx-2.5 self-start`}>
+            {m.nav_account()}
+          </Link>
           {oidc && konten.data && !verbunden && (
             <button
               type="button"

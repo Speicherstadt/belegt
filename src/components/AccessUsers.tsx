@@ -14,6 +14,7 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
   const queryClient = useQueryClient();
   const [bearbeiten, setBearbeiten] = useState(false);
   const [entziehen, setEntziehen] = useState(false);
+  const [zuruecksetzen, setZuruecksetzen] = useState(false);
   const [wahl, setWahl] = useState<MitarbeiterWahl>({
     recht: z.recht ?? "lesen",
     sichtbereich: { ...LEERER_SICHTBEREICH, ...z.sichtbereich },
@@ -27,7 +28,15 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
     },
   });
   const weg = useMutation({ mutationFn: () => api.entziehen(z.id), onSuccess: neu });
-  const fehler = speichern.error ?? weg.error;
+  const reset = useMutation({
+    mutationFn: () => api.zweiFaktorZuruecksetzen(z.id),
+    onSuccess: async () => {
+      setZuruecksetzen(false);
+      await neu();
+    },
+  });
+  const fehler = speichern.error ?? weg.error ?? reset.error;
+  const zweiterFaktor = z.zweiFaktor.totp || z.zweiFaktor.passkeys > 0;
 
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-border p-3 text-sm">
@@ -40,6 +49,7 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
             ` · ${m.access_period({ von: tag(z.zeitraumVon), bis: tag(z.zeitraumBis) })}`}
           {z.recht && ` · ${z.recht === "bearbeiten" ? m.scope_right_edit() : m.scope_right_read()}`}
           {z.entzogenAm && ` · ${m.access_withdrawn({ datum: tag(z.entzogenAm) })}`}
+          {` · ${zweiterFaktor ? m.access_2fa_yes() : m.access_2fa_no()}`}
         </span>
       </div>
       {z.sichtbereich && <p className="m-0 text-muted">{sichtbereichText(z.sichtbereich, name)}</p>}
@@ -56,6 +66,25 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
               {m.access_edit()}
             </button>
           )}
+          {zweiterFaktor &&
+            (zuruecksetzen ? (
+              <button
+                type="button"
+                onClick={() => reset.mutate()}
+                className="h-8 rounded-md bg-red-700 px-3 font-medium text-white"
+              >
+                {m.access_2fa_reset_confirm({ email: z.email })}
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={m.access_2fa_reset_named({ email: z.email })}
+                onClick={() => setZuruecksetzen(true)}
+                className={knopf}
+              >
+                {m.access_2fa_reset()}
+              </button>
+            ))}
           {entziehen ? (
             <button
               type="button"

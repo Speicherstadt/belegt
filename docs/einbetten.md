@@ -24,6 +24,9 @@ verbindet jede Person ihr Konto neu. Eine Verknüpfung allein über die
 Adresse gibt es nicht: Belegt bestätigt keine Adressen, und wer einen Einladungslink öffnet, wählt seine Adresse selbst.
 Ob der Anbieter die Adresse als bestätigt meldet, spielt deshalb keine Rolle. Tokens des Anbieters speichert Belegt nicht.
 
+Über den Anbieter verlangt Belegt keinen eigenen zweiten Faktor, auch nicht bei Pflicht ([Zwei-Faktor](zugaenge.md#zwei-faktor));
+ob einer nötig ist, regelt der Anbieter. Mit E-Mail und Passwort gilt der zweite Faktor von Belegt.
+
 ## Einbetten
 
 `BELEGT_EMBED_ORIGIN` nennt die eine Seite, die Belegt in einem Frame zeigen darf (`https://portal.firma.de`). Belegt

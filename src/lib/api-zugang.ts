@@ -13,6 +13,8 @@ export interface Ich {
   /** Nur beim Mitarbeiter: Recht und Sichtbereich */
   recht?: Recht;
   sichtbereich?: Sichtbereich;
+  /** Die Pflicht zum zweiten Faktor gilt, und diese Sitzung hat keinen: erst auf der Seite Konto einrichten */
+  zweiFaktorEinrichten?: boolean;
 }
 
 /** Eine Einladung: Steuerberatung, Prüfer mit Zeitraum oder Mitarbeiter mit Recht und Sichtbereich */
@@ -32,6 +34,7 @@ export interface Zugaenge {
     sichtbereich: Sichtbereich | null;
     entzogenAm: string | null;
     erstelltAm: string;
+    zweiFaktor: { totp: boolean; passkeys: number };
   }[];
   einladungen: {
     id: string;
@@ -108,8 +111,9 @@ export const zugangApi = {
     aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}`, { ...json({ recht, sichtbereich }), method: "PATCH" }),
   entziehen: (id: string) => aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}/entziehen`, { method: "POST" }),
   zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
+  /** Mit zweitem Faktor kommt statt der Sitzung { twoFactorRedirect: true } */
   anmelden: (email: string, passwort: string) =>
-    aufruf<unknown>("/api/auth/sign-in/email", json({ email, password: passwort })),
+    aufruf<{ twoFactorRedirect?: boolean }>("/api/auth/sign-in/email", json({ email, password: passwort })),
   // Geteilte Dateien, die noch nicht hochgeladen sind, bleiben nach dem Abmelden nicht im Browser
   abmelden: async () => {
     await geteilteVerwerfen();

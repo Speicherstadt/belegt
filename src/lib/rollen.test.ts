@@ -22,6 +22,7 @@ describe("ausgeschlossenBei", () => {
       sichtbereich,
       entzogenAm,
       erstelltAm: "2026-01-01",
+      zweiFaktor: { totp: false, passkeys: 0 },
     });
     const einladung = (
       sichtbereich: ReturnType<typeof bereich>,

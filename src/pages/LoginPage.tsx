@@ -15,6 +15,9 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [fehler, setFehler] = useState<string | null>(null);
   const [laeuft, setLaeuft] = useState(false);
+  // Nach dem Passwort: zweiter Schritt mit TOTP-Code oder Backup-Code
+  const [zweiterSchritt, setZweiterSchritt] = useState(false);
+  const [mitBackupCode, setMitBackupCode] = useState(false);
   const einrichten = status.data?.eingerichtet === false;
   const titel = einrichten ? m.login_setup_title() : m.login_title();
   // Rückkehr vom OIDC-Anbieter mit Fehler: kein verbundenes Konto, abgelehnt, oder (still) keine Sitzung dort
@@ -29,12 +32,23 @@ export function LoginPage() {
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email"));
     const passwort = String(form.get("passwort"));
+    await versuchen(async () => {
+      if (einrichten) await api.einrichten(email, passwort, String(form.get("code")));
+      else if ((await api.anmelden(email, passwort)).twoFactorRedirect) return setZweiterSchritt(true);
+      await weiter();
+    });
+  }
+
+  async function weiter() {
+    await queryClient.invalidateQueries();
+    await navigate({ to: await ziel() });
+  }
+
+  async function versuchen(schritt: () => Promise<void>) {
     setFehler(null);
     setLaeuft(true);
     try {
-      await (einrichten ? api.einrichten(email, passwort, String(form.get("code"))) : api.anmelden(email, passwort));
-      await queryClient.invalidateQueries();
-      await navigate({ to: await ziel() });
+      await schritt();
     } catch (err) {
       setFehler(m.login_failed({ meldung: err instanceof Error ? err.message : String(err) }));
     } finally {
@@ -42,7 +56,65 @@ export function LoginPage() {
     }
   }
 
+  async function codeAbsenden(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const code = String(new FormData(e.currentTarget).get("code")).trim();
+    await versuchen(async () => {
+      await (mitBackupCode ? api.backupCodePruefen(code) : api.totpPruefen(code.replace(/\s/g, "")));
+      await weiter();
+    });
+  }
+
+  const fehlerZeile = (fehler || (anbieterFehler && anbieterFehler !== "login_required")) && (
+    <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+      {fehler ?? (anbieterFehler === "account_not_linked" ? m.oidc_not_linked() : m.oidc_failed())}
+    </p>
+  );
+
   if (!status.data) return <p className="p-8 text-muted text-sm">{m.loading()}</p>;
+  if (zweiterSchritt)
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-bg px-4 text-fg">
+        <form
+          onSubmit={codeAbsenden}
+          className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-border p-6"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="text-muted text-sm">{m.app_name()}</span>
+            <h1 className="m-0 font-semibold text-2xl tracking-tight">{m.login_second_title()}</h1>
+            <p className="m-0 text-muted text-sm">
+              {mitBackupCode ? m.login_second_backup_intro() : m.login_second_intro()}
+            </p>
+          </div>
+          <label className="flex flex-col gap-1.5 font-medium text-sm">
+            {mitBackupCode ? m.login_backup_code() : m.login_totp_code()}
+            <input
+              key={mitBackupCode ? "backup" : "totp"}
+              name="code"
+              required
+              autoComplete="one-time-code"
+              inputMode={mitBackupCode ? "text" : "numeric"}
+              className="h-9 rounded-md border border-border bg-bg px-3 font-normal"
+            />
+          </label>
+          {fehlerZeile}
+          <button
+            type="submit"
+            disabled={laeuft}
+            className="h-9 rounded-md bg-primary font-medium text-onprimary text-sm disabled:opacity-60"
+          >
+            {laeuft ? m.login_busy() : m.login_second_submit()}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMitBackupCode(!mitBackupCode)}
+            className="self-start text-sm underline underline-offset-2"
+          >
+            {mitBackupCode ? m.login_use_totp() : m.login_use_backup()}
+          </button>
+        </form>
+      </main>
+    );
   return (
     <main className="flex min-h-screen items-center justify-center bg-bg px-4 text-fg">
       <form onSubmit={absenden} className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-border p-6">
@@ -109,11 +181,7 @@ export function LoginPage() {
             </span>
           )}
         </label>
-        {(fehler || (anbieterFehler && anbieterFehler !== "login_required")) && (
-          <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
-            {fehler ?? (anbieterFehler === "account_not_linked" ? m.oidc_not_linked() : m.oidc_failed())}
-          </p>
-        )}
+        {fehlerZeile}
         <button
           type="submit"
           disabled={laeuft}
@@ -121,6 +189,21 @@ export function LoginPage() {
         >
           {laeuft ? m.login_busy() : einrichten ? m.login_setup_submit() : m.login_submit()}
         </button>
+        {!einrichten && (
+          <button
+            type="button"
+            disabled={laeuft}
+            onClick={() =>
+              void versuchen(async () => {
+                await api.passkeyAnmelden();
+                await weiter();
+              })
+            }
+            className="h-9 rounded-md border border-border font-medium text-sm hover:bg-subtle disabled:opacity-60"
+          >
+            {m.login_passkey()}
+          </button>
+        )}
       </form>
     </main>
   );

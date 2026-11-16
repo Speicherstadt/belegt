@@ -28,7 +28,7 @@ import { rechteBeschreiben } from "./datenbank.ts";
 import { postfachAktion, postfachAktionenAbsatz } from "./postfach.ts";
 import { sicherungBeschreiben } from "./sicherung.ts";
 import { unveraenderbarkeit } from "./unveraenderbarkeit.ts";
-import { zugaengeBeschreiben } from "./zugaenge.ts";
+import { anmeldungBeschreiben, zugaengeBeschreiben } from "./zugaenge.ts";
 
 /**
  * Verfahrensdokumentation (GoBD Rz. 151 ff.): allgemeine Beschreibung, Anwender-, System- und Betriebsdokumentation.
@@ -122,6 +122,7 @@ export async function verfahrensdoku(
     lernstand,
     zugriff,
     sicherung,
+    anmeldung,
   ] = await Promise.all([
     einstellungenLaden(db),
     zugaengeBeschreiben(db),
@@ -139,6 +140,7 @@ export async function verfahrensdoku(
     klassifikatorStand(db),
     zugriffLesen(db.$client),
     backupStand(db, jetzt),
+    anmeldungBeschreiben(db),
   ]);
   const rechte = rechteBeschreiben(zugriff);
   const allgemein = angabenAbsaetze(e, ["rechtsform", "anschrift", "verantwortlich", "aufbewahrungsort"]);
@@ -233,6 +235,7 @@ export async function verfahrensdoku(
       absaetze: [
         "Zugänge entstehen nur über Einladung durch den Inhaber. Von den Personen schreibt nur der Inhaber; die Steuerberatung liest, kann Löschungen als zweite Person bestätigen und Notizen zu Dokumenten schreiben, die sich nicht ändern lassen und mit der Löschung des Dokuments entfernt werden; Prüfer lesen nur Dokumente ihres Zeitraums (Z1) und können sie als Datenträger nach dem Beschreibungsstandard exportieren (Z3).",
         "Mitarbeiter sehen nur die Dokumente ihres Sichtbereichs (Tags, Dokumenttypen, Korrespondenten, die der Inhaber festlegt). Mit dem Recht zu bearbeiten nehmen sie Dokumente auf, ordnen sie ein, setzen Tags, Typ, Korrespondent und Felder und schreiben Notizen, aber nur, solange das Dokument danach in ihrem Sichtbereich bleibt. Löschen, bestätigen, sperren, exportieren, teilen und Einstellungen, Zugänge, Tokens, Regeln, Workflows und Quellen ändern können sie nicht. Jede Änderung eines Sichtbereichs und jeder Entzug eines Zugangs stehen mit Akteur im Protokoll.",
+        anmeldung,
         "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur.",
         geteilt.jemals
           ? `Der Inhaber kann das Original eines einzelnen Dokuments per Link an Personen ohne Zugang geben, für 1, 7 oder höchstens 30 Tage (die Datenbank lässt keine längere Frist zu). Über den Link lässt sich nur diese Datei herunterladen, nichts ändern; nach Ablauf, Widerruf oder Löschung des Dokuments gilt er nicht mehr. Gespeichert ist nur ein Hash des Links. Anlegen, Widerruf und jeder Abruf stehen mit Zeitpunkt im Protokoll, ohne IP-Adresse oder andere Angaben zur abrufenden Person. Bisher wurden ${geteilt.jemals} Links angelegt, ${geteilt.aktiv} gelten derzeit.`

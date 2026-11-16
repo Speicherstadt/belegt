@@ -3,6 +3,7 @@ import { Navigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { ApiFehler, api } from "../lib/api.ts";
 import { eingebettet, stillAnmeldenErlaubt } from "../lib/einbetten.ts";
+import { AccountPage } from "../pages/AccountPage.tsx";
 import { m } from "../paraglide/messages.js";
 import { Sidebar } from "./Sidebar.tsx";
 
@@ -33,7 +34,9 @@ export function Shell({ children }: { children: ReactNode }) {
       </a>
       <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} version={status.data?.version} />
       <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
-        {children}
+        {/* Pflicht zum zweiten Faktor: bis er eingerichtet ist, auf jeder Seite die Einrichtung (der Server sperrt alles
+            andere) */}
+        {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}
       </main>
     </div>
   );
