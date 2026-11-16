@@ -142,14 +142,20 @@ const vorschauAbfragen = async (_url: string, init: RequestInit) => {
     .drawText(`Ansicht von ${datei.name}`, { x: 50, y: 700, font: await pdf.embedFont(StandardFonts.Helvetica) });
   return new Response(new Uint8Array(await pdf.save()));
 };
-/** Nachgebauter KoSIT-Validator: eine Rechnungsnummer mit „UNGUELTIG“ lehnt er ab (BR-CO-15), alles andere nimmt er an */
+/**
+ * Nachgebauter KoSIT-Validator: eine Rechnungsnummer mit „UNGUELTIG“ lehnt er ab (BR-CO-15), alles andere nimmt er an;
+ * das Szenario nach der Syntax wie in conf/scenarios.xml der KoSIT-Konfiguration für XRechnung
+ */
 const validatorAbfragen = async (_url: string, init: RequestInit) => {
   const ungueltig = String(init.body).includes("UNGUELTIG");
+  const szenario = String(init.body).includes("CrossIndustryInvoice")
+    ? "EN16931 (CII)"
+    : "EN16931 XRechnung (UBL Invoice)";
   const meldung = ungueltig
     ? '<rep:message level="error" code="BR-CO-15">[BR-CO-15]-Invoice total amount with VAT (BT-112) = Invoice total amount without VAT (BT-109) + Invoice total VAT amount (BT-110).</rep:message>'
     : "";
   return new Response(
-    `<rep:report xmlns:rep="http://www.xoev.de/de/validator/varl/1" xmlns:s="http://www.xoev.de/de/validator/framework/1/scenarios"><rep:scenarioMatched><s:scenario><s:name>EN16931 XRechnung (UBL Invoice)</s:name></s:scenario><rep:validationStepResult id="val-sch.1" valid="${!ungueltig}">${meldung}</rep:validationStepResult></rep:scenarioMatched><rep:assessment>${ungueltig ? "<rep:reject/>" : "<rep:accept/>"}</rep:assessment></rep:report>`,
+    `<rep:report xmlns:rep="http://www.xoev.de/de/validator/varl/1" xmlns:s="http://www.xoev.de/de/validator/framework/1/scenarios"><rep:scenarioMatched><s:scenario><s:name>${szenario}</s:name></s:scenario><rep:validationStepResult id="val-sch.1" valid="${!ungueltig}">${meldung}</rep:validationStepResult></rep:scenarioMatched><rep:assessment>${ungueltig ? "<rep:reject/>" : "<rep:accept/>"}</rep:assessment></rep:report>`,
     { status: ungueltig ? 406 : 200 },
   );
 };

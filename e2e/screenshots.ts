@@ -1,118 +1,76 @@
-import { readFileSync } from "node:fs";
-import { expect, type Page, test } from "@playwright/test";
+import { writeFile } from "node:fs/promises";
+import { type Browser, expect, type Page, test } from "@playwright/test";
+import { mitRahmen } from "./bildrahmen.ts";
+import { vorbereiten } from "./screenshot-daten.ts";
 
 /*
- * Bilder für README und Doku: erfundene Dokumente, Mails, Einordnungen, Tags, Dokumenttypen und Felder, dann je Seite
- * hell und dunkel nach docs/assets/. Läuft nur mit DOKU_SCREENSHOTS=1 (bun run screenshots), nicht in der CI.
+ * Bilder für README und Doku (docs/assets/screenshot-*.png): erfundene Firmen, Dokumente, Mails, Einordnungen, Tags,
+ * Felder, Workflows und Zugänge, dann je Seite hell und dunkel mit Rahmen (bildrahmen.ts). Läuft nur mit
+ * DOKU_SCREENSHOTS=1 (bun run docs:screenshots) auf eigenen Ports (playwright.config.ts), nicht in der CI.
  */
 
-const UBL = readFileSync(new URL("../server/inhalt/beispiele/ubl.xml", import.meta.url), "utf8");
-const pdf = (text: string) => Buffer.from(`%PDF-1.7\n% ${text}\n`);
-const json = (data: unknown) => ({ data });
+const ASSETS = "docs/assets";
+const MOBIL = { width: 390, height: 844 };
 
-async function vorbereiten(page: Page) {
-  const r = page.request;
-  const hoch = async (name: string, buffer: Buffer, mimeType = "application/pdf") =>
-    (await (await r.post("/api/dokumente", { multipart: { datei: { name, mimeType, buffer } } })).json()) as {
-      id: string;
-    };
-  const einordnen = (id: string, e: object) => r.post(`/api/dokumente/${id}/einordnung`, json(e));
+let rahmenBrowser: Browser;
 
-  const strom = await hoch("Stadtwerke-Rechnung-Oktober.pdf", pdf("Rechnung Stadtwerke Musterstadt"));
-  await einordnen(strom.id, {
-    art: "beleg",
-    entstanden: "2026-10-31",
-    titel: "Strom Oktober",
-    korrespondent: "Stadtwerke Musterstadt",
-  });
-  const miete = await hoch("Mietvertrag-Buero.pdf", pdf("Mietvertrag"));
-  await einordnen(miete.id, {
-    art: "freiwillig",
-    entstanden: "2024-03-01",
-    freiwilligBis: "2034-02-28",
-    titel: "Mietvertrag Büro",
-    korrespondent: "Hausverwaltung Beispiel",
-  });
-  const brief = await hoch("Angebot-Werkstatt.pdf", pdf("Angebot"));
-  await einordnen(brief.id, {
-    art: "geschaeftsbrief",
-    entstanden: "2026-09-15",
-    titel: "Angebot Werkstattausstattung",
-    korrespondent: "Werkstatt Beispiel GmbH",
-  });
-  const xrechnung = await hoch("xrechnung-2026-77.xml", Buffer.from(UBL), "application/xml");
-  await hoch("Scan-Tankquittung.pdf", pdf("Tankquittung"));
-  await hoch("Scan-Bewirtung.pdf", pdf("Bewirtungsbeleg"));
-
-  // Ordnung: Tags, Dokumenttypen und ein Betragsfeld, damit Liste und Dokument sie zeigen
-  const anlegen = async (pfad: string, body: object) =>
-    ((await (await r.post(pfad, json(body))).json()) as { id: string }).id;
-  const steuer = await anlegen("/api/tags", { name: "Steuer 2026", farbe: "blau" });
-  const fix = await anlegen("/api/tags", { name: "Fixkosten", farbe: "gruen" });
-  const buero = await anlegen("/api/tags", { name: "Büro", farbe: "violett" });
-  const rechnung = await anlegen("/api/dokumenttypen", { name: "Rechnung", vorgabeArt: "beleg" });
-  const vertrag = await anlegen("/api/dokumenttypen", { name: "Vertrag", vorgabeArt: null });
-  const betrag = await anlegen("/api/felder", { name: "Betrag", typ: "betrag" });
-  const ordnen = (id: string, a: object) => r.post(`/api/dokumente/${id}/ordnung`, json(a));
-  await ordnen(strom.id, {
-    tagsHinzu: [steuer, fix],
-    dokumenttyp: rechnung,
-    felder: [{ feldId: betrag, wert: "84,20" }],
-  });
-  await ordnen(miete.id, { tagsHinzu: [fix, buero], dokumenttyp: vertrag });
-  await ordnen(brief.id, { tagsHinzu: [buero] });
-  await ordnen(xrechnung.id, { tagsHinzu: [steuer], dokumenttyp: rechnung });
-  const eml = [
-    "From: Buchhaltung <rechnung@lieferant.example>",
-    "To: anna@example.org",
-    "Subject: Ihre Rechnung RE-2026-0042",
-    "Message-ID: <screenshot-1@lieferant.example>",
-    "Date: Mon, 2 Nov 2026 09:12:00 +0100",
-    "",
-    "Guten Tag, anbei die Rechnung für Oktober.",
-    "",
-  ].join("\r\n");
-  await r.post("/api/mails", {
-    multipart: { datei: { name: "rechnung.eml", mimeType: "message/rfc822", buffer: Buffer.from(eml) } },
-  });
-  await r.post("/api/sperren", json({ grund: "Außenprüfung 2023", von: "2023-01-01", bis: "2023-12-31" }));
-  await r.post(
-    "/api/einstellungen",
-    json({
-      firma: "Muster Werkstatt GmbH",
-      anschrift: "Musterweg 1, 12345 Musterstadt",
-      verantwortlich: "Anna Muster",
-      aufsicht: false,
-      datensicherung: "Täglich verschlüsselt auf ein zweites Gerät, monatlich Wiederherstellung geprüft.",
-      papierbelege: "Papier wird nach dem Scannen ein Jahr aufbewahrt.",
-      ergaenzungen: "",
-      rechtsform: "GmbH",
-      aufbewahrungsort: "Server und Sicherungen im Büro in Musterstadt, Deutschland.",
-      serverbetrieb: "Anna Muster betreibt den Server selbst und spielt Updates monatlich ein.",
-      schluesselablage: "Im Tresor des Büros.",
-    }),
-  );
-  // Der E2E-Server liest Inhalte jede Sekunde; die XRechnung soll erkannt sein
-  await expect
-    .poll(async () => (await (await r.get("/api/dokumente?suche=Werkstatt")).json()).length)
-    .toBeGreaterThan(1);
-  return { strom };
+/** Hell und dunkel über den Schalter „Darstellung“ der App (speichert belegt.darstellung), ohne Neuladen */
+async function darstellung(page: Page, modus: "Hell" | "Dunkel") {
+  // Ein Klick im DOM, damit die Seite nicht zum Schalter scrollt
+  await page.getByRole("radio", { name: modus }).evaluate((e: HTMLInputElement) => e.click());
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("belegt.darstellung"))).toBe(modus.toLowerCase());
+  await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
 }
 
-async function bild(page: Page, name: string) {
-  for (const schema of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: schema });
-    await page.waitForTimeout(300);
-    await page.screenshot({ path: `docs/assets/screenshot-${name}${schema === "dark" ? "-dunkel" : ""}.png` });
+/** Hell und dunkel mit Rahmen; oben ein Ausschnitt der Seite (selector), am Handy sonst der Inhalt unter der Navigation */
+async function bild(page: Page, name: string, oben?: string) {
+  const mobil = page.viewportSize()?.width === MOBIL.width;
+  const ziel = oben ?? (mobil ? "#inhalt" : undefined);
+  for (const modus of ["Hell", "Dunkel"] as const) {
+    await darstellung(page, modus);
+    if (ziel)
+      await page
+        .locator(ziel)
+        .first()
+        .evaluate((e) => e.scrollIntoView({ block: "start" }));
+    const png = await page.screenshot({ animations: "disabled", caret: "hide" });
+    const pfad = `${ASSETS}/screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
+    await writeFile(pfad, await mitRahmen(rahmenBrowser, png, modus === "Dunkel" ? "dunkel" : "hell", mobil ? 36 : 12));
   }
+  await darstellung(page, "Hell");
 }
 
-test("Bilder für README und Doku", async ({ page }) => {
-  await vorbereiten(page);
+test("Bilder für README und Doku", async ({ page, browser }) => {
+  test.setTimeout(240_000);
+  rahmenBrowser = browser;
+  const { holz, steuer, material, rechnung, betrag } = await vorbereiten(page);
+
+  // Die ZUGFeRD-Rechnung mit Vorschau, Kopfdaten und Prüfung
+  await page.goto(`/dokumente/${holz.id}`);
+  await expect(page.getByRole("region", { name: "E-Rechnung" })).toBeVisible();
+  await page.waitForTimeout(1500);
+  await bild(page, "dokument");
+  // danach eingeordnet, damit Archiv und Start sie zeigen
+  await page.request.post(`/api/dokumente/${holz.id}/einordnung`, {
+    data: {
+      art: "beleg",
+      entstanden: "2026-11-03",
+      titel: "Rechnung HK-2026-1187",
+      korrespondent: "Holzhandel Kranich GmbH",
+    },
+  });
+  await page.request.post(`/api/dokumente/${holz.id}/ordnung`, {
+    data: { tagsHinzu: [steuer, material], dokumenttyp: rechnung, felder: [{ feldId: betrag, wert: "1.475,60" }] },
+  });
 
   await page.goto("/archiv");
   await expect(page.getByRole("link", { name: "Strom Oktober" })).toBeVisible();
   await bild(page, "archiv");
+
+  // Volltext: „Rechnung“ findet Titel, Mail, XRechnung und den Text in den PDFs
+  await page.goto("/archiv?suche=Rechnung");
+  await expect(page.getByRole("link", { name: "Rechnung HK-2026-1187", exact: true })).toBeVisible();
+  await bild(page, "suche");
 
   // Eingang mit Mehrfachauswahl: zwei Scans gewählt, darüber die Sammelbearbeitung; daneben „Foto aufnehmen“
   await page.goto("/eingang");
@@ -122,11 +80,11 @@ test("Bilder für README und Doku", async ({ page }) => {
     await page.getByRole("checkbox", { name: `${name} auswählen` }).check();
   await bild(page, "eingang");
 
-  const x = page.getByRole("link", { name: "xrechnung-2026-77.xml" });
-  await page.goto("/eingang");
-  await x.click();
-  await expect(page.getByRole("region", { name: "E-Rechnung" })).toBeVisible();
-  await bild(page, "dokument");
+  // Ordnung: Kacheln mit Vorschaubild, Korrespondent, Typ und Tags, darüber die Filter
+  await page.goto("/archiv?darstellung=kacheln");
+  await expect(page.getByRole("link", { name: "Strom Oktober" })).toBeVisible();
+  await page.waitForTimeout(1000);
+  await bild(page, "ordnung");
 
   await page.goto("/fristen");
   await expect(page.getByRole("heading", { level: 1, name: "Fristen" })).toBeVisible();
@@ -135,6 +93,18 @@ test("Bilder für README und Doku", async ({ page }) => {
   await page.goto("/pruefung");
   await expect(page.getByRole("region", { name: "Prüfbericht" })).toBeVisible();
   await bild(page, "pruefung");
+
+  await page.goto("/verfahrensdoku");
+  await expect(page.getByRole("status")).toBeVisible();
+  // Die erzeugte Dokumentation steht unter dem Formular „Angaben zum Betrieb“; das Bild zeigt sie ohne das Formular
+  await page
+    .getByRole("region", { name: "Angaben zum Betrieb" })
+    .evaluate((e: HTMLElement) => e.style.setProperty("display", "none"));
+  await bild(page, "verfahrensdoku");
+
+  await page.goto("/workflows");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await bild(page, "workflows");
 
   // Startseite mit einer Kachel aus einer gespeicherten Ansicht
   const ansicht = await page.request.post("/api/ansichten", {
@@ -146,4 +116,12 @@ test("Bilder für README und Doku", async ({ page }) => {
   await page.getByRole("region", { name: "Unveränderbarkeit" }).getByRole("button", { name: "Jetzt prüfen" }).click();
   await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
   await bild(page, "start");
+
+  // Am Handy: der Eingang mit „Foto aufnehmen“, als Kacheln
+  await page.setViewportSize(MOBIL);
+  await page.goto("/eingang");
+  await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+  await page.getByRole("button", { name: "Kacheln" }).click();
+  await page.waitForTimeout(500);
+  await bild(page, "mobil");
 });

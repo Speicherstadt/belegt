@@ -117,4 +117,15 @@ Einmalig im Repository einzurichten:
   Änderung an `docs/` (den ersten Lauf unter Actions → Docs → Re-run starten).
 - Die GitHub-App [Renovate](https://github.com/apps/renovate) für dieses Repository (`.github/renovate.json5`).
 
-Die Bilder in README und Doku erzeugt `bun run screenshots` (erfundene Daten, hell und dunkel, nach `docs/assets/`).
+## Bilder für README und Doku
+
+```sh
+E2E_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_bilder bun run docs:screenshots
+```
+
+`e2e/screenshots.ts` startet Belegt wie die E2E-Tests mit frischer Datenbank (sie wird gelöscht und neu angelegt), aber
+auf eigenen Ports (App 5195, Server 3195), legt erfundene Firmen, Dokumente, Mails und Workflows an und nimmt jede
+Seite hell und dunkel auf (`docs/assets/screenshot-<name>.png` und `-dunkel.png`, 1440 × 900 mit Rahmen und Schatten
+im Bild, `e2e/bildrahmen.ts`). Danach rendert `bun run docs:social-preview` das Vorschaubild für Links
+(`docs/social-preview.png`, 1280 × 640) aus `scripts/social-preview/`. Die Aufnahmen laufen im vollen Chromium von Playwright
+(`bunx playwright install chromium`), weil die Headless Shell keine PDFs zeigt. Jedes Bild vor dem Commit ansehen.

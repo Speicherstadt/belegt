@@ -17,6 +17,7 @@ use_directory_urls: false
 
 nav:
   - Start: index.md
+  - Alle Funktionen: ueberblick.md
   - Betrieb:
       - Installation und Betrieb: betrieb.md
       - Zu Hause betreiben: zuhause.md
@@ -43,6 +44,8 @@ nav:
 
 theme:
   name: material
+  # SEO: Open Graph, Twitter Card und strukturierte Daten (overrides/main.html)
+  custom_dir: overrides
   language: de
   logo: assets/icon.svg
   favicon: assets/icon.svg
@@ -78,6 +81,10 @@ theme:
 
 plugins:
   - search
+
+# Startseite als Rundgang in Bildern (index.md)
+extra_css:
+  - assets/startseite.css
 
 markdown_extensions:
   - admonition

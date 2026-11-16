@@ -1,0 +1,56 @@
+<!doctype html>
+<!-- Vorschaubild beim Teilen eines Links (overrides/main.html: og:image, twitter:image) und für Settings → Social preview,
+     1280 × 640. Links Zeichen, Satz und Angaben, rechts die Volltextsuche im Archiv und das Handy, beide aus den Bildern
+     der Doku (bun run docs:screenshots). Ein Bild für alle Umgebungen, deshalb hell; die dunkle Spalte trägt es auch auf
+     dunklem Grund. Rendern: bun run docs:social-preview → docs/social-preview.png -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Geist"; font-weight: 100 900; src: url("../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2") format("woff2"); }
+
+  /* Zink wie src/styles.css, Grün wie das Häkchen im Zeichen (docs/assets/icon.svg) */
+  :root { --ink: #09090b; --ground: #f4f4f5; --line: #e4e4e7; --nav: #18181b; --nav-ink: #a1a1aa; --brand: #4ade80; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body { position: relative; display: flex; font-family: "Geist", system-ui, sans-serif; background: var(--ground); color: var(--ink); }
+
+  .side { width: 460px; flex: none; background: var(--nav); color: var(--nav-ink); padding: 56px 48px; display: flex; flex-direction: column; position: relative; z-index: 1; }
+  .brand { display: flex; align-items: center; gap: 20px; }
+  .brand svg { width: 72px; height: 72px; box-shadow: 0 0 0 1.5px #3f3f46; border-radius: 16px; }
+  .name { font-size: 56px; font-weight: 650; color: #fff; letter-spacing: -1.2px; }
+  .claim { margin-top: 40px; font-size: 44px; line-height: 52px; font-weight: 650; color: #fff; letter-spacing: -1px; }
+  .claim span { color: var(--brand); }
+  .sub { margin-top: 16px; font-size: 20px; line-height: 28px; }
+  .am-stueck { white-space: nowrap; }
+  dl { margin-top: auto; display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; font-size: 17px; line-height: 24px; }
+  dt { font-weight: 600; color: var(--brand); }
+  dd { margin: 0; }
+
+  /* Das Archiv ohne die Navigation der App läuft rechts und unten aus dem Bild; die Bilder tragen 32 px Rand
+     seitlich und 24 px oben (e2e/bildrahmen.ts) */
+  .shot { position: absolute; left: 508px; top: 56px; width: 900px; height: 700px; border: 1px solid var(--line); border-radius: 12px 0 0 0; overflow: hidden; background: #fff; }
+  .shot img { display: block; margin: -24px 0 0 -273px; }
+  /* Handy rechts, unten angeschnitten */
+  .phone { position: absolute; right: 40px; top: 176px; width: 244px; height: 504px; padding: 7px 7px 0; background: #09090b; border-radius: 41px 41px 0 0; box-shadow: 0 0 0 1.5px #3f3f46, 0 16px 40px rgba(9, 9, 11, 0.25); }
+  .phone .screen { position: relative; height: 100%; border-radius: 34px 34px 0 0; overflow: hidden; padding-top: 30px; background: #fff; }
+  .phone .screen img { display: block; width: 268px; margin: -14px 0 0 -19px; }
+  .phone .time { position: absolute; top: 8px; left: 26px; font-size: 13px; font-weight: 600; }
+  .phone .island { position: absolute; top: 7px; left: 50%; width: 72px; height: 20px; margin-left: -36px; border-radius: 10px; background: #000; }
+</style>
+</head>
+<body>
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#18181b"/><path d="M20 14h18l10 10v26a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z" fill="#fafafa"/><path d="M38 14v10h10" fill="#d4d4d8"/><path d="M25 38l6 6 11-13" fill="none" stroke="#16a34a" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="name">Belegt</div>
+    </div>
+    <p class="claim">Belegt ist, <span>was du beweisen kannst.</span></p>
+    <p class="sub"><span class="am-stueck">Open-Source-Dokumentenarchiv</span> mit GoBD-Modus, selbst gehostet.</p>
+    <dl><dt>Eingang</dt><dd>Mails, Scans, E-Rechnungen</dd><dt>Suche</dt><dd>Volltext mit Texterkennung</dd><dt>Fristen</dt><dd>gesperrt bis Fristende</dd><dt>Prüfung</dt><dd>Hash-Kette, Siegel, Z1, Z3</dd></dl>
+  </aside>
+  <div class="shot"><img src="../../docs/assets/screenshot-suche.png" alt=""></div>
+  <div class="phone"><div class="screen"><img src="../../docs/assets/screenshot-mobil.png" alt=""><div class="island"></div><div class="time">9:41</div></div></div>
+</body>
+</html>

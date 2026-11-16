@@ -7,10 +7,10 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
+    paths: ["docs/**", "overrides/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths: ["docs/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
+    paths: ["docs/**", "overrides/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
   workflow_dispatch:
 
 permissions:
