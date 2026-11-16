@@ -45,9 +45,12 @@ test("die Prüfung zeigt die wirksamen Rechte der App-Rolle und die Sicherung", 
   const zugriff = page.getByRole("region", { name: "Datenbankzugriff" });
   await expect(zugriff).toContainText(/Getrennte Rollen wirksam: Die Anmeldung \S+_app/);
   await zugriff.getByText("Rechte je Tabelle").click();
-  const audit = zugriff.getByRole("row", { name: /^audit_log / });
+  const dokumente = zugriff.getByRole("row", { name: /^dokumente / });
   // Lesen, Einfügen ja; Ändern, Löschen, Leeren nein
-  await expect(audit.getByRole("cell")).toHaveText(["audit_log", "ja", "ja", "nein", "nein", "nein"]);
+  await expect(dokumente.getByRole("cell")).toHaveText(["dokumente", "ja", "ja", "nein", "nein", "nein"]);
+  // Das Audit-Log schreiben nur die Trigger
+  const audit = zugriff.getByRole("row", { name: /^audit_log / });
+  await expect(audit.getByRole("cell")).toHaveText(["audit_log", "ja", "nein", "nein", "nein", "nein"]);
   const sicherung = page.getByRole("region", { name: "Sicherung" });
   await expect(sicherung).toContainText("/backups");
   await expect(sicherung.getByRole("alert")).toContainText("1 Befunde");
