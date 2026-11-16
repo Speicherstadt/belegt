@@ -19,6 +19,7 @@ Der Plan steht in `docs/plan.md`, Befehle und Tests in `docs/entwicklung.md`.
   Fehler beginnt mit einem roten Test. Was GoBD betrifft, immer gegen Postgres.
 - `bun run typecheck`, `bun run lint`, `bun run test` grün vor jedem Push; Übersprungenes melden.
 - Texte der Oberfläche über Paraglide (Deutsch und Englisch), nie fest im Code.
+- Oberfläche nach `DESIGN.md`; ändert sich eine Regel, ändert sich die Datei im selben Commit.
 - Doku in `docs/` im selben Commit, kurz und für Menschen.
 
 ## Arbeitsweise
