@@ -15,8 +15,9 @@ Nach dem Anmelden zeigt die Startseite, was ansteht: wie viel im Eingang liegt, 
 wie viele in diesem Jahr eingingen, offene Löschanträge, aktive Sperren mit der Zahl der Dokumente darunter, die Größe
 der Originale (jede Datei einmal) und die Fristen, die in den nächsten 90 Tagen enden, mit dem Tag, ab dem das
 Dokument löschbar ist. Daneben der Zustand der Quellen (letzter Abruf oder Fehler jedes Postfachs, das letzte Dokument
-aus dem Eingangsordner, der letzte Umzug aus Paperless-ngx) und der Unveränderbarkeit: das Ergebnis der Prüfung von
-Hash-Kette und Siegeln und der letzte Zeitstempel. Gelöschte Dokumente zählen nirgends mit.
+aus dem Eingangsordner, der letzte Umzug aus Paperless-ngx) und der Unveränderbarkeit: das Ergebnis der letzten
+[täglichen Prüfung](pruefung.md#taegliche-pruefung) von Hash-Kette und Siegeln und der letzte Zeitstempel. Gelöschte
+Dokumente zählen nirgends mit.
 
 Unter „Kacheln wählen“ zeigst du [gespeicherte Ansichten](ordnung.md#gespeicherte-ansichten) als Kacheln, jede mit der
 Zahl der Treffer und den ersten fünf in ihrer Sortierung. Die Auswahl gilt für deinen Zugang. Die Steuerberatung sieht

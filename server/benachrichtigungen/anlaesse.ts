@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { backupStand } from "../betrieb/backup.ts";
 import type { Datenbank } from "../db/client.ts";
-import { pruefen } from "../dokumente/dokumente.ts";
+import { letztePruefung } from "../pruefung/kette.ts";
 import type { Anlaesse, Anlass } from "./einstellungen.ts";
 
 /*
@@ -29,8 +29,6 @@ export interface Lage {
   jetzt: Date;
   /** Heutiger Tag in Deutschland, JJJJ-MM-TT */
   heute: string;
-  /** Die tägliche Prüfung der Kette ist fällig (der Worker entscheidet) */
-  kettePruefen: boolean;
 }
 
 const zeit = (d: Date | string) =>
@@ -115,10 +113,11 @@ async function postfach(db: Datenbank, { tage }: Anlaesse["postfach"], { jetzt }
   ];
 }
 
-async function kette(db: Datenbank, lage: Lage): Promise<Meldung[]> {
-  if (!lage.kettePruefen) return [];
-  const befunde = await pruefen(db);
-  if (!befunde.length) return [];
+/** Der letzte gespeicherte Lauf der Prüfung (server/pruefung/kette.ts) mit Befunden; neue Befunde sind ein neuer Zustand */
+async function kette(db: Datenbank): Promise<Meldung[]> {
+  const lauf = await letztePruefung(db);
+  if (!lauf || lauf.ok) return [];
+  const befunde = lauf.befundListe;
   const arten = [...new Set(befunde.map((b) => `${b.art} in ${b.tabelle}`))].slice(0, 5);
   return [
     {
@@ -126,7 +125,7 @@ async function kette(db: Datenbank, lage: Lage): Promise<Meldung[]> {
       zustand: `befunde:${kurz(JSON.stringify(befunde.map((b) => [b.art, b.tabelle, b.zeile, b.seq])))}`,
       betreff: "Belegt: Prüfung der Kette mit Befund",
       zeilen: [
-        `Die tägliche Prüfung von Hash-Kette, Kopf und Siegeln meldet ${befunde.length} Befund${befunde.length > 1 ? "e" : ""}.`,
+        `Die Prüfung von Hash-Kette, Kopf und Siegeln am ${zeit(lauf.geprueftAm)} meldet ${lauf.befunde} Befund${lauf.befunde > 1 ? "e" : ""}.`,
         `Betroffen: ${arten.join(", ")}.`,
       ],
       pfad: "/pruefung",
@@ -243,7 +242,7 @@ export async function meldungenSammeln(db: Datenbank, anlaesse: Anlaesse, lage: 
   const teile = await Promise.all([
     anlaesse.backup.an ? backup(db, anlaesse.backup, lage) : [],
     anlaesse.postfach.an ? postfach(db, anlaesse.postfach, lage) : [],
-    anlaesse.kette.an ? kette(db, lage) : [],
+    anlaesse.kette.an ? kette(db) : [],
     anlaesse.loeschung.an ? loeschung(db) : [],
     anlaesse.fristen.an ? fristen(db, lage) : [],
     anlaesse.eingang.an ? eingang(db, anlaesse.eingang) : [],

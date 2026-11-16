@@ -16,6 +16,15 @@ arbeitet ([Getrennte Datenbankrollen](betrieb.md#getrennte-datenbankrollen)), so
 wirksamen Rechte je Tabelle, so wie die Datenbank sie meldet. Daneben steht der Stand der
 [Sicherung](betrieb.md#sichern): letztes Backup, letzter bestandener Test-Restore und Fehler.
 
+## Tägliche Prüfung { #taegliche-pruefung }
+
+Der Worker prüft Hash-Kette, Kopf und Siegel einmal am Tag und speichert Zeitpunkt, Ergebnis, Befunde und die Zahl der
+Einträge im Audit-Log (Tabelle `kettenpruefungen`, nur ergänzen, mit Audit-Log). Die Startseite zeigt diesen Lauf,
+statt bei jedem Aufruf die ganze Kette zu lesen; ist er älter als zwei Tage, weist sie darauf hin. **Jetzt prüfen**
+(nur der Inhaber) startet einen Lauf sofort. Meldet ein Lauf Befunde, kommt die
+[Benachrichtigung](betrieb.md#benachrichtigungen) „Kette“. Die Prüfung unter **Prüfung** rechnet wie bisher bei jedem
+Aufruf neu.
+
 ## Prüferzugang (Z1)
 
 Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.

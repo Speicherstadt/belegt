@@ -18,6 +18,7 @@ import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
 import { ordnerEinlesen, type Zustand } from "./ordner/ordner.ts";
 import { naechsterImport } from "./paperless/ausfuehren.ts";
+import { kettePruefen, letztePruefung, pruefungFaellig } from "./pruefung/kette.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
@@ -293,22 +294,39 @@ async function paperless() {
 }
 
 /**
- * Mit MAIL_SMTP_URL: Benachrichtigungen alle 15 Minuten, die Prüfung der Kette dabei einmal am Tag (ab dem Start). Ins
- * Log kommen nur Zahlen, nie Adresse oder Passwort des SMTP-Servers.
+ * Prüfung von Kette, Kopf und Siegeln einmal am Tag, gespeichert für Startseite und Benachrichtigungen
+ * (server/pruefung/kette.ts); ob sie fällig ist, steht in der Datenbank und übersteht einen Neustart
  */
-async function benachrichtigungen(versender: Versender) {
-  let letztePruefung = 0;
+async function kettenpruefung() {
   for (;;) {
     const jetzt = new Date();
-    const kettePruefen = jetzt.getTime() - letztePruefung >= 86_400_000;
+    await letztePruefung(db)
+      .then(async (letzte) => {
+        if (!pruefungFaellig(letzte, jetzt)) return;
+        const lauf = await kettePruefen(db, "system:worker");
+        console.log(
+          `Prüfung der Kette: ${lauf.ok ? "keine Befunde" : `${lauf.befunde} Befunde`}, ${lauf.eintraege} Einträge`,
+        );
+      })
+      .catch((err) => console.error(`Prüfung der Kette fehlgeschlagen: ${meldung(err)}`));
+    await Bun.sleep(3_600_000);
+  }
+}
+
+/**
+ * Mit MAIL_SMTP_URL: Benachrichtigungen alle 15 Minuten; die Kette aus ihrem letzten Lauf. Ins Log kommen nur Zahlen,
+ * nie Adresse oder Passwort des SMTP-Servers.
+ */
+async function benachrichtigungen(versender: Versender) {
+  for (;;) {
+    const jetzt = new Date();
     const r = await benachrichtigen(
       { db, versender, basisUrl: env.BETTER_AUTH_URL },
-      { jetzt, heute: new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(jetzt), kettePruefen },
+      { jetzt, heute: new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(jetzt) },
     ).catch((err) => {
       console.error(`Benachrichtigungen fehlgeschlagen: ${meldung(err)}`);
       return null;
     });
-    if (r && kettePruefen) letztePruefung = jetzt.getTime();
     if (r && (r.gesendet || r.fehler))
       console.log(`Benachrichtigungen: ${r.gesendet} gesendet${r.fehler ? `, ${r.fehler} nicht zugestellt` : ""}`);
     await Bun.sleep(900_000);
@@ -335,6 +353,7 @@ await Promise.all([
   zuordnungen(),
   lernen(),
   entfernungen(),
+  kettenpruefung(),
   ...(rasterVerfuegbar() ? [vorschaubilder()] : []),
   ...(env.ARCHIVFASSUNG && ocrVerfuegbar() ? [archivfassungen()] : []),
   ...(sperrbar ? [objektsperren(sperrbar)] : []),

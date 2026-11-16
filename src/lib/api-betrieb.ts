@@ -113,6 +113,16 @@ export interface Uebersicht {
   loeschbar: number;
 }
 
+/** Ein gespeicherter Lauf der Prüfung von Kette, Kopf und Siegeln (server/pruefung/kette.ts) */
+export interface Kettenpruefung {
+  geprueftAm: string;
+  ok: boolean;
+  befunde: number;
+  eintraege: number;
+  dauerMs: number;
+  ausgeloestVon: string;
+}
+
 export interface Befund {
   art: string;
   tabelle: string;
@@ -185,6 +195,8 @@ export const betriebApi = {
     aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number; bericht: Bericht }>(
       `/api/pruefung${dateien ? "?dateien=1" : ""}`,
     ),
+  kette: () => aufruf<{ lauf: Kettenpruefung | null; zeitstempel: Bericht["zeitstempel"] }>("/api/kette"),
+  ketteJetztPruefen: () => aufruf<Kettenpruefung>("/api/kette/pruefen", { method: "POST" }),
   zeitstempel: () =>
     aufruf<{ id: string; seq: number; hash: string; dienst: string; zeit: string; seriennummer: string }[]>(
       "/api/zeitstempel",

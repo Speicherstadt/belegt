@@ -155,6 +155,8 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
       delete: false,
     });
     expect(t("benachrichtigungen")).toMatchObject(nurErgaenzen);
+    // Läufe der Prüfung von Kette, Kopf und Siegeln: nur ergänzen
+    expect(t("kettenpruefungen")).toMatchObject(nurErgaenzen);
     expect(tabellen.every((x) => !x.truncate && !x.trigger)).toBe(true);
   });
 

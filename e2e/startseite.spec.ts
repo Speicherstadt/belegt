@@ -28,7 +28,11 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
   await expect(eingang.getByRole("definition").first()).toHaveText(/^[1-9]\d*$/);
   await expect(page.getByRole("region", { name: "Fristen der nächsten 90 Tage" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Quellen" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
+  // Die Startseite zeigt den letzten gespeicherten Lauf; der Inhaber prüft auf Wunsch sofort
+  const kette = page.getByRole("region", { name: "Unveränderbarkeit" });
+  await kette.getByRole("button", { name: "Jetzt prüfen" }).click();
+  await expect(kette).toContainText("in Ordnung");
+  await expect(kette.getByRole("definition").nth(1)).toHaveText(/^\d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}, \d+ Einträge$/);
 
   // Eine Ansicht speichern und als Kachel wählen
   await page.goto("/archiv");

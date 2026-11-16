@@ -379,6 +379,13 @@
       "when": 1794831290330,
       "tag": "0053_weitergabe",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1794833797101,
+      "tag": "0054_kettenpruefungen",
+      "breakpoints": true
     }
   ]
 }

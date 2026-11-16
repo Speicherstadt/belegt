@@ -6,6 +6,7 @@ import {
 } from "../einstellungen/einstellungen.ts";
 import { z3Export } from "../export/z3.ts";
 import { bericht } from "../pruefung/bericht.ts";
+import { kettePruefen, letztePruefung } from "../pruefung/kette.ts";
 import { verfahrensdoku } from "../verfahrensdoku/verfahrensdoku.ts";
 import { listen as zeitstempelListen, token as zeitstempelToken } from "../zeitstempel/zeitstempel.ts";
 import { schnitt } from "../zugang/pruefer.ts";
@@ -66,6 +67,22 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
       "Content-Disposition": `attachment; filename="zeitstempel-${z.seq}.tst"`,
       "X-Content-Type-Options": "nosniff",
     });
+  });
+
+  // Der letzte gespeicherte Lauf der Prüfung von Kette, Kopf und Siegeln für die Startseite, mit dem neuesten
+  // Zeitstempel (server/pruefung/kette.ts); prüfen lässt erneut nur der Inhaber mit seiner Sitzung
+  app.get("/api/kette", async (c) => {
+    const [lauf, [stempel]] = await Promise.all([letztePruefung(umgebung.db), zeitstempelListen(umgebung.db)]);
+    return c.json({
+      lauf,
+      zeitstempel: stempel ? { seq: stempel.seq, zeit: stempel.zeit.toISOString(), dienst: stempel.dienst } : null,
+    });
+  });
+
+  app.post("/api/kette/pruefen", async (c) => {
+    const nutzer = c.get("nutzer");
+    if (nutzer.role !== "inhaber" || nutzer.token) return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    return c.json(await kettePruefen(umgebung.db, akteur(nutzer)), 201);
   });
 
   app.get("/api/pruefung", async (c) => {

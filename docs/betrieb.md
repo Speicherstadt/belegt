@@ -187,7 +187,7 @@ Unter **Benachrichtigungen** (nur der Inhaber) schaltest du jeden Anlass an oder
 | --- | --- | --- |
 | Sicherung | Backup oder Test-Restore fehlgeschlagen, oder seit X Tagen kein erfolgreiches Backup ([Sichern](#sichern)) | an, 2 Tage |
 | Postfach | seit X Tagen nicht erfolgreich abgerufen, oder eine [Aktion im Postfach](eingang.md#nach-dem-abholen) fehlgeschlagen | an, 1 Tag |
-| Kette | die tägliche [Prüfung](pruefung.md) von Kette, Kopf und Siegeln meldet Befunde | an |
+| Kette | die [tägliche Prüfung](pruefung.md#taegliche-pruefung) von Kette, Kopf und Siegeln meldet Befunde | an |
 | Löschung | ein Antrag wartet auf die zweite Person; geht an Inhaber und Steuerberatung außer dem Antragsteller | an |
 | Fristen | wöchentlich: Fristen, die in den nächsten 30 Tagen enden | an |
 | Eingang | mehr als N Dokumente warten auf ihre Einordnung | aus, 50 |

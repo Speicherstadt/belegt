@@ -143,6 +143,7 @@ test("Bilder für README und Doku", async ({ page }) => {
   await page.request.put("/api/start/kacheln", { data: { ansichten: [(await ansicht.json()).id] } });
   await page.goto("/");
   await expect(page.getByRole("region", { name: "Steuer 2026" })).toContainText("Dokumente");
+  await page.getByRole("region", { name: "Unveränderbarkeit" }).getByRole("button", { name: "Jetzt prüfen" }).click();
   await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
   await bild(page, "start");
 });

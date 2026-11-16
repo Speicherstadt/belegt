@@ -971,5 +971,10 @@
   "workflow_send_url_example": "https://accounting.example/api/receipts",
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
   "zip_download": "Download {anzahl} as ZIP ({groesse})",
-  "zip_too_large": "{groesse} in total: too large for one ZIP (at most 2 GB). Please select fewer."
+  "zip_too_large": "{groesse} in total: too large for one ZIP (at most 2 GB). Please select fewer.",
+  "start_chain_never": "not checked yet; the worker checks once a day",
+  "start_chain_checked": "Last checked",
+  "start_chain_checked_value": "{zeit}, {eintraege} entries",
+  "start_chain_stale": "No check for two days: is the worker running?",
+  "start_chain_now": "Check now"
 }

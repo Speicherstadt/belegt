@@ -971,5 +971,10 @@
   "workflow_send_url_example": "https://buchhaltung.example/api/belege",
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
   "zip_download": "{anzahl} als ZIP herunterladen ({groesse})",
-  "zip_too_large": "Zusammen {groesse}: zu groß für ein ZIP (höchstens 2 GB). Bitte weniger wählen."
+  "zip_too_large": "Zusammen {groesse}: zu groß für ein ZIP (höchstens 2 GB). Bitte weniger wählen.",
+  "start_chain_never": "noch nicht geprüft; der Worker prüft einmal am Tag",
+  "start_chain_checked": "Zuletzt geprüft",
+  "start_chain_checked_value": "{zeit}, {eintraege} Einträge",
+  "start_chain_stale": "Seit zwei Tagen keine Prüfung: Läuft der Worker?",
+  "start_chain_now": "Jetzt prüfen"
 }

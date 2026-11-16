@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { api, type ImportStatus, type Start } from "../../lib/api.ts";
 import { zeitpunkt } from "../../lib/format.ts";
@@ -70,31 +70,65 @@ export function SourceStatus({ quellen }: { quellen: NonNullable<Start["quellen"
   );
 }
 
-/** Prüfung der Hash-Kette und der letzte Zeitstempel, aus /api/pruefung */
-export function ChainStatus() {
-  const pruefung = useQuery({ queryKey: ["pruefung", false], queryFn: () => api.pruefung() });
-  const z = pruefung.data?.bericht.zeitstempel;
+/** Nach so vielen Stunden ohne Lauf weist die Startseite darauf hin (der Worker prüft alle 24 Stunden) */
+const VERALTET_STUNDEN = 48;
+
+/**
+ * Der letzte gespeicherte Lauf der Prüfung von Hash-Kette, Kopf und Siegeln und der letzte Zeitstempel, aus /api/kette;
+ * die Prüfung selbst läuft im Worker, auf Wunsch des Inhabers sofort
+ */
+export function ChainStatus({ inhaber }: { inhaber: boolean }) {
+  const queryClient = useQueryClient();
+  const kette = useQuery({ queryKey: ["kette"], queryFn: api.kette });
+  const jetzt = useMutation({
+    mutationFn: api.ketteJetztPruefen,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["kette"] }),
+  });
+  const lauf = kette.data?.lauf;
+  const z = kette.data?.zeitstempel;
+  const veraltet = !!lauf && Date.now() - new Date(lauf.geprueftAm).getTime() > VERALTET_STUNDEN * 3_600_000;
   return (
     <section aria-labelledby="start-kette" className={kachel}>
       <h2 id="start-kette" className="m-0 font-semibold text-lg">
         {m.start_chain()}
       </h2>
-      {pruefung.isPending && <p className="m-0 text-muted text-sm">{m.start_chain_busy()}</p>}
-      {pruefung.error && <p className={fehler}>{pruefung.error.message}</p>}
-      {pruefung.data && (
+      {kette.error && <p className={fehler}>{kette.error.message}</p>}
+      {kette.data && (
         <dl className="m-0 flex flex-col gap-1 text-sm">
           <dt className="text-muted">{m.start_chain_result()}</dt>
-          <dd className={pruefung.data.ok ? "m-0 font-medium" : `${fehler} font-medium`}>
-            {pruefung.data.ok
-              ? m.start_chain_ok()
-              : m.start_chain_findings({ anzahl: String(pruefung.data.befunde.length) })}
-          </dd>
+          {lauf ? (
+            <dd className={lauf.ok ? "m-0 font-medium" : `${fehler} font-medium`}>
+              {lauf.ok ? m.start_chain_ok() : m.start_chain_findings({ anzahl: String(lauf.befunde) })}
+            </dd>
+          ) : (
+            <dd className="m-0">{m.start_chain_never()}</dd>
+          )}
+          {lauf && (
+            <>
+              <dt className="text-muted">{m.start_chain_checked()}</dt>
+              <dd className={veraltet ? `${fehler} m-0` : "m-0"}>
+                {m.start_chain_checked_value({ zeit: zeitpunkt(lauf.geprueftAm), eintraege: String(lauf.eintraege) })}
+                {veraltet && ` ${m.start_chain_stale()}`}
+              </dd>
+            </>
+          )}
           <dt className="text-muted">{m.start_timestamp()}</dt>
           <dd className="m-0">
             {z ? m.start_timestamp_value({ zeit: zeitpunkt(z.zeit), dienst: z.dienst }) : m.start_timestamp_none()}
           </dd>
         </dl>
       )}
+      {inhaber && (
+        <button
+          type="button"
+          onClick={() => jetzt.mutate()}
+          disabled={jetzt.isPending}
+          className="h-9 self-start rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle disabled:opacity-60"
+        >
+          {jetzt.isPending ? m.start_chain_busy() : m.start_chain_now()}
+        </button>
+      )}
+      {jetzt.error && <p className={fehler}>{jetzt.error.message}</p>}
       <Link to="/pruefung" className="text-sm underline underline-offset-2">
         {m.start_chain_link()}
       </Link>

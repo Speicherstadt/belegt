@@ -2,6 +2,7 @@ import type { AddressInfo } from "node:net";
 import PostalMime from "postal-mime";
 import { SMTPServer } from "smtp-server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { kettePruefen } from "../pruefung/kette.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { zugangAnlegen } from "../test-zugaenge.ts";
@@ -69,11 +70,7 @@ describe.skipIf(!testDatenbankUrl)("Benachrichtigungen gegen Postgres und SMTP",
   let u: Umgebung;
   let inhaber: string;
   const heute = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
-  const lage = (stunden = 0, kettePruefen = true) => ({
-    jetzt: new Date(Date.now() + stunden * 3_600_000),
-    heute,
-    kettePruefen,
-  });
+  const lage = (stunden = 0) => ({ jetzt: new Date(Date.now() + stunden * 3_600_000), heute });
   const json = (methode: string, body: unknown) => ({
     method: methode,
     headers: { "content-type": "application/json" },
@@ -202,6 +199,8 @@ describe.skipIf(!testDatenbankUrl)("Benachrichtigungen gegen Postgres und SMTP",
       await tx`set local session_replication_role = replica`;
       await tx`update dokumente set dateiname = 'gefaelscht.pdf' where id = ${bald.id}`;
     });
+    // Gemeldet wird der letzte gespeicherte Lauf der Prüfung, nicht eine eigene
+    await kettePruefen(t.db, "system:worker");
 
     const ergebnis = await benachrichtigen(u, lage());
     const betreffe = smtp.post.map((m) => m.betreff).sort();

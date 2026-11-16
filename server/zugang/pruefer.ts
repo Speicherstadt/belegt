@@ -14,6 +14,7 @@ const ERLAUBT = [
   /^\/api\/(tags|dokumenttypen|korrespondenten|felder)$/,
   /^\/api\/export$/,
   /^\/api\/pruefung$/,
+  /^\/api\/kette$/,
   /^\/api\/zeitstempel(\/[^/]+\/token)?$/,
 ];
 

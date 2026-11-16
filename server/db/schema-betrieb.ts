@@ -79,3 +79,29 @@ export const benachrichtigungen = pgTable(
     check("benachrichtigungen_fehler", sql`${t.ok} = (${t.fehler} is null)`),
   ],
 );
+
+/**
+ * Ergebnis je Prüfung von Hash-Kette, Kopf und Siegeln (docs/pruefung.md#taegliche-pruefung): der Worker einmal am Tag,
+ * der Inhaber auf Wunsch. Die Startseite zeigt den letzten Lauf, statt bei jedem Aufruf zu prüfen. Nur ergänzen, mit
+ * Audit-Log.
+ */
+export const kettenpruefungen = pgTable(
+  "kettenpruefungen",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    geprueftAm: timestamp("geprueft_am", { withTimezone: true }).notNull().defaultNow(),
+    ok: boolean("ok").notNull(),
+    /** Die Befunde, höchstens 100 wie bei belegt_integrity_problems(100), und ihre Zahl */
+    befunde: bigint("befunde", { mode: "number" }).notNull(),
+    befundListe: jsonb("befund_liste").notNull().default([]),
+    /** Einträge im Audit-Log zum Zeitpunkt der Prüfung */
+    eintraege: bigint("eintraege", { mode: "number" }).notNull(),
+    dauerMs: bigint("dauer_ms", { mode: "number" }).notNull(),
+    /** system:worker oder nutzer:<E-Mail> */
+    ausgeloestVon: text("ausgeloest_von").notNull(),
+  },
+  (t) => [
+    index("kettenpruefungen_zeit").on(t.geprueftAm),
+    check("kettenpruefungen_ok", sql`${t.ok} = (${t.befunde} = 0)`),
+  ],
+);

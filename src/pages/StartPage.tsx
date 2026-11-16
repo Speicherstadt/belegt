@@ -27,7 +27,7 @@ export function StartPage() {
         {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
         {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
         {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
-        {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus />}
+        {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus inhaber={ich.data.role === "inhaber"} />}
         {/* Betrieb nur für Inhaber und Steuerberatung; der Server lehnt es für andere ab */}
         {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
           <OperationStatus inhaber={ich.data.role === "inhaber"} />
