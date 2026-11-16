@@ -8,7 +8,7 @@ export function PageHeader({ title, intro }: { title: string; intro: string }) {
   }, [title]);
   return (
     <header className="flex flex-col gap-1">
-      <h1 className="m-0 font-semibold text-2xl tracking-tight">{title}</h1>
+      <h1 className="m-0 font-semibold text-2xl tracking-tight [overflow-wrap:anywhere]">{title}</h1>
       <p className="m-0 text-muted text-sm">{intro}</p>
     </header>
   );

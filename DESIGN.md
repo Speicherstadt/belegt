@@ -5,8 +5,8 @@ Regeln für alles, was man in Belegt sieht und bedient. Vor jeder Arbeit an der 
 Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/styles.css`, eine Kopie hier würde
 auseinanderlaufen.
 
-**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
-`--control-h`, die Fokusregel, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
+**Stand:** Farben, `--bg` bis `--onprimary`, der Dunkelmodus, die Fokusregel und der Umbruch langer Prüfwerte gibt es heute. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
+`--control-h`, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
 
@@ -81,12 +81,13 @@ Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 u
 - Fließtext hat höchstens etwa 70 Zeichen Zeilenlänge: `max-w-prose` als Empfehlung.
 - Prüfwerte, Hashes und Token stehen in `font-mono` mit `overflow-wrap: anywhere` (`break-all` genügt nicht für
   Wörter in Sätzen); Flex-Eltern bekommen `min-w-0`, sonst wächst die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px,
-  Dokumentseite 438 px bei 390 px Breite).
+  Dokumentseite 438 px bei 390 px Breite). Seitentitel (`PageHeader`) und der Text der Verfahrensdokumentation
+  brechen ebenso um; `e2e/umbruch-fokus.spec.ts` prüft beides.
 - Kein Text in Versalien mit Sperrung; Beschriftungen in Satzschreibung.
 
 ## Fokus
 
-Vorschlag: eine globale Regel in `styles.css`.
+Eine globale Regel in `styles.css`:
 
 ```css
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
@@ -95,8 +96,8 @@ Vorschlag: eine globale Regel in `styles.css`.
 - **Knöpfe, Links, Checkboxen:** 2 px Ring in `--fg` mit 2 px Abstand, so entsteht er im Hell- wie im Dunkelmodus.
 - **Felder:** Der Ring liegt auf dem eigenen Rand, der sich in `--fg` färbt (`focus-visible:border-fg`,
   Ring ohne Abstand): kein Doppelrahmen.
-- Nie `outline-none` ohne Ersatz. Heute fehlt der Ersatz im Suchfeld des Archivs (`DocumentList.tsx`): Der Rahmen
-  (`focus-within:border-fg` am umgebenden Label) muss mitkommen.
+- Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
+  am umgebenden Label.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).
 
 ## Knöpfe

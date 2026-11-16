@@ -157,7 +157,7 @@ export function DocumentList({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
         {suchbar && (
-          <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border border-border px-3 text-sm">
+          <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border border-border px-3 text-sm focus-within:border-fg">
             <span className="sr-only">{m.archive_search()}</span>
             <input
               type="search"

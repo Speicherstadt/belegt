@@ -64,6 +64,14 @@
   --font-sans: "Geist Variable", system-ui, sans-serif;
 }
 
+/* Fokus nach DESIGN.md: 2 px Ring in --fg, in beiden Modi sichtbar; in der Ebene base, damit Utilities (outline-none am Suchfeld) ihn ersetzen können */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);
