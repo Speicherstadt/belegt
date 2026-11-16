@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { ConfirmDialog } from "./ConfirmDialog.tsx";
 import { kannBestaetigen } from "./Deletion.tsx";
 
 /** Offene Anträge auf der Seite Fristen, zum Bestätigen durch die zweite Person */
@@ -14,6 +16,7 @@ export function OpenDeletions() {
     mutationFn: api.loeschungBestaetigen,
     onSuccess: () => queryClient.invalidateQueries(),
   });
+  const [fragen, setFragen] = useState<string | null>(null);
   const offen = liste.data?.filter((l) => !l.bestaetigtAm) ?? [];
   return (
     <section aria-labelledby="offene-loeschungen" className="flex flex-col gap-3">
@@ -42,7 +45,7 @@ export function OpenDeletions() {
             {kannBestaetigen(l, ich.data) && (
               <button
                 type="button"
-                onClick={() => bestaetigen.mutate(l.id)}
+                onClick={() => setFragen(l.id)}
                 className="h-8 rounded-md bg-primary px-3 font-medium text-onprimary"
               >
                 {m.delete_confirm()}
@@ -51,11 +54,20 @@ export function OpenDeletions() {
           </li>
         ))}
       </ul>
-      {bestaetigen.error && (
-        <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
-          {m.delete_failed({ meldung: bestaetigen.error.message })}
-        </p>
-      )}
+      <ConfirmDialog
+        open={fragen !== null}
+        titel={m.delete_confirm_title()}
+        folge={m.delete_confirm_follow()}
+        verb={m.delete_final()}
+        haken={m.delete_confirm_check()}
+        pending={bestaetigen.isPending}
+        fehler={bestaetigen.error ? m.delete_failed({ meldung: bestaetigen.error.message }) : undefined}
+        onConfirm={() => fragen && bestaetigen.mutate(fragen, { onSuccess: () => setFragen(null) })}
+        onCancel={() => {
+          setFragen(null);
+          bestaetigen.reset();
+        }}
+      />
     </section>
   );
 }
