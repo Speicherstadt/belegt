@@ -82,7 +82,10 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
   app.post("/api/kette/pruefen", async (c) => {
     const nutzer = c.get("nutzer");
     if (nutzer.role !== "inhaber" || nutzer.token) return c.json({ fehler: "Nur für den Inhaber" }, 403);
-    return c.json(await kettePruefen(umgebung.db, akteur(nutzer)), 201);
+    const lauf = await kettePruefen(umgebung.db, akteur(nutzer));
+    return lauf
+      ? c.json(lauf, 201)
+      : c.json({ fehler: "Die Kette wird gerade geprüft; gleich steht das Ergebnis hier" }, 409);
   });
 
   app.get("/api/pruefung", async (c) => {

@@ -1,5 +1,5 @@
 import { desc, sql } from "drizzle-orm";
-import { mitAkteur } from "../db/akteur.ts";
+import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { kettenpruefungen } from "../db/schema.ts";
 import { type Befund, pruefen } from "../dokumente/dokumente.ts";
@@ -33,15 +33,27 @@ const ausZeile = (z: typeof kettenpruefungen.$inferSelect): Kettenpruefung => ({
   ausgeloestVon: z.ausgeloestVon,
 });
 
-/** Prüft jetzt und speichert das Ergebnis; akteur steht im Lauf und im Audit-Log */
-export async function kettePruefen(db: Datenbank, akteur: string): Promise<Kettenpruefung> {
-  const beginn = performance.now();
-  const [befundListe, [zahl]] = await Promise.all([
-    pruefen(db),
-    db.execute<{ eintraege: string }>(sql`select count(*) as eintraege from audit_log`),
-  ]);
-  const [zeile] = await mitAkteur(db, akteur, (tx) =>
-    tx
+/**
+ * Prüft jetzt und speichert das Ergebnis; akteur steht im Lauf und im Audit-Log. Es läuft höchstens eine Prüfung
+ * zugleich, über alle Prozesse (Sperre in Postgres bis zum Ende der Transaktion): Läuft schon eine, kommt null zurück,
+ * statt die ganze Kette ein weiteres Mal zu lesen. Mit faelligAm prüft sie nur, wenn der letzte Lauf zu diesem
+ * Zeitpunkt fällig ist; so prüfen zwei Worker nicht kurz nacheinander dasselbe.
+ */
+export async function kettePruefen(
+  db: Datenbank,
+  akteur: string,
+  { faelligAm }: { faelligAm?: Date } = {},
+): Promise<Kettenpruefung | null> {
+  return mitAkteur(db, akteur, async (tx) => {
+    const [sperre] = await tx.execute<{ frei: boolean }>(
+      sql`select pg_try_advisory_xact_lock(hashtextextended('belegt_kettenpruefung', 0)) as frei`,
+    );
+    if (!sperre?.frei) return null;
+    if (faelligAm && !pruefungFaellig(await letztePruefung(tx), faelligAm)) return null;
+    const beginn = performance.now();
+    const befundListe = await pruefen(tx);
+    const [zahl] = await tx.execute<{ eintraege: string }>(sql`select count(*) as eintraege from audit_log`);
+    const [zeile] = await tx
       .insert(kettenpruefungen)
       .values({
         ok: befundListe.length === 0,
@@ -51,13 +63,13 @@ export async function kettePruefen(db: Datenbank, akteur: string): Promise<Kette
         dauerMs: Math.round(performance.now() - beginn),
         ausgeloestVon: akteur,
       })
-      .returning(),
-  );
-  return ausZeile(zeile!);
+      .returning();
+    return ausZeile(zeile!);
+  });
 }
 
 /** Der neueste Lauf, null vor dem ersten */
-export async function letztePruefung(db: Datenbank): Promise<Kettenpruefung | null> {
+export async function letztePruefung(db: Datenbank | Tx): Promise<Kettenpruefung | null> {
   const [zeile] = await db.select().from(kettenpruefungen).orderBy(desc(kettenpruefungen.id)).limit(1);
   return zeile ? ausZeile(zeile) : null;
 }

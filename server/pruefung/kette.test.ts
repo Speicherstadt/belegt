@@ -28,7 +28,7 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
 
   it("speichert Zeitpunkt, Ergebnis und Zahl der Einträge; die Startseite liest den letzten Lauf", async () => {
     expect(await (await t.anfrage("/api/kette", {}, kanzlei)).json()).toEqual({ lauf: null, zeitstempel: null });
-    const lauf = await kettePruefen(t.db, "system:worker");
+    const lauf = (await kettePruefen(t.db, "system:worker"))!;
     expect(lauf).toMatchObject({ ok: true, befunde: 0, befundListe: [], ausgeloestVon: "system:worker" });
     expect(lauf.eintraege).toBeGreaterThan(0);
     expect((await (await t.anfrage("/api/kette", {}, kanzlei)).json()).lauf).toEqual(lauf);
@@ -52,6 +52,12 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
     expect(await zahl()).toBe(vorher + 1);
   });
 
+  it("prüft im Worker nur, wenn der letzte Lauf fällig ist", async () => {
+    expect(await kettePruefen(t.db, "system:worker", { faelligAm: new Date() })).toBeNull();
+    const spaeter = new Date(Date.now() + 25 * 3_600_000);
+    expect(await kettePruefen(t.db, "system:worker", { faelligAm: spaeter })).toMatchObject({ ok: true });
+  });
+
   it("hält einen Befund fest, und der Lauf lässt sich weder ändern noch löschen", async () => {
     // Eine Zeile an den Triggern vorbei geändert (braucht einen Superuser)
     const [d] = await t.sql`select id from dokumente limit 1`;
@@ -64,13 +70,13 @@ describe.skipIf(!testDatenbankUrl)("Gespeicherte Prüfung der Kette gegen Postgr
       await tx`set local session_replication_role = replica`;
       await tx`update dokumente set dateiname = 'gefaelscht.pdf'`;
     });
-    const lauf = await kettePruefen(t.db, "system:worker");
+    const lauf = (await kettePruefen(t.db, "system:worker"))!;
     expect(lauf.ok).toBe(false);
     expect(lauf.befunde).toBeGreaterThan(0);
     expect(lauf.befundListe[0]).toMatchObject({ tabelle: "dokumente" });
     await expect(t.sql`update kettenpruefungen set ok = true, befunde = 0`).rejects.toThrow();
     await expect(t.sql`delete from kettenpruefungen`).rejects.toThrow();
     const [protokoll] = await t.sql`select count(*)::int as n from audit_log where table_name = 'kettenpruefungen'`;
-    expect(protokoll?.n).toBe(4);
+    expect(protokoll?.n).toBe(5);
   });
 });

@@ -18,7 +18,7 @@ import { imapOeffnen } from "./mail/imapflow.ts";
 import { oauthAusEnv } from "./mail/oauth.ts";
 import { ordnerEinlesen, type Zustand } from "./ordner/ordner.ts";
 import { naechsterImport } from "./paperless/ausfuehren.ts";
-import { kettePruefen, letztePruefung, pruefungFaellig } from "./pruefung/kette.ts";
+import { kettePruefen } from "./pruefung/kette.ts";
 import { speicherAusEnv } from "./speicher/auswahl.ts";
 import { sperrenAbgleichen } from "./speicher/objektsperren.ts";
 import type { SperrbarerSpeicher } from "./speicher/s3.ts";
@@ -299,14 +299,12 @@ async function paperless() {
  */
 async function kettenpruefung() {
   for (;;) {
-    const jetzt = new Date();
-    await letztePruefung(db)
-      .then(async (letzte) => {
-        if (!pruefungFaellig(letzte, jetzt)) return;
-        const lauf = await kettePruefen(db, "system:worker");
-        console.log(
-          `Prüfung der Kette: ${lauf.ok ? "keine Befunde" : `${lauf.befunde} Befunde`}, ${lauf.eintraege} Einträge`,
-        );
+    await kettePruefen(db, "system:worker", { faelligAm: new Date() })
+      .then((lauf) => {
+        if (lauf)
+          console.log(
+            `Prüfung der Kette: ${lauf.ok ? "keine Befunde" : `${lauf.befunde} Befunde`}, ${lauf.eintraege} Einträge`,
+          );
       })
       .catch((err) => console.error(`Prüfung der Kette fehlgeschlagen: ${meldung(err)}`));
     await Bun.sleep(3_600_000);

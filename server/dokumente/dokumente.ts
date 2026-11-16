@@ -243,7 +243,7 @@ export interface Befund {
 }
 
 /** Befunde zu Hash-Kette, Kopf und Siegeln aus Postgres (belegt_integrity_problems) */
-export async function pruefen(db: Datenbank): Promise<Befund[]> {
+export async function pruefen(db: Datenbank | Tx): Promise<Befund[]> {
   const zeilen = await db.execute<{
     art: string;
     tabelle: string;
