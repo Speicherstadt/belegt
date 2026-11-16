@@ -3,7 +3,7 @@ import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { mitAkteur } from "../db/akteur.ts";
 import { dokumente, mails, postfachAktionen, postfachMails, quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { type AbrufOptionen, type Oeffnen, quellenAkteur, type Zugang, zugangZu } from "./abruf.ts";
+import { type AbrufOptionen, type Oeffnen, type Ordner, quellenAkteur, type Zugang, zugangZu } from "./abruf.ts";
 import { jmapBearbeiten } from "./jmap.ts";
 
 /*
@@ -34,8 +34,8 @@ export interface AktionenErgebnis {
 interface Adapter {
   /** Grund, aus dem der Eintrag in diesem Postfach nicht mehr adressierbar ist (UIDVALIDITY) */
   unpassend(e: Eintrag): string | null;
-  /** Den Zielordner gibt es: IMAP über den Pfad, JMAP über die Mailbox-ID */
-  ordnerGibtEs(id: string): Promise<boolean>;
+  /** Der Zielordner, IMAP über den Pfad, JMAP über die Mailbox-ID; null, wenn es ihn nicht gibt */
+  zielordner(id: string): Promise<Ordner | null>;
   gibtEs(e: Eintrag): Promise<boolean>;
   roh(e: Eintrag): Promise<Uint8Array | null>;
   gelesen(e: Eintrag): Promise<void>;
@@ -45,11 +45,15 @@ interface Adapter {
   schliessen(): Promise<void>;
 }
 
+/** Löschen, oder Verschieben in einen Papierkorb (papierkorb.ts): Bestätigung, Wartezeit, Sperre, Hash-Vergleich */
+export const wieLoeschen = (q: Pick<QuelleZeile, "aktion" | "aktionZielPapierkorb">) =>
+  q.aktion === "loeschen" || (q.aktion === "verschieben" && q.aktionZielPapierkorb);
+
 const meldungVon = (err: unknown) => (err instanceof Error ? err.message : String(err)).slice(0, 500);
 
 /** Fällige Einträge: offen, Wiederholung erreicht; Löschen erst nach der Wartezeit und gegebenenfalls mit Sperre */
 async function faellige({ db }: Umgebung, q: QuelleZeile, jetzt: Date) {
-  const loeschen = q.aktion === "loeschen";
+  const loeschen = wieLoeschen(q);
   return db
     .select()
     .from(postfachMails)
@@ -146,10 +150,18 @@ async function anwenden(
   melden: (e: Eintrag, ergebnis: Ergebnis, meldung?: string | null, endgueltig?: boolean) => Promise<void>,
 ) {
   // Wie Paperless-ngx (_handle_mail_rule): beim Verschieben zuerst prüfen, ob es den Zielordner gibt
-  if (q.aktion === "verschieben" && !(await a.ordnerGibtEs(q.aktionZiel!))) {
-    for (const e of eintraege)
-      await melden(e, "fehler", `Zielordner „${q.aktionZielPfad ?? q.aktionZiel}“ gibt es nicht`);
-    return;
+  if (q.aktion === "verschieben") {
+    const ziel = await a.zielordner(q.aktionZiel!);
+    const name = q.aktionZielPfad ?? q.aktionZiel;
+    const grund = !ziel
+      ? `Zielordner „${name}“ gibt es nicht`
+      : ziel.papierkorb && !wieLoeschen(q)
+        ? `Zielordner „${name}“ ist ein Papierkorb; Verschieben dorthin muss wie Löschen bestätigt werden`
+        : null;
+    if (grund) {
+      for (const e of eintraege) await melden(e, "fehler", grund);
+      return;
+    }
   }
   for (const e of eintraege) {
     const grund = a.unpassend(e);
@@ -158,8 +170,8 @@ async function anwenden(
       continue;
     }
     try {
-      if (q.aktion === "loeschen") {
-        // Gelöscht wird nur, was Byte für Byte dem Original im Archiv entspricht
+      if (wieLoeschen(q)) {
+        // Gelöscht (oder in den Papierkorb gelegt) wird nur, was Byte für Byte dem Original im Archiv entspricht
         const roh = await a.roh(e);
         if (!roh) {
           await melden(e, "entfallen", "Die Mail liegt nicht mehr im Ordner");
@@ -169,7 +181,8 @@ async function anwenden(
           await melden(e, "fehler", "Die Mail im Postfach weicht vom Original im Archiv ab; nicht gelöscht", true);
           continue;
         }
-        await a.loeschen(e);
+        if (q.aktion === "loeschen") await a.loeschen(e);
+        else await a.verschieben(e, q.aktionZiel!);
       } else {
         if (!(await a.gibtEs(e))) {
           await melden(e, "entfallen", "Die Mail liegt nicht mehr im Ordner");
@@ -200,7 +213,7 @@ async function imapAdapter(oeffnen: Oeffnen, zugang: Zugang): Promise<Adapter> {
       e.uidValidity === postfach.uidValidity
         ? null
         : "UIDVALIDITY des Ordners hat sich geändert; der nächste Abruf ordnet die Mail neu zu",
-    ordnerGibtEs: async (id) => (await postfach.ordner?.())?.some((o) => o.id === id) ?? false,
+    zielordner: async (id) => (await postfach.ordner?.())?.find((o) => o.id === id) ?? null,
     gibtEs: (e) => b.gibtEs(e.uid!),
     roh: (e) => b.roh(e.uid!),
     gelesen: (e) => b.flagge(e.uid!, "\\Seen"),
@@ -215,7 +228,7 @@ async function jmapAdapter(zugang: Zugang, abfragen: AbrufOptionen["abfragen"]):
   const j = await jmapBearbeiten(zugang, abfragen);
   return {
     unpassend: (e) => (e.jmapId ? null : "Keine Email-ID"),
-    ordnerGibtEs: async (id) => j.gibtZiel(id),
+    zielordner: async (id) => j.ziel(id),
     gibtEs: (e) => j.gibtEs(e.jmapId!),
     roh: (e) => j.roh(e.jmapId!),
     gelesen: (e) => j.schluesselwort(e.jmapId!, "$seen"),
@@ -259,7 +272,7 @@ export async function aktionenAusfuehren(
     return ergebnis;
   }
   // Die Datenbank lässt Löschen ohne Bestätigung nicht zu (quellen_loeschen_bestaetigt); hier noch einmal
-  if (q.aktion === "loeschen" && !q.loeschenBestaetigtAm) return ergebnis;
+  if (wieLoeschen(q) && !q.loeschenBestaetigtAm) return ergebnis;
 
   const geprueft: Eintrag[] = [];
   for (const e of await faellige(umgebung, q, jetzt)) {

@@ -1,5 +1,6 @@
 import { ImapFlow } from "imapflow";
 import type { Bearbeiten, Oeffnen } from "./abruf.ts";
+import { papierkorbName } from "./papierkorb.ts";
 
 /**
  * Öffnet ein Postfach mit imapflow (wie Kontext). Zum Abholen nur lesend (EXAMINE): nichts wird als gelesen markiert
@@ -62,7 +63,11 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
       }
     },
     async ordner() {
-      return (await client.list()).map((o) => ({ id: o.path, pfad: o.path }));
+      return (await client.list()).map((o) => ({
+        id: o.path,
+        pfad: o.path,
+        papierkorb: o.specialUse === "\\Trash" || papierkorbName(o.name),
+      }));
     },
     ...(zugang.schreiben ? { bearbeiten } : {}),
     async schliessen() {

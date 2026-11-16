@@ -1,0 +1,2 @@
+ALTER TABLE "quellen" ADD COLUMN "aktion_ziel_papierkorb" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "quellen" ADD CONSTRAINT "quellen_papierkorb_bestaetigt" CHECK (not "quellen"."aktion_ziel_papierkorb" or ("quellen"."loeschen_bestaetigt_von" is not null and "quellen"."loeschen_bestaetigt_am" is not null));

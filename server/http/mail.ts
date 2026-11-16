@@ -194,9 +194,6 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
         },
         400,
       );
-    // Ohne S3 mit Object Lock gibt es keine Sperre, auf die das Löschen warten könnte; es würde nie gelöscht
-    if (eingabe.data.aktion === "loeschen" && eingabe.data.nachSperre && !umgebung.objektsperre)
-      return c.json({ fehler: "„Erst nach Sperre“ geht nur mit S3 und Object Lock" }, 400);
     let ziel: Ordner | null = null;
     if (eingabe.data.aktion === "verschieben") {
       if (!umgebung.schluessel || !umgebung.oeffnen)
@@ -216,7 +213,18 @@ export function mailRouten(app: App, umgebung: AppUmgebung) {
       if (!ordner) return c.json({ fehler: "Nicht gefunden" }, 404);
       ziel = ordner.find((o) => o.id === eingabe.data.ziel) ?? null;
       if (!ziel) return c.json({ fehler: `Den Ordner „${eingabe.data.ziel}“ gibt es im Postfach nicht` }, 400);
+      // Ein Papierkorb leert sich von selbst: Verschieben dorthin ist Löschen und braucht dieselbe Bestätigung
+      if (ziel.papierkorb && !eingabe.data.loeschenBestaetigt)
+        return c.json(
+          {
+            fehler: `„${ziel.pfad}“ ist ein Papierkorb; Verschieben dorthin muss wie Löschen ausdrücklich bestätigt werden`,
+          },
+          400,
+        );
     }
+    // Ohne S3 mit Object Lock gibt es keine Sperre, auf die das Löschen warten könnte; es würde nie gelöscht
+    if ((eingabe.data.aktion === "loeschen" || ziel?.papierkorb) && eingabe.data.nachSperre && !umgebung.objektsperre)
+      return c.json({ fehler: "„Erst nach Sperre“ geht nur mit S3 und Object Lock" }, 400);
     const q = await aktionEinstellen(umgebung.db, id.data, eingabe.data, akteur(c.get("nutzer")), ziel);
     if (!q) return c.json({ fehler: "Nicht gefunden" }, 404);
     return c.json((await quellenListen(umgebung.db)).find((x) => x.id === q.id));

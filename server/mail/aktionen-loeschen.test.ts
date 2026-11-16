@@ -147,6 +147,52 @@ describe.skipIf(!testDatenbankUrl)("Löschen im Postfach über IMAP", () => {
     expect((await (await anfrage(`/api/quellen/${id}/aktionen`)).json()).objektsperre).toBe(true);
   });
 
+  it("behandelt Verschieben in den Papierkorb wie Löschen: Bestätigung, Wartezeit, gleicher Inhalt", async () => {
+    const benutzer = "papierkorb@example.org";
+    const id = await quelle(benutzer);
+    p.konto(benutzer).ordner.set("Papierkorb", p.neuerOrdner());
+    const ohne = await einstellen(id, { aktion: "verschieben", ziel: "Papierkorb" });
+    expect(ohne.status).toBe(400);
+    expect((await ohne.json()).fehler).toContain("bestätigt");
+    const res = await einstellen(id, {
+      aktion: "verschieben",
+      ziel: "Papierkorb",
+      warteStunden: 24,
+      loeschenBestaetigt: true,
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ loeschenBestaetigtVon: "nutzer:anna@example.org" });
+    p.einliefern(benutzer, mailRoh(1, "papierkorb"));
+    const geaendert = p.einliefern(benutzer, mailRoh(2, "papierkorb"));
+    await abholen(id);
+    p.konto(benutzer).ordner.get("INBOX")!.mails.get(geaendert)!.roh = mailRoh(3, "papierkorb");
+    const jetzt = new Date();
+    expect(await ausfuehren(id, jetzt)).toEqual({ ausgefuehrt: 0, entfallen: 0, fehler: 0 });
+    expect(p.konto(benutzer).aufrufe).toEqual([]);
+    expect(await ausfuehren(id, new Date(jetzt.getTime() + 25 * STUNDE))).toEqual({
+      ausgefuehrt: 1,
+      entfallen: 0,
+      fehler: 1,
+    });
+    expect(p.konto(benutzer).aufrufe).toEqual(["verschieben 1 Papierkorb"]);
+    // Auch an der Datenbank vorbei nicht ohne Bestätigung
+    await expect(
+      t.sql`update quellen set loeschen_bestaetigt_von = null, loeschen_bestaetigt_am = null where id = ${id}`,
+    ).rejects.toThrow(/quellen_papierkorb_bestaetigt/);
+  });
+
+  it("verschiebt nicht in einen Papierkorb, der ohne Bestätigung als Ziel eingetragen ist", async () => {
+    const benutzer = "papierkorb-sql@example.org";
+    const id = await quelle(benutzer);
+    p.konto(benutzer).ordner.set("Trash", p.neuerOrdner());
+    await t.sql`update quellen set aktion = 'verschieben', aktion_ziel = 'Trash', aktion_ziel_pfad = 'Trash'
+                 where id = ${id}`;
+    p.einliefern(benutzer, mailRoh(1, "papierkorb-sql"));
+    await abholen(id);
+    expect(await ausfuehren(id, new Date(Date.now() + 25 * STUNDE))).toMatchObject({ ausgefuehrt: 0, fehler: 1 });
+    expect(p.konto(benutzer).aufrufe).toEqual([]);
+  });
+
   it("nimmt die Bestätigung mit einer anderen Aktion zurück", async () => {
     const id = await quelle("zurueck@example.org");
     await einstellen(id, { aktion: "loeschen", loeschenBestaetigt: true });
@@ -166,7 +212,12 @@ describe.skipIf(!testDatenbankUrl)("Löschen im Postfach über IMAP", () => {
     expect(doku).toContain(
       "Postfach „ohne@example.org“: ohne@example.org auf imap.example.org, Ordner INBOX; nach dem Abholen: keine Aktion, nur lesend",
     );
-    expect(doku).toContain("Löschen im Postfach muss der Inhaber ausdrücklich bestätigen");
+    expect(doku).toContain(
+      "Löschen im Postfach, auch Verschieben in einen Papierkorb, muss der Inhaber ausdrücklich bestätigen",
+    );
+    expect(doku).toContain(
+      "nach dem Abholen: in den Papierkorb „Papierkorb“ verschieben, wie Löschen frühestens 24 Stunden nach der Archivierung; ausdrücklich bestätigt von nutzer:anna@example.org am",
+    );
   });
 
   it("lässt nur den Inhaber mit Sitzung Aktionen einstellen und Ordner sehen", async () => {

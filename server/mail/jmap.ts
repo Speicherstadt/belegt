@@ -1,4 +1,5 @@
 import type { Ordner, Zugang } from "./abruf.ts";
+import { papierkorbName } from "./papierkorb.ts";
 
 /**
  * Abruf über JMAP (RFC 8620, RFC 8621), etwa von Stalwart. Beim ersten Abruf alle Mails des Ordners, danach nur, was
@@ -168,10 +169,18 @@ function pfadVon(liste: Mailbox[], m: Mailbox): string {
   return teile.join("/");
 }
 
+const ordnerVon =
+  (liste: Mailbox[]) =>
+  (m: Mailbox): Ordner => ({
+    id: m.id,
+    pfad: pfadVon(liste, m),
+    papierkorb: m.role === "trash" || papierkorbName(m.name),
+  });
+
 /** Alle Ordner des Kontos mit Mailbox-ID und Pfad */
 export async function jmapOrdner(zugang: Zugang, abfragen: Abfragen = fetch): Promise<Ordner[]> {
   const liste = await (await verbinden(zugang, abfragen)).mailboxen();
-  return liste.map((m) => ({ id: m.id, pfad: pfadVon(liste, m) }));
+  return liste.map(ordnerVon(liste));
 }
 
 /**
@@ -206,8 +215,11 @@ export async function jmapBearbeiten(zugang: Zugang, abfragen: Abfragen = fetch)
   const aendern = (id: string, patch: Record<string, unknown>) => setzen({ update: { [id]: patch } }, id, "notUpdated");
 
   return {
-    /** Den Zielordner gibt es (über die Mailbox-ID) */
-    gibtZiel: (id: string) => liste.some((m) => m.id === id),
+    /** Der Zielordner über die Mailbox-ID, null, wenn es ihn nicht gibt */
+    ziel: (id: string) => {
+      const m = liste.find((x) => x.id === id);
+      return m ? ordnerVon(liste)(m) : null;
+    },
     gibtEs: async (id: string) => Boolean(await imOrdner(id)),
     roh: async (id: string) => {
       const e = await imOrdner(id);

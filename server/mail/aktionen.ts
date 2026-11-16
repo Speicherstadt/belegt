@@ -45,7 +45,9 @@ export async function aktionEinstellen(
   /** Der Zielordner aus ordnerListen, beim Verschieben */
   ziel: Ordner | null = null,
 ) {
-  const loeschen = e.aktion === "loeschen";
+  // Verschieben in einen Papierkorb gilt wie Löschen (papierkorb.ts)
+  const papierkorb = e.aktion === "verschieben" && Boolean(ziel?.papierkorb);
+  const loeschen = e.aktion === "loeschen" || papierkorb;
   const [q] = await mitAkteur(db, akteur, (tx) =>
     tx
       .update(quellen)
@@ -53,6 +55,7 @@ export async function aktionEinstellen(
         aktion: e.aktion,
         aktionZiel: e.aktion === "verschieben" ? e.ziel : null,
         aktionZielPfad: e.aktion === "verschieben" ? (ziel?.pfad ?? e.ziel) : null,
+        aktionZielPapierkorb: papierkorb,
         loeschenWarteStunden: e.warteStunden,
         loeschenNachSperre: loeschen && e.nachSperre,
         loeschenBestaetigtVon: loeschen ? akteur : null,

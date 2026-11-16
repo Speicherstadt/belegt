@@ -29,6 +29,13 @@ vi.mock("imapflow", () => ({
         return { path: "INBOX", destination: ziel };
       },
       messageFlagsAdd: async () => true,
+      list: async () => [
+        { path: "INBOX", name: "INBOX" },
+        { path: "Ablage", name: "Ablage", specialUse: "\\Trash" },
+        { path: "[Gmail]/Papierkorb", name: "Papierkorb" },
+        { path: "Gelöschte Elemente", name: "Gelöschte Elemente" },
+        { path: "Archiv", name: "Archiv", specialUse: "\\Archive" },
+      ],
     };
   }),
 }));
@@ -72,5 +79,16 @@ describe("imapflow: Löschen und Verschieben nur über die UID", () => {
     client.capabilities = new Map([["MOVE", true]]);
     await postfach.bearbeiten!.verschieben(7, "Archiv");
     expect(client.aufrufe).toEqual(["delete 5", "move 6 Archiv", "move 7 Archiv"]);
+  });
+
+  it("erkennt den Papierkorb an SPECIAL-USE \\Trash (RFC 6154) und an gängigen Namen", async () => {
+    const postfach = await imapOeffnen(zugang);
+    expect(await postfach.ordner!()).toEqual([
+      { id: "INBOX", pfad: "INBOX", papierkorb: false },
+      { id: "Ablage", pfad: "Ablage", papierkorb: true },
+      { id: "[Gmail]/Papierkorb", pfad: "[Gmail]/Papierkorb", papierkorb: true },
+      { id: "Gelöschte Elemente", pfad: "Gelöschte Elemente", papierkorb: true },
+      { id: "Archiv", pfad: "Archiv", papierkorb: false },
+    ]);
   });
 });

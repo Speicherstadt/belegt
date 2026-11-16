@@ -32,6 +32,7 @@ function jmapServer() {
     // Gleichnamige Ordner unter verschiedenen Eltern (RFC 8621, 2: eindeutig nur unter Geschwistern)
     { id: "projekte", name: "Projekte", role: null },
     { id: "projekte-archiv", name: "Archiv", role: null, parentId: "projekte" },
+    { id: "ablage", name: "Ablage", role: "trash" },
   ];
   const anlegen = (id: string, blob: Uint8Array, weitere: string[] = []) => {
     const mailboxIds: Record<string, true> = { posteingang: true };
@@ -181,16 +182,19 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über JMAP", () => {
     const id = await quelle("jmap-verschieben");
     expect(await (await anfrage(`/api/quellen/${id}/ordner`)).json()).toEqual({
       ordner: [
-        { id: "posteingang", pfad: "Posteingang" },
-        { id: "archiv", pfad: "Archiv" },
-        { id: "wichtig", pfad: "Wichtig" },
-        { id: "projekte", pfad: "Projekte" },
-        { id: "projekte-archiv", pfad: "Projekte/Archiv" },
+        { id: "posteingang", pfad: "Posteingang", papierkorb: false },
+        { id: "archiv", pfad: "Archiv", papierkorb: false },
+        { id: "wichtig", pfad: "Wichtig", papierkorb: false },
+        { id: "projekte", pfad: "Projekte", papierkorb: false },
+        { id: "projekte-archiv", pfad: "Projekte/Archiv", papierkorb: false },
+        { id: "ablage", pfad: "Ablage", papierkorb: true },
       ],
     });
     expect((await einstellen(id, { aktion: "verschieben", ziel: "gibtesnicht" })).status).toBe(400);
     // Der Name allein reicht nicht, gewählt wird über die Mailbox-ID
     expect((await einstellen(id, { aktion: "verschieben", ziel: "Archiv" })).status).toBe(400);
+    // Die Mailbox mit der Rolle trash ist ein Papierkorb: Verschieben dorthin ist Löschen
+    expect((await einstellen(id, { aktion: "verschieben", ziel: "ablage" })).status).toBe(400);
     expect((await einstellen(id, { aktion: "verschieben", ziel: "archiv" })).status).toBe(200);
     j.anlegen("m3", mailRoh(3, "jmap-aktion"), ["wichtig"]);
     await abholen(id);

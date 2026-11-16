@@ -1,4 +1,5 @@
 import type { Oeffnen } from "./abruf.ts";
+import { papierkorbName } from "./papierkorb.ts";
 
 /*
  * Nachgebauter IMAP-Server für Tests der Aktionen nach dem Abholen: je Benutzer ein Konto mit Ordnern, je Ordner
@@ -95,7 +96,7 @@ export function testPostfaecher() {
         for (const [uid, m] of [...o.mails].sort(([a], [b]) => a - b)) if (uid > seit) yield { uid, roh: m.roh };
       },
       async ordner() {
-        return [...k.ordner.keys()].map((name) => ({ id: name, pfad: name }));
+        return [...k.ordner.keys()].map((name) => ({ id: name, pfad: name, papierkorb: papierkorbName(name) }));
       },
       async schliessen() {},
       ...(zugang.schreiben

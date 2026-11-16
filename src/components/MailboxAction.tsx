@@ -10,6 +10,10 @@ const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 export function aktionText(q: Quelle): string {
   if (q.aktion === "gelesen") return m.mailbox_action_read();
   if (q.aktion === "markieren") return m.mailbox_action_flag();
+  if (q.aktion === "verschieben" && q.aktionZielPapierkorb) {
+    const werte = { ordner: q.aktionZielPfad ?? q.aktionZiel ?? "", stunden: String(q.loeschenWarteStunden) };
+    return q.loeschenNachSperre ? m.mailbox_action_move_trash_lock(werte) : m.mailbox_action_move_trash(werte);
+  }
   if (q.aktion === "verschieben") return m.mailbox_action_move_to({ ordner: q.aktionZielPfad ?? q.aktionZiel ?? "" });
   if (q.aktion === "loeschen")
     return q.loeschenNachSperre
@@ -75,10 +79,13 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
     enabled: aktion === "verschieben",
     retry: false,
   });
+  // Verschieben in einen Papierkorb gilt wie Löschen: dieselben Felder und dieselbe Bestätigung
+  const papierkorb = aktion === "verschieben" && Boolean(ordner.data?.ordner.find((o) => o.id === ziel)?.papierkorb);
+  const wieLoeschen = aktion === "loeschen" || papierkorb;
   const protokoll = useQuery({
     queryKey: ["quelle-aktionen", quelle.id],
     queryFn: () => api.quelleAktionen(quelle.id),
-    enabled: aktion === "loeschen",
+    enabled: wieLoeschen,
   });
   const speichern = useMutation({
     mutationFn: api.quelleAktion,
@@ -95,7 +102,7 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
       id: quelle.id,
       aktion,
       ziel: aktion === "verschieben" ? ziel : null,
-      warteStunden: aktion === "loeschen" ? Number(f.get("warten")) : quelle.loeschenWarteStunden,
+      warteStunden: wieLoeschen ? Number(f.get("warten")) : quelle.loeschenWarteStunden,
       nachSperre: f.get("sperre") === "on",
       loeschenBestaetigt: f.get("bestaetigt") === "on",
     });
@@ -139,9 +146,10 @@ function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => void }) {
           )}
         </label>
       )}
-      {aktion === "loeschen" && (
+      {wieLoeschen && (
         <>
           <p role="note" className="m-0 rounded-md border border-border bg-subtle p-3">
+            {papierkorb && `${m.mailbox_move_trash_hint()} `}
             {m.mailbox_delete_hint()}
           </p>
           <label className="flex flex-col gap-1.5 font-medium">
@@ -196,7 +204,7 @@ export function MailboxAction({ quelle, inhaber }: { quelle: Quelle; inhaber: bo
     <div className="flex w-full flex-col gap-2 text-sm">
       <span className="flex flex-wrap items-center gap-2">
         <span>{m.mailbox_action_current({ aktion: aktionText(quelle) })}</span>
-        {quelle.aktion === "loeschen" && quelle.loeschenBestaetigtAm && (
+        {quelle.loeschenBestaetigtAm && (quelle.aktion === "loeschen" || quelle.aktionZielPapierkorb) && (
           <span className="text-muted">
             {m.mailbox_delete_confirmed({
               wer: quelle.loeschenBestaetigtVon ?? "",

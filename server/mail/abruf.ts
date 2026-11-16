@@ -23,10 +23,14 @@ export interface Postfach {
   bearbeiten?: Bearbeiten;
 }
 
-/** Ein Ordner des Kontos: id ist bei IMAP der volle Pfad, bei JMAP die Mailbox-ID; pfad zum Anzeigen */
+/**
+ * Ein Ordner des Kontos: id ist bei IMAP der volle Pfad, bei JMAP die Mailbox-ID; pfad zum Anzeigen; papierkorb, wenn
+ * Verschieben dorthin wie Löschen gilt (papierkorb.ts)
+ */
 export interface Ordner {
   id: string;
   pfad: string;
+  papierkorb: boolean;
 }
 
 /** Aktionen an einer Mail im geöffneten Ordner; jede wirft, wenn der Server sie ablehnt */

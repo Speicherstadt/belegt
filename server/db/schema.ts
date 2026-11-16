@@ -248,6 +248,8 @@ export const quellen = pgTable(
     aktionZiel: text("aktion_ziel"),
     /** Pfad des Zielordners zum Anzeigen, bei JMAP aus den Namen der Eltern */
     aktionZielPfad: text("aktion_ziel_pfad"),
+    /** Der Zielordner ist ein Papierkorb (server/mail/papierkorb.ts): Verschieben gilt wie Löschen */
+    aktionZielPapierkorb: boolean("aktion_ziel_papierkorb").notNull().default(false),
     /** Löschen frühestens so viele Stunden nach der Archivierung, damit eine Sicherung dazwischen liegt */
     loeschenWarteStunden: integer("loeschen_warte_stunden").notNull().default(24),
     /** Löschen erst, wenn die Datei im S3-Bucket bis zum Fristende gesperrt ist (objektsperren) */
@@ -265,6 +267,10 @@ export const quellen = pgTable(
     check(
       "quellen_loeschen_bestaetigt",
       sql`${t.aktion} <> 'loeschen' or (${t.loeschenBestaetigtVon} is not null and ${t.loeschenBestaetigtAm} is not null)`,
+    ),
+    check(
+      "quellen_papierkorb_bestaetigt",
+      sql`not ${t.aktionZielPapierkorb} or (${t.loeschenBestaetigtVon} is not null and ${t.loeschenBestaetigtAm} is not null)`,
     ),
     check("quellen_loeschen_warten", sql`${t.loeschenWarteStunden} between 1 and 2160`),
   ],

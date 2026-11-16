@@ -34,6 +34,8 @@ export interface Quelle {
   /** Zielordner: bei IMAP der Pfad, bei JMAP die Mailbox-ID */
   aktionZiel: string | null;
   aktionZielPfad: string | null;
+  /** Der Zielordner ist ein Papierkorb: Verschieben gilt wie Löschen */
+  aktionZielPapierkorb: boolean;
   loeschenWarteStunden: number;
   loeschenNachSperre: boolean;
   loeschenBestaetigtVon: string | null;
@@ -44,6 +46,7 @@ export interface Quelle {
 export interface PostfachOrdner {
   id: string;
   pfad: string;
+  papierkorb: boolean;
 }
 
 /** Aktion im Postfach nach dem Abholen (docs/eingang.md#nach-dem-abholen) */
