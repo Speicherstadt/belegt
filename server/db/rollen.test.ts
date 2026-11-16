@@ -83,6 +83,15 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     ["Siegel löschen", "delete from seals"],
     ["eine Tabelle leeren", "truncate einstellungen"],
     ["den Kopf der Kette zurücksetzen", "update audit_chain set seq = 0"],
+    // Die Kette beweist nur Reihenfolge und Vollständigkeit; ein erfundener Eintrag wäre ein gültiges Glied
+    [
+      "einen Eintrag im Audit-Log erfinden",
+      "insert into audit_log (actor, table_name, row_id, action, old_value) values ('user:inhaber', 'dokumente', 'x', 'DELETE', '{}')",
+    ],
+    [
+      "ein Siegel erfinden",
+      "insert into seals (table_name, row_id, columns, digest) values ('einstellungen', gen_random_uuid(), '{}', 'x')",
+    ],
     ["eine Tabelle versiegelt anmelden", "insert into sealed_tables (table_name) values ('einstellungen')"],
     ["eine Tabelle über die Funktion anmelden", "select belegt_seal_table('einstellungen')"],
     ["eine Tabelle anlegen", "create table fremd (x int)"],
@@ -119,13 +128,14 @@ describe.skipIf(!testDatenbankUrl)("Getrennte Datenbankrollen (Postgres)", () =>
     const { tabellen } = await zugriffLesen(app);
     const t = (name: string) => tabellen.find((x) => x.tabelle === name);
     const nurErgaenzen = { select: true, insert: true, update: false, delete: false, truncate: false, trigger: false };
-    expect(t("audit_log")).toMatchObject(nurErgaenzen);
-    expect(t("seals")).toMatchObject(nurErgaenzen);
+    const nurLesen = { select: true, insert: false, update: false, delete: false };
+    expect(t("audit_log")).toMatchObject(nurLesen);
+    expect(t("seals")).toMatchObject(nurLesen);
     expect(t("dokumente")).toMatchObject(nurErgaenzen);
     expect(t("freigaben")).toMatchObject(nurErgaenzen);
-    expect(t("audit_chain")).toMatchObject({ select: true, insert: false, update: true, delete: false });
-    expect(t("sealed_tables")).toMatchObject({ select: true, insert: false, update: false, delete: false });
-    expect(t("backup_status")).toMatchObject({ select: true, insert: false, update: false, delete: false });
+    expect(t("audit_chain")).toMatchObject(nurLesen);
+    expect(t("sealed_tables")).toMatchObject(nurLesen);
+    expect(t("backup_status")).toMatchObject(nurLesen);
     // Festschreibung über eine Spalte: ändern, solange nicht festgeschrieben, prüft der Trigger
     expect(t("loeschungen")).toMatchObject({ select: true, insert: true, update: true, delete: true });
     expect(t("einstellungen")).toMatchObject({ select: true, insert: true, update: true, delete: true });

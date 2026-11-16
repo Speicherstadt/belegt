@@ -176,15 +176,15 @@ export async function appAnmeldungPruefen(
 
 /**
  * Tabellen, die die App nur liest: Die Anmeldung versiegelter Tabellen geschieht nur in Migrationen, den Stand der
- * Sicherung trägt der Backup-Container mit dem Eigentümerzugang ein.
+ * Sicherung trägt der Backup-Container mit dem Eigentümerzugang ein. Audit-Log, Siegel und Kopf der Kette schreiben
+ * nur ihre Trigger, deren Funktionen mit den Rechten des Eigentümers laufen (drizzle/0047_audit_nur_trigger.sql).
  */
-export const NUR_LESEN = ["sealed_tables", "backup_status"];
+export const NUR_LESEN = ["sealed_tables", "backup_status", "audit_log", "seals", "audit_chain"];
 
 /**
- * Rechte je Tabelle aus ihren Triggern: Wer per belegt_append_only nur ergänzt werden darf (Audit-Log, Siegel,
- * versiegelte Tabellen ohne Festschreibungsspalte, Freigaben, Postfach-Aktionen …), bekommt kein UPDATE oder DELETE.
- * Den Kopf der Kette (audit_chain) schreibt nur der Trigger des Audit-Logs fort, und Trigger laufen mit den Rechten
- * der Sitzung; er braucht UPDATE, aber kein INSERT oder DELETE. TRUNCATE, TRIGGER und REFERENCES gibt es nie.
+ * Rechte je Tabelle aus ihren Triggern: Wer per belegt_append_only nur ergänzt werden darf (versiegelte Tabellen ohne
+ * Festschreibungsspalte, Freigaben, Postfach-Aktionen …), bekommt kein UPDATE oder DELETE. TRUNCATE, TRIGGER und
+ * REFERENCES gibt es nie.
  * tgtype: Bit 8 DELETE, Bit 16 UPDATE (src/include/catalog/pg_trigger.h).
  */
 async function tabellenRechte(tx: Leser): Promise<{ tabelle: string; rechte: string[] }[]> {
@@ -200,7 +200,6 @@ async function tabellenRechte(tx: Leser): Promise<{ tabelle: string; rechte: str
      order by c.relname`;
   return zeilen.map((z) => {
     if (NUR_LESEN.includes(z.tabelle)) return { tabelle: z.tabelle, rechte: ["select"] };
-    if (z.tabelle === "audit_chain") return { tabelle: z.tabelle, rechte: ["select", "update"] };
     return {
       tabelle: z.tabelle,
       rechte: ["select", "insert", ...(z.ohne_update ? [] : ["update"]), ...(z.ohne_delete ? [] : ["delete"])],

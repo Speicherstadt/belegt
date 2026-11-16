@@ -59,9 +59,8 @@ hat keine Rechte als Superuser, für Rollen oder neue Datenbanken und kann desha
 
 | Tabellen | Rechte der App |
 | --- | --- |
-| Nur ergänzen: Audit-Log, Siegel, versiegelte Tabellen ohne Festschreibungsspalte (Dokumente, Archivnummern, Einordnungen, Mails …), Freigaben, Postfach-Aktionen | lesen, einfügen |
-| Kopf der Kette (`audit_chain`), den nur der Trigger des Audit-Logs fortschreibt | lesen, ändern |
-| `sealed_tables`, `backup_status` | lesen |
+| Nur ergänzen: versiegelte Tabellen ohne Festschreibungsspalte (Dokumente, Archivnummern, Einordnungen, Mails …), Freigaben, Postfach-Aktionen | lesen, einfügen |
+| Audit-Log, Siegel und Kopf der Kette (`audit_chain`), die nur ihre Trigger mit den Rechten des Eigentümers schreiben; `sealed_tables`, `backup_status` | lesen |
 | Alle anderen; Festschreibungen (etwa bestätigte Löschungen) prüfen die Trigger | lesen, einfügen, ändern, löschen |
 
 `TRUNCATE`, `TRIGGER`, eigene Objekte und temporäre Tabellen gibt es für die App nie. Der Server bekommt die
