@@ -42,9 +42,17 @@ describe("Caddy-Block für HTTPS", () => {
 
   it("vergleicht wirklich etwas: HSTS, Kompression und Ziel stehen im Block", () => {
     expect(vorlage[0]).toBe("<domain> {");
-    expect(vorlage).toContain('Strict-Transport-Security "max-age=31536000; includeSubDomains"');
+    expect(vorlage.join("\n")).toContain("Strict-Transport-Security");
     expect(vorlage).toContain("encode zstd gzip");
     expect(vorlage).toContain("reverse_proxy <ziel>");
+  });
+
+  // HSTS gilt für den Hostnamen auf allen Ports; für localhost (Compose ohne DOMAIN) erzwänge es ein Jahr lang HTTPS
+  // auch für andere Programme auf diesem Rechner, includeSubDomains dazu für jede Subdomain
+  it("setzt HSTS mit includeSubDomains nur für eine echte Domain, nie für localhost", () => {
+    expect(vorlage).toContain("@domain not host localhost");
+    expect(vorlage).toContain('header @domain Strict-Transport-Security "max-age=31536000; includeSubDomains"');
+    expect(vorlage.filter((z) => z.includes("Strict-Transport-Security"))).toHaveLength(1);
   });
 
   it("setzt keinen eigenen Schutz gegen Rahmen: den setzt Belegt nach BELEGT_EMBED_ORIGIN (server/http/statisch.ts)", () => {

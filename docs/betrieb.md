@@ -45,9 +45,11 @@ bereit. In `.env` `DOMAIN` (zeigt auf den Server, Ports 80 und 443 offen), `BELE
 docker compose --profile https up -d
 ```
 
-Caddy setzt HSTS und komprimiert; Rahmen und Inhaltstyp setzt Belegt selbst. Eine Grenze für Uploads setzt Caddy nicht,
-weil der Export aus Paperless-ngx bis `IMPORT_MAX_GB` groß sein darf. Für einen eigenen Caddy ist `deploy/Caddyfile`
-die Vorlage, mit demselben Block. Das SMTP-Journal geht nicht über Caddy; für STARTTLS dort siehe
+Caddy komprimiert und setzt HSTS für die Domain mit `includeSubDomains`: Browser öffnen dann ein Jahr lang auch jede
+Subdomain nur noch über HTTPS; läuft eine noch ohne, nimm `includeSubDomains` heraus. Ohne `DOMAIN` (`localhost`) setzt
+Caddy kein HSTS, weil es für alle Ports des Namens gälte. Rahmen und Inhaltstyp setzt Belegt selbst. Eine Grenze für
+Uploads setzt Caddy nicht, weil der Export aus Paperless-ngx bis `IMPORT_MAX_GB` groß sein darf. Für einen eigenen Caddy
+ist `deploy/Caddyfile` die Vorlage, mit demselben Block. Das SMTP-Journal geht nicht über Caddy; für STARTTLS dort siehe
 [SMTP-Journal](eingang.md#smtp-journal).
 
 Die Anmeldeversuche begrenzt Belegt je Client. Die Adresse kommt aus der Verbindung; `X-Forwarded-For` gilt nur, wenn
