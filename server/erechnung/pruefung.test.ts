@@ -124,7 +124,7 @@ describe("Prüfbericht des KoSIT-Validators", () => {
   });
 });
 
-describe.skipIf(!testDatenbankUrl)("E-Rechnungen prüfen gegen Postgres", () => {
+describe.skipIf(!testDatenbankUrl)("E-Rechnungen prüfen gegen Postgres", { timeout: 30_000 }, () => {
   let t: Awaited<ReturnType<typeof testApp>>;
   let cookie: string;
   const als = (pfad: string, init: RequestInit = {}) => t.anfrage(pfad, init, cookie);
