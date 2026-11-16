@@ -2,9 +2,10 @@
 # (docs/scannen.md). Nur im eigenen Netz gedacht; FTP ohne TLS überträgt Passwort und Dateien unverschlüsselt.
 #   docker build -t belegt-ftp deploy/ftp
 FROM docker.io/library/debian:trixie-slim
-# openssl nur für ein selbst signiertes Zertifikat, wenn FTPS an ist und keins eingehängt wurde
+# openssl nur für ein selbst signiertes Zertifikat, wenn FTPS an ist und keins eingehängt wurde. tini ist Prozess 1:
+# vsftpd als Prozess 1 bekäme die verwaisten Prozesse beendeter Sitzungen und stürzte nach wenigen Sitzungen ab
 RUN apt-get update \
- && apt-get install -y --no-install-recommends vsftpd openssl \
+ && apt-get install -y --no-install-recommends vsftpd openssl tini \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir -p /var/run/vsftpd/empty
 COPY vsftpd.conf /etc/vsftpd.conf
@@ -14,4 +15,4 @@ COPY start.sh /usr/local/bin/start.sh
 # Steuerverbindung und der feste Bereich für den passiven Modus (in compose.yml veröffentlicht)
 EXPOSE 21 30000-30009
 VOLUME /eingang
-ENTRYPOINT ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/start.sh"]
