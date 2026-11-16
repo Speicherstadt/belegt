@@ -81,8 +81,17 @@ export const Senden = z
           .trim()
           .regex(/^[A-Za-z0-9-]{1,100}$/)
           .refine((n) => !VERBOTENE_KOPFZEILEN.has(n.toLowerCase()), "Diese Kopfzeile setzt Belegt selbst"),
-        /** Nur beim Anlegen; danach nie mehr in einer Antwort */
-        wert: z.string().min(1).max(4000).optional(),
+        /**
+         * Nur beim Anlegen; danach nie mehr in einer Antwort. Ohne Steuerzeichen außer Tab (field-value, RFC 9110
+         * Abschnitt 5.5): CR und LF schleusten Kopfzeilen ein, und fetch lehnte den Wert bei jedem Versuch ab
+         */
+        wert: z
+          .string()
+          .min(1)
+          .max(4000)
+          // biome-ignore lint/suspicious/noControlCharactersInRegex: gerade Steuerzeichen sind verboten
+          .regex(/^[^\u0000-\u0008\u000a-\u001f\u007f]+$/, "Keine Zeilenumbrüche oder Steuerzeichen")
+          .optional(),
         gesetzt: z.literal(true).optional(),
       })
       .optional(),
