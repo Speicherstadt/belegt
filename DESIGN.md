@@ -5,7 +5,7 @@ Regeln für alles, was man in Belegt sieht und bedient. Vor jeder Arbeit an der 
 Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/styles.css`, eine Kopie hier würde
 auseinanderlaufen.
 
-**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Alles mit „Vorschlag“ (`--field-border`,
+**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
 `--control-h`, die Fokusregel, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
@@ -49,7 +49,7 @@ verlangt WCAG 1.4.11 mindestens 3 : 1. `--field-border` erreicht das in beiden M
 Karten und Trennlinien behalten `--border`: Sie tragen keine Bedeutung, ein Bedienelement erkennt man an `--field-border`.
 
 **Gefahr und Hinweis.** Im Code stehen heute Fehlertext in `text-red-700 dark:text-red-400` (6,47 : 1 auf Weiß,
-7,19 : 1 auf `#09090b`) und Hinweiskästen mit `border-amber-600` auf `bg-subtle`. Beides sind keine Tokens. Offen
+7,19 : 1 auf `#09090b`) und Hinweiskästen mit `border-amber-600` auf `bg-subtle` (`AccountPage.tsx`), in `ProcedurePage.tsx:92` mit `border-amber-600/40 bg-amber-50` (im Dunkelmodus `bg-amber-950`). Beides sind keine Tokens. Offen
 (siehe unten): ob es Tokens `--danger` und `--warn` werden. Farbe allein trägt nie die Bedeutung: Ein Fehler hat immer
 Text, ein Status ein Wort oder Symbol.
 
@@ -67,7 +67,7 @@ Vorschlag:
 
 ## Schrift
 
-Schrift ist Geist (`--font-sans`). Stufen, nur diese: 12, 14, 16, 18 und 24 px (`text-xs`, `text-sm`, `text-base`,
+Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 und 24 px (`text-xs`, `text-sm`, `text-base`,
 `text-lg`, `text-2xl`). Kein `text-[10px]` und kein `text-[15px]` (heute je einmal in `Thumbnail.tsx` und `Sidebar.tsx`).
 
 | Stufe | Wofür |
@@ -80,7 +80,7 @@ Schrift ist Geist (`--font-sans`). Stufen, nur diese: 12, 14, 16, 18 und 24 px (
 
 - Fließtext hat höchstens etwa 70 Zeichen Zeilenlänge: `max-w-prose` als Empfehlung.
 - Prüfwerte, Hashes und Token stehen in `font-mono` mit `overflow-wrap: anywhere` (`break-all` genügt nicht für
-  Wörter in Sätzen); Flex-Eltern bekommen `min-w-0`, sonst wächst die Seite seitwärts (Verfahrensdoku 519 px,
+  Wörter in Sätzen); Flex-Eltern bekommen `min-w-0`, sonst wächst die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px,
   Dokumentseite 438 px bei 390 px Breite).
 - Kein Text in Versalien mit Sperrung; Beschriftungen in Satzschreibung.
 
@@ -105,9 +105,9 @@ Vorschlag: eine globale Regel in `styles.css`.
 | --- | --- | --- |
 | Hauptaktion | `bg-primary text-onprimary` | Eine je Karte |
 | Normal | `border border-border` (Vorschlag: `border-field-border`) | alles übrige |
-| Gefahr | Vorschlag: `border-red-700 text-red-700 dark:border-red-400 dark:text-red-400` | Löschen, Widerrufen, Entfernen |
+| Gefahr | heute `bg-red-700 text-white` (6 Stellen: `TagsAdmin.tsx:83`, `AccessUsers.tsx:74` und `:92`, `FieldsAdmin.tsx:64`, `DoctypesAdmin.tsx:69`, `CorrespondentsAdmin.tsx:84`); Vorschlag für den auslösenden Knopf: `border-red-700 text-red-700 dark:border-red-400 dark:text-red-400` | Löschen, Widerrufen, Entfernen |
 
-- Reihenfolge in einer Knopfzeile: Die Hauptaktion steht als **letzter** Knopf rechts, Nebenaktionen und „Abbrechen“
+- Vorschlag, Reihenfolge in einer Knopfzeile: Die Hauptaktion steht als **letzter** Knopf rechts, Nebenaktionen und „Abbrechen“
   davor. Ein Gefahrknopf steht neben einer Hauptaktion ganz vorn links, so weit wie möglich von ihr: Ein knapp
   verfehlter Klick trifft dann etwas Harmloses.
 - Die Tab-Reihenfolge ist die des Markups und gleicht der sichtbaren (WCAG 1.3.2, 2.4.3): kein `order`, kein
@@ -125,7 +125,7 @@ Die Bausteine sind Vorschläge, die in eigenen Pull Requests entstehen. Sie nutz
 ### Bestätigung
 
 Eine Komponente `ConfirmDialog` mit dem nativen `<dialog>` (`showModal()`), für Endgültiges, das heute mit einem Klick
-läuft: „Löschung beantragen“ bei frei abgelegten Dokumenten, „Löschung bestätigen“, „Sperre aufheben“, Workflow
+läuft (es gibt kein `window.confirm` im Code; wo es eine zweite Stufe gibt, etwa bei Tags und Zugängen, ersetzt ein roter Knopf („… wirklich löschen“) den ersten, ohne „Abbrechen“): „Löschung beantragen“ bei frei abgelegten Dokumenten, „Löschung bestätigen“, „Sperre aufheben“, Workflow
 löschen, Token widerrufen, Passkey entfernen.
 
 - **Titel als Frage:** „Dokument jetzt löschen?“
@@ -170,7 +170,7 @@ Wert selbst: sonst liest ein Screenreader das Geheimnis vor); darunter in normal
 ### „Was ist das?“
 
 Ein kleiner Knopf neben dem Fachbegriff (ASN, Siegel, Hash-Kette, Sperre, Art) klappt darunter einen Satz in einfacher
-Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Das Glossar ist eine Seite in `docs/`.
+Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Das Glossar gibt es noch nicht; es wird als Seite in `docs/` angelegt (Vorschlag).
 Kein Hover, kein Popover: Beides erreicht weder Tastatur noch Touch zuverlässig.
 
 ## Bewegung und Reize
@@ -198,7 +198,7 @@ einem Text, nicht über zwei Felder verteilt.
 
 ## Offen
 
-Das soll Tristan entscheiden:
+Das soll der Maintainer entscheiden:
 
 - Werden Gefahr und Hinweis Tokens (`--danger`, `--warn`), und gibt es Knopfart „Gefahr“ als Komponente oder nur als
   Klassen?
