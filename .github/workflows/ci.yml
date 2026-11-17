@@ -63,10 +63,17 @@ jobs:
       - run: bun run test
       - run: bun run build
 
-  e2e:
-    name: E2E mit Playwright und axe
+  # Desktop und Handy je in zwei Teilen nebeneinander (Playwright --shard); jeder Teil hat eigene Datenbank und
+  # richtet Belegt selbst ein (e2e/einrichten.setup.ts)
+  e2e-teil:
+    name: E2E ${{ matrix.projekt }} ${{ matrix.teil }}/2
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projekt: [desktop, handy]
+        teil: [1, 2]
     services:
       postgres:
         image: postgres:18
@@ -88,8 +95,31 @@ jobs:
       # der Oberfläche
       - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils
       - run: bun install --frozen-lockfile
-      - run: bunx playwright install --with-deps chromium
-      - run: bun run e2e
+      # Chromium aus dem Cache, je Playwright-Version; die Systembibliotheken kommen bei jedem Lauf
+      - id: playwright
+        run: echo "version=$(bunx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - id: browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}-chromium
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: bunx playwright install --with-deps chromium
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
+      # Nur die Testdatenbank: ohne fsync und synchrones Commit schreibt sie schneller
+      - name: PostgreSQL ohne fsync
+        run: docker exec ${{ job.services.postgres.id }} psql -U belegt -d belegt_e2e -qc "ALTER SYSTEM SET fsync = off" -c "ALTER SYSTEM SET synchronous_commit = off" -c "ALTER SYSTEM SET full_page_writes = off" -c "SELECT pg_reload_conf()"
+      - run: bun run e2e --project=${{ matrix.projekt }} --shard=${{ matrix.teil }}/2
+
+  # Ein Ergebnis für die Regeln auf main, egal in wie viele Teile die Tests zerfallen
+  e2e:
+    name: E2E mit Playwright und axe
+    if: ${{ always() && !github.event.pull_request.draft }}
+    needs: [e2e-teil]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.e2e-teil.result }}" = success
 
   container:
     name: Container bauen und starten
