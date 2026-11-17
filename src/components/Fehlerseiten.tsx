@@ -31,7 +31,8 @@ export function SeitenFehler({ error, reset }: ErrorComponentProps) {
 export function ServerAntwortetNicht({ error, erneut }: { error: Error; erneut: () => void }) {
   // Nur ein 403 mit Hinweis (etwa „Sichtbereich ungültig“) kommt vom Server selbst; 404, 429 oder leere Antworten
   // stammen oft von einem Proxy und bleiben „antwortet nicht“
-  const verweigert = error instanceof ApiFehler && error.status === 403 && error.message.trim() !== "";
+  const verweigert =
+    error instanceof ApiFehler && error.status === 403 && !error.ohneHinweis && error.message.trim() !== "";
   return (
     <main className="p-8">
       <Meldung
