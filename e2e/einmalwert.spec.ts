@@ -105,3 +105,28 @@ for (const fall of ["Erfolg", "Fehler"] as const) {
     expect((await wert.boundingBox())!.height).toBe(vorher);
   });
 }
+
+test("die Fehlermeldung beim Kopieren lässt die Höhe auch in der schmalen Seitenspalte des Dokuments unverändert", async ({
+  page,
+}, info) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
+  });
+  // Laptop-Breite: Vorschau und Seitenspalte stehen nebeneinander, die Spalte ist knapp 300 px breit
+  await page.setViewportSize({ width: 1100, height: 900 });
+  const name = `hoehe-spalte-${info.project.name}.pdf`;
+  await page.goto("/eingang");
+  await page.getByTestId("upload").setInputFiles({
+    name,
+    mimeType: "application/pdf",
+    buffer: Buffer.from(`%PDF-1.4\n%Hoehe ${info.project.name}\n`),
+  });
+  await page.getByRole("link", { name }).click();
+  const bereich = page.getByRole("region", { name: "Teilen per Link" });
+  await bereich.getByRole("button", { name: "Link anlegen" }).click();
+  const wert = bereich.getByTestId("einmalwert");
+  const vorher = (await wert.boundingBox())!.height;
+  await wert.getByRole("button", { name: "Kopieren" }).click();
+  await expect(wert.getByRole("status")).toHaveText("Kopieren nicht möglich, bitte den Wert markieren.");
+  expect((await wert.boundingBox())!.height).toBe(vorher);
+});
