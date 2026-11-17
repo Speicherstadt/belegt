@@ -42,9 +42,15 @@ export function Einmalwert({ label, wert }: { label: string; wert: string }) {
       >
         {m.einmalwert_copy()}
       </button>
-      <p role="status" className="m-0 min-h-12 text-muted sm:min-h-5">
-        {meldung}
-      </p>
+      {/* Die längste Meldung hält unsichtbar ihren Platz frei, bei jeder Breite: Beim Klick springt nichts */}
+      <div className="grid w-full text-muted">
+        <span aria-hidden="true" className="invisible col-start-1 row-start-1">
+          {m.einmalwert_copy_failed()}
+        </span>
+        <p role="status" className="col-start-1 row-start-1 m-0">
+          {meldung}
+        </p>
+      </div>
       <p className="m-0">{m.einmalwert_once()}</p>
     </div>
   );
