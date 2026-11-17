@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { api, type Einordnung, type Ich, type Loeschung } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
+import { alleinInhaber } from "../lib/rollen.ts";
 import { m } from "../paraglide/messages.js";
 import { ConfirmDialog } from "./ConfirmDialog.tsx";
 
@@ -17,14 +18,17 @@ export function kannBestaetigen(l: Loeschung, ich: Ich | undefined): boolean {
 export function Deletion({
   dokumentId,
   einordnung,
+  vormalsAnders,
   loeschung,
 }: {
   dokumentId: string;
   einordnung: Einordnung | null;
+  vormalsAnders: boolean;
   loeschung: Loeschung | null;
 }) {
   const queryClient = useQueryClient();
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
+  const zugaenge = useQuery({ queryKey: ["zugaenge"], queryFn: api.zugaenge, enabled: ich.data?.role === "inhaber" });
   const [fragenBestaetigen, setFragenBestaetigen] = useState(false);
   const [fragenJetzt, setFragenJetzt] = useState(false);
   const neu = () => queryClient.invalidateQueries();
@@ -35,6 +39,8 @@ export function Deletion({
   const abgelaufen =
     einordnung && (einordnung.art === "frei" || (einordnung.fristBis !== null && einordnung.fristBis < heute()));
   if (!loeschung && !abgelaufen) return null;
+  // Der Server löscht sofort nur, wenn alle Einordnungen frei waren (server/loeschung/loeschung.ts)
+  const sofort = einordnung?.art === "frei" && !vormalsAnders;
 
   return (
     <section aria-labelledby="loeschung" className="flex flex-col gap-3 rounded-lg border border-border p-4">
@@ -55,7 +61,7 @@ export function Deletion({
           <p className="m-0 text-sm">
             {m.delete_requested({ wer: loeschung.beantragtVon, wann: zeitpunkt(loeschung.beantragtAm) })}
           </p>
-          {ich.data?.role === "inhaber" && !kannBestaetigen(loeschung, ich.data) && (
+          {alleinInhaber(zugaenge.data, ich.data) && (
             <p className="m-0 text-sm">
               {m.delete_alone_before()}{" "}
               <Link to="/zugaenge" className="underline">
@@ -104,10 +110,8 @@ export function Deletion({
       )}
       {!loeschung && ich.data?.role === "inhaber" && (
         <>
-          <p className="m-0 text-muted text-sm">
-            {einordnung?.art === "frei" ? m.delete_hint_free() : m.delete_hint()}
-          </p>
-          {einordnung?.art === "frei" ? (
+          <p className="m-0 text-muted text-sm">{sofort ? m.delete_hint_free() : m.delete_hint()}</p>
+          {sofort ? (
             <>
               <button
                 type="button"
