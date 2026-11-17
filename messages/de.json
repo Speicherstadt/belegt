@@ -1150,5 +1150,13 @@
     }
   ],
   "start_chain_stale": "Seit zwei Tagen keine Prüfung: Läuft der Worker?",
-  "start_chain_now": "Jetzt prüfen"
+  "start_chain_now": "Jetzt prüfen",
+  "meldung_details": "Details",
+  "notfound_title": "Diese Seite gibt es nicht.",
+  "notfound_text": "Deine Dokumente sind nicht betroffen.",
+  "notfound_action": "Zum Archiv",
+  "error_title": "Hier ist etwas schiefgegangen.",
+  "error_text": "Deine Dokumente sind nicht verloren.",
+  "server_down_title": "Der Server antwortet gerade nicht.",
+  "server_down_text": "Deine Dokumente sind nicht verloren."
 }

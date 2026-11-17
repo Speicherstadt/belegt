@@ -1228,5 +1228,13 @@
     }
   ],
   "start_chain_stale": "No check for two days: is the worker running?",
-  "start_chain_now": "Check now"
+  "start_chain_now": "Check now",
+  "meldung_details": "Details",
+  "notfound_title": "This page does not exist.",
+  "notfound_text": "Your documents are not affected.",
+  "notfound_action": "Go to the archive",
+  "error_title": "Something went wrong here.",
+  "error_text": "Your documents are not lost.",
+  "server_down_title": "The server is not responding right now.",
+  "server_down_text": "Your documents are not lost."
 }
