@@ -346,8 +346,9 @@ export function DocumentList({
                 onClick={() => {
                   // Nach dem Hochladen ist der Leerzustand weg; der Fokus geht auf den bleibenden Knopf oben
                   uploadKnopf.current?.focus();
-                  eingabe.current?.click();
+                  if (!hochladen.isPending) eingabe.current?.click();
                 }}
+                aria-busy={hochladen.isPending}
                 className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
               >
                 {m.archive_empty_upload()}
