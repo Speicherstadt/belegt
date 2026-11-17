@@ -96,3 +96,34 @@ describe("Shell", () => {
     expect(html).not.toContain("antwortet gerade nicht");
   });
 });
+
+describe("ServerAntwortetNicht mit echter Antwort", () => {
+  it("hält ein 403 als HTML-Seite eines Proxys nicht für einen Hinweis des Servers", async () => {
+    const { aufruf } = await import("../lib/api-aufruf.ts");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response("<html><body><h1>403 Forbidden</h1></body></html>", { status: 403, statusText: "Forbidden" }),
+      ),
+    );
+    const fehler = (await aufruf("/api/ich").catch((e: unknown) => e)) as Error;
+    vi.unstubAllGlobals();
+    const html = renderToStaticMarkup(<ServerAntwortetNicht error={fehler} erneut={() => {}} />);
+    expect(html).toContain("antwortet gerade nicht");
+    expect(html).not.toContain("kann gerade nichts anzeigen");
+  });
+
+  it("hält ein 403 mit Klartext eines Proxys nicht für einen Hinweis des Servers", async () => {
+    const { aufruf } = await import("../lib/api-aufruf.ts");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("Forbidden", { status: 403 })),
+    );
+    const fehler = (await aufruf("/api/ich").catch((e: unknown) => e)) as Error;
+    vi.unstubAllGlobals();
+    const html = renderToStaticMarkup(<ServerAntwortetNicht error={fehler} erneut={() => {}} />);
+    expect(html).toContain("antwortet gerade nicht");
+    expect(html).not.toContain("kann gerade nichts anzeigen");
+  });
+});
