@@ -2,6 +2,21 @@ import { useEffect, useId, useRef, useState } from "react";
 import { m } from "../paraglide/messages.js";
 
 /**
+ * Schließt der Browser den Dialog selbst (zweimal Escape, CloseWatcher), ohne dass `open` kippt: Läuft es noch, öffnet er
+ * wieder (Fehler und Ergebnis bleiben sichtbar), sonst meldet er den Abbruch dem Elternteil.
+ */
+export function nachSchliessen(
+  open: boolean,
+  pending: boolean | undefined,
+  dialog: { showModal: () => void },
+  onCancel: () => void,
+) {
+  if (!open) return;
+  if (pending) dialog.showModal();
+  else onCancel();
+}
+
+/**
  * Rückfrage vor Endgültigem mit dem nativen `<dialog>`: Fokusfalle, Escape und die Rückkehr des Fokus zum auslösenden
  * Knopf liefert der Browser. Mit `haken` (Stufe 2) gilt Bestätigen erst bei gesetztem Häkchen.
  */
@@ -52,6 +67,7 @@ export function ConfirmDialog({
         e.preventDefault();
         if (!pending) onCancel();
       }}
+      onClose={() => dialog.current && nachSchliessen(open, pending, dialog.current, onCancel)}
       className="m-auto w-[min(28rem,calc(100%-2rem))] rounded-lg border border-border bg-bg p-5 text-fg backdrop:bg-black/50"
     >
       <div className="flex flex-col gap-3">

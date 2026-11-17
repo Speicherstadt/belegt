@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, type Einordnung, type Ich, type Loeschung } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { alleinInhaber } from "../lib/rollen.ts";
@@ -38,9 +38,18 @@ export function Deletion({
   const fehler = beantragen.error ?? bestaetigen.error ?? zurueckziehen.error;
   const abgelaufen =
     einordnung && (einordnung.art === "frei" || (einordnung.fristBis !== null && einordnung.fristBis < heute()));
-  if (!loeschung && !abgelaufen) return null;
   // Der Server löscht sofort nur, wenn alle Einordnungen frei waren (server/loeschung/loeschung.ts)
   const sofort = einordnung?.art === "frei" && !vormalsAnders;
+  const zeigeBestaetigen = !!loeschung && !loeschung.bestaetigtAm && kannBestaetigen(loeschung, ich.data);
+  const zeigeJetzt = !loeschung && ich.data?.role === "inhaber" && sofort;
+  // Fällt die Rückfrage nach einem Refetch weg, darf ihr Zustand nicht stehen bleiben (sonst öffnet sie später von selbst)
+  useEffect(() => {
+    if (!zeigeBestaetigen) setFragenBestaetigen(false);
+  }, [zeigeBestaetigen]);
+  useEffect(() => {
+    if (!zeigeJetzt) setFragenJetzt(false);
+  }, [zeigeJetzt]);
+  if (!loeschung && !abgelaufen) return null;
 
   return (
     <section aria-labelledby="loeschung" className="flex flex-col gap-3 rounded-lg border border-border p-4">
@@ -61,13 +70,12 @@ export function Deletion({
           <p className="m-0 text-sm">
             {m.delete_requested({ wer: loeschung.beantragtVon, wann: zeitpunkt(loeschung.beantragtAm) })}
           </p>
-          {alleinInhaber(zugaenge.data, ich.data) && (
+          {alleinInhaber(zugaenge.data, ich.data) && !kannBestaetigen(loeschung, ich.data) && (
             <p className="m-0 text-sm">
-              {m.delete_alone_before()}{" "}
+              {m.delete_alone()}{" "}
               <Link to="/zugaenge" className="underline">
                 {m.nav_access()}
-              </Link>{" "}
-              {m.delete_alone_after()}
+              </Link>
             </p>
           )}
           <div className="flex flex-wrap gap-2">
@@ -110,7 +118,9 @@ export function Deletion({
       )}
       {!loeschung && ich.data?.role === "inhaber" && (
         <>
-          <p className="m-0 text-muted text-sm">{sofort ? m.delete_hint_free() : m.delete_hint()}</p>
+          <p className="m-0 text-muted text-sm">
+            {sofort ? m.delete_hint_free() : einordnung?.art === "frei" ? m.delete_hint_before() : m.delete_hint()}
+          </p>
           {sofort ? (
             <>
               <button

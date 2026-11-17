@@ -144,7 +144,7 @@ Feldern, Dokumenttypen und Korrespondenten, wo ein roter Knopf den ersten ersetz
   Bestätigen-Knopf ist erst mit Häkchen bedienbar, und der Grund steht daneben. Heute: „Löschung bestätigen“.
 - **Umkehrbares fragt nicht,** es bietet „Rückgängig“ (Tag entfernen, Vorschlag übernehmen).
 - Wer bei einem offenen Löschantrag allein arbeitet (kein weiteres Konto als Inhaber oder Steuerberatung), sieht zusätzlich zu
-  „Eine zweite Person bestätigt“ einen Satz mit Link zu „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt. Das Vier-Augen-Prinzip bleibt bewusst so.
+  „Eine zweite Person bestätigt“ einen Satz mit Link zu „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt; stammt der Antrag von einem anderen Akteur, darf er selbst bestätigen und sieht den Satz nicht. Das Vier-Augen-Prinzip bleibt bewusst so.
 
 ### Meldung in drei Teilen
 

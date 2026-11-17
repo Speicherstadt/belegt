@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import { ConfirmDialog } from "./ConfirmDialog.tsx";
+import { describe, expect, it, vi } from "vitest";
+import { ConfirmDialog, nachSchliessen } from "./ConfirmDialog.tsx";
 
 const zeigen = (props: Partial<Parameters<typeof ConfirmDialog>[0]> = {}) =>
   renderToStaticMarkup(
@@ -46,5 +46,31 @@ describe("ConfirmDialog", () => {
     // Auch „Abbrechen“ ist gesperrt, sonst ginge ein laufender Fehler im geschlossenen Dialog verloren
     expect(knoepfe(html).map((k) => k[1]?.includes('disabled=""'))).toEqual([true, true]);
     expect(html).toMatch(/role="alert"[^>]*>Nicht erlaubt</);
+  });
+
+  describe("nachSchliessen (Browser schließt selbst)", () => {
+    it("öffnet den Dialog wieder, solange es läuft, und meldet keinen Abbruch", () => {
+      const dialog = { showModal: vi.fn() };
+      const onCancel = vi.fn();
+      nachSchliessen(true, true, dialog, onCancel);
+      expect(dialog.showModal).toHaveBeenCalledOnce();
+      expect(onCancel).not.toHaveBeenCalled();
+    });
+
+    it("meldet sonst den Abbruch, damit der Elternzustand zurückfällt", () => {
+      const dialog = { showModal: vi.fn() };
+      const onCancel = vi.fn();
+      nachSchliessen(true, false, dialog, onCancel);
+      expect(onCancel).toHaveBeenCalledOnce();
+      expect(dialog.showModal).not.toHaveBeenCalled();
+    });
+
+    it("tut nichts, wenn der Elternteil den Dialog selbst geschlossen hat", () => {
+      const dialog = { showModal: vi.fn() };
+      const onCancel = vi.fn();
+      nachSchliessen(false, true, dialog, onCancel);
+      expect(dialog.showModal).not.toHaveBeenCalled();
+      expect(onCancel).not.toHaveBeenCalled();
+    });
   });
 });
