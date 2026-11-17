@@ -128,22 +128,23 @@ Die Bausteine sind Vorschläge, die in eigenen Pull Requests entstehen. Sie nutz
 
 Die Komponente `ConfirmDialog` (`src/components/ConfirmDialog.tsx`) nutzt das native `<dialog>` (`showModal()`); Fokusfalle,
 Escape und die Rückkehr des Fokus zum auslösenden Knopf liefert der Browser. Sie fragt vor Endgültigem, das sonst mit
-einem Klick liefe. Heute im Einsatz: „Jetzt löschen“ bei frei abgelegten Dokumenten und „Löschung bestätigen“ (Stufe 2,
+einem Klick liefe. Heute im Einsatz: „Jetzt löschen“ bei Dokumenten, die immer frei abgelegt waren, und „Löschung bestätigen“ (Stufe 2,
 auf Dokumentseite und unter Fristen). **Noch ohne Rückfrage** (Vorschlag, je ein eigener Pull Request): „Sperre aufheben“,
 Workflow löschen, Token widerrufen, Passkey entfernen und die zweistufigen Inline-Bestätigungen bei Tags, Zugängen,
 Feldern, Dokumenttypen und Korrespondenten, wo ein roter Knopf den ersten ersetzt, ohne „Abbrechen“.
 
 - **Titel als Frage:** „Dokument jetzt löschen?“
-- **Folgesatz:** was passiert, was bleibt und ob es sich umkehren lässt: „Die Datei wird endgültig entfernt. Prüfwert
-  und Verlauf bleiben.“
+- **Folgesatz:** was passiert, was bleibt und ob es sich umkehren lässt: „Das Dokument wird endgültig gelöscht. Prüfwert
+  und Verlauf bleiben. Das lässt sich nicht rückgängig machen.“ (Stufe 2: „… lässt sich nicht wiederherstellen“). Der Satz sagt
+  nichts über die Datei selbst, denn ihr Prüfwert und Speicher folgen eigenen Regeln.
 - **Knöpfe:** „Abbrechen“ und das Verb („Jetzt löschen“). Der Fokus startet auf „Abbrechen“; Escape bricht ab; der
-  Fokus kehrt zum auslösenden Knopf zurück.
+  Fokus kehrt zum auslösenden Knopf zurück. Läuft die Aktion, sind beide Knöpfe gesperrt und Escape bleibt wirkungslos.
 - **Stufe 1:** alles Endgültige. **Stufe 2** für besonders Folgenschweres (Löschung eines Pflichtdokuments, Löschaktion
   im Postfach): zusätzlich ein Pflicht-Häkchen (Prop `haken`, Satz wie `mailbox_delete_confirm` in `MailboxAction.tsx`); der
   Bestätigen-Knopf ist erst mit Häkchen bedienbar, und der Grund steht daneben. Heute: „Löschung bestätigen“.
 - **Umkehrbares fragt nicht,** es bietet „Rückgängig“ (Tag entfernen, Vorschlag übernehmen).
-- Wer bei Pflichtdokumenten allein arbeitet, sieht zusätzlich zu „Eine zweite Person bestätigt“ einen Satz mit Link zu
-  „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt. Das Vier-Augen-Prinzip bleibt bewusst so.
+- Wer bei Pflichtdokumenten allein arbeitet (kein weiteres Konto als Inhaber oder Steuerberatung), sieht zusätzlich zu
+  „Eine zweite Person bestätigt“ einen Satz mit Link zu „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt. Das Vier-Augen-Prinzip bleibt bewusst so.
 
 ### Meldung in drei Teilen
 

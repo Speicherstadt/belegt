@@ -20,7 +20,6 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   await expect(loeschung).toContainText("§ 147 Abs. 3 Satz 5 AO");
   await loeschung.getByRole("button", { name: "Löschung beantragen" }).click();
   await expect(loeschung).toContainText("Eine zweite Person bestätigt.");
-  await expect(loeschung.getByRole("link", { name: "Zugänge" })).toBeVisible();
   await expect(loeschung.getByRole("button", { name: "Löschung bestätigen" })).toHaveCount(0);
   const dokumentUrl = page.url();
 
@@ -45,7 +44,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
       .analyze();
     expect(axe.violations).toEqual([]);
     await antrag.getByRole("button", { name: "Löschung bestätigen" }).click();
-    const frage = kanzlei.getByRole("dialog", { name: "Löschung endgültig bestätigen?" });
+    const frage = kanzlei.getByRole("dialog", { name: `Löschung von „${name}“ bestätigen?` });
     await expect(frage.getByRole("button", { name: "Endgültig löschen" })).toBeDisabled();
     await frage.getByRole("checkbox").check();
     await frage.getByRole("button", { name: "Endgültig löschen" }).click();
@@ -83,7 +82,9 @@ test("frei abgelegt: „Jetzt löschen“ fragt nach, „Abbrechen“ löscht ni
   const frage = page.getByRole("dialog", { name: "Dokument jetzt löschen?" });
 
   await jetzt.click();
-  await expect(frage).toContainText("Die Datei wird endgültig entfernt. Prüfwert und Verlauf bleiben.");
+  await expect(frage).toContainText(
+    "Das Dokument wird endgültig gelöscht. Prüfwert und Verlauf bleiben. Das lässt sich nicht rückgängig machen.",
+  );
   await expect(frage.getByRole("button", { name: "Abbrechen" })).toBeFocused();
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(axe.violations).toEqual([]);
@@ -97,9 +98,32 @@ test("frei abgelegt: „Jetzt löschen“ fragt nach, „Abbrechen“ löscht ni
   await expect(frage).toBeHidden();
   await expect(jetzt).toBeFocused();
   await expect(loeschung).not.toContainText("Gelöscht am");
+  await expect(page.getByRole("link", { name: "Original herunterladen" })).toBeVisible();
 
   await jetzt.click();
   await frage.getByRole("button", { name: "Jetzt löschen" }).click();
   await expect(loeschung).toContainText("Gelöscht am");
   await expect(page.getByRole("link", { name: "Original herunterladen" })).toHaveCount(0);
+});
+
+test("nachträglich als frei eingeordnet: kein „Jetzt löschen“, sondern der Antrag für die zweite Person", async ({
+  page,
+}, info) => {
+  const name = `Umgeordnet-${info.project.name}.pdf`;
+  await page.goto("/eingang");
+  await page
+    .getByTestId("upload")
+    .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
+  await page.getByRole("link", { name }).click();
+  const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
+  await einordnung.getByLabel("Art").selectOption("beleg");
+  await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-01");
+  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnung ändern" }).click();
+  await einordnung.getByLabel("Art").selectOption("frei");
+  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+
+  const loeschung = page.locator("section", { has: page.getByRole("heading", { name: "Löschung", exact: true }) });
+  await expect(loeschung.getByRole("button", { name: "Löschung beantragen" })).toBeVisible();
+  await expect(loeschung.getByRole("button", { name: "Jetzt löschen" })).toHaveCount(0);
 });
