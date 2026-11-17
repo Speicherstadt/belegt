@@ -6,7 +6,7 @@ const html = renderToStaticMarkup(<Einmalwert label="Neues Token:" wert="belegt_
 
 describe("Einmalwert", () => {
   it("zeigt den Wert in font-mono, umbrechend und auswählbar", () => {
-    expect(html).toMatch(/<code class="[^"]*font-mono[^"]*">belegt_geheim123<\/code>/);
+    expect(html).toMatch(/<code [^>]*class="[^"]*font-mono[^"]*"[^>]*>belegt_geheim123<\/code>/);
     expect(html).toContain("[overflow-wrap:anywhere]");
     expect(html).toContain("select-all");
   });
@@ -23,6 +23,10 @@ describe("Einmalwert", () => {
     expect(html).toMatch(/<button type="button"[^>]*h-10[^>]*pointer-coarse:h-11[^>]*>Kopieren<\/button>/);
     expect(html).toMatch(/<p class="[^"]*">Wird nur jetzt angezeigt\.<\/p>/);
     expect(html.indexOf("Wird nur jetzt angezeigt.")).toBeGreaterThan(html.indexOf("</code>"));
+  });
+
+  it("macht den Wert per Tastatur erreichbar", () => {
+    expect(html).toMatch(/<code [^>]*tabindex="0"/);
   });
 
   it("schreibt den Wert nirgends in ein Attribut", () => {

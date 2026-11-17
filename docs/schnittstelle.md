@@ -11,7 +11,7 @@ unter `/api/openapi.json`; alle Aufrufe stehen in [`api.md`](api.md).
 
 ## API-Tokens
 
-Unter **Quellen und Schnittstellen** legt der Inhaber ein Token an und kopiert es einmal (Knopf „Kopieren“; ein Token, ein Webhook-Geheimnis und ein Einladungslink erscheinen nur beim Anlegen). Das Programm schickt es als
+Unter **Quellen und Schnittstellen** legt der Inhaber ein Token an und kopiert es einmal (Knopf „Kopieren“). Das Programm schickt es als
 `Authorization: Bearer belegt_…`. Mit dem Recht **Lesen** liest es Dokumente, Originale, Mails und Verlauf, mit
 **Lesen, aufnehmen und einordnen** nimmt es zusätzlich Dateien und Mails auf und ordnet ein. Löschen, bestätigen und
 Einstellungen ändern kann kein Token. Im Protokoll steht `token:<Name>`.

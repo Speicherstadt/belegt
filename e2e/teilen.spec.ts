@@ -40,3 +40,18 @@ test("Teilen per Link: Link anlegen, ohne Anmeldung herunterladen, Abruf sehen, 
   expect((await fremd.get(url)).status()).toBe(404);
   await fremd.dispose();
 });
+
+test("Teilen per Link: Wer den frisch angelegten Link widerruft, sieht ihn nicht mehr", async ({ page }, info) => {
+  await page.goto("/eingang");
+  await page.getByTestId("upload").setInputFiles({
+    name: `widerruf-${info.project.name}.pdf`,
+    mimeType: "application/pdf",
+    buffer: Buffer.from(`%PDF-1.4\n%Widerruf ${info.project.name}\n`),
+  });
+  await page.getByRole("link", { name: `widerruf-${info.project.name}.pdf` }).click();
+  const bereich = page.getByRole("region", { name: "Teilen per Link" });
+  await bereich.getByRole("button", { name: "Link anlegen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toBeVisible();
+  await bereich.getByRole("list", { name: "Gültige Links" }).getByRole("button", { name: "Widerrufen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toHaveCount(0);
+});

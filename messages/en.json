@@ -609,8 +609,6 @@
   "share_link_30": "30 days",
   "share_link_create": "Create link",
   "share_link_new": "New link",
-  "share_link_copy": "Copy",
-  "share_link_copied": "Copied.",
   "share_link_active": "Valid links",
   "share_link_until": "Valid until {datum}",
   "share_link_fetched": [
@@ -1229,5 +1227,7 @@
   "start_chain_stale": "No check for two days: is the worker running?",
   "start_chain_now": "Check now",
   "einmalwert_once": "Only shown now.",
-  "einmalwert_copy_failed": "Copying is not possible, please select the value."
+  "einmalwert_copy_failed": "Copying is not possible, please select the value.",
+  "einmalwert_copy": "Copy",
+  "einmalwert_copied": "Copied."
 }

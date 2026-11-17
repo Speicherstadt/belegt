@@ -26,7 +26,11 @@ export function ShareLinks({ dokumentId }: { dokumentId: string }) {
   });
   const widerrufen = useMutation({
     mutationFn: (link: string) => api.linkWiderrufen(dokumentId, link),
-    onSuccess: neu,
+    onSuccess: (_, link) => {
+      // Ein widerrufener Link soll nicht weiter auf der Seite stehen
+      if (anlegen.data?.id === link) anlegen.reset();
+      return neu();
+    },
   });
 
   function absenden(e: FormEvent<HTMLFormElement>) {
