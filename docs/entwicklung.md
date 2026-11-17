@@ -51,6 +51,14 @@ Die E2E-Tests starten einen eigenen Server mit frischer Datenbank unter `E2E_DAT
 Port 3187 (`E2E_SMTP_PORT`). Der Server läuft dabei wie im Betrieb als eigene App-Rolle
 `<name>_app`; der Benutzer aus `E2E_DATABASE_URL` migriert und braucht dafür `CREATEROLE`.
 
+Jeder Test läuft am Desktop und am Handy (Projekte `desktop` und `handy`). In der CI laufen beide je in zwei Teilen
+nebeneinander, jeder Teil mit eigener Datenbank. Ein Test darf sich darum nicht auf Daten aus einer anderen Datei
+verlassen. Einen Teil wie in der CI startet:
+
+```sh
+bun run e2e --project=desktop --shard=1/2
+```
+
 Daneben legt der Lauf `<name>_vorlage` an (einmal migriert) und je Vitest-Worker `<name>_<Nummer>` als Kopie davon
 (`server/test-db.ts`). Der Benutzer braucht `CREATEDB`; Tests, die eine Manipulation an den Triggern vorbei
 nachstellen, brauchen einen Superuser.
