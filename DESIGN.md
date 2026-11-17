@@ -159,8 +159,9 @@ z. B. „Erneut versuchen“). Den Rohtext des Servers gibt es eingeklappt unter
 - Fehler an einem Feld: Text direkt unter dem Feld mit `role="alert"`, am Feld `aria-describedby` und
   `aria-invalid`; kein Browser-Blasentext in fremder Sprache. Der Fokus geht auf das erste fehlerhafte Feld.
 - Erfolg: ein Satz in `role="status"`, der nach weiteren Änderungen verschwindet.
-- Der Router bekommt `defaultNotFoundComponent` und `defaultErrorComponent` (heute beide nicht gesetzt); die Shell
-  bleibt bei einem Fehler von `/api/ich` nicht bei „Lädt …“ stehen.
+- Der Router hat `defaultNotFoundComponent` und `defaultErrorComponent` (`src/components/Fehlerseiten.tsx`, Baustein
+  `Meldung.tsx`); eine unbekannte Adresse zeigt die Meldung in der Shell. Schlägt `/api/ich` anders als mit 401
+  fehl, zeigt die Shell „Der Server antwortet gerade nicht“ mit „Erneut versuchen“ statt „Lädt …“.
 
 ### Leerzustand
 

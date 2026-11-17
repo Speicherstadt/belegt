@@ -1178,5 +1178,14 @@
   "explain_seal": "Das Siegel ist ein Fingerabdruck der Angaben zum Dokument. Ändert sich etwas, passt er nicht mehr.",
   "explain_chain": "Jeder Eintrag im Protokoll enthält den Fingerabdruck des Eintrags davor. Wer einen ändert, bricht die Kette, und die Prüfung zeigt es.",
   "explain_hold": "Eine Sperre hält die Dokumente eines Zeitraums fest, auch wenn ihre Frist abgelaufen ist, etwa für eine Betriebsprüfung.",
-  "explain_kind": "Die Art sagt, wie lange ein Dokument bleiben muss: Pflicht (gesetzliche Frist), freiwillig (bis zu einem Tag, den du wählst) oder frei (keine Frist; löschbar, solange keine Sperre den Tag umfasst, an dem es entstanden ist)."
+  "explain_kind": "Die Art sagt, wie lange ein Dokument bleiben muss: Pflicht (gesetzliche Frist), freiwillig (bis zu einem Tag, den du wählst) oder frei (keine Frist; löschbar, solange keine Sperre den Tag umfasst, an dem es entstanden ist).",
+  "meldung_details": "Details",
+  "notfound_title": "Diese Seite gibt es nicht.",
+  "notfound_text": "Deine Dokumente sind nicht betroffen.",
+  "notfound_action": "Zum Archiv",
+  "error_title": "Hier ist etwas schiefgegangen.",
+  "error_text": "Deine Dokumente sind nicht verloren.",
+  "server_down_title": "Der Server antwortet gerade nicht.",
+  "server_down_text": "Deine Dokumente sind nicht verloren.",
+  "denied_title": "Dieser Zugang kann gerade nichts anzeigen."
 }

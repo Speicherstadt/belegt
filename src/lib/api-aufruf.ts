@@ -25,7 +25,8 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
   const res = await fetch(pfad, { credentials: "same-origin", ...init });
   if (!res.ok) {
     const text = await res.text();
-    let meldung = text;
+    // HTML eines Proxys gehört nicht in eine Meldung: dann nur der Status
+    let meldung = text.trimStart().startsWith("<") ? `${res.status} ${res.statusText}`.trim() : text;
     let ergebnis: ApiFehler["ergebnis"];
     let vorhanden: ApiFehler["vorhanden"];
     try {
@@ -36,7 +37,7 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
         ergebnisse?: SammelErgebnis[];
         vorhanden?: ApiFehler["vorhanden"];
       };
-      meldung = json.fehler ?? json.message ?? text;
+      meldung = json.fehler ?? json.message ?? meldung;
       if (json.ergebnisse) ergebnis = { ok: false, ergebnisse: json.ergebnisse };
       vorhanden = json.vorhanden;
     } catch {}
