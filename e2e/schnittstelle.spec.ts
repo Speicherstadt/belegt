@@ -51,3 +51,14 @@ test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abs
   await expect(eintrag).toContainText("deaktiviert");
   await expect(eintrag.getByRole("button", { name: "Aktivieren" })).toBeVisible();
 });
+
+test("ein widerrufenes neues Token verschwindet von der Seite", async ({ page }, info) => {
+  const name = `Widerruf ${info.project.name}`;
+  await page.goto("/quellen");
+  const bereich = page.getByRole("region", { name: "API-Tokens" });
+  await bereich.getByLabel("Name").fill(name);
+  await bereich.getByRole("button", { name: "Token anlegen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toBeVisible();
+  await bereich.getByRole("listitem").filter({ hasText: name }).getByRole("button", { name: "Widerrufen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toHaveCount(0);
+});

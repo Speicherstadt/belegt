@@ -10,16 +10,23 @@ export function ApiTokens() {
   const id = useId();
   const queryClient = useQueryClient();
   const tokens = useQuery({ queryKey: ["tokens"], queryFn: api.tokens });
-  const [klartext, setKlartext] = useState<string | null>(null);
+  const [neuesToken, setNeuesToken] = useState<{ id: string; klartext: string } | null>(null);
   const neu = () => queryClient.invalidateQueries({ queryKey: ["tokens"] });
   const anlegen = useMutation({
     mutationFn: ({ name, recht }: { name: string; recht: ApiToken["recht"] }) => api.tokenAnlegen(name, recht),
     onSuccess: async (t) => {
-      setKlartext(t.klartext);
+      setNeuesToken({ id: t.id, klartext: t.klartext });
       await neu();
     },
   });
-  const widerrufen = useMutation({ mutationFn: api.tokenWiderrufen, onSuccess: neu });
+  const widerrufen = useMutation({
+    mutationFn: api.tokenWiderrufen,
+    onSuccess: (_, id) => {
+      // Ein widerrufenes Token soll nicht weiter auf der Seite stehen
+      if (neuesToken?.id === id) setNeuesToken(null);
+      return neu();
+    },
+  });
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -53,7 +60,7 @@ export function ApiTokens() {
           {m.tokens_create()}
         </button>
       </form>
-      {klartext && <Einmalwert label={m.tokens_once()} wert={klartext} />}
+      {neuesToken && <Einmalwert label={m.tokens_once()} wert={neuesToken.klartext} />}
       {anlegen.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {anlegen.error.message}

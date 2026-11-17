@@ -169,3 +169,13 @@ test("ein Mitarbeiter sieht nur die Dokumente seines Sichtbereichs und bearbeite
   await konto.getByRole("button", { name: /wirklich entziehen/ }).click();
   await expect(konto).toContainText("entzogen am");
 });
+
+test("eine zurückgezogene neue Einladung verschwindet von der Seite", async ({ page }) => {
+  await page.goto("/zugaenge");
+  await page.getByLabel("Rolle").selectOption("steuerberatung");
+  await page.getByRole("button", { name: "Einladen" }).click();
+  await expect(page.getByTestId("einmalwert")).toBeVisible();
+  // Die neueste Einladung steht zuerst in der Liste
+  await page.getByRole("button", { name: "Zurückziehen" }).first().click();
+  await expect(page.getByTestId("einmalwert")).toHaveCount(0);
+});
