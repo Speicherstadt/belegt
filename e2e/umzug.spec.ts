@@ -86,6 +86,14 @@ test("Paperless-ngx über die API und aus einem Export übernehmen", async ({ pa
     .filter({ has: page.getByRole("link", { name: `paperless-export-${projekt}.bin` }) });
   await expect(exportZeile).toContainText(`Export ${projekt}`);
   const zeile = page.getByRole("row").filter({ has: page.getByRole("link", { name: "paperless-strom.bin" }) });
+  // Im zweiten Projekt kam das Dokument schon im ersten an; neuere Dokumente anderer Tests können es auf eine
+  // spätere Seite des Eingangs schieben
+  const weiter = page.getByRole("navigation", { name: "Seiten" }).getByRole("button", { name: "Weiter" });
+  while ((await zeile.count()) === 0 && (await weiter.isVisible()) && (await weiter.isEnabled())) {
+    const vorher = await page.getByRole("navigation", { name: "Seiten" }).textContent();
+    await weiter.click();
+    await expect(page.getByRole("navigation", { name: "Seiten" })).not.toHaveText(vorher ?? "");
+  }
   await expect(zeile).toContainText("Strom");
   await zeile.getByRole("link", { name: "paperless-strom.bin" }).click();
   await expect(page.getByText("Importiert", { exact: true })).toBeVisible();
