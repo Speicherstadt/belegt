@@ -1158,5 +1158,6 @@
   "error_title": "Hier ist etwas schiefgegangen.",
   "error_text": "Deine Dokumente sind nicht verloren.",
   "server_down_title": "Der Server antwortet gerade nicht.",
-  "server_down_text": "Deine Dokumente sind nicht verloren."
+  "server_down_text": "Deine Dokumente sind nicht verloren.",
+  "denied_title": "Dieser Zugang kann gerade nichts anzeigen."
 }

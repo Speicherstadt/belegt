@@ -3,7 +3,7 @@ import { m } from "../paraglide/messages.js";
 
 /** Knopf der Meldung: gleiche Gestalt für „Erneut versuchen“ und den Link ins Archiv */
 export const meldungKnopf =
-  "inline-flex h-9 items-center rounded-md bg-primary px-4 font-medium text-onprimary text-sm";
+  "inline-flex h-10 pointer-coarse:h-11 items-center rounded-md bg-primary px-4 font-medium text-onprimary text-base sm:text-sm";
 
 /**
  * Meldung in drei Teilen (DESIGN.md): was ist passiert (Überschrift), ist etwas verloren (Satz), was kann man tun
@@ -26,9 +26,13 @@ export function Meldung({
       <p className="m-0 text-muted text-sm">{verloren}</p>
       {children}
       {details ? (
-        <details className="text-sm">
-          <summary className="cursor-pointer font-medium">{m.meldung_details()}</summary>
-          <pre className="mt-1 whitespace-pre-wrap break-words font-mono text-muted text-xs">{details}</pre>
+        <details className="w-full min-w-0 text-sm">
+          <summary className="inline-flex min-h-6 cursor-pointer items-center font-medium">
+            {m.meldung_details()}
+          </summary>
+          <pre className="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere] font-mono text-muted text-xs">
+            {details}
+          </pre>
         </details>
       ) : null}
     </section>

@@ -24,7 +24,8 @@ export function Shell({ children }: { children: ReactNode }) {
     if (versuchen) void api.anmeldenMitAnbieter(window.location.pathname, true).catch(() => setStill(false));
   }, [abgemeldet, status.data, still, imFrame]);
   if (abgemeldet && still === false) return <Navigate to="/anmelden" />;
-  if (ich.error && !abgemeldet) return <ServerAntwortetNicht error={ich.error} erneut={() => void ich.refetch()} />;
+  if (ich.error && !abgemeldet && !ich.data)
+    return <ServerAntwortetNicht error={ich.error} erneut={() => void ich.refetch()} />;
   if (!ich.data) return <p className="p-8 text-muted text-sm">{m.loading()}</p>;
   return (
     <div className="flex min-h-screen flex-wrap bg-bg text-fg">

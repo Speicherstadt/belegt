@@ -1236,5 +1236,6 @@
   "error_title": "Something went wrong here.",
   "error_text": "Your documents are not lost.",
   "server_down_title": "The server is not responding right now.",
-  "server_down_text": "Your documents are not lost."
+  "server_down_text": "Your documents are not lost.",
+  "denied_title": "This access cannot show anything right now."
 }
