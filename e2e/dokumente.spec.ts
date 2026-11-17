@@ -235,3 +235,39 @@ test("nach dem Hochladen aus dem Leerzustand steht der Fokus auf „Hochladen“
   await expect(knopf).not.toHaveAttribute("aria-busy", "true");
   await expect(knopf).toBeFocused();
 });
+
+test("während ein Hochladen läuft, startet „Dokument hochladen“ im Leerzustand kein zweites", async ({
+  page,
+}, info) => {
+  await page.route("**/api/dokumente?*", (route) => route.fulfill({ json: [], headers: { "x-gesamt": "0" } }));
+  let freigeben = () => {};
+  const frei = new Promise<void>((r) => {
+    freigeben = r;
+  });
+  let posts = 0;
+  await page.route("**/api/dokumente", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    posts++;
+    await frei;
+    await route.continue();
+  });
+  await page.goto("/archiv");
+  const leerKnopf = page.getByRole("button", { name: "Dokument hochladen" });
+  const chooser = page.waitForEvent("filechooser");
+  await leerKnopf.click();
+  await (await chooser).setFiles({
+    name: `Doppelt-${info.project.name}.pdf`,
+    mimeType: "application/pdf",
+    buffer: Buffer.from(`%PDF-1.7\n% Doppelt ${info.project.name} ${Date.now()}\n`),
+  });
+  await expect.poll(() => posts).toBe(1);
+  // Der Knopf in der Leiste lässt kein zweites Hochladen zu; der im Leerzustand darf es auch nicht
+  let geoeffnet = 0;
+  page.on("filechooser", () => {
+    geoeffnet++;
+  });
+  if (await leerKnopf.isVisible()) await leerKnopf.click();
+  await page.waitForTimeout(500);
+  freigeben();
+  expect(geoeffnet).toBe(0);
+});
