@@ -202,6 +202,14 @@ der Woche), ein neuer Zustand sofort; ein gescheiterter Versand frühestens nach
 alle 15 Minuten, die Kette einmal am Tag. Jede gesendete Mail steht mit Anlass, Empfängern und Betreff unter „Zuletzt
 gesendet“ und im Protokoll; ändern lässt sich dieser Eintrag nicht. **Testmail senden** prüft den Versand.
 
+## Wenn der Server nicht antwortet
+
+Erreicht die Oberfläche den Server nicht (Netz, Neustart, Fehler `5xx`), steht dort „Der Server antwortet gerade nicht.
+Deine Dokumente sind nicht verloren.“ mit dem Knopf „Erneut versuchen“; die Rohmeldung ist unter „Details“
+eingeklappt. Verweigert der Server den Zugang (etwa wegen eines ungültigen Sichtbereichs), steht sein Hinweis an der
+Stelle. Eine unbekannte Adresse zeigt „Diese Seite gibt es nicht“ mit einem Knopf ins Archiv; Anmeldung und Seitenleiste
+bleiben wie sonst.
+
 ## Aktualisieren
 
 ```bash

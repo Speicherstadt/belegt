@@ -4,6 +4,7 @@ import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { tag, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Explain } from "./WasIstDas.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
@@ -29,9 +30,19 @@ export function Holds() {
 
   return (
     <section aria-labelledby="sperren" className="flex flex-col gap-3">
-      <h2 id="sperren" className="m-0 font-semibold text-base">
-        {m.holds_title()}
-      </h2>
+      <Explain term="hold">
+        {(knopf, satz) => (
+          <>
+            <div className="flex items-center gap-1">
+              <h2 id="sperren" className="m-0 font-semibold text-base">
+                {m.holds_title()}
+              </h2>
+              {knopf}
+            </div>
+            {satz}
+          </>
+        )}
+      </Explain>
       <p className="m-0 text-muted text-sm">{m.holds_intro()}</p>
       {liste.data?.length === 0 && <p className="m-0 text-sm">{m.holds_none()}</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

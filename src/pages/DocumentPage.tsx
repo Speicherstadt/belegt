@@ -14,6 +14,7 @@ import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
+import { Explain } from "../components/WasIstDas.tsx";
 import { ansichtUrl, api, archivfassungUrl, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -61,6 +62,16 @@ export function DocumentPage() {
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
   const d = dok.data;
   const geloescht = !!d.loeschung?.bestaetigtAm;
+  const einordnen = !geloescht && (
+    <Classification
+      key={d.einordnung?.id ?? "neu"}
+      dokumentId={d.id}
+      einordnung={d.einordnung}
+      eingang={d.eingegangenAm}
+      dokumenttyp={d.dokumenttyp}
+      korrespondent={d.korrespondent}
+    />
+  );
   // Bei Scans die durchsuchbare Fassung: Text lässt sich darin suchen und markieren
   const vorschau = geloescht
     ? null
@@ -130,6 +141,8 @@ export function DocumentPage() {
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
         <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
+          {/* Offen: Die Einordnung ist der nächste Schritt und steht zuerst */}
+          {!d.einordnung && einordnen}
           <MailSection dokumentId={d.id} />
           <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
           <EInvoice dokumentId={d.id} />
@@ -140,17 +153,8 @@ export function DocumentPage() {
             vormalsAnders={d.vormalsAnders}
             loeschung={d.loeschung}
           />
-          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
-          {!geloescht && (
-            <Classification
-              key={d.einordnung?.id ?? "neu"}
-              dokumentId={d.id}
-              einordnung={d.einordnung}
-              eingang={d.eingegangenAm}
-              dokumenttyp={d.dokumenttyp}
-              korrespondent={d.korrespondent}
-            />
-          )}
+          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks key={d.id} dokumentId={d.id} />}
+          {d.einordnung && einordnen}
           {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
           {!geloescht && <Similar dokumentId={d.id} />}
           <DocumentOrdnung
@@ -163,10 +167,20 @@ export function DocumentPage() {
               {m.doc_details()}
             </h2>
             <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
-              <dt className="text-muted">{m.doc_asn()}</dt>
-              <dd className="m-0 tabular-nums" data-testid="asn">
-                {d.asn}
-              </dd>
+              <Explain term="asn" row>
+                {(knopf, satz) => (
+                  <>
+                    <dt className="text-muted">{m.doc_asn()}</dt>
+                    <dd className="m-0 flex items-center">
+                      <span className="tabular-nums" data-testid="asn">
+                        {d.asn}
+                      </span>
+                      {knopf}
+                    </dd>
+                    {satz}
+                  </>
+                )}
+              </Explain>
               <dt className="text-muted">{m.doc_source()}</dt>
               <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
               <dt className="text-muted">{m.doc_received()}</dt>
@@ -211,8 +225,18 @@ export function DocumentPage() {
             <dl className="m-0 flex flex-col gap-2 text-sm">
               <dt className="text-muted">{m.doc_hash()}</dt>
               <dd className="m-0 break-all font-mono text-xs">{d.sha256}</dd>
-              <dt className="text-muted">{m.doc_seal()}</dt>
-              <dd className="m-0 break-all font-mono text-xs">{verlauf.data?.siegel ?? "–"}</dd>
+              <Explain term="seal" row>
+                {(knopf, satz) => (
+                  <>
+                    <dt className="flex items-center text-muted">
+                      {m.doc_seal()}
+                      {knopf}
+                    </dt>
+                    <dd className="m-0 break-all font-mono text-xs">{verlauf.data?.siegel ?? "–"}</dd>
+                    {satz}
+                  </>
+                )}
+              </Explain>
             </dl>
           </section>
         </div>

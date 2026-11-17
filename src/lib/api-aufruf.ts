@@ -11,6 +11,8 @@ export class ApiFehler extends Error {
     readonly ergebnis?: { ok: boolean; ergebnisse: SammelErgebnis[] },
     /** Beim Hochladen 409: das Dokument mit derselben Datei (id und asn null, wenn der Zugang es nicht sieht) */
     readonly vorhanden?: { id: string | null; asn: number | null },
+    /** true, wenn die Antwort kein JSON mit fehler/message war (HTML, Klartext, leer: oft ein Proxy) */
+    readonly ohneHinweis?: boolean,
   ) {
     super(message);
   }
@@ -25,9 +27,11 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
   const res = await fetch(pfad, { credentials: "same-origin", ...init });
   if (!res.ok) {
     const text = await res.text();
-    let meldung = text;
+    // HTML eines Proxys gehört nicht in eine Meldung: dann nur der Status
+    let meldung = text.trimStart().startsWith("<") ? `${res.status} ${res.statusText}`.trim() : text;
     let ergebnis: ApiFehler["ergebnis"];
     let vorhanden: ApiFehler["vorhanden"];
+    let ohneHinweis = true;
     try {
       const json = JSON.parse(text) as {
         fehler?: string;
@@ -36,11 +40,12 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
         ergebnisse?: SammelErgebnis[];
         vorhanden?: ApiFehler["vorhanden"];
       };
-      meldung = json.fehler ?? json.message ?? text;
+      ohneHinweis = (json.fehler ?? json.message) == null;
+      meldung = json.fehler ?? json.message ?? meldung;
       if (json.ergebnisse) ergebnis = { ok: false, ergebnisse: json.ergebnisse };
       vorhanden = json.vorhanden;
     } catch {}
-    throw new ApiFehler(res.status, meldung, ergebnis, vorhanden);
+    throw new ApiFehler(res.status, meldung, ergebnis, vorhanden, ohneHinweis);
   }
   return res;
 }

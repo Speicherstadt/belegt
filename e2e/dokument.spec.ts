@@ -168,3 +168,28 @@ test("ähnliche Dokumente stehen auf der Seite des Dokuments", async ({ page }, 
   await expect(aehnliche.getByRole("link", { name: erstes, exact: true })).toBeVisible();
   await axeHellUndDunkel(page);
 });
+
+test("ein frisch angelegter Freigabelink bleibt nicht beim Wechsel zu einem anderen Dokument stehen", async ({
+  page,
+}, info) => {
+  const p = info.project.name;
+  const text = `Mietvertrag Gartenhaus${p} Schlüsselübergabe${p} Kaution${p}`;
+  const erstes = `miete-1-${p}.pdf`;
+  await hochladen(page, erstes, await pdf(text));
+  const id = await hochladen(page, `miete-2-${p}.pdf`, await pdf(text));
+  await expect
+    .poll(async () => (await (await page.request.get(`/api/dokumente/${id}/aehnliche`)).json()).length, {
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
+  await page.goto(`/dokumente/${id}`);
+  const teilen = page.getByRole("region", { name: "Teilen per Link" });
+  await teilen.getByRole("button", { name: "Link anlegen" }).click();
+  await expect(teilen.getByTestId("einmalwert")).toBeVisible();
+  await page
+    .getByRole("region", { name: "Ähnliche Dokumente" })
+    .getByRole("link", { name: erstes, exact: true })
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: erstes })).toBeVisible();
+  await expect(page.getByTestId("einmalwert")).toHaveCount(0);
+});

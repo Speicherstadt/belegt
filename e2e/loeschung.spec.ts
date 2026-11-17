@@ -26,7 +26,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   await page.goto("/zugaenge");
   await page.getByLabel("Rolle").selectOption("steuerberatung");
   await page.getByRole("button", { name: "Einladen" }).click();
-  const link = await page.getByRole("status").locator("code").textContent();
+  const link = await page.getByTestId("einmalwert").locator("code").textContent();
 
   const fremd = await browser.newContext({ storageState: { cookies: [], origins: [] }, locale: "de-DE" });
   const kanzlei = await fremd.newPage();
@@ -120,7 +120,7 @@ test("nachträglich als frei eingeordnet: kein „Jetzt löschen“, sondern der
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-01");
   await einordnung.getByRole("button", { name: "Einordnen" }).click();
   await einordnung.getByRole("button", { name: "Einordnung ändern" }).click();
-  await einordnung.getByLabel("Art").selectOption("frei");
+  await einordnung.getByRole("combobox", { name: "Art" }).selectOption("frei");
   await einordnung.getByRole("button", { name: "Einordnen" }).click();
 
   const loeschung = page.locator("section", { has: page.getByRole("heading", { name: "Löschung", exact: true }) });

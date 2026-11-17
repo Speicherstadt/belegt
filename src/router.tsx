@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { EmbedBridge } from "./components/EmbedBridge.tsx";
+import { NichtGefunden, SeitenFehler } from "./components/Fehlerseiten.tsx";
 import { Shell } from "./components/Shell.tsx";
 import { AccessPage } from "./pages/AccessPage.tsx";
 import { AccountPage } from "./pages/AccountPage.tsx";
@@ -20,6 +21,12 @@ import { WorkflowsPage } from "./pages/WorkflowsPage.tsx";
 
 // Die Brücke zur einbettenden Seite läuft auf jeder Seite, auch beim Anmelden
 const root = createRootRoute({
+  // Unbekannte Adresse landet an der Wurzel: die Meldung steht trotzdem in der Shell, die Seitenleiste bleibt
+  notFoundComponent: () => (
+    <Shell>
+      <NichtGefunden />
+    </Shell>
+  ),
   component: () => (
     <>
       <EmbedBridge />
@@ -80,6 +87,8 @@ export const router = createRouter({
   routeTree: root.addChildren([anmelden, einladung, app.addChildren(seiten)]),
   parseSearch,
   stringifySearch,
+  defaultNotFoundComponent: NichtGefunden,
+  defaultErrorComponent: SeitenFehler,
 });
 
 declare module "@tanstack/react-router" {

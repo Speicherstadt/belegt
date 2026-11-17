@@ -5,8 +5,8 @@ Regeln für alles, was man in Belegt sieht und bedient. Vor jeder Arbeit an der 
 Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/styles.css`, eine Kopie hier würde
 auseinanderlaufen.
 
-**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
-`--control-h`, die Fokusregel, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
+**Stand:** Farben, `--bg` bis `--onprimary`, der Dunkelmodus, die Fokusregel und der Umbruch langer Prüfwerte gibt es heute. Der Leerzustand (Archiv, Eingang, „Keine Treffer“) und die Reihenfolge der Dokumentseite (Einordnung zuerst, solange offen) stehen im Code. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
+`--control-h`, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
 
@@ -81,24 +81,28 @@ Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 u
 | 24 px | Seitentitel (`h1`, genau einer je Seite) |
 
 - Fließtext hat höchstens etwa 70 Zeichen Zeilenlänge: `max-w-prose` als Empfehlung.
-- Prüfwerte, Hashes und Token stehen in `font-mono` mit `overflow-wrap: anywhere` (`break-all` genügt nicht für
-  Wörter in Sätzen); Flex-Eltern bekommen `min-w-0`, sonst wächst die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px,
-  Dokumentseite 438 px bei 390 px Breite).
+- Prüfwerte, Hashes und Token stehen in `font-mono` mit `break-all` (`DocumentPage.tsx`, `AuditPage.tsx`). Fließtext und
+  Überschriften (Text der Verfahrensdokumentation, `PageHeader`) brechen mit `[overflow-wrap:anywhere]` um, damit
+  Wörter in Sätzen nicht mitten zerrissen werden, wo es nicht nötig ist. Flex-Eltern bekommen `min-w-0`, sonst wächst
+  die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px, Dokumentseite 438 px).
+  `e2e/umbruch-fokus.spec.ts` prüft beides.
 - Kein Text in Versalien mit Sperrung; Beschriftungen in Satzschreibung.
 
 ## Fokus
 
-Vorschlag: eine globale Regel in `styles.css`.
+Eine globale Regel in `styles.css`:
 
 ```css
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 ```
 
 - **Knöpfe, Links, Checkboxen:** 2 px Ring in `--fg` mit 2 px Abstand, so entsteht er im Hell- wie im Dunkelmodus.
-- **Felder:** Der Ring liegt auf dem eigenen Rand, der sich in `--fg` färbt (`focus-visible:border-fg`,
-  Ring ohne Abstand): kein Doppelrahmen.
-- Nie `outline-none` ohne Ersatz. Heute fehlt der Ersatz im Suchfeld des Archivs (`DocumentList.tsx`): Der Rahmen
-  (`focus-within:border-fg` am umgebenden Label) muss mitkommen.
+- **Felder** (Text-Eingaben, Auswahllisten, Textfelder; nicht Checkbox, Radio, Datei, Schieber): Der Ring hat keinen
+  Abstand (`outline-offset: 0`) und der Rand färbt sich in `--fg`, so entsteht kein Doppelrahmen. Die globale Regel
+  in `styles.css` tut genau das; die Randfarbe steht dort ungeschichtet, sonst verlöre sie gegen `border-border`.
+- Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
+  am umgebenden Label. Dazu `outline-hidden` statt `outline-none` am Feld: Bei erzwungenen Farben (Kontrastmodus) zeigt
+  ein Farbwechsel des Rands nichts, der Ring dann schon.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).
 
 ## Knöpfe
@@ -156,25 +160,34 @@ z. B. „Erneut versuchen“). Den Rohtext des Servers gibt es eingeklappt unter
 - Fehler an einem Feld: Text direkt unter dem Feld mit `role="alert"`, am Feld `aria-describedby` und
   `aria-invalid`; kein Browser-Blasentext in fremder Sprache. Der Fokus geht auf das erste fehlerhafte Feld.
 - Erfolg: ein Satz in `role="status"`, der nach weiteren Änderungen verschwindet.
-- Der Router bekommt `defaultNotFoundComponent` und `defaultErrorComponent` (heute beide nicht gesetzt); die Shell
-  bleibt bei einem Fehler von `/api/ich` nicht bei „Lädt …“ stehen.
+- Der Router hat `defaultNotFoundComponent` und `defaultErrorComponent` (`src/components/Fehlerseiten.tsx`, Baustein
+  `Meldung.tsx`); eine unbekannte Adresse zeigt die Meldung in der Shell. Schlägt `/api/ich` anders als mit 401
+  fehl, zeigt die Shell „Der Server antwortet gerade nicht“ mit „Erneut versuchen“ statt „Lädt …“.
 
 ### Leerzustand
 
 Ein Satz und **genau ein** Knopf zur nächsten Handlung: „Noch keine Dokumente. [Dokument hochladen]“, „Noch kein
-Postfach. [Postfach verbinden]“. „Keine Treffer für ‚Rechnung‘. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
-Dokumente“ und darf nie wie ein leeres Archiv aussehen.
+Postfach. [Postfach verbinden]“. „Keine Treffer für „Rechnung“. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
+Dokumente“ und darf nie wie ein leeres Archiv aussehen. Umgesetzt für Archiv und Eingang (`DocumentList.tsx`); die
+übrigen Leerzustände („Noch keine Tags“, „Noch keine Postfächer“ …) haben noch keinen Knopf.
 
 ### Einmalwert
 
-Für Token, Webhook-Geheimnis und Einladungslink, die nur einmal erscheinen: Wert in `font-mono`, umbrechend,
-auswählbar; Knopf „Kopieren“ mit Rückmeldung „Kopiert“ in einer eigenen Live-Region (`role="status"`, nicht um den
-Wert selbst: sonst liest ein Screenreader das Geheimnis vor); darunter in normaler Größe „Wird nur jetzt angezeigt.“
+Für Token, Webhook-Geheimnis, Einladungslink und Freigabelink, die nur einmal erscheinen: `Einmalwert.tsx`. Der Wert steht in
+`font-mono` mit `overflow-wrap: anywhere` und ist mit einem Klick ganz auswählbar (`select-all`). Darunter steht der Knopf
+„Kopieren“ (40 px, auf `pointer-coarse` 44 px, Schrift 16 px auf dem Handy, sichtbarer Fokusring in `--fg`). Die Rückmeldung
+„Kopiert.“ steht in einer eigenen Live-Region (`role="status"`, nicht um den Wert selbst: sonst liest ein Screenreader das
+Geheimnis vor). Fehlt die Zwischenablage oder wird sie abgelehnt, sagt dieselbe Region „Kopieren nicht möglich, bitte den Wert
+markieren.“ Darunter in normaler Größe: „Wird nur jetzt angezeigt.“ Der Wert ist per Tastatur erreichbar (`tabindex="0"`, Fokusring), und der Fokus markiert ihn ganz. Die Rückmeldung hat festen Platz (den der längsten Meldung, unsichtbar in derselben Zelle), damit beim Klick nichts springt. Der Wert steht in keinem Attribut, keiner URL und keinem Log.
+Nicht darunter: Backup-Codes (eigene Liste mit Download) und der TOTP-Schlüssel (steht bis zur Bestätigung im Dialog).
 
 ### „Was ist das?“
 
 Ein kleiner Knopf neben dem Fachbegriff (ASN, Siegel, Hash-Kette, Sperre, Art) klappt darunter einen Satz in einfacher
-Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Das Glossar gibt es noch nicht; es wird als Seite in `docs/` angelegt (Vorschlag).
+Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Umgesetzt in `src/components/WasIstDas.tsx` (`Explain`) für ASN, Siegel, Hash-Kette, Sperre und Art, je an einer Stelle:
+Dokumentseite, Startseite, Fristen, Einordnung. Der Knopf hat 40 px (44 px bei Touch), der Satz steht in 16 px am Handy und
+darf die Zeilen darunter schieben. In Zweispaltenlisten steht der Knopf in der Wertzelle, damit die Begriffsspalte nicht breiter wird; der Kreis um das „?“ nutzt `--muted` (mindestens 3:1). Das Glossar ist `docs/glossar.md`; der Link zeigt wie die anderen Doku-Links auf die
+veröffentlichte Seite, mit einem Anker je Begriff.
 Kein Hover, kein Popover: Beides erreicht weder Tastatur noch Touch zuverlässig.
 
 ## Bewegung und Reize
