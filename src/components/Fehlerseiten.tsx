@@ -29,8 +29,9 @@ export function SeitenFehler({ error, reset }: ErrorComponentProps) {
 
 /** Die Sitzungsabfrage der Shell scheiterte, aber nicht mit 401 (Netz, 5xx) */
 export function ServerAntwortetNicht({ error, erneut }: { error: Error; erneut: () => void }) {
-  // 403 (etwa „Sichtbereich ungültig“): der Server antwortet, sein Hinweis ist der Satz; sonst Netz oder 5xx
-  const verweigert = error instanceof ApiFehler && error.status >= 400 && error.status < 500;
+  // Nur ein 403 mit Hinweis (etwa „Sichtbereich ungültig“) kommt vom Server selbst; 404, 429 oder leere Antworten
+  // stammen oft von einem Proxy und bleiben „antwortet nicht“
+  const verweigert = error instanceof ApiFehler && error.status === 403 && error.message.trim() !== "";
   return (
     <main className="p-8">
       <Meldung

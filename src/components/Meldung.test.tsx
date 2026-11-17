@@ -58,6 +58,14 @@ describe("Fehlerseiten", () => {
     expect(verweigert).toContain("Sichtbereich ungültig");
     expect(verweigert).not.toContain("antwortet gerade nicht");
     expect(verweigert).not.toContain("<details");
+    for (const [status, text] of [
+      [404, "404 page not found"],
+      [403, ""],
+    ] as const) {
+      const html = fehler(status, text);
+      expect(html).toContain("antwortet gerade nicht");
+      expect(html).not.toContain("kann gerade nichts anzeigen");
+    }
     const ausfall = fehler(500, "kaputt");
     expect(ausfall).toContain("antwortet gerade nicht");
     expect(ausfall).toMatch(/<details/);
