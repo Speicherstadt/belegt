@@ -37,7 +37,7 @@ Die Art legt beim Einordnen fest, wie lange ein Dokument bleiben muss:
 
 - **Pflicht**: gesetzliche Frist nach § 147 AO, je nach Art 6, 8 oder 10 Jahre.
 - **Freiwillig**: bis zu einem Tag, den du selbst wählst.
-- **Frei**: keine Frist; löschbar, solange keine [Sperre](#sperre) das Einordnungsdatum umfasst.
+- **Frei**: keine Frist; löschbar, solange keine [Sperre](#sperre) den Tag umfasst, an dem es entstanden ist.
 
 Die Fristen stehen unter [Fristen und Löschen](fristen.md).
 
