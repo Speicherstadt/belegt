@@ -38,6 +38,7 @@ nav:
       - Programme, Webhooks, MCP: schnittstelle.md
       - REST-API: api.md
   - Hintergrund:
+      - Glossar: glossar.md
       - Unterlagen für ein Testat: testat.md
       - Entwicklung: entwicklung.md
       - Plan: plan.md

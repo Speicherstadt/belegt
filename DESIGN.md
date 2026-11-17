@@ -174,7 +174,10 @@ Wert selbst: sonst liest ein Screenreader das Geheimnis vor); darunter in normal
 ### „Was ist das?“
 
 Ein kleiner Knopf neben dem Fachbegriff (ASN, Siegel, Hash-Kette, Sperre, Art) klappt darunter einen Satz in einfacher
-Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Das Glossar gibt es noch nicht; es wird als Seite in `docs/` angelegt (Vorschlag).
+Sprache auf (`<details>` oder `aria-expanded`), mit Link „Mehr im Glossar“. Umgesetzt in `src/components/WasIstDas.tsx` (`Explain`) für ASN, Siegel, Hash-Kette, Sperre und Art, je an einer Stelle:
+Dokumentseite, Startseite, Fristen, Einordnung. Der Knopf hat 40 px (44 px bei Touch), der Satz steht in 16 px am Handy und
+darf die Zeilen darunter schieben. In Zweispaltenlisten steht der Knopf in der Wertzelle, damit die Begriffsspalte nicht breiter wird; der Kreis um das „?“ nutzt `--muted` (mindestens 3:1). Das Glossar ist `docs/glossar.md`; der Link zeigt wie die anderen Doku-Links auf die
+veröffentlichte Seite, mit einem Anker je Begriff.
 Kein Hover, kein Popover: Beides erreicht weder Tastatur noch Touch zuverlässig.
 
 ## Bewegung und Reize

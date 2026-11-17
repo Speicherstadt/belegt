@@ -14,6 +14,7 @@ import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
+import { Explain } from "../components/WasIstDas.tsx";
 import { ansichtUrl, api, archivfassungUrl, dateiUrl, type Ereignis } from "../lib/api.ts";
 import { groesse, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -163,10 +164,20 @@ export function DocumentPage() {
               {m.doc_details()}
             </h2>
             <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
-              <dt className="text-muted">{m.doc_asn()}</dt>
-              <dd className="m-0 tabular-nums" data-testid="asn">
-                {d.asn}
-              </dd>
+              <Explain term="asn" row>
+                {(knopf, satz) => (
+                  <>
+                    <dt className="text-muted">{m.doc_asn()}</dt>
+                    <dd className="m-0 flex items-center">
+                      <span className="tabular-nums" data-testid="asn">
+                        {d.asn}
+                      </span>
+                      {knopf}
+                    </dd>
+                    {satz}
+                  </>
+                )}
+              </Explain>
               <dt className="text-muted">{m.doc_source()}</dt>
               <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
               <dt className="text-muted">{m.doc_received()}</dt>
@@ -211,8 +222,18 @@ export function DocumentPage() {
             <dl className="m-0 flex flex-col gap-2 text-sm">
               <dt className="text-muted">{m.doc_hash()}</dt>
               <dd className="m-0 break-all font-mono text-xs">{d.sha256}</dd>
-              <dt className="text-muted">{m.doc_seal()}</dt>
-              <dd className="m-0 break-all font-mono text-xs">{verlauf.data?.siegel ?? "–"}</dd>
+              <Explain term="seal" row>
+                {(knopf, satz) => (
+                  <>
+                    <dt className="flex items-center text-muted">
+                      {m.doc_seal()}
+                      {knopf}
+                    </dt>
+                    <dd className="m-0 break-all font-mono text-xs">{verlauf.data?.siegel ?? "–"}</dd>
+                    {satz}
+                  </>
+                )}
+              </Explain>
             </dl>
           </section>
         </div>
