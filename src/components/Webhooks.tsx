@@ -3,6 +3,7 @@ import { type FormEvent, useId, useState } from "react";
 import { api, EREIGNISSE, type Ereignisart } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Einmalwert } from "./Einmalwert.tsx";
 
 const ART: Record<Ereignisart, () => string> = {
   "dokument.aufgenommen": () => m.event_dokument_aufgenommen(),
@@ -76,12 +77,7 @@ export function Webhooks() {
           {m.webhooks_create()}
         </button>
       </form>
-      {geheimnis && (
-        <p role="status" className="m-0 flex flex-col gap-1 rounded-md border border-border bg-subtle p-3 text-sm">
-          {m.webhooks_secret()}
-          <code className="break-all">{geheimnis}</code>
-        </p>
-      )}
+      {geheimnis && <Einmalwert label={m.webhooks_secret()} wert={geheimnis} />}
       {anlegen.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {anlegen.error.message}

@@ -7,7 +7,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
   await bereich.getByLabel("Name").fill(name);
   await bereich.getByLabel("Recht").selectOption("schreiben");
   await bereich.getByRole("button", { name: "Token anlegen" }).click();
-  const token = (await bereich.getByRole("status").locator("code").textContent())!;
+  const token = (await bereich.getByTestId("einmalwert").locator("code").textContent())!;
   expect(token).toMatch(/^belegt_/);
   await expect(bereich.getByText(/\/api\/mcp$/)).toBeVisible();
 
@@ -43,7 +43,7 @@ test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abs
   await bereich.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/belegt");
   await bereich.getByLabel("eingeordnet").check();
   await bereich.getByRole("button", { name: "Webhook anlegen" }).click();
-  await expect(bereich.getByRole("status").locator("code")).toHaveText(/^whsec_/);
+  await expect(bereich.getByTestId("einmalwert").locator("code")).toHaveText(/^whsec_/);
 
   const eintrag = bereich.getByRole("listitem").filter({ hasText: name });
   await expect(eintrag).toContainText("aufgenommen, eingeordnet");

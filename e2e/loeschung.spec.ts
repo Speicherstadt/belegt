@@ -26,7 +26,7 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   await page.goto("/zugaenge");
   await page.getByLabel("Rolle").selectOption("steuerberatung");
   await page.getByRole("button", { name: "Einladen" }).click();
-  const link = await page.getByRole("status").locator("code").textContent();
+  const link = await page.getByTestId("einmalwert").locator("code").textContent();
 
   const fremd = await browser.newContext({ storageState: { cookies: [], origins: [] }, locale: "de-DE" });
   const kanzlei = await fremd.newPage();

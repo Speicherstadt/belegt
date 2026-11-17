@@ -294,7 +294,7 @@
   "tokens_read": "Lesen",
   "tokens_write": "Lesen, aufnehmen und einordnen",
   "tokens_create": "Token anlegen",
-  "tokens_once": "Das Token erscheint nur jetzt. Kopiere es in das Programm:",
+  "tokens_once": "Neues Token. Kopiere es in das Programm:",
   "tokens_revoke": "Widerrufen",
   "tokens_revoked": "widerrufen {datum}",
   "tokens_created": "angelegt {datum}",
@@ -307,7 +307,7 @@
   "event_dokument_eingeordnet": "eingeordnet",
   "event_dokument_geloescht": "gelöscht",
   "webhooks_create": "Webhook anlegen",
-  "webhooks_secret": "Das Geheimnis zum Prüfen der Signatur erscheint nur jetzt:",
+  "webhooks_secret": "Geheimnis zum Prüfen der Signatur:",
   "webhooks_error": "Letzter Fehler: {fehler}",
   "webhooks_last": "zuletzt zugestellt {datum}",
   "webhooks_on": "Aktivieren",
@@ -575,7 +575,6 @@
   "share_link_new": "Neuer Link",
   "share_link_copy": "Kopieren",
   "share_link_copied": "Kopiert.",
-  "share_link_once": "Der Link erscheint nur jetzt; gespeichert ist er nicht.",
   "share_link_active": "Gültige Links",
   "share_link_until": "Gültig bis {datum}",
   "share_link_fetched": "{anzahl}-mal abgerufen, zuletzt {zeit}",
@@ -1150,5 +1149,7 @@
     }
   ],
   "start_chain_stale": "Seit zwei Tagen keine Prüfung: Läuft der Worker?",
-  "start_chain_now": "Jetzt prüfen"
+  "start_chain_now": "Jetzt prüfen",
+  "einmalwert_once": "Wird nur jetzt angezeigt.",
+  "einmalwert_copy_failed": "Kopieren nicht möglich, bitte den Wert markieren."
 }

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useState } from "react";
+import type { FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Einmalwert } from "./Einmalwert.tsx";
 
 const TAGE = [1, 7, 30] as const;
 const DAUER: Record<(typeof TAGE)[number], () => string> = {
@@ -27,21 +28,10 @@ export function ShareLinks({ dokumentId }: { dokumentId: string }) {
     mutationFn: (link: string) => api.linkWiderrufen(dokumentId, link),
     onSuccess: neu,
   });
-  const [kopiert, setKopiert] = useState(false);
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setKopiert(false);
     anlegen.mutate(Number(new FormData(e.currentTarget).get("tage")) as 1 | 7 | 30);
-  }
-
-  async function kopieren(url: string) {
-    try {
-      await navigator.clipboard.writeText(url);
-      setKopiert(true);
-    } catch {
-      // Ohne Erlaubnis für die Zwischenablage bleibt das Feld zum Markieren
-    }
   }
 
   const fehler = anlegen.error ?? widerrufen.error;
@@ -69,31 +59,7 @@ export function ShareLinks({ dokumentId }: { dokumentId: string }) {
           {m.share_link_create()}
         </button>
       </form>
-      {anlegen.data && (
-        <div className="flex flex-col gap-1.5 rounded-md bg-subtle p-3 text-sm">
-          <label className="flex flex-col gap-1.5 font-medium">
-            {m.share_link_new()}
-            <input
-              readOnly
-              value={anlegen.data.url}
-              onFocus={(e) => e.currentTarget.select()}
-              className="h-9 rounded-md border border-border bg-bg px-3 font-mono font-normal text-xs"
-            />
-          </label>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => void kopieren(anlegen.data.url)}
-              className="h-8 rounded-md border border-border bg-bg px-3 font-medium hover:bg-subtle"
-            >
-              {m.share_link_copy()}
-            </button>
-            <span role="status" className="text-muted">
-              {kopiert ? m.share_link_copied() : m.share_link_once()}
-            </span>
-          </div>
-        </div>
-      )}
+      {anlegen.data && <Einmalwert label={m.share_link_new()} wert={anlegen.data.url} />}
       {liste.data && liste.data.length > 0 && (
         <ul aria-label={m.share_link_active()} className="m-0 flex list-none flex-col gap-2 p-0">
           {liste.data.map((l) => (

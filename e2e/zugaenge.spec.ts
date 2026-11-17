@@ -6,7 +6,7 @@ test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoc
   await expect(page.getByRole("heading", { level: 1, name: "Zugänge" })).toBeVisible();
   await page.getByLabel("Rolle").selectOption("steuerberatung");
   await page.getByRole("button", { name: "Einladen" }).click();
-  const link = await page.getByRole("status").locator("code").textContent();
+  const link = await page.getByTestId("einmalwert").locator("code").textContent();
   expect(link).toMatch(/\/einladung\/[A-Za-z0-9_-]{40,}$/);
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(axe.violations).toEqual([]);
@@ -50,7 +50,7 @@ test("ein Prüfer sieht nur Archiv und Prüfung und nur Dokumente seines Zeitrau
   await page.getByLabel("Von").fill("2001-01-01");
   await page.getByLabel("Bis").fill("2001-12-31");
   await page.getByRole("button", { name: "Einladen" }).click();
-  const link = await page.getByRole("status").locator("code").textContent();
+  const link = await page.getByTestId("einmalwert").locator("code").textContent();
 
   const fremd = await browser.newContext({ storageState: { cookies: [], origins: [] }, locale: "de-DE" });
   const pruefer = await fremd.newPage();
@@ -116,7 +116,7 @@ test("ein Mitarbeiter sieht nur die Dokumente seines Sichtbereichs und bearbeite
   }
   await page.emulateMedia({ colorScheme: "light" });
   await page.getByRole("button", { name: "Einladen" }).click();
-  const link = await page.getByRole("status").locator("code").textContent();
+  const link = await page.getByTestId("einmalwert").locator("code").textContent();
 
   const fremd = await browser.newContext({ storageState: { cookies: [], origins: [] }, locale: "de-DE" });
   const kollege = await fremd.newPage();

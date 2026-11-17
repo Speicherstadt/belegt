@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { AccessUsers } from "../components/AccessUsers.tsx";
+import { Einmalwert } from "../components/Einmalwert.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import {
   LEERER_SICHTBEREICH,
@@ -121,12 +122,7 @@ export function AccessPage() {
             {m.access_invite()}
           </button>
         </div>
-        {link && (
-          <p role="status" className="m-0 flex flex-col gap-1 rounded-md border border-border bg-subtle p-3 text-sm">
-            {m.access_link()}
-            <code className="break-all">{link}</code>
-          </p>
-        )}
+        {link && <Einmalwert label={m.access_link()} wert={link} />}
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {daten.data?.einladungen.map((e) => (
             <li

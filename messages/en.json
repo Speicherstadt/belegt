@@ -294,7 +294,7 @@
   "tokens_read": "Read",
   "tokens_write": "Read, add and classify",
   "tokens_create": "Create token",
-  "tokens_once": "The token is only shown now. Copy it into the program:",
+  "tokens_once": "New token. Copy it into the program:",
   "tokens_revoke": "Revoke",
   "tokens_revoked": "revoked {datum}",
   "tokens_created": "created {datum}",
@@ -307,7 +307,7 @@
   "event_dokument_eingeordnet": "classified",
   "event_dokument_geloescht": "deleted",
   "webhooks_create": "Create webhook",
-  "webhooks_secret": "The secret for checking the signature is only shown now:",
+  "webhooks_secret": "Secret for checking the signature:",
   "webhooks_error": "Last error: {fehler}",
   "webhooks_last": "last delivered {datum}",
   "webhooks_on": "Activate",
@@ -611,7 +611,6 @@
   "share_link_new": "New link",
   "share_link_copy": "Copy",
   "share_link_copied": "Copied.",
-  "share_link_once": "The link is shown only now; it is not stored.",
   "share_link_active": "Valid links",
   "share_link_until": "Valid until {datum}",
   "share_link_fetched": [
@@ -1228,5 +1227,7 @@
     }
   ],
   "start_chain_stale": "No check for two days: is the worker running?",
-  "start_chain_now": "Check now"
+  "start_chain_now": "Check now",
+  "einmalwert_once": "Only shown now.",
+  "einmalwert_copy_failed": "Copying is not possible, please select the value."
 }

@@ -3,6 +3,7 @@ import { type FormEvent, useId, useState } from "react";
 import { type ApiToken, api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Einmalwert } from "./Einmalwert.tsx";
 
 /** API-Tokens für Programme: anlegen (Klartext einmal), Liste, widerrufen; nur für den Inhaber */
 export function ApiTokens() {
@@ -52,12 +53,7 @@ export function ApiTokens() {
           {m.tokens_create()}
         </button>
       </form>
-      {klartext && (
-        <p role="status" className="m-0 flex flex-col gap-1 rounded-md border border-border bg-subtle p-3 text-sm">
-          {m.tokens_once()}
-          <code className="break-all">{klartext}</code>
-        </p>
-      )}
+      {klartext && <Einmalwert label={m.tokens_once()} wert={klartext} />}
       {anlegen.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {anlegen.error.message}
