@@ -101,7 +101,8 @@ Eine globale Regel in `styles.css`:
   Abstand (`outline-offset: 0`) und der Rand färbt sich in `--fg`, so entsteht kein Doppelrahmen. Die globale Regel
   in `styles.css` tut genau das; die Randfarbe steht dort ungeschichtet, sonst verlöre sie gegen `border-border`.
 - Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
-  am umgebenden Label.
+  am umgebenden Label. Dazu `outline-hidden` statt `outline-none` am Feld: Bei erzwungenen Farben (Kontrastmodus) zeigt
+  ein Farbwechsel des Rands nichts, der Ring dann schon.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).
 
 ## Knöpfe
@@ -177,7 +178,7 @@ Für Token, Webhook-Geheimnis, Einladungslink und Freigabelink, die nur einmal e
 „Kopieren“ (40 px, auf `pointer-coarse` 44 px, Schrift 16 px auf dem Handy, sichtbarer Fokusring in `--fg`). Die Rückmeldung
 „Kopiert.“ steht in einer eigenen Live-Region (`role="status"`, nicht um den Wert selbst: sonst liest ein Screenreader das
 Geheimnis vor). Fehlt die Zwischenablage oder wird sie abgelehnt, sagt dieselbe Region „Kopieren nicht möglich, bitte den Wert
-markieren.“ Darunter in normaler Größe: „Wird nur jetzt angezeigt.“ Der Wert ist per Tastatur erreichbar (`tabindex="0"`, Fokusring), und der Fokus markiert ihn ganz. Die Rückmeldung hat festen Platz (zwei Zeilen am Handy), damit beim Klick nichts springt. Der Wert steht in keinem Attribut, keiner URL und keinem Log.
+markieren.“ Darunter in normaler Größe: „Wird nur jetzt angezeigt.“ Der Wert ist per Tastatur erreichbar (`tabindex="0"`, Fokusring), und der Fokus markiert ihn ganz. Die Rückmeldung hat festen Platz (den der längsten Meldung, unsichtbar in derselben Zelle), damit beim Klick nichts springt. Der Wert steht in keinem Attribut, keiner URL und keinem Log.
 Nicht darunter: Backup-Codes (eigene Liste mit Download) und der TOTP-Schlüssel (steht bis zur Bestätigung im Dialog).
 
 ### „Was ist das?“

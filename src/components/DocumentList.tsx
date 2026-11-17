@@ -173,7 +173,7 @@ export function DocumentList({
               value={suche}
               onChange={(e) => setAnsicht({ ...ansicht, suche: e.target.value })}
               placeholder={m.archive_search()}
-              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted"
+              className="min-w-0 flex-1 bg-transparent outline-hidden placeholder:text-muted"
             />
           </label>
         )}
