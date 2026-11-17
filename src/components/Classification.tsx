@@ -86,11 +86,11 @@ export function Classification({
           <Explain term="kind" row>
             {(knopf, satz) => (
               <>
-                <dt className="flex items-center text-muted">
-                  {m.classify_kind()}
+                <dt className="text-muted">{m.classify_kind()}</dt>
+                <dd className="m-0 flex items-center font-medium">
+                  {artLabel(einordnung.art)}
                   {knopf}
-                </dt>
-                <dd className="m-0 font-medium">{artLabel(einordnung.art)}</dd>
+                </dd>
                 {satz}
               </>
             )}

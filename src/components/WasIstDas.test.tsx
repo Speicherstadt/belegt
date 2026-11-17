@@ -1,6 +1,7 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { Explain, GLOSSARY } from "./WasIstDas.tsx";
+import { Explain, GLOSSARY, TERMS } from "./WasIstDas.tsx";
 
 const html = renderToStaticMarkup(
   <Explain term="asn">
@@ -35,6 +36,15 @@ describe("Explain", () => {
 
   it("setzt den Satz auf dem Handy auf 16 px", () => {
     expect(html).toMatch(/<div [^>]*class="[^"]*\btext-base\b[^"]*\bsm:text-sm\b/);
+  });
+
+  it("öffnet das Glossar in einem neuen Tab ohne Referrer", () => {
+    expect(html).toMatch(/<a [^>]*href="[^"]*#asn"[^>]*target="_blank"[^>]*rel="noreferrer"/);
+  });
+
+  it("hat im Glossar zu jedem Anker einen Eintrag", () => {
+    const glossar = readFileSync("docs/glossar.md", "utf8");
+    for (const { anchor } of Object.values(TERMS)) expect(glossar).toContain(`{ #${anchor} }`);
   });
 
   it("kennt zu jedem Begriff einen eigenen Anker im Glossar", () => {

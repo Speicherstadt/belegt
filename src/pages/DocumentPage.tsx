@@ -162,12 +162,12 @@ export function DocumentPage() {
               <Explain term="asn" row>
                 {(knopf, satz) => (
                   <>
-                    <dt className="flex items-center text-muted">
-                      {m.doc_asn()}
+                    <dt className="text-muted">{m.doc_asn()}</dt>
+                    <dd className="m-0 flex items-center">
+                      <span className="tabular-nums" data-testid="asn">
+                        {d.asn}
+                      </span>
                       {knopf}
-                    </dt>
-                    <dd className="m-0 tabular-nums" data-testid="asn">
-                      {d.asn}
                     </dd>
                     {satz}
                   </>

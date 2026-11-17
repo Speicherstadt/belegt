@@ -1160,7 +1160,7 @@
   "explain_term_kind": "Art",
   "explain_asn": "Die Archivnummer ist eine fortlaufende Nummer, die jedes Dokument beim Eingang bekommt. Sie ändert sich nie.",
   "explain_seal": "Das Siegel ist ein Fingerabdruck der Angaben zum Dokument. Ändert sich etwas, passt er nicht mehr.",
-  "explain_chain": "Jeder Eintrag im Verlauf enthält den Fingerabdruck des Eintrags davor. Wer einen ändert, bricht die Kette, und die Prüfung zeigt es.",
+  "explain_chain": "Jeder Eintrag im Protokoll enthält den Fingerabdruck des Eintrags davor. Wer einen ändert, bricht die Kette, und die Prüfung zeigt es.",
   "explain_hold": "Eine Sperre hält die Dokumente eines Zeitraums fest, auch wenn ihre Frist abgelaufen ist, etwa für eine Betriebsprüfung.",
-  "explain_kind": "Die Art sagt, wie lange ein Dokument bleiben muss: Pflicht (gesetzliche Frist), freiwillig (bis zu einem Tag, den du wählst) oder frei (jederzeit löschbar)."
+  "explain_kind": "Die Art sagt, wie lange ein Dokument bleiben muss: Pflicht (gesetzliche Frist), freiwillig (bis zu einem Tag, den du wählst) oder frei (keine Frist; löschbar, solange keine Sperre das Einordnungsdatum umfasst)."
 }

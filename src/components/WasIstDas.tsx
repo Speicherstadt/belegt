@@ -5,7 +5,7 @@ import { m } from "../paraglide/messages.js";
 export const GLOSSARY = "https://firsttris.github.io/belegt/glossar.html";
 
 /** Fachbegriffe mit Name, Satz in einfacher Sprache und Anker im Glossar */
-const TERMS = {
+export const TERMS = {
   asn: { name: m.explain_term_asn, text: m.explain_asn, anchor: "asn" },
   seal: { name: m.explain_term_seal, text: m.explain_seal, anchor: "siegel" },
   chain: { name: m.explain_term_chain, text: m.explain_chain, anchor: "hash-kette" },
@@ -14,6 +14,7 @@ const TERMS = {
 };
 
 /**
+ * Der Kreis um das „?“ nutzt `--muted` (hell 5,4:1, dunkel 7,7:1 gegen den Grund; `--border` hätte nur 1,3:1, WCAG 1.4.11).
  * „Was ist das?“ (DESIGN.md): Knopf neben dem Fachbegriff, der darunter einen Satz aufklappt. Kein Hover, kein Popover.
  * Knopf und Satz kommen getrennt, weil sie an verschiedenen Stellen der Zeile stehen (Begriff links, Satz über die Breite).
  */
@@ -37,11 +38,11 @@ export function Explain({
       aria-controls={id}
       aria-label={m.explain_label({ begriff: t.name() })}
       onClick={() => setOpen(!open)}
-      className="-my-2.5 -mr-2 -ml-1 inline-flex size-10 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-fg focus-visible:outline-offset-2"
+      className="-my-2.5 -ml-1 inline-flex size-10 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-md text-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-fg focus-visible:outline-offset-2"
     >
       <span
         aria-hidden="true"
-        className="inline-flex size-5 items-center justify-center rounded-full border border-border text-xs"
+        className="inline-flex size-5 items-center justify-center rounded-full border border-muted text-xs"
       >
         ?
       </span>
@@ -50,7 +51,12 @@ export function Explain({
   const inhalt = (
     <>
       {t.text()}{" "}
-      <a href={`${GLOSSARY}#${t.anchor}`} className="whitespace-nowrap underline underline-offset-2">
+      <a
+        href={`${GLOSSARY}#${t.anchor}`}
+        target="_blank"
+        rel="noreferrer"
+        className="whitespace-nowrap underline underline-offset-2"
+      >
         {m.explain_glossary()}
       </a>
     </>
