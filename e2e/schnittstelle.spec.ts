@@ -7,7 +7,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
   await bereich.getByLabel("Name").fill(name);
   await bereich.getByLabel("Recht").selectOption("schreiben");
   await bereich.getByRole("button", { name: "Token anlegen" }).click();
-  const token = (await bereich.getByRole("status").locator("code").textContent())!;
+  const token = (await bereich.getByTestId("einmalwert").locator("code").textContent())!;
   expect(token).toMatch(/^belegt_/);
   await expect(bereich.getByText(/\/api\/mcp$/)).toBeVisible();
 
@@ -43,11 +43,22 @@ test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abs
   await bereich.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/belegt");
   await bereich.getByLabel("eingeordnet").check();
   await bereich.getByRole("button", { name: "Webhook anlegen" }).click();
-  await expect(bereich.getByRole("status").locator("code")).toHaveText(/^whsec_/);
+  await expect(bereich.getByTestId("einmalwert").locator("code")).toHaveText(/^whsec_/);
 
   const eintrag = bereich.getByRole("listitem").filter({ hasText: name });
   await expect(eintrag).toContainText("aufgenommen, eingeordnet");
   await eintrag.getByRole("button", { name: "Deaktivieren" }).click();
   await expect(eintrag).toContainText("deaktiviert");
   await expect(eintrag.getByRole("button", { name: "Aktivieren" })).toBeVisible();
+});
+
+test("ein widerrufenes neues Token verschwindet von der Seite", async ({ page }, info) => {
+  const name = `Widerruf ${info.project.name}`;
+  await page.goto("/quellen");
+  const bereich = page.getByRole("region", { name: "API-Tokens" });
+  await bereich.getByLabel("Name").fill(name);
+  await bereich.getByRole("button", { name: "Token anlegen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toBeVisible();
+  await bereich.getByRole("listitem").filter({ hasText: name }).getByRole("button", { name: "Widerrufen" }).click();
+  await expect(bereich.getByTestId("einmalwert")).toHaveCount(0);
 });

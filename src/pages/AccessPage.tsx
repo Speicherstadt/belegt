@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { AccessUsers } from "../components/AccessUsers.tsx";
+import { Einmalwert } from "../components/Einmalwert.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
 import {
   LEERER_SICHTBEREICH,
@@ -30,7 +31,7 @@ export function AccessPage() {
   const jahr = String(new Date().getFullYear() - 1);
   const [von, setVon] = useState(`${jahr}-01-01`);
   const [bis, setBis] = useState(`${jahr}-12-31`);
-  const [link, setLink] = useState<string | null>(null);
+  const [link, setLink] = useState<{ id: string; url: string } | null>(null);
   const zeitraumOk = rolle !== "pruefer" || (!!von && !!bis && von <= bis);
   const einladen = useMutation({
     mutationFn: () =>
@@ -42,13 +43,17 @@ export function AccessPage() {
             : { rolle },
       ),
     onSuccess: async (e) => {
-      setLink(`${window.location.origin}${e.pfad}`);
+      setLink({ id: e.id, url: `${window.location.origin}${e.pfad}` });
       await queryClient.invalidateQueries({ queryKey: ["zugaenge"] });
     },
   });
   const zurueckziehen = useMutation({
     mutationFn: api.zurueckziehen,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["zugaenge"] }),
+    onSuccess: (_, id) => {
+      // Eine zurückgezogene Einladung soll nicht weiter auf der Seite stehen
+      if (link?.id === id) setLink(null);
+      return queryClient.invalidateQueries({ queryKey: ["zugaenge"] });
+    },
   });
 
   function zustand(e: NonNullable<typeof daten.data>["einladungen"][number]): string {
@@ -121,12 +126,7 @@ export function AccessPage() {
             {m.access_invite()}
           </button>
         </div>
-        {link && (
-          <p role="status" className="m-0 flex flex-col gap-1 rounded-md border border-border bg-subtle p-3 text-sm">
-            {m.access_link()}
-            <code className="break-all">{link}</code>
-          </p>
-        )}
+        {link && <Einmalwert label={m.access_link()} wert={link.url} />}
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {daten.data?.einladungen.map((e) => (
             <li

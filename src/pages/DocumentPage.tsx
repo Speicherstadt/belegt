@@ -153,7 +153,7 @@ export function DocumentPage() {
             vormalsAnders={d.vormalsAnders}
             loeschung={d.loeschung}
           />
-          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
+          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks key={d.id} dokumentId={d.id} />}
           {d.einordnung && einordnen}
           {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
           {!geloescht && <Similar dokumentId={d.id} />}
