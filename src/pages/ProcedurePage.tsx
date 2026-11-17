@@ -63,7 +63,7 @@ export function ProcedurePage() {
       )}
       {werte.data && ich.data && <ProcedureSettings werte={werte.data} darfAendern={ich.data.role === "inhaber"} />}
       {doku.data && (
-        <article lang="de" className="flex max-w-3xl flex-col gap-5 text-sm leading-relaxed">
+        <article lang="de" className="flex max-w-3xl flex-col gap-5 text-sm leading-relaxed [overflow-wrap:anywhere]">
           <p className="m-0 text-muted">
             {m.procedure_stand({
               datum: tag(doku.data.stand.datum),

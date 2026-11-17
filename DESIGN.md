@@ -5,8 +5,8 @@ Regeln für alles, was man in Belegt sieht und bedient. Vor jeder Arbeit an der 
 Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/styles.css`, eine Kopie hier würde
 auseinanderlaufen.
 
-**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Der Leerzustand (Archiv, Eingang, „Keine Treffer“) und die Reihenfolge der Dokumentseite (Einordnung zuerst, solange offen) stehen im Code. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
-`--control-h`, die Fokusregel, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
+**Stand:** Farben, `--bg` bis `--onprimary`, der Dunkelmodus, die Fokusregel und der Umbruch langer Prüfwerte gibt es heute. Der Leerzustand (Archiv, Eingang, „Keine Treffer“) und die Reihenfolge der Dokumentseite (Einordnung zuerst, solange offen) stehen im Code. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
+`--control-h`, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
 
@@ -81,24 +81,27 @@ Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 u
 | 24 px | Seitentitel (`h1`, genau einer je Seite) |
 
 - Fließtext hat höchstens etwa 70 Zeichen Zeilenlänge: `max-w-prose` als Empfehlung.
-- Prüfwerte, Hashes und Token stehen in `font-mono` mit `overflow-wrap: anywhere` (`break-all` genügt nicht für
-  Wörter in Sätzen); Flex-Eltern bekommen `min-w-0`, sonst wächst die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px,
-  Dokumentseite 438 px bei 390 px Breite).
+- Prüfwerte, Hashes und Token stehen in `font-mono` mit `break-all` (`DocumentPage.tsx`, `AuditPage.tsx`). Fließtext und
+  Überschriften (Text der Verfahrensdokumentation, `PageHeader`) brechen mit `[overflow-wrap:anywhere]` um, damit
+  Wörter in Sätzen nicht mitten zerrissen werden, wo es nicht nötig ist. Flex-Eltern bekommen `min-w-0`, sonst wächst
+  die Seite seitwärts (Messung aus Issue #3, Playwright bei 390 px Breite: Verfahrensdoku 519 px, Dokumentseite 438 px).
+  `e2e/umbruch-fokus.spec.ts` prüft beides.
 - Kein Text in Versalien mit Sperrung; Beschriftungen in Satzschreibung.
 
 ## Fokus
 
-Vorschlag: eine globale Regel in `styles.css`.
+Eine globale Regel in `styles.css`:
 
 ```css
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 ```
 
 - **Knöpfe, Links, Checkboxen:** 2 px Ring in `--fg` mit 2 px Abstand, so entsteht er im Hell- wie im Dunkelmodus.
-- **Felder:** Der Ring liegt auf dem eigenen Rand, der sich in `--fg` färbt (`focus-visible:border-fg`,
-  Ring ohne Abstand): kein Doppelrahmen.
-- Nie `outline-none` ohne Ersatz. Heute fehlt der Ersatz im Suchfeld des Archivs (`DocumentList.tsx`): Der Rahmen
-  (`focus-within:border-fg` am umgebenden Label) muss mitkommen.
+- **Felder** (Text-Eingaben, Auswahllisten, Textfelder; nicht Checkbox, Radio, Datei, Schieber): Der Ring hat keinen
+  Abstand (`outline-offset: 0`) und der Rand färbt sich in `--fg`, so entsteht kein Doppelrahmen. Die globale Regel
+  in `styles.css` tut genau das; die Randfarbe steht dort ungeschichtet, sonst verlöre sie gegen `border-border`.
+- Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
+  am umgebenden Label.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).
 
 ## Knöpfe
