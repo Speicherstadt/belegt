@@ -1,6 +1,6 @@
 import type { Rolle } from "../../shared/rollen.ts";
 import { m } from "../paraglide/messages.js";
-import type { Zugaenge } from "./api-zugang.ts";
+import type { Ich, Zugaenge } from "./api-zugang.ts";
 
 export function rolleLabel(rolle: Rolle): string {
   return {
@@ -22,5 +22,16 @@ export function ausgeschlossenBei(tagId: string, z: Zugaenge, jetzt = new Date()
     z.einladungen.filter(
       (e) => !e.eingeloestAm && !e.zurueckgezogenAm && new Date(e.gueltigBis) > jetzt && schliesstAus(e.sichtbereich),
     ).length
+  );
+}
+
+/** Arbeitet der Inhaber allein? Kein weiteres Konto (nicht entzogen) mit Rolle Inhaber oder Steuerberatung, das bestätigen könnte */
+export function alleinInhaber(z: Zugaenge | undefined, ich: Ich | undefined): boolean {
+  return (
+    ich?.role === "inhaber" &&
+    !!z &&
+    !z.zugaenge.some(
+      (a) => !a.entzogenAm && a.email !== ich.email && (a.rolle === "inhaber" || a.rolle === "steuerberatung"),
+    )
   );
 }

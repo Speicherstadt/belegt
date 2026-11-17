@@ -10,6 +10,8 @@ auseinanderlaufen.
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
 
+**Stand Bestätigung:** `ConfirmDialog` gibt es heute (nicht mehr Vorschlag), eingesetzt bei „Jetzt löschen“ und „Löschung bestätigen“.
+
 ## Überblick
 
 Belegt soll verständlich, ruhig und nachvollziehbar sein, auch für Menschen mit Autismus, ADHS oder wenig IT-Erfahrung:
@@ -124,23 +126,25 @@ Die Bausteine sind Vorschläge, die in eigenen Pull Requests entstehen. Sie nutz
 
 ### Bestätigung
 
-Eine Komponente `ConfirmDialog` mit dem nativen `<dialog>` (`showModal()`), für Endgültiges, das heute mit einem Klick
-läuft (es gibt kein `window.confirm` im Code; wo es eine zweite Stufe gibt, etwa bei Tags und Zugängen, ersetzt ein roter Knopf („… wirklich löschen“) den ersten, ohne „Abbrechen“): „Löschung beantragen“ bei frei abgelegten Dokumenten, „Löschung bestätigen“, „Sperre aufheben“, Workflow
-löschen, Token widerrufen, Passkey entfernen.
+Die Komponente `ConfirmDialog` (`src/components/ConfirmDialog.tsx`) nutzt das native `<dialog>` (`showModal()`); Fokusfalle,
+Escape und die Rückkehr des Fokus zum auslösenden Knopf liefert der Browser. Sie fragt vor Endgültigem, das sonst mit
+einem Klick liefe. Heute im Einsatz: „Jetzt löschen“ bei Dokumenten, die immer frei abgelegt waren, und „Löschung bestätigen“ (Stufe 2,
+auf Dokumentseite und unter Fristen). **Noch ohne Rückfrage** (Vorschlag, je ein eigener Pull Request): „Sperre aufheben“,
+Workflow löschen, Token widerrufen, Passkey entfernen und die zweistufigen Inline-Bestätigungen bei Tags, Zugängen,
+Feldern, Dokumenttypen und Korrespondenten, wo ein roter Knopf den ersten ersetzt, ohne „Abbrechen“.
 
 - **Titel als Frage:** „Dokument jetzt löschen?“
-- **Folgesatz:** was passiert, was bleibt und ob es sich umkehren lässt: „Die Datei wird endgültig entfernt. Prüfwert
-  und Verlauf bleiben.“
+- **Folgesatz:** was passiert, was bleibt und ob es sich umkehren lässt: „Das Dokument wird endgültig gelöscht. Prüfwert
+  und Verlauf bleiben. Das lässt sich nicht rückgängig machen.“ (Stufe 2: „… lässt sich nicht wiederherstellen“). Der Satz sagt
+  nichts über die Datei selbst, denn ihr Prüfwert und Speicher folgen eigenen Regeln.
 - **Knöpfe:** „Abbrechen“ und das Verb („Jetzt löschen“). Der Fokus startet auf „Abbrechen“; Escape bricht ab; der
-  Fokus kehrt zum auslösenden Knopf zurück.
-- **Stufe 1:** alles Endgültige. **Stufe 2** für besonders Folgenschweres (Löschung eines Pflichtdokuments, Löschaktion
-  im Postfach): zusätzlich ein Pflicht-Häkchen mit Satz wie `mailbox_delete_confirm` in `MailboxAction.tsx`; der
-  Bestätigen-Knopf ist erst mit Häkchen bedienbar, und der Grund steht daneben.
+  Fokus kehrt zum auslösenden Knopf zurück. Läuft die Aktion, sind beide Knöpfe gesperrt und Escape bleibt wirkungslos.
+- **Stufe 1:** alles Endgültige. **Stufe 2** für besonders Folgenschweres (jede „Löschung bestätigen“ eines offenen Antrags, Löschaktion
+  im Postfach): zusätzlich ein Pflicht-Häkchen (Prop `haken`, Satz wie `mailbox_delete_confirm` in `MailboxAction.tsx`); der
+  Bestätigen-Knopf ist erst mit Häkchen bedienbar, und der Grund steht daneben. Heute: „Löschung bestätigen“.
 - **Umkehrbares fragt nicht,** es bietet „Rückgängig“ (Tag entfernen, Vorschlag übernehmen).
-- Wer bei Pflichtdokumenten allein arbeitet, sieht statt „Eine zweite Person bestätigt“ einen Satz mit Link zu
-  „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt. Das Vier-Augen-Prinzip bleibt bewusst so.
-
-Zuerst entsteht der Dialog bei „Jetzt löschen“ für frei abgelegte Dokumente.
+- Wer bei einem offenen Löschantrag allein arbeitet (kein weiteres Konto als Inhaber oder Steuerberatung), sieht zusätzlich zu
+  „Eine zweite Person bestätigt“ einen Satz mit Link zu „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt; stammt der Antrag von einem anderen Akteur, darf er selbst bestätigen und sieht den Satz nicht. Das Vier-Augen-Prinzip bleibt bewusst so.
 
 ### Meldung in drei Teilen
 
@@ -187,7 +191,7 @@ Schlüssel sind uneinheitlich und werden mit dem Glossar angeglichen:
 | Verb | Gilt für | heute auch |
 | --- | --- | --- |
 | Einordnen | Art, Tags, Frist festlegen | „Ordnung“ für die Verwaltung von Tags und Arten |
-| Löschen | Endgültiges (Datei weg) | „Löschung beantragen“ bei frei abgelegten Dokumenten |
+| Löschen | Endgültiges (Datei weg) | „Löschung beantragen“ bei allen außer nie anders eingeordneten frei abgelegten Dokumenten (die bekommen „Jetzt löschen“) |
 | Entfernen | Zuordnung lösen, Inhalt bleibt (Tag, Seite, Passkey) | „Entziehen“, „Zurückziehen“ |
 | Widerrufen | Zugriff beenden (Token, Teilen-Link, Einladung) | „Zurückziehen“, „Entziehen“ |
 | Aufheben | nur die Sperre | |

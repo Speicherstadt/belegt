@@ -165,6 +165,14 @@ const REIHENFOLGE: Record<Sortierung, ReturnType<typeof sql>> = {
   frist: sql`e.frist_bis asc nulls last, d.eingegangen_am desc, d.id desc`,
 };
 
+/** Ob das Dokument je anders als „frei“ eingeordnet war; dann entsteht beim Löschen ein Antrag (server/loeschung/loeschung.ts) */
+export async function vormalsAnders(db: Datenbank, id: string): Promise<boolean> {
+  const [z] = await db.execute<{ anders: boolean }>(
+    sql`select exists (select 1 from einordnungen where dokument_id = ${id}::uuid and art <> 'frei') as anders`,
+  );
+  return z?.anders ?? false;
+}
+
 /** Eine Seite der Liste, neueste zuerst; versatz überspringt so viele Einträge (Seiten in server/http/dokumente.ts) */
 export async function listen(
   db: Datenbank,

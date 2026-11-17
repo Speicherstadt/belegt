@@ -134,7 +134,12 @@ export function DocumentPage() {
           <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
           <EInvoice dokumentId={d.id} />
           {(ich.data?.role === "inhaber" || ich.data?.role === "steuerberatung") && <Forwardings dokumentId={d.id} />}
-          <Deletion dokumentId={d.id} einordnung={d.einordnung} loeschung={d.loeschung} />
+          <Deletion
+            dokumentId={d.id}
+            einordnung={d.einordnung}
+            vormalsAnders={d.vormalsAnders}
+            loeschung={d.loeschung}
+          />
           {!geloescht && ich.data?.role === "inhaber" && <ShareLinks dokumentId={d.id} />}
           {!geloescht && (
             <Classification

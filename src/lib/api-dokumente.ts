@@ -193,6 +193,8 @@ export const dokumenteApi = {
       Dokument &
         Ordnung & {
           einordnung: Einordnung | null;
+          /** Je anders als „frei“ eingeordnet: „Jetzt löschen“ gilt dann nicht, es braucht einen Antrag */
+          vormalsAnders: boolean;
           loeschung: Loeschung | null;
           ansicht: boolean;
           archivfassung: boolean;

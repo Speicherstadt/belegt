@@ -127,6 +127,23 @@ describe.skipIf(!testDatenbankUrl)("Dokumente gegen Postgres", () => {
     expect(treffer.map((d: { dateiname: string }) => d.dateiname)).toEqual(["Vertrag_100%.txt"]);
   });
 
+  it("meldet beim Dokument, ob es je anders als frei eingeordnet war", async () => {
+    const id = (await (await hochladen(einzeln("anders"), "Anders.pdf")).json()).id;
+    const einordnen = (art: string) =>
+      app.request(`/api/dokumente/${id}/einordnung`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ art, entstanden: "2026-03-01" }),
+      });
+    const anders = async () => (await (await app.request(`/api/dokumente/${id}`)).json()).vormalsAnders;
+    expect(await anders()).toBe(false);
+    expect((await einordnen("frei")).status).toBe(201);
+    expect(await anders()).toBe(false);
+    expect((await einordnen("beleg")).status).toBe(201);
+    expect((await einordnen("frei")).status).toBe(201);
+    expect(await anders()).toBe(true);
+  });
+
   it("begrenzt limit auf 1 bis 200, auch bei negativen und kaputten Werten", async () => {
     for (const limit of ["-5", "0", "abc", "1e9", "2.5"])
       expect((await app.request(`/api/dokumente?limit=${limit}`)).status, limit).toBe(200);

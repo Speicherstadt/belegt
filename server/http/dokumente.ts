@@ -3,7 +3,7 @@ import { z } from "zod";
 import { SORTIERUNGEN } from "../../shared/archivansicht.ts";
 import { ansichtZu, hatAnsicht } from "../ansicht/ansicht.ts";
 import { archivfassungZu, hatArchivfassung } from "../archivfassung/archivfassung.ts";
-import { anzahl, laden, listen, verlauf } from "../dokumente/dokumente.ts";
+import { anzahl, laden, listen, verlauf, vormalsAnders } from "../dokumente/dokumente.ts";
 import { aufnehmenEinmal, sha256Von, type Vorhanden, vorhandenes } from "../dokumente/doppelt.ts";
 import {
   aktuelle,
@@ -174,6 +174,7 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     return c.json({
       ...dokument,
       einordnung: await aktuelle(umgebung.db, dokument.id),
+      vormalsAnders: await vormalsAnders(umgebung.db, dokument.id),
       loeschung: await fuerDokument(umgebung.db, dokument.id),
       ansicht: await hatAnsicht(umgebung.db, dokument.id),
       archivfassung: await hatArchivfassung(umgebung.db, dokument.id),
