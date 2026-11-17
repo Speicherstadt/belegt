@@ -88,3 +88,23 @@ for (const colorScheme of ["light", "dark"] as const) {
     expect(await stil("#fokus input[type=text]")).toMatchObject({ w: "2px", o: "0px", f: fg, r: fg });
   });
 }
+
+// Windows-Kontrastmodus: Farben werden ersetzt, ein Rand, der nur die Farbe wechselt, zeigt dann keinen Fokus
+test("Suchfeld zeigt den Fokus auch bei erzwungenen Farben", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto("/archiv");
+  const such = page.getByRole("searchbox");
+  const label = page.locator("label").filter({ has: such });
+  const zustand = async () => ({
+    rand: await label.evaluate((el) => getComputedStyle(el).borderTopColor),
+    ring: await such.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return s.outlineStyle === "none" ? "kein" : `${s.outlineWidth} ${s.outlineStyle} ${s.outlineColor}`;
+    }),
+  });
+  const vorher = await zustand();
+  await page.keyboard.press("Tab");
+  await such.focus();
+  await expect(such).toBeFocused();
+  expect(await zustand()).not.toEqual(vorher);
+});
