@@ -139,11 +139,11 @@ Feldern, Dokumenttypen und Korrespondenten, wo ein roter Knopf den ersten ersetz
   nichts über die Datei selbst, denn ihr Prüfwert und Speicher folgen eigenen Regeln.
 - **Knöpfe:** „Abbrechen“ und das Verb („Jetzt löschen“). Der Fokus startet auf „Abbrechen“; Escape bricht ab; der
   Fokus kehrt zum auslösenden Knopf zurück. Läuft die Aktion, sind beide Knöpfe gesperrt und Escape bleibt wirkungslos.
-- **Stufe 1:** alles Endgültige. **Stufe 2** für besonders Folgenschweres (Löschung eines Pflichtdokuments, Löschaktion
+- **Stufe 1:** alles Endgültige. **Stufe 2** für besonders Folgenschweres (jede „Löschung bestätigen“ eines offenen Antrags, Löschaktion
   im Postfach): zusätzlich ein Pflicht-Häkchen (Prop `haken`, Satz wie `mailbox_delete_confirm` in `MailboxAction.tsx`); der
   Bestätigen-Knopf ist erst mit Häkchen bedienbar, und der Grund steht daneben. Heute: „Löschung bestätigen“.
 - **Umkehrbares fragt nicht,** es bietet „Rückgängig“ (Tag entfernen, Vorschlag übernehmen).
-- Wer bei Pflichtdokumenten allein arbeitet (kein weiteres Konto als Inhaber oder Steuerberatung), sieht zusätzlich zu
+- Wer bei einem offenen Löschantrag allein arbeitet (kein weiteres Konto als Inhaber oder Steuerberatung), sieht zusätzlich zu
   „Eine zweite Person bestätigt“ einen Satz mit Link zu „Zugänge“, wo sich z. B. die Steuerberatung einladen lässt. Das Vier-Augen-Prinzip bleibt bewusst so.
 
 ### Meldung in drei Teilen
@@ -191,7 +191,7 @@ Schlüssel sind uneinheitlich und werden mit dem Glossar angeglichen:
 | Verb | Gilt für | heute auch |
 | --- | --- | --- |
 | Einordnen | Art, Tags, Frist festlegen | „Ordnung“ für die Verwaltung von Tags und Arten |
-| Löschen | Endgültiges (Datei weg) | „Löschung beantragen“ bei frei abgelegten Dokumenten |
+| Löschen | Endgültiges (Datei weg) | „Löschung beantragen“ bei allen außer nie anders eingeordneten frei abgelegten Dokumenten (die bekommen „Jetzt löschen“) |
 | Entfernen | Zuordnung lösen, Inhalt bleibt (Tag, Seite, Passkey) | „Entziehen“, „Zurückziehen“ |
 | Widerrufen | Zugriff beenden (Token, Teilen-Link, Einladung) | „Zurückziehen“, „Entziehen“ |
 | Aufheben | nur die Sperre | |

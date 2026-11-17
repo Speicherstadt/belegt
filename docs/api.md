@@ -92,7 +92,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `GET /api/paperless/zuordnungen`, `POST /api/paperless/zuordnungen` (`art`: `dokumenttyp` oder `tag`, `name`, `zielArt`), `DELETE /api/paperless/zuordnungen/:id` | Zuordnung zur Art für den Import; `409` bei doppeltem Namen |
 | `GET /api/oauth`, `GET /api/oauth/:anbieter/start?name=&ordner=`, `GET /api/oauth/rueckkehr` | Postfächer bei `microsoft` oder `google` per OAuth verbinden, nur der Inhaber; leitet zum Anbieter und zurück nach `/quellen?oauth=…` |
 | `GET /api/sperren`, `POST /api/sperren` (`grund`, `von`, `bis`), `POST /api/sperren/:id/aufheben` | Sperren |
-| `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (frei Abgelegtes: sofort gelöscht); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
+| `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (sofort gelöscht nur, wenn das Dokument nie anders als frei eingeordnet war); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |
 | `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
 | `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp, Korrespondent und Feldwerte, mit `detail`: deren Name; Einordnungen mit `detail`: ihr Korrespondent, wie er beim Einordnen hieß; Ableitungen mit `detail`: Operation und `richtung`: `aus` oder `daraus`) und sein Siegel |
