@@ -7,7 +7,7 @@ const zeigen = (props: Partial<Parameters<typeof ConfirmDialog>[0]> = {}) =>
     <ConfirmDialog
       open
       titel="Dokument jetzt löschen?"
-      folge="Die Datei wird endgültig entfernt."
+      folge="Das Dokument wird endgültig gelöscht."
       verb="Jetzt löschen"
       onConfirm={() => {}}
       onCancel={() => {}}
@@ -22,7 +22,7 @@ describe("ConfirmDialog", () => {
     const html = zeigen();
     expect(html).toContain("<dialog");
     expect(html).toContain("Dokument jetzt löschen?");
-    expect(html).toContain("Die Datei wird endgültig entfernt.");
+    expect(html).toContain("Das Dokument wird endgültig gelöscht.");
     expect(knoepfe(html).map((k) => k[2])).toEqual(["Abbrechen", "Jetzt löschen"]);
   });
 
@@ -43,7 +43,8 @@ describe("ConfirmDialog", () => {
 
   it("sperrt das Bestätigen, solange es läuft, und zeigt einen Fehler als Hinweis", () => {
     const html = zeigen({ pending: true, fehler: "Nicht erlaubt" });
-    expect(knoepfe(html)[1]![1]).toContain('disabled=""');
+    // Auch „Abbrechen“ ist gesperrt, sonst ginge ein laufender Fehler im geschlossenen Dialog verloren
+    expect(knoepfe(html).map((k) => k[1]?.includes('disabled=""'))).toEqual([true, true]);
     expect(html).toMatch(/role="alert"[^>]*>Nicht erlaubt</);
   });
 });

@@ -47,10 +47,10 @@ export function ConfirmDialog({
       ref={dialog}
       aria-labelledby={`${id}-titel`}
       aria-describedby={`${id}-folge`}
-      // Escape: Der Elternteil schließt über `open`, sonst liefen Anzeige und Zustand auseinander
+      // Escape: Der Elternteil schließt über `open`, sonst liefen Anzeige und Zustand auseinander; während es läuft, bleibt der Dialog
       onCancel={(e) => {
         e.preventDefault();
-        onCancel();
+        if (!pending) onCancel();
       }}
       className="m-auto w-[min(28rem,calc(100%-2rem))] rounded-lg border border-border bg-bg p-5 text-fg backdrop:bg-black/50"
     >
@@ -81,8 +81,9 @@ export function ConfirmDialog({
           <button
             ref={abbrechen}
             type="button"
+            disabled={pending}
             onClick={onCancel}
-            className="h-9 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle"
+            className="h-9 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle disabled:opacity-60"
           >
             {m.confirm_cancel()}
           </button>

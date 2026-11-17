@@ -17,6 +17,7 @@ export function OpenDeletions() {
     onSuccess: () => queryClient.invalidateQueries(),
   });
   const [fragen, setFragen] = useState<string | null>(null);
+  const gewaehlt = liste.data?.find((l) => l.id === fragen);
   const offen = liste.data?.filter((l) => !l.bestaetigtAm) ?? [];
   return (
     <section aria-labelledby="offene-loeschungen" className="flex flex-col gap-3">
@@ -56,7 +57,7 @@ export function OpenDeletions() {
       </ul>
       <ConfirmDialog
         open={fragen !== null}
-        titel={m.delete_confirm_title()}
+        titel={m.delete_open_confirm_title({ name: gewaehlt?.dateiname ?? m.unnamed() })}
         folge={m.delete_confirm_follow()}
         verb={m.delete_final()}
         haken={m.delete_confirm_check()}
