@@ -7,6 +7,7 @@ import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { LearnedSuggestion, RuleMatchSuggestion } from "./MatchSuggestions.tsx";
 import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
+import { Explain } from "./WasIstDas.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
@@ -82,8 +83,18 @@ export function Classification({
       </h2>
       {einordnung ? (
         <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-muted">{m.classify_kind()}</dt>
-          <dd className="m-0 font-medium">{artLabel(einordnung.art)}</dd>
+          <Explain term="kind" row>
+            {(knopf, satz) => (
+              <>
+                <dt className="flex items-center text-muted">
+                  {m.classify_kind()}
+                  {knopf}
+                </dt>
+                <dd className="m-0 font-medium">{artLabel(einordnung.art)}</dd>
+                {satz}
+              </>
+            )}
+          </Explain>
           <dt className="text-muted">{m.classify_created()}</dt>
           <dd className="m-0">{tag(einordnung.entstanden)}</dd>
           <dt className="text-muted">{m.classify_period()}</dt>
