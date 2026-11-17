@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import type { ArchivAnsicht } from "../../shared/archivansicht.ts";
+import { type ArchivAnsicht, LEERE_ANSICHT } from "../../shared/archivansicht.ts";
 import { darfBearbeiten, darfSchreiben } from "../../shared/rollen.ts";
 import { api, type Doppelt, type Gruppe } from "../lib/api.ts";
 import { filterParameter } from "../lib/ordnung.ts";
@@ -88,6 +88,12 @@ export function DocumentList({
   useEffect(() => {
     if (leereSeite) setSeiteWahl({ seite: seiten, fuer: abfrage });
   }, [leereSeite, seiten, abfrage]);
+  // Suche oder Filter machen aus „leer“ ein „keine Treffer“ (DESIGN.md, Leerzustand); im Eingang gibt es keine
+  const filterAktiv = !!suche.trim() || (!feste && (gruppe !== "alle" || parameter !== ""));
+  // Zeigt der Leerzustand „Dokument hochladen“, ist der Knopf in der Leiste nur zweitrangig: genau eine Hauptaktion
+  // Platzhalter (keepPreviousData) gehören zur vorigen Abfrage und sagen nichts über den neuen Filter
+  const leer0 = liste.data?.length === 0 && seite === 1 && !abfrageDaten.isPlaceholderData;
+  const leerMitUpload = leer0 && !filterAktiv;
   const [auswahl, setAuswahl] = useState<Set<string>>(new Set());
   const [sammelMeldung, setSammelMeldung] = useState<string | null>(null);
   // Mails einlesen und PDFs zusammenfügen nur der Inhaber; hochladen und sammeln auch Mitarbeiter mit bearbeiten
@@ -126,6 +132,8 @@ export function DocumentList({
     },
   };
   const eingabe = useRef<HTMLInputElement>(null);
+  const suchEingabe = useRef<HTMLInputElement>(null);
+  const uploadKnopf = useRef<HTMLButtonElement>(null);
   const mailEingabe = useRef<HTMLInputElement>(null);
   const mailImport = useMutation({
     mutationFn: async (dateien: File[]) => {
@@ -160,6 +168,7 @@ export function DocumentList({
           <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border border-border px-3 text-sm">
             <span className="sr-only">{m.archive_search()}</span>
             <input
+              ref={suchEingabe}
               type="search"
               value={suche}
               onChange={(e) => setAnsicht({ ...ansicht, suche: e.target.value })}
@@ -185,10 +194,11 @@ export function DocumentList({
               }}
             />
             <button
+              ref={uploadKnopf}
               type="button"
-              onClick={() => eingabe.current?.click()}
-              disabled={hochladen.isPending}
-              className="h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+              onClick={() => !hochladen.isPending && eingabe.current?.click()}
+              aria-busy={hochladen.isPending}
+              className={`h-10 rounded-md px-4 font-medium text-sm ${leerMitUpload ? "border border-border hover:bg-subtle" : "bg-primary text-onprimary"}`}
             >
               {hochladen.isPending ? m.upload_busy() : m.upload()}
             </button>
@@ -301,7 +311,51 @@ export function DocumentList({
           {sammelMeldung}
         </p>
       )}
-      {liste.data?.length === 0 && seite === 1 && <EmptyState title={leer.title} text={leer.text} />}
+      {leer0 && (
+        <EmptyState
+          title={
+            !filterAktiv
+              ? leer.title
+              : suche.trim()
+                ? m.archive_no_match_title({ suche: suche.trim() })
+                : m.archive_no_match_title_filter()
+          }
+          text={filterAktiv ? m.archive_no_match_text() : leer.text}
+        >
+          {filterAktiv ? (
+            <button
+              type="button"
+              onClick={() => {
+                // Der Knopf verschwindet mit dem Zurücksetzen; der Fokus soll nicht auf body fallen
+                suchEingabe.current?.focus();
+                setAnsicht({
+                  ...LEERE_ANSICHT,
+                  sortierung: ansicht.sortierung,
+                  proSeite: ansicht.proSeite,
+                  darstellung: ansicht.darstellung,
+                });
+              }}
+              className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+            >
+              {m.archive_reset_filter()}
+            </button>
+          ) : (
+            bearbeiten && (
+              <button
+                type="button"
+                onClick={() => {
+                  // Nach dem Hochladen ist der Leerzustand weg; der Fokus geht auf den bleibenden Knopf oben
+                  uploadKnopf.current?.focus();
+                  eingabe.current?.click();
+                }}
+                className="mt-2 h-10 rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+              >
+                {m.archive_empty_upload()}
+              </button>
+            )
+          )}
+        </EmptyState>
+      )}
       {!!liste.data?.length &&
         (darstellung === "kacheln" ? (
           <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} />

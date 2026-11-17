@@ -17,6 +17,9 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
 
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await expect(einordnung).toContainText("Noch nicht eingeordnet");
+  // Offen: Die Einordnung steht als erste Karte der rechten Spalte, vor allen anderen
+  const spalte = einordnung.locator("..");
+  await expect(spalte.locator("> section").first()).toHaveAttribute("aria-labelledby", "einordnung");
   expect((await axe(page)).violations).toEqual([]);
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-15");
@@ -24,6 +27,8 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
   await einordnung.getByRole("button", { name: "Einordnen" }).click();
   await expect(page.getByRole("heading", { level: 1, name: titel })).toBeVisible();
   await expect(einordnung).toContainText("Buchungsbelege");
+  // Eingeordnet: Die Reihenfolge der Karten ist wieder die übliche, die Einordnung steht nicht mehr zuerst
+  await expect(spalte.locator("> section").first()).not.toHaveAttribute("aria-labelledby", "einordnung");
   await expect(einordnung).toContainText("31.12.2034");
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     "Eingeordnet",

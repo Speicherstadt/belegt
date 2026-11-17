@@ -5,7 +5,7 @@ Regeln für alles, was man in Belegt sieht und bedient. Vor jeder Arbeit an der 
 Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/styles.css`, eine Kopie hier würde
 auseinanderlaufen.
 
-**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
+**Stand:** Farben, `--bg` bis `--onprimary` und der Dunkelmodus gibt es heute. Der Leerzustand (Archiv, Eingang, „Keine Treffer“) und die Reihenfolge der Dokumentseite (Einordnung zuerst, solange offen) stehen im Code. Alles mit „Vorschlag“ (`--field-border`, die Schriftstufen, die Reihenfolge der Knöpfe,
 `--control-h`, die Fokusregel, die Bausteine) steht noch nicht im Code. Jeder Umsetzungs-Pull-Request führt seinen
 Teil ein und streicht hier das „Vorschlag“. Ändert sich eine Gestaltungsregel, ändert sich diese Datei im selben Pull
 Request.
@@ -162,8 +162,9 @@ z. B. „Erneut versuchen“). Den Rohtext des Servers gibt es eingeklappt unter
 ### Leerzustand
 
 Ein Satz und **genau ein** Knopf zur nächsten Handlung: „Noch keine Dokumente. [Dokument hochladen]“, „Noch kein
-Postfach. [Postfach verbinden]“. „Keine Treffer für ‚Rechnung‘. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
-Dokumente“ und darf nie wie ein leeres Archiv aussehen.
+Postfach. [Postfach verbinden]“. „Keine Treffer für „Rechnung“. [Filter zurücksetzen]“ ist etwas anderes als „Noch keine
+Dokumente“ und darf nie wie ein leeres Archiv aussehen. Umgesetzt für Archiv und Eingang (`DocumentList.tsx`); die
+übrigen Leerzustände („Noch keine Tags“, „Noch keine Postfächer“ …) haben noch keinen Knopf.
 
 ### Einmalwert
 
