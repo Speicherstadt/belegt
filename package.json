@@ -8,7 +8,7 @@
   "scripts": {
     "dev:server": "bun --watch server/index.ts",
     "typecheck": "bun run postinstall && tsc -p .",
-    "lint": "biome check --error-on-warnings .",
+    "lint": "biome check --error-on-warnings . && checks",
     "format": "biome check --write .",
     "test": "vitest run",
     "dev:app": "vite",
@@ -47,6 +47,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@biomejs/biome": "^2.6.7",
+    "@firsttris/checks": "github:firsttris/workflows#v1",
     "@fontsource-variable/geist": "^5.3.0",
     "@inlang/paraglide-js": "^3.2.2",
     "@inlang/plugin-message-format": "^4.6.0",

@@ -15,11 +15,16 @@ bun run dev:app      # Oberfläche mit Vite, leitet /api an den Server
 bun server/smtp.ts   # SMTP-Journal (docs/eingang.md)
 bun server/worker.ts # Worker: Postfächer, Eingangsordner, Webhooks, Workflows, Text und E-Rechnungen, Benachrichtigungen
 bun run typecheck
-bun run lint         # Biome; bun run format behebt Formatfehler
+bun run lint         # Biome und checks; bun run format behebt Formatfehler
 bun run test         # Vitest
 bun run e2e          # Playwright mit axe gegen echten Server (Port 3185) und Vite (5185), braucht E2E_DATABASE_URL
 bun run build
 ```
+
+`bun run lint` prüft mit [`checks`](https://github.com/firsttris/workflows#checks) auch, dass keine Datei über 400 Zeilen
+wächst und kein Text der Oberfläche im Code steht; was schon vorher so war, steht in `.checks/` und darf nur weniger
+werden (`checks file-size --clean`, `checks i18n --clean`). Lange Funktionen zeigt Biome als Hinweis, `bun checks pr` vor
+dem Push die neuen.
 
 Die installierbare App (Manifest, Service Worker, Seite ohne Verbindung) steht in `src/pwa/`; Vite liefert sie in der
 Entwicklung aus und legt sie beim Bauen nach `dist`. Die Symbole in `public/icons/` erzeugt `bun scripts/symbole.ts` aus
