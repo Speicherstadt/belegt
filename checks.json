@@ -1,4 +1,11 @@
 {
-  "fileSize": { "include": ["src/**/*.{ts,tsx}", "server/**/*.ts", "shared/**/*.ts", "scripts/**/*.ts"] },
-  "i18n": { "include": ["src/**/*.{ts,tsx}"] }
+  "fileSize": {
+    "include": ["src/**/*.{ts,tsx}", "server/**/*.ts", "shared/**/*.ts", "scripts/**/*.ts"]
+  },
+  "i18n": {
+    "include": ["src/**/*.{ts,tsx}"]
+  },
+  "cycles": {
+    "modules": ["server/*", "src/*"]
+  }
 }

@@ -4,9 +4,9 @@ import { extractText, getDocumentProxy } from "unpdf";
 import { inhalte } from "../db/schema.ts";
 import { dateityp } from "../dokumente/dateityp.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { OFFICE_TYPEN, officeText } from "../dokumente/office.ts";
 import { type ERechnung, eRechnungLesen, speicherbar } from "./erechnung.ts";
 import { ausfuehren, bildText, ocrVerfuegbar, pdfScanText } from "./ocr.ts";
-import { OFFICE_TYPEN, officeText } from "./office.ts";
 
 const OFFICE: string[] = Object.values(OFFICE_TYPEN);
 /** Was der Worker immer liest (ohne Texterkennung); unbekannte Dateien prüft er auf Office oder Text */

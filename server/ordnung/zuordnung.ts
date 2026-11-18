@@ -14,8 +14,8 @@ import {
   tags,
 } from "../db/schema.ts";
 import { aktuelle, EinordnungEingabe, einordnenIn } from "../einordnung/einordnung.ts";
+import { korrespondentSetzen } from "../einordnung/korrespondent-setzen.ts";
 import { imSichtbereichBleiben, type Sicht } from "../zugang/sicht.ts";
-import { korrespondentSetzen } from "./korrespondent-setzen.ts";
 import { type Feld, felderListen, feldwertAus, feldwertSpalten, konflikt } from "./ordnung.ts";
 
 /*

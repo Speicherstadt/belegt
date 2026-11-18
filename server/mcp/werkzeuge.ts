@@ -3,7 +3,7 @@ import type { Angemeldet } from "../auth.ts";
 import { laden, listen, type Umgebung } from "../dokumente/dokumente.ts";
 import { aufnehmenEinmal } from "../dokumente/doppelt.ts";
 import { aktuelle, EinordnungEingabe, einordnen, Gruppe } from "../einordnung/einordnung.ts";
-import { akteur, heute, MAX_UPLOAD } from "../http/gemeinsam.ts";
+import { akteur, heute, MAX_UPLOAD } from "../grundlagen.ts";
 import { inhaltZu, textZu } from "../inhalt/inhalt.ts";
 import { fuerDokument, regelVerletzt } from "../loeschung/loeschung.ts";
 import { mailZuDokument } from "../mail/import.ts";

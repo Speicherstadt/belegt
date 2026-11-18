@@ -4,7 +4,7 @@ import { entschluesseln } from "../crypto.ts";
 import { mitAkteur } from "../db/akteur.ts";
 import { importe, paperlessQuellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { MAX_UPLOAD } from "../http/gemeinsam.ts";
+import { MAX_UPLOAD } from "../grundlagen.ts";
 import { type Abfragen, paperlessApi } from "./api.ts";
 import {
   AKTEUR,

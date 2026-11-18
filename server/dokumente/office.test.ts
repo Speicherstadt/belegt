@@ -1,9 +1,9 @@
 import { strToU8, zipSync } from "fflate";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { dateityp } from "../dokumente/dateityp.ts";
+import { inhalteErzeugen, lesen } from "../inhalt/inhalt.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
-import { inhalteErzeugen, lesen } from "./inhalt.ts";
+import { dateityp } from "./dateityp.ts";
 import { OFFICE_TYPEN, officeText, officeTyp } from "./office.ts";
 
 const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';

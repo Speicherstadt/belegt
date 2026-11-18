@@ -1,6 +1,6 @@
 import { sniff } from "@firsttris/gobd-kern/dateityp";
-import { officeTyp } from "../inhalt/office.ts";
 import { cfbWurzelNamen } from "./cfb.ts";
+import { officeTyp } from "./office.ts";
 
 /** Ältere Office-Formate: Word, Excel und PowerPoint bis 2003 (Compound File) und RTF */
 export const ALTE_OFFICE_TYPEN = {

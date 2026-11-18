@@ -22,9 +22,9 @@ bun run build
 ```
 
 `bun run lint` prüft mit [`checks`](https://github.com/firsttris/workflows#checks) auch, dass keine Datei über 400 Zeilen
-wächst und kein Text der Oberfläche im Code steht; was schon vorher so war, steht in `.checks/` und darf nur weniger
-werden (`checks file-size --clean`, `checks i18n --clean`). Lange Funktionen zeigt Biome als Hinweis, `bun checks pr` vor
-dem Push die neuen.
+wächst, kein Text der Oberfläche im Code steht und kein Kreis von Importen zwischen den Ordnern in `server/` und `src/`
+entsteht; was schon vorher so war, steht in `.checks/` und darf nur weniger werden (`checks file-size --clean`,
+`checks i18n --clean`). Lange Funktionen zeigt Biome als Hinweis, `bun checks pr` vor dem Push die neuen.
 
 Die installierbare App (Manifest, Service Worker, Seite ohne Verbindung) steht in `src/pwa/`; Vite liefert sie in der
 Entwicklung aus und legt sie beim Bauen nach `dist`. Die Symbole in `public/icons/` erzeugt `bun scripts/symbole.ts` aus

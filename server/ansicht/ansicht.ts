@@ -2,9 +2,9 @@ import { eq, sql } from "drizzle-orm";
 import { ansichten, inhalte } from "../db/schema.ts";
 import { ALTE_OFFICE_TYPEN } from "../dokumente/dateityp.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { OFFICE_TYPEN } from "../dokumente/office.ts";
 import { speicherbar } from "../inhalt/erechnung.ts";
 import { lesenImKind } from "../inhalt/inhalt.ts";
-import { OFFICE_TYPEN } from "../inhalt/office.ts";
 
 /*
  * Ansicht als PDF für Office-Dateien über einen Vorschau-Dienst mit der Schnittstelle von Gotenberg

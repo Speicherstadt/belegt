@@ -1,7 +1,6 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
 import { EmbedBridge } from "./components/EmbedBridge.tsx";
 import { NichtGefunden, SeitenFehler } from "./components/Fehlerseiten.tsx";
-import { Shell } from "./components/Shell.tsx";
 import { AccessPage } from "./pages/AccessPage.tsx";
 import { AccountPage } from "./pages/AccountPage.tsx";
 import { ArchivePage } from "./pages/ArchivePage.tsx";
@@ -18,6 +17,7 @@ import { SharePage } from "./pages/SharePage.tsx";
 import { SourcesPage } from "./pages/SourcesPage.tsx";
 import { StartPage } from "./pages/StartPage.tsx";
 import { WorkflowsPage } from "./pages/WorkflowsPage.tsx";
+import { Shell } from "./Shell.tsx";
 
 // Die Brücke zur einbettenden Seite läuft auf jeder Seite, auch beim Anmelden
 const root = createRootRoute({

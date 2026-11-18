@@ -1,6 +1,6 @@
 import { SMTPServer, type SMTPServerOptions } from "smtp-server";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { MAX_UPLOAD } from "../http/gemeinsam.ts";
+import { MAX_UPLOAD } from "../grundlagen.ts";
 import { finden } from "../zugang/tokens.ts";
 import { mailAufnehmen } from "./import.ts";
 

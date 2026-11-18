@@ -4,8 +4,8 @@ import { regexGueltig, unscharfKurzGenug } from "../../shared/abgleich.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumentKorrespondenten, korrespondenten, regeln, workflows } from "../db/schema.ts";
+import type { Korrespondent } from "../einordnung/korrespondent-setzen.ts";
 import type { Sicht } from "../zugang/sicht.ts";
-import type { Korrespondent } from "./korrespondent-setzen.ts";
 import {
   Abgleich,
   aendertAbgleich,
@@ -16,7 +16,7 @@ import {
   UNSCHARF_ZU_LANG,
 } from "./ordnung.ts";
 
-export { korrespondentMitNamen, korrespondentSetzen } from "./korrespondent-setzen.ts";
+export { korrespondentMitNamen, korrespondentSetzen } from "../einordnung/korrespondent-setzen.ts";
 
 /*
  * Korrespondenten als Liste (docs/ordnung.md#korrespondenten): anlegen, umbenennen, zusammenführen, löschen. Die

@@ -7,11 +7,11 @@ import {
   regexGueltig,
   unscharfKurzGenug,
 } from "../../shared/abgleich.ts";
+import { ARTEN } from "../../shared/fristen.ts";
 import { betragAusText, FARBNAMEN, type Farbe, FELDTYPEN, type Feldtyp, GRENZE } from "../../shared/ordnung.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumentDokumenttypen, dokumentTags, dokumenttypen, felder, feldwerte, tags } from "../db/schema.ts";
-import { ARTEN } from "../einordnung/einordnung.ts";
 import { type Sicht, sichtBedingung } from "../zugang/sicht.ts";
 
 /*

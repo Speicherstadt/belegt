@@ -2,7 +2,7 @@ import { strToU8, zipSync } from "fflate";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ALTE_OFFICE_TYPEN, dateityp } from "../dokumente/dateityp.ts";
-import { OFFICE_TYPEN } from "../inhalt/office.ts";
+import { OFFICE_TYPEN } from "../dokumente/office.ts";
 import { testApp } from "../test-app.ts";
 import { cfbDatei } from "../test-cfb.ts";
 import { testDatenbankUrl } from "../test-db.ts";
