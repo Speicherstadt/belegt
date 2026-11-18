@@ -5,7 +5,7 @@ import { Inflate } from "fflate";
  * ZIP lesen, ohne es ganz in den Speicher zu laden: das zentrale Verzeichnis am Ende (APPNOTE.TXT 4.3.12 ff., mit
  * ZIP64 nach 4.3.14 und 4.5.3), dann je Eintrag nur seine Bytes. Ein Export von Paperless-ngx schreibt Python mit
  * zipfile, ohne Angabe DEFLATE (src/documents/management/commands/document_exporter.py, --zip-compression); andere
- * Verfahren und verschlüsselte Einträge lehnt Belegt ab. Gegen ZIP-Bomben (Muster wie server/inhalt/office.ts): Jeder
+ * Verfahren und verschlüsselte Einträge lehnt Belegt ab. Gegen ZIP-Bomben (Muster wie server/dokumente/office.ts): Jeder
  * Eintrag hat eine Obergrenze, entpackt wird höchstens so viel, wie das Verzeichnis angibt, und mehr bricht ab.
  */
 

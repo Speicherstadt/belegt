@@ -1,7 +1,9 @@
 import type { Hono } from "hono";
 import { z } from "zod";
-import paket from "../../package.json" with { type: "json" };
 import { RECHTE } from "../../shared/rollen.ts";
+
+export { akteur, heute, MAX_UPLOAD, VERSION } from "../grundlagen.ts";
+
 import type { Angemeldet, Auth } from "../auth.ts";
 import type { Versender } from "../benachrichtigungen/versand.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
@@ -51,12 +53,8 @@ export type App = Hono<{ Variables: { nutzer: Angemeldet } }>;
 /** Typen, die der Browser gefahrlos anzeigen kann; kein SVG und kein HTML, die Skripte enthalten könnten */
 export const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
 
-/** Größte Datei je Upload */
-export const MAX_UPLOAD = 100 * 1024 * 1024;
-
 export const Id = z.uuid();
 
-export const VERSION = paket.version;
 export const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
 /** Sichtbereich eines Mitarbeiters (shared/rollen.ts); fehlende Listen sind leer */
 const Ids = z.array(z.uuid()).max(200).default([]);
@@ -74,9 +72,6 @@ export const ZugangEingabe = z.discriminatedUnion("rolle", [
   z.object({ rolle: z.literal("mitarbeiter"), ...MitarbeiterEingabe.shape }),
 ]);
 
-/** Heutiger Tag in Deutschland, für Fristen (JJJJ-MM-TT) */
-export const heute = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
-
 /** Dateiname für filename* nach RFC 8187: encodeURIComponent lässt ' ( ) * stehen, die dort nicht erlaubt sind */
 export const dateinameKodiert = (name: string) =>
   encodeURIComponent(name).replace(/['()*]/g, (z) => `%${z.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -92,6 +87,3 @@ export function vonFremderSeite(headers: Headers, eigeneHerkunft: string): boole
   const herkunft = headers.get("origin");
   return herkunft !== null && herkunft !== eigeneHerkunft;
 }
-
-/** Akteur im Audit-Log: wer angemeldet ist, mit Adresse, damit das Protokoll ohne die Tabelle user lesbar bleibt */
-export const akteur = (n: Angemeldet) => (n.token ? `token:${n.token.name}` : `nutzer:${n.email}`);

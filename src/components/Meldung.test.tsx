@@ -3,9 +3,9 @@ import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { ApiFehler } from "../lib/api.ts";
+import { Shell } from "../Shell.tsx";
 import { SeitenFehler, ServerAntwortetNicht } from "./Fehlerseiten.tsx";
 import { ErneutVersuchen, Meldung } from "./Meldung.tsx";
-import { Shell } from "./Shell.tsx";
 
 // Seitenleiste und Konto brauchen einen Router; hier zählt nur, ob die Shell die Seite zeigt
 vi.mock("./Sidebar.tsx", () => ({ Sidebar: () => null }));

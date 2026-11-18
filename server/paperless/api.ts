@@ -1,4 +1,4 @@
-import { MAX_UPLOAD } from "../http/gemeinsam.ts";
+import { MAX_UPLOAD } from "../grundlagen.ts";
 import type { PaperlessFeld } from "./abbildung.ts";
 import type { PaperlessDokument } from "./kern.ts";
 import { jsonLesen, optionenAus, waehrungAus } from "./manifest.ts";

@@ -1,6 +1,6 @@
 import type { Angemeldet } from "../auth.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
-import { VERSION } from "../http/gemeinsam.ts";
+import { VERSION } from "../grundlagen.ts";
 import { istWerkzeugFehler, WERKZEUGE } from "./werkzeuge.ts";
 
 /**

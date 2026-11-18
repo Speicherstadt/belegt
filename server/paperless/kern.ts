@@ -6,7 +6,7 @@ import type { Datenbank } from "../db/client.ts";
 import { dokumentDokumenttypen, felder, feldwerte, importEintraege, importZuordnungen, notizen } from "../db/schema.ts";
 import { type Umgebung, zeileAnlegen } from "../dokumente/dokumente.ts";
 import { einordnenIn } from "../einordnung/einordnung.ts";
-import { korrespondentMitNamen, korrespondentSetzen } from "../ordnung/korrespondent-setzen.ts";
+import { korrespondentMitNamen, korrespondentSetzen } from "../einordnung/korrespondent-setzen.ts";
 import { dokumenttypMitNamen, feldwertSpalten } from "../ordnung/ordnung.ts";
 import {
   type Feldabbildung,

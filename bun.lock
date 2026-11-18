@@ -190,7 +190,7 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g=="],
 
-    "@firsttris/checks": ["@firsttris/checks@github:firsttris/workflows#f2c9c85", { "dependencies": { "oxc-parser": "^0.156.0" }, "bin": { "checks": "checks/cli.ts" } }, "firsttris-workflows-f2c9c85", "sha512-/s9dCShMQaI4f9KcJ3rsPnV4whvraxiV7KhyyhC9MyhZQON+trvm+QLwNwQ9pdSw3Ns8brlHm1FtHrD4iqedFQ=="],
+    "@firsttris/checks": ["@firsttris/checks@github:firsttris/workflows#0a19805", { "dependencies": { "oxc-parser": "^0.156.0" }, "bin": { "checks": "checks/cli.ts" } }, "firsttris-workflows-0a19805", "sha512-vhDesBHvUki0RowtgDUoVxgDlAmfcRTxj6l0r3ZhgjjoNr1EA/M6PH9K4ooo94IZf3xZSp+ZitqK5QpkINQ2Kw=="],
 
     "@firsttris/gobd-kern": ["@firsttris/gobd-kern@https://github.com/firsttris/haben/releases/download/gobd-kern-v0.2.0/firsttris-gobd-kern-0.2.0.tgz", { "dependencies": { "zod": "^4.6.5" } }, "sha512-BrgfdfwfX+bU2wRnjKb+UTWl5sfIa5eCBcqYyxrL0JdU/CAb6myndEpNuF1q2SZPo/uQssJJ2fK4tb57PYbbDQ=="],
 

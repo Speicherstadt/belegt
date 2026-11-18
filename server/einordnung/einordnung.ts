@@ -1,21 +1,14 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
+import { ARTEN, type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
-import { korrespondentMitNamen, korrespondentSetzen, korrespondentVorhanden } from "../ordnung/korrespondent-setzen.ts";
 import { imSichtbereichBleiben, NEUER_KORRESPONDENT, nurFuerInhaber, type Sicht } from "../zugang/sicht.ts";
+import { korrespondentMitNamen, korrespondentSetzen, korrespondentVorhanden } from "./korrespondent-setzen.ts";
 
-export const ARTEN = [
-  "buecher",
-  "zoll",
-  "beleg",
-  "geschaeftsbrief",
-  "sonstige",
-  "freiwillig",
-  "frei",
-] as const satisfies readonly Aufbewahrungsart[];
+export { ARTEN };
+
 const GESETZLICH: Aufbewahrungsart[] = ["buecher", "zoll", "beleg", "geschaeftsbrief", "sonstige"];
 
 const Datum = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);

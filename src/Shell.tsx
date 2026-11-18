@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
-import { ApiFehler, api } from "../lib/api.ts";
-import { eingebettet, stillAnmeldenErlaubt } from "../lib/einbetten.ts";
-import { AccountPage } from "../pages/AccountPage.tsx";
-import { m } from "../paraglide/messages.js";
-import { ServerAntwortetNicht } from "./Fehlerseiten.tsx";
-import { Sidebar } from "./Sidebar.tsx";
+import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
+import { Sidebar } from "./components/Sidebar.tsx";
+import { ApiFehler, api } from "./lib/api.ts";
+import { eingebettet, stillAnmeldenErlaubt } from "./lib/einbetten.ts";
+import { AccountPage } from "./pages/AccountPage.tsx";
+import { m } from "./paraglide/messages.js";
 
 export function Shell({ children }: { children: ReactNode }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });

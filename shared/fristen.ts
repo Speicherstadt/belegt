@@ -38,6 +38,17 @@ export type Aufbewahrungsart =
   /** keine Pflicht und keine Sperre: jederzeit löschbar */
   | "frei";
 
+/** Alle Arten, in der Reihenfolge, in der die Schnittstelle sie annimmt */
+export const ARTEN = [
+  "buecher",
+  "zoll",
+  "beleg",
+  "geschaeftsbrief",
+  "sonstige",
+  "freiwillig",
+  "frei",
+] as const satisfies readonly Aufbewahrungsart[];
+
 export interface Steuerpflichtiger {
   /** Kredit- oder Wertpapierinstitut oder unter Versicherungsaufsicht (Art. 97 § 19a Abs. 3 EGAO) */
   aufsicht?: boolean;
