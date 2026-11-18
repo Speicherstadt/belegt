@@ -1,4 +1,4 @@
-# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://firsttris.github.io/belegt/
+# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://belegt.net/
 # In Pull Requests nur bauen (ein kaputter Link oder eine fehlende Seite fällt vor dem Merge auf), auf main
 # veröffentlichen. Voraussetzung einmalig, von Hand: Settings → Pages → Source „GitHub Actions“. Anlegen kann die
 # Seite der Token des Workflows nicht (Resource not accessible by integration).

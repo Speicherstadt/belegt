@@ -6,7 +6,7 @@ lokal startest und testest, steht in der [Entwicklung](docs/entwicklung.md). Fü
 
 ## Fehler und Wünsche melden
 
-Neues Issue über die Formulare: [Issue anlegen](https://github.com/firsttris/belegt/issues/new/choose). **Keine echten
+Neues Issue über die Formulare: [Issue anlegen](https://github.com/Speicherstadt/belegt/issues/new/choose). **Keine echten
 Dokumente, Mails, Adressen oder Zugangsdaten** in Issues, Screenshots oder Logs. Sicherheitslücken bitte privat melden,
 siehe [SECURITY.md](SECURITY.md).
 

@@ -1,13 +1,13 @@
-# Dokumentation als Website: https://firsttris.github.io/belegt/
+# Dokumentation als Website: https://belegt.net/
 # Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml), dem Nachfolger von MkDocs Material.
 # Lokal: pip install -r requirements-docs.txt && zensical serve
 site_name: Belegt
 site_description: >-
   Belegt, das selbst gehostete Dokumentenarchiv mit GoBD-Modus: Mails, E-Rechnungen, Scans und beliebige Dokumente,
   unveränderbar bis Fristende, durchsuchbar, mit Prüferzugang und Datenträger für die Betriebsprüfung.
-site_url: https://firsttris.github.io/belegt/
-repo_url: https://github.com/firsttris/belegt
-repo_name: firsttris/belegt
+site_url: https://belegt.net/
+repo_url: https://github.com/Speicherstadt/belegt
+repo_name: Speicherstadt/belegt
 edit_uri: edit/main/docs/
 copyright: Lizenz AGPL-3.0 · Keine Steuer- oder Rechtsberatung.
 
@@ -111,7 +111,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/firsttris/belegt
+      link: https://github.com/Speicherstadt/belegt
       name: Quellcode auf GitHub
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/tristanteu/belegt

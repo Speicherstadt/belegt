@@ -57,7 +57,7 @@ jobs:
       description: "Backup für Belegt: pg_dump und Originale mit restic, Test-Restore mit der Prüfung der Kette"
       dockerfile: deploy/backup/Containerfile
       ghcr: true
-      ghcr-image: firsttris/belegt-backup
+      ghcr-image: speicherstadt/belegt-backup
       readme: deploy/backup/README.md
       github-release: false
     secrets: inherit
@@ -76,7 +76,7 @@ jobs:
       context: deploy/validator
       dockerfile: deploy/validator/Containerfile
       ghcr: true
-      ghcr-image: firsttris/belegt-validator
+      ghcr-image: speicherstadt/belegt-validator
       readme: deploy/validator/README.md
       github-release: false
     secrets: inherit
@@ -95,7 +95,7 @@ jobs:
       context: deploy/ftp
       dockerfile: deploy/ftp/Containerfile
       ghcr: true
-      ghcr-image: firsttris/belegt-ftp
+      ghcr-image: speicherstadt/belegt-ftp
       readme: deploy/ftp/README.md
       github-release: false
     secrets: inherit
