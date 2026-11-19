@@ -10,8 +10,8 @@ Belegt läuft als ein Image für Server und Worker neben PostgreSQL. Der Server 
 und liefert die Oberfläche aus; der Worker ruft Postfächer ab, überwacht den Eingangsordner, stellt Webhooks zu, führt
 Workflows aus und liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch) auch aus Scans.
 
-Keine Zeit für Einrichtung und Betrieb? Die Entwickler richten Belegt ein oder betreiben es für dich, siehe
-[Support und Partnerschaft](support.md).
+Keinen eigenen Server oder keine eigene IT? Belegt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](partner.md).
 
 ## Starten
 

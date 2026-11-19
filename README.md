@@ -23,7 +23,6 @@ werden muss, bleibt bis Fristende unverändert, und danach löschst du es nachwe
 [Schnellstart](#schnellstart) •
 [FAQ](#faq) •
 [Dokumentation](https://belegt.net/) •
-[Support und Partnerschaft](#support-und-partnerschaft) •
 [Entwicklung](#entwicklung)
 
 🖼️ **[Rundgang in Bildern](https://belegt.net/)**
@@ -135,6 +134,9 @@ Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Re
 > Sichere `BELEGT_SCHLUESSEL` zusätzlich an einem zweiten Ort. Ohne ihn lassen sich Postfach-Passwörter,
 > Refresh-Tokens und Webhook-Geheimnisse nach einer Wiederherstellung nicht mehr lesen.
 
+Keinen eigenen Server oder keine eigene IT? Belegt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](https://speicherstadt.app/partner/).
+
 ## FAQ
 
 <details>
@@ -191,8 +193,7 @@ löschen kann keiner. Für eigene Programme gibt es REST-API, Webhooks und API-T
 <details>
 <summary><b>Was kostet Belegt?</b></summary>
 
-Die Software ist kostenlos (AGPL-3.0). Du brauchst nur einen Server. Einrichtung, Umzug, Support und Betrieb gibt es
-auf Wunsch von den Entwicklern, siehe [Support und Partnerschaft](#support-und-partnerschaft).
+Die Software ist kostenlos (AGPL-3.0). Du brauchst nur einen Server.
 </details>
 
 ## Dokumentation
@@ -240,18 +241,6 @@ Open-Source-Buchhaltung desselben Projekts.
 
 Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
 
-## Support und Partnerschaft
-
-Belegt ist kostenlos (AGPL). Wer es nicht selbst einrichten oder betreiben will, bekommt Hilfe von den
-Entwicklern:
-
-- **Einrichtung und Umzug** auf deinem Server, auch aus Paperless-ngx
-- **Support** bei Updates, Backups und Fragen im Betrieb
-- **Betrieb** von Belegt als gehosteter Dienst, ohne eigenen Server
-- **Partnerschaft für IT-Dienstleister**, die Belegt bei ihren Kunden einrichten: direkter Draht zur Entwicklung
-
-Mehr auf [speicherstadt.app](https://speicherstadt.app/#support), Anfragen an [info@teufel-it.de](mailto:info@teufel-it.de).
-
 ## Mitwirken
 
 Fehler und Ideen gern als Issue, mit dem [Formular für Fehlerberichte](https://github.com/Speicherstadt/belegt/issues/new?template=fehler.yml)
@@ -278,6 +267,7 @@ Sicherheitslücken bitte privat melden, siehe [SECURITY.md](SECURITY.md). Wie du
 
 <sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
 Wer eine veränderte Fassung von Belegt für andere übers Netz betreibt, muss ihnen den Quellcode anbieten (§ 13 AGPL).<br>
+Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.<br>
 Belegt ist keine Steuer- oder Rechtsberatung. Aufbewahrung und Verfahrensdokumentation vor dem Echtbetrieb mit deiner Steuerberatung abgleichen.<br>
 Paperless-ngx ist ein Projekt seiner Entwickler; Belegt steht mit ihm in keiner Verbindung.</sub>
 
