@@ -134,6 +134,9 @@ Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Re
 > Sichere `BELEGT_SCHLUESSEL` zusätzlich an einem zweiten Ort. Ohne ihn lassen sich Postfach-Passwörter,
 > Refresh-Tokens und Webhook-Geheimnisse nach einer Wiederherstellung nicht mehr lesen.
 
+Keinen eigenen Server oder keine eigene IT? Belegt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](https://speicherstadt.app/partner/).
+
 ## FAQ
 
 <details>
@@ -211,10 +214,14 @@ Seite; dazu kommen:
 
 ## Entwicklung
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.sh)
 [![Hono](https://img.shields.io/badge/Hono-e36002?logo=hono&logoColor=white)](https://hono.dev)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![React](https://img.shields.io/badge/React-149eca?logo=react&logoColor=white)](https://react.dev)
+[![TanStack](https://img.shields.io/badge/TanStack-Router%20%7C%20Query-ff4154?logo=reactquery&logoColor=white)](https://tanstack.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06b6d4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Drizzle-4169e1?logo=postgresql&logoColor=white)](https://orm.drizzle.team)
 
 Voraussetzungen: Bun 1.4.4, PostgreSQL. Befehle, Tests und Umgebungsvariablen stehen in
 [Entwicklung](https://belegt.net/entwicklung.html).
@@ -259,7 +266,8 @@ Sicherheitslücken bitte privat melden, siehe [SECURITY.md](SECURITY.md). Wie du
 [Fehler melden](https://github.com/Speicherstadt/belegt/issues/new?template=fehler.yml) &nbsp;·&nbsp; [Idee vorschlagen](https://github.com/Speicherstadt/belegt/issues/new?template=funktionswunsch.yml)
 
 <sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
-Wer eine veränderte Fassung von Belegt für andere übers Netz betreibt, muss ihnen den Quellcode anbieten (§ 13 AGPL). Für IT-Dienstleister: Partnerschaft mit direktem Draht zur Entwicklung, dazu Einrichtung und Support über <a href="https://teufel-it.de">teufel-it.de</a>.<br>
+Wer eine veränderte Fassung von Belegt für andere übers Netz betreibt, muss ihnen den Quellcode anbieten (§ 13 AGPL).<br>
+Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.<br>
 Belegt ist keine Steuer- oder Rechtsberatung. Aufbewahrung und Verfahrensdokumentation vor dem Echtbetrieb mit deiner Steuerberatung abgleichen.<br>
 Paperless-ngx ist ein Projekt seiner Entwickler; Belegt steht mit ihm in keiner Verbindung.</sub>
 
