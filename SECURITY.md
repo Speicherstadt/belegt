@@ -7,13 +7,13 @@ Sicherheitsfixes gibt es nur für das neueste Release. Bitte vor einer Meldung a
 
 | Version | Unterstützt |
 | --- | --- |
-| [neuestes Release](https://github.com/firsttris/belegt/releases/latest) | ja |
+| [neuestes Release](https://github.com/Speicherstadt/belegt/releases/latest) | ja |
 | ältere Releases | nein |
 
 ## Eine Lücke melden
 
 Bitte **kein öffentliches Issue** für ein Sicherheitsproblem. Melde es privat über GitHub:
-[Security › Report a vulnerability](https://github.com/firsttris/belegt/security/advisories/new).
+[Security › Report a vulnerability](https://github.com/Speicherstadt/belegt/security/advisories/new).
 
 Eine gute Meldung nennt die Version, wie sich das Problem nachstellen lässt und was ein Angreifer damit erreicht. Keine
 echten Dokumente, Mails oder Zugangsdaten mitschicken. Wir bestätigen die Meldung, arbeiten den Fix in einem privaten
@@ -32,7 +32,7 @@ erst die Konfiguration von Belegt sie ausnutzbar, bitte hier melden.
 
 ## Getrennte Datenbankrollen
 
-Mit [getrennten Rollen](https://firsttris.github.io/belegt/betrieb.html#getrennte-datenbankrollen) arbeitet die App als
+Mit [getrennten Rollen](https://belegt.net/betrieb.html#getrennte-datenbankrollen) arbeitet die App als
 Rolle ohne Eigentum an Tabellen und ohne Rechte, Trigger abzuschalten, Tabellen zu ändern oder zu leeren oder den
 Replikationsmodus zu setzen. Nur der Migrationsschritt nutzt den Eigentümer und vergibt danach die Rechte neu; der
 Server bekommt dessen Adresse nicht. Eine übernommene App kann so nur, was auch die Oberfläche kann, und die Trigger

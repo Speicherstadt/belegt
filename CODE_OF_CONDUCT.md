@@ -36,7 +36,7 @@ wiederkommen.
 
 ## Wo der Kodex gilt
 
-Überall, wo an Belegt gearbeitet oder darüber gesprochen wird: im Repository `firsttris/belegt` auf GitHub (Issues, Pull
+Überall, wo an Belegt gearbeitet oder darüber gesprochen wird: im Repository `Speicherstadt/belegt` auf GitHub (Issues, Pull
 Requests, Reviews, Diskussionen, Commits) und überall, wo jemand öffentlich für Belegt spricht.
 
 ## Melden

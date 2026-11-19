@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, type DatenbankProblem } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 
-export const ROLLEN_DOKU = "https://firsttris.github.io/belegt/betrieb.html#getrennte-datenbankrollen";
+export const ROLLEN_DOKU = "https://belegt.net/betrieb.html#getrennte-datenbankrollen";
 
 export const PROBLEM: Record<DatenbankProblem, () => string> = {
   rollenwechsel: () => m.db_problem_rollenwechsel(),

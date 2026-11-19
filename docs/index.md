@@ -232,8 +232,8 @@ Mit dem Einrichtungscode aus `docker compose logs server` das erste Konto anlege
 
 ```bash
 mkdir belegt && cd belegt
-curl -O https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.yml
-curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.env.example
+curl -O https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.yml
+curl -o .env https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.env.example
 chmod 600 .env
 ```
 
@@ -246,6 +246,6 @@ chmod 600 .env
 
 <p class="showcase-claim">Open Source unter AGPL-3.0, kostenlos. Du brauchst nur einen Server.</p>
 
-[Installieren](betrieb.md){ .md-button .md-button--primary } [Alle Funktionen](ueberblick.md){ .md-button } [Quellcode auf GitHub](https://github.com/firsttris/belegt){ .md-button }
+[Installieren](betrieb.md){ .md-button .md-button--primary } [Alle Funktionen](ueberblick.md){ .md-button } [Quellcode auf GitHub](https://github.com/Speicherstadt/belegt){ .md-button }
 
 </div>

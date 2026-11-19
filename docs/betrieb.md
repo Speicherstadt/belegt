@@ -12,13 +12,13 @@ Workflows aus und liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch
 
 ## Starten
 
-Das Image `tristanteu/belegt` (auch `ghcr.io/firsttris/belegt`, für amd64 und arm64) erscheint mit dem ersten Release
+Das Image `tristanteu/belegt` (auch `ghcr.io/speicherstadt/belegt`, für amd64 und arm64) erscheint mit dem ersten Release
 auf Docker Hub und GHCR. Dann reichen ohne den Quellcode zwei Dateien:
 
 ```bash
 mkdir belegt && cd belegt
-curl -O https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.yml
-curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.env.example
+curl -O https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.yml
+curl -o .env https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.env.example
 chmod 600 .env
 ```
 
