@@ -1,11 +1,11 @@
 # belegt-ftp
 
 FTP für Netzwerkscanner, die per „Scan to FTP“ senden: [vsftpd](https://security.appspot.com/vsftpd.html) mit einem
-Benutzer, der nur in den Eingangsordner von [Belegt](https://github.com/firsttris/belegt) schreibt. Der Worker von
+Benutzer, der nur in den Eingangsordner von [Belegt](https://github.com/Speicherstadt/belegt) schreibt. Der Worker von
 Belegt nimmt jede fertige Datei von dort auf. Nur für das eigene Netz: Ohne TLS gehen Passwort und Dateien
 unverschlüsselt über die Leitung.
 
-- Compose: Profil `ftp` in [`deploy/compose.yml`](https://github.com/firsttris/belegt/blob/main/deploy/compose.yml), derselbe Ordner wie beim Worker unter `/eingang`.
+- Compose: Profil `ftp` in [`deploy/compose.yml`](https://github.com/Speicherstadt/belegt/blob/main/deploy/compose.yml), derselbe Ordner wie beim Worker unter `/eingang`.
 - Ports: 21 und der passive Bereich 30000–30009.
 - Dateien gehören UID 1000 (wie der Worker), damit Belegt sie nach der Aufnahme entfernen kann.
 
@@ -18,4 +18,4 @@ unverschlüsselt über die Leitung.
 | `FTP_UID` | Besitzer der Dateien | `1000` |
 
 Die Tags folgen Belegt (`:latest`, `:0.2`, `:0.2.0`, `:next`). Einrichten mit einem Scanner:
-[Scannen](https://firsttris.github.io/belegt/scannen.html).
+[Scannen](https://belegt.net/scannen.html).

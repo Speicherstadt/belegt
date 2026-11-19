@@ -3,7 +3,7 @@ import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 
-export const BACKUP_DOKU = "https://firsttris.github.io/belegt/betrieb.html#sichern";
+export const BACKUP_DOKU = "https://belegt.net/betrieb.html#sichern";
 
 const fehler = "m-0 text-red-700 text-sm dark:text-red-400";
 

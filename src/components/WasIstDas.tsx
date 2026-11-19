@@ -2,7 +2,7 @@ import { type ReactNode, useId, useState } from "react";
 import { m } from "../paraglide/messages.js";
 
 /** Glossar in der Dokumentation (docs/glossar.md); wie BACKUP_DOKU: die App liefert die Doku nicht selbst aus */
-export const GLOSSARY = "https://firsttris.github.io/belegt/glossar.html";
+export const GLOSSARY = "https://belegt.net/glossar.html";
 
 /** Fachbegriffe mit Name, Satz in einfacher Sprache und Anker im Glossar */
 export const TERMS = {

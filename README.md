@@ -7,26 +7,26 @@ Mails, E-Rechnungen, Scans und beliebige Dokumente an einem Ort, durchsuchbar, a
 werden muss, bleibt bis Fristende unverändert, und danach löschst du es nachweisbar.
 
 ![Status: Beta](https://img.shields.io/badge/Status-Beta-orange)
-[![CI](https://github.com/firsttris/belegt/actions/workflows/ci.yml/badge.svg)](https://github.com/firsttris/belegt/actions/workflows/ci.yml)
+[![CI](https://github.com/Speicherstadt/belegt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/belegt/actions/workflows/ci.yml)
 [![Lizenz: AGPL-3.0](https://img.shields.io/badge/Lizenz-AGPL--3.0-blue)](LICENSE)
-[![Doku](https://img.shields.io/badge/Doku-firsttris.github.io%2Fbelegt-4f46e5)](https://firsttris.github.io/belegt/)
-[![GoBD](https://img.shields.io/badge/GoBD-Siegel%20%7C%20Hash--Kette%20%7C%20Z1%20%7C%20Z3-1f6f5c)](https://firsttris.github.io/belegt/pruefung.html)
-[![E-Rechnung](https://img.shields.io/badge/E--Rechnung-ZUGFeRD%20%7C%20XRechnung-1f6f5c)](https://firsttris.github.io/belegt/eingang.html#text-und-e-rechnungen)
-[![RFC 3161](https://img.shields.io/badge/Zeitstempel-RFC%203161-1f6f5c)](https://firsttris.github.io/belegt/pruefung.html#zeitstempel-rfc-3161)
-[![MCP](https://img.shields.io/badge/MCP-KI--Assistenten-d97757)](https://firsttris.github.io/belegt/schnittstelle.html#ki-assistenten-mcp)
+[![Doku](https://img.shields.io/badge/Doku-belegt.net-4f46e5)](https://belegt.net/)
+[![GoBD](https://img.shields.io/badge/GoBD-Siegel%20%7C%20Hash--Kette%20%7C%20Z1%20%7C%20Z3-1f6f5c)](https://belegt.net/pruefung.html)
+[![E-Rechnung](https://img.shields.io/badge/E--Rechnung-ZUGFeRD%20%7C%20XRechnung-1f6f5c)](https://belegt.net/eingang.html#text-und-e-rechnungen)
+[![RFC 3161](https://img.shields.io/badge/Zeitstempel-RFC%203161-1f6f5c)](https://belegt.net/pruefung.html#zeitstempel-rfc-3161)
+[![MCP](https://img.shields.io/badge/MCP-KI--Assistenten-d97757)](https://belegt.net/schnittstelle.html#ki-assistenten-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.sh)
 [![Hono](https://img.shields.io/badge/Hono-e36002?logo=hono&logoColor=white)](https://hono.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169e1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-[Rundgang in Bildern](https://firsttris.github.io/belegt/) •
+[Rundgang in Bildern](https://belegt.net/) •
 [Warum?](#warum-belegt) •
 [Funktionen](#funktionen) •
 [Schnellstart](#schnellstart) •
 [FAQ](#faq) •
 [Entwicklung](#entwicklung)
 
-<sub>English: self-hosted document archive with a GoBD mode for German businesses: mails (IMAP, JMAP, Microsoft 365, Google, SMTP journal, PST), e-invoices (ZUGFeRD, XRechnung), scans with OCR and any other file, immutable until the end of the legal retention period, with auditor access and the data medium for tax audits. The app is in German and English; the [documentation](https://firsttris.github.io/belegt/) is in German.</sub>
+<sub>English: self-hosted document archive with a GoBD mode for German businesses: mails (IMAP, JMAP, Microsoft 365, Google, SMTP journal, PST), e-invoices (ZUGFeRD, XRechnung), scans with OCR and any other file, immutable until the end of the legal retention period, with auditor access and the data medium for tax audits. The app is in German and English; the [documentation](https://belegt.net/) is in German.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-start-dunkel.png">
@@ -37,7 +37,7 @@ werden muss, bleibt bis Fristende unverändert, und danach löschst du es nachwe
 
 > [!WARNING]
 > **Beta:** Belegt wird noch stark weiterentwickelt. Vor jedem Update sichern
-> ([Sichern](https://firsttris.github.io/belegt/betrieb.html#sichern)); Migrationen lassen sich nicht zurückspielen.
+> ([Sichern](https://belegt.net/betrieb.html#sichern)); Migrationen lassen sich nicht zurückspielen.
 
 ## Warum Belegt?
 
@@ -61,21 +61,21 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 ## Funktionen
 
 Kurz je Bereich; die Details stehen auf der verlinkten Seite, alles auf einen Blick unter
-[Alle Funktionen](https://firsttris.github.io/belegt/ueberblick.html).
+[Alle Funktionen](https://belegt.net/ueberblick.html).
 
 | Bereich | Was Belegt kann |
 |---|---|
-| 📥 [Eingang](https://firsttris.github.io/belegt/eingang.html) | Hochladen, Foto mit dem Handy, Teilen an die installierte App, [Scanner per FTP](https://firsttris.github.io/belegt/scannen.html) mit Trennblättern, Postfächer per IMAP, JMAP, Microsoft 365 und Google, SMTP-Journal, EML, MBOX und PST |
-| 🔎 [Suche](https://firsttris.github.io/belegt/eingang.html) | Volltext in PDFs, Office-Dateien, Mails und Scans (Texterkennung), fortlaufende Archivnummer |
-| 🏷️ [Ordnung](https://firsttris.github.io/belegt/ordnung.html) | Korrespondenten, Tags, Dokumenttypen und eigene Felder, Zuordnungsregeln und gelernte Vorschläge, gespeicherte Ansichten |
-| 🧾 [E-Rechnungen](https://firsttris.github.io/belegt/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, als Vorschlag zur Einordnung, auf Wunsch [mit dem KoSIT-Validator geprüft](https://firsttris.github.io/belegt/betrieb.html#erechnung-pruefen) |
-| ⏳ [Fristen und Löschen](https://firsttris.github.io/belegt/fristen.html) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen nach Fristende mit zweiter Person |
-| 🔒 [Prüfung](https://firsttris.github.io/belegt/pruefung.html) | Siegel und Hash-Kette in PostgreSQL, Prüfbericht, Prüferzugang (Z1), Datenträger mit `index.xml` (Z3), Zeitstempel nach RFC 3161 |
-| 📘 [Verfahrensdokumentation](https://firsttris.github.io/belegt/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
-| ⚙️ [Workflows](https://firsttris.github.io/belegt/workflows.html) | Tags, Typ, Felder, Notiz, Webhook oder Original an eine Adresse, wenn ein Dokument ankommt oder eingeordnet wird |
-| 🔌 [Schnittstellen](https://firsttris.github.io/belegt/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
-| 🔐 [Zugänge](https://firsttris.github.io/belegt/zugaenge.html) | Inhaber, Steuerberatung, Prüfer und Mitarbeiter mit Sichtbereich, zweiter Faktor, [OpenID Connect und Einbetten](https://firsttris.github.io/belegt/einbetten.html), [Teilen per Link](https://firsttris.github.io/belegt/teilen.html) |
-| 📦 [Umzug](https://firsttris.github.io/belegt/umzug.html) | Aus Paperless-ngx über die API oder einen Export, mit Tags, Feldern und Notizen |
+| 📥 [Eingang](https://belegt.net/eingang.html) | Hochladen, Foto mit dem Handy, Teilen an die installierte App, [Scanner per FTP](https://belegt.net/scannen.html) mit Trennblättern, Postfächer per IMAP, JMAP, Microsoft 365 und Google, SMTP-Journal, EML, MBOX und PST |
+| 🔎 [Suche](https://belegt.net/eingang.html) | Volltext in PDFs, Office-Dateien, Mails und Scans (Texterkennung), fortlaufende Archivnummer |
+| 🏷️ [Ordnung](https://belegt.net/ordnung.html) | Korrespondenten, Tags, Dokumenttypen und eigene Felder, Zuordnungsregeln und gelernte Vorschläge, gespeicherte Ansichten |
+| 🧾 [E-Rechnungen](https://belegt.net/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, als Vorschlag zur Einordnung, auf Wunsch [mit dem KoSIT-Validator geprüft](https://belegt.net/betrieb.html#erechnung-pruefen) |
+| ⏳ [Fristen und Löschen](https://belegt.net/fristen.html) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen nach Fristende mit zweiter Person |
+| 🔒 [Prüfung](https://belegt.net/pruefung.html) | Siegel und Hash-Kette in PostgreSQL, Prüfbericht, Prüferzugang (Z1), Datenträger mit `index.xml` (Z3), Zeitstempel nach RFC 3161 |
+| 📘 [Verfahrensdokumentation](https://belegt.net/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
+| ⚙️ [Workflows](https://belegt.net/workflows.html) | Tags, Typ, Felder, Notiz, Webhook oder Original an eine Adresse, wenn ein Dokument ankommt oder eingeordnet wird |
+| 🔌 [Schnittstellen](https://belegt.net/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
+| 🔐 [Zugänge](https://belegt.net/zugaenge.html) | Inhaber, Steuerberatung, Prüfer und Mitarbeiter mit Sichtbereich, zweiter Faktor, [OpenID Connect und Einbetten](https://belegt.net/einbetten.html), [Teilen per Link](https://belegt.net/teilen.html) |
+| 📦 [Umzug](https://belegt.net/umzug.html) | Aus Paperless-ngx über die API oder einen Export, mit Tags, Feldern und Notizen |
 | 🌍 Oberfläche | Deutsch und Englisch, hell, dunkel oder nach dem Gerät, als App installierbar, gegen WCAG 2.2 AA geprüft |
 
 ## Screenshots
@@ -91,7 +91,7 @@ Kurz je Bereich; die Details stehen auf der verlinkten Seite, alles auf einen Bl
   </tr>
 </table>
 
-Mehr im [Rundgang in Bildern](https://firsttris.github.io/belegt/).
+Mehr im [Rundgang in Bildern](https://belegt.net/).
 
 ## Schnellstart
 
@@ -101,8 +101,8 @@ Images erscheinen mit dem ersten Release auf Docker Hub und GHCR.
 
 ```bash
 mkdir belegt && cd belegt
-curl -O https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.yml
-curl -o .env https://raw.githubusercontent.com/firsttris/belegt/main/deploy/compose.env.example
+curl -O https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.yml
+curl -o .env https://raw.githubusercontent.com/Speicherstadt/belegt/main/deploy/compose.env.example
 chmod 600 .env
 ```
 
@@ -118,7 +118,7 @@ Mit dem Einrichtungscode aus dem Log legst du unter `BELEGT_URL` (Port 3000) das
 Dienste sind Profile (`docker compose --profile <name> up -d`): `https` (Caddy), `backup` (tägliche Sicherung mit
 Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Rechnungen prüfen), `vorschau`
 (Office-Dateien als PDF) und `ki` (Sprachmodell). S3, Zeitstempel, Microsoft 365, Google und OpenID Connect stehen in
-[Installation und Betrieb](https://firsttris.github.io/belegt/betrieb.html).
+[Installation und Betrieb](https://belegt.net/betrieb.html).
 
 > [!IMPORTANT]
 > Sichere `BELEGT_SCHLUESSEL` zusätzlich an einem zweiten Ort. Ohne ihn lassen sich Postfach-Passwörter,
@@ -132,7 +132,7 @@ Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Re
 Belegt setzt die technischen Anforderungen um: Unveränderbarkeit per Datenbank, Hash-Kette, Fristen, Löschen mit
 Nachweis, Prüferzugang und Datenträger. Zur Ordnungsmäßigkeit gehören außerdem dein Betrieb (Sicherung, Zugänge,
 Abläufe) und deine Verfahrensdokumentation. Ein Testat für die Software gibt es nicht; was eine Prüfung braucht, steht
-in [Unterlagen für ein Testat](https://firsttris.github.io/belegt/testat.html).
+in [Unterlagen für ein Testat](https://belegt.net/testat.html).
 </details>
 
 <details>
@@ -141,7 +141,7 @@ in [Unterlagen für ein Testat](https://firsttris.github.io/belegt/testat.html).
 Es kann das Gleiche (hochladen, Texterkennung, Suche, einordnen), aber mit einem anderen Ziel: Belegt beweist, dass ein
 Dokument seit dem Eingang unverändert ist, und weiß, wie lange es aufbewahrt werden muss. Was nicht aufbewahrt werden
 muss, legst du „frei“ ab und löschst es, wann du willst. Aus Paperless-ngx ziehst du mit allen Dokumenten, Tags,
-Feldern und Notizen um, siehe [Von Paperless-ngx zu Belegt](https://firsttris.github.io/belegt/umzug.html).
+Feldern und Notizen um, siehe [Von Paperless-ngx zu Belegt](https://belegt.net/umzug.html).
 </details>
 
 <details>
@@ -149,7 +149,7 @@ Feldern und Notizen um, siehe [Von Paperless-ngx zu Belegt](https://firsttris.gi
 
 Ja: Postfächer per OAuth (Microsoft 365, Google), IMAP oder JMAP abrufen, alle Mails per SMTP-Journal vom Mailserver
 bekommen, oder eine PST-Datei aus Outlook importieren. Siehe
-[Eingang, Mails und Suche](https://firsttris.github.io/belegt/eingang.html).
+[Eingang, Mails und Suche](https://belegt.net/eingang.html).
 </details>
 
 <details>
@@ -165,8 +165,8 @@ und was es bekommt.
 
 Ja, über eine Einladung: Die Steuerberatung liest und bestätigt Löschungen als zweite Person; ein Prüfer sieht nur
 Dokumente seines Zeitraums und lädt den Datenträger herunter. Mitarbeiter sehen nur Dokumente bestimmter Tags, Typen
-oder Korrespondenten und ordnen sie auf Wunsch ein. Siehe [Prüfung, Z1 und Z3](https://firsttris.github.io/belegt/pruefung.html)
-und [Zugänge](https://firsttris.github.io/belegt/zugaenge.html).
+oder Korrespondenten und ordnen sie auf Wunsch ein. Siehe [Prüfung, Z1 und Z3](https://belegt.net/pruefung.html)
+und [Zugänge](https://belegt.net/zugaenge.html).
 </details>
 
 <details>
@@ -174,7 +174,7 @@ und [Zugänge](https://firsttris.github.io/belegt/zugaenge.html).
 
 Ja: per MCP suchen und lesen KI-Assistenten im Archiv, mit dem Recht „schreiben“ nehmen sie auch auf und ordnen ein;
 löschen kann keiner. Für eigene Programme gibt es REST-API, Webhooks und API-Tokens. Siehe
-[Schnittstellen](https://firsttris.github.io/belegt/schnittstelle.html).
+[Schnittstellen](https://belegt.net/schnittstelle.html).
 </details>
 
 <details>
@@ -186,7 +186,7 @@ Die Software ist kostenlos (AGPL-3.0). Du brauchst nur einen Server.
 ## Entwicklung
 
 Voraussetzungen: Bun 1.4.4, PostgreSQL. Befehle, Tests und Umgebungsvariablen stehen in
-[Entwicklung](https://firsttris.github.io/belegt/entwicklung.html), wie du mitmachst, in
+[Entwicklung](https://belegt.net/entwicklung.html), wie du mitmachst, in
 [CONTRIBUTING.md](CONTRIBUTING.md). Sicherheitslücken bitte privat melden, siehe [SECURITY.md](SECURITY.md).
 
 ```bash
@@ -202,10 +202,10 @@ Open-Source-Buchhaltung desselben Projekts.
 
 ## Sterne im Verlauf
 
-<a href="https://www.star-history.com/#firsttris/belegt&Date">
+<a href="https://www.star-history.com/#Speicherstadt/belegt&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=firsttris/belegt&type=Date&theme=dark">
-    <img alt="Verlauf der GitHub-Sterne von Belegt" src="https://api.star-history.com/svg?repos=firsttris/belegt&type=Date">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Speicherstadt/belegt&type=Date&theme=dark">
+    <img alt="Verlauf der GitHub-Sterne von Belegt" src="https://api.star-history.com/svg?repos=Speicherstadt/belegt&type=Date">
   </picture>
 </a>
 
@@ -213,8 +213,8 @@ Open-Source-Buchhaltung desselben Projekts.
 
 <div align="center">
 
-⭐ Gefällt dir Belegt? Ein [Stern auf GitHub](https://github.com/firsttris/belegt) hilft anderen, es zu finden.<br>
-🐛 [Fehler melden](https://github.com/firsttris/belegt/issues/new) · 💡 [Idee vorschlagen](https://github.com/firsttris/belegt/issues/new) · 🔒 [Sicherheitslücke melden](SECURITY.md)
+⭐ Gefällt dir Belegt? Ein [Stern auf GitHub](https://github.com/Speicherstadt/belegt) hilft anderen, es zu finden.<br>
+🐛 [Fehler melden](https://github.com/Speicherstadt/belegt/issues/new) · 💡 [Idee vorschlagen](https://github.com/Speicherstadt/belegt/issues/new) · 🔒 [Sicherheitslücke melden](SECURITY.md)
 
 <sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
 Wer Belegt für andere betreibt, muss ihnen den Quellcode anbieten.<br>
