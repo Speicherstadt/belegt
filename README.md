@@ -222,7 +222,7 @@ Weitere Open-Source-Apps für deinen eigenen Server, für Buchhaltung, Mail, Off
 [Fehler melden](https://github.com/Speicherstadt/belegt/issues/new) &nbsp;·&nbsp; [Idee vorschlagen](https://github.com/Speicherstadt/belegt/issues/new) &nbsp;·&nbsp; [Sicherheitslücke melden](SECURITY.md)
 
 <sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
-Wer Belegt für andere betreibt, muss ihnen den Quellcode anbieten.<br>
+Wer eine veränderte Fassung von Belegt für andere übers Netz betreibt, muss ihnen den Quellcode anbieten (§ 13 AGPL). Für IT-Dienstleister: Partnerschaft mit direktem Draht zur Entwicklung, dazu Einrichtung und Support über <a href="https://teufel-it.de">teufel-it.de</a>.<br>
 Belegt ist keine Steuer- oder Rechtsberatung. Aufbewahrung und Verfahrensdokumentation vor dem Echtbetrieb mit deiner Steuerberatung abgleichen.</sub>
 
 </div>
