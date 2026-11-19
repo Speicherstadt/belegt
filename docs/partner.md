@@ -15,8 +15,9 @@ andere Wege:
 **Mit Partner:** IT-Dienstleister und Hoster aus dem Partnerprogramm richten Belegt für ihre Kunden ein und betreuen
 es.
 
-Fragen zur Nutzung gehören in die [Issues auf GitHub](https://github.com/Speicherstadt/belegt/issues). Kostenlose
-Einzelhilfe gibt es nicht; die Einrichtung für ein einzelnes Unternehmen übernimmt ein Partner oder, als bezahltes
-Projekt, die Entwicklung.
+Fragen zur Nutzung beantworten wir öffentlich in den
+[GitHub-Issues](https://github.com/Speicherstadt/belegt/issues), damit alle etwas davon haben. Wer Einrichtung oder
+Betrieb für seine Firma abgeben will, findet einen Partner oder nutzt den gehosteten Betrieb; größere Einführungen
+übernehmen wir auch als bezahltes Projekt.
 
 Mehr zum Partnerprogramm und zum gehosteten Betrieb auf [speicherstadt.app/partner](https://speicherstadt.app/partner/).
