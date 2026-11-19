@@ -39,7 +39,11 @@ jobs:
       description: "Selbst gehostetes Dokumentenarchiv mit GoBD-Modus: Mails, E-Rechnungen, Scans, Fristen"
       dockerfile: Containerfile
       ghcr: true
-    secrets: inherit
+    # Ausdrücklich statt „inherit“: das reicht Secrets nur an Workflows desselben Besitzers weiter, und seit
+    # dem Umzug nach Speicherstadt liegt firsttris/workflows bei einem anderen (sonst kommt DOCKER_PAT leer
+    # an und „prepare“ wird abgewiesen, bevor es einen Runner bekommt).
+    secrets:
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
     permissions:
       contents: write
       packages: write
@@ -60,7 +64,8 @@ jobs:
       ghcr-image: firsttris/belegt-backup
       readme: deploy/backup/README.md
       github-release: false
-    secrets: inherit
+    secrets:
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
     permissions:
       contents: write
       packages: write
@@ -79,7 +84,8 @@ jobs:
       ghcr-image: firsttris/belegt-validator
       readme: deploy/validator/README.md
       github-release: false
-    secrets: inherit
+    secrets:
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
     permissions:
       contents: write
       packages: write
@@ -98,7 +104,8 @@ jobs:
       ghcr-image: firsttris/belegt-ftp
       readme: deploy/ftp/README.md
       github-release: false
-    secrets: inherit
+    secrets:
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
     permissions:
       contents: write
       packages: write
