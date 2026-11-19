@@ -200,6 +200,10 @@ bun run e2e          # Playwright mit axe gegen einen echten Server
 Belegt nutzt den GoBD-Kern (`@firsttris/gobd-kern`) aus [Haben](https://github.com/firsttris/haben), der
 Open-Source-Buchhaltung desselben Projekts.
 
+## Mehr von uns
+
+Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
+
 ## Sterne im Verlauf
 
 <a href="https://www.star-history.com/#Speicherstadt/belegt&Date">
@@ -213,11 +217,12 @@ Open-Source-Buchhaltung desselben Projekts.
 
 <div align="center">
 
-⭐ Gefällt dir Belegt? Ein [Stern auf GitHub](https://github.com/Speicherstadt/belegt) hilft anderen, es zu finden.<br>
-🐛 [Fehler melden](https://github.com/Speicherstadt/belegt/issues/new) · 💡 [Idee vorschlagen](https://github.com/Speicherstadt/belegt/issues/new) · 🔒 [Sicherheitslücke melden](SECURITY.md)
+⭐ **Gefällt dir Belegt?** Ein [Stern auf GitHub](https://github.com/Speicherstadt/belegt) hilft anderen, es zu finden.
+
+[Fehler melden](https://github.com/Speicherstadt/belegt/issues/new) &nbsp;·&nbsp; [Idee vorschlagen](https://github.com/Speicherstadt/belegt/issues/new) &nbsp;·&nbsp; [Sicherheitslücke melden](SECURITY.md)
 
 <sub>Lizenz: <a href="LICENSE">AGPL-3.0</a> · © Tristan Teufel und Mitwirkende<br>
-Wer Belegt für andere betreibt, muss ihnen den Quellcode anbieten.<br>
+Wer eine veränderte Fassung von Belegt für andere übers Netz betreibt, muss ihnen den Quellcode anbieten (§ 13 AGPL). Für IT-Dienstleister: Partnerschaft mit direktem Draht zur Entwicklung, dazu Einrichtung und Support über <a href="https://teufel-it.de">teufel-it.de</a>.<br>
 Belegt ist keine Steuer- oder Rechtsberatung. Aufbewahrung und Verfahrensdokumentation vor dem Echtbetrieb mit deiner Steuerberatung abgleichen.</sub>
 
 </div>
