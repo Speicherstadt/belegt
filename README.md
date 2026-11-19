@@ -202,7 +202,7 @@ Open-Source-Buchhaltung desselben Projekts.
 
 ## Mehr von uns
 
-Weitere Open-Source-Apps für deinen eigenen Server, für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
+Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
 
 ## Sterne im Verlauf
 
