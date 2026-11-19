@@ -134,8 +134,8 @@ Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Re
 > Sichere `BELEGT_SCHLUESSEL` zusätzlich an einem zweiten Ort. Ohne ihn lassen sich Postfach-Passwörter,
 > Refresh-Tokens und Webhook-Geheimnisse nach einer Wiederherstellung nicht mehr lesen.
 
-Keinen eigenen Server oder keine eigene IT? Belegt gibt es gehostet oder über einen IT-Dienstleister aus dem
-[Partnerprogramm](https://speicherstadt.app/partner/).
+Keinen eigenen Server oder keine eigene IT? Belegt gibt es auf Anfrage gehostet oder über einen IT-Dienstleister
+aus dem [Partnerprogramm](https://speicherstadt.app/partner/).
 
 ## FAQ
 
