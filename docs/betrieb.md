@@ -10,6 +10,9 @@ Belegt läuft als ein Image für Server und Worker neben PostgreSQL. Der Server 
 und liefert die Oberfläche aus; der Worker ruft Postfächer ab, überwacht den Eingangsordner, stellt Webhooks zu, führt
 Workflows aus und liest Text, mit Texterkennung (Tesseract, Deutsch und Englisch) auch aus Scans.
 
+Keine Zeit für Einrichtung und Betrieb? Die Entwickler richten Belegt ein oder betreiben es für dich, siehe
+[Support und Partnerschaft](support.md).
+
 ## Starten
 
 Das Image `tristanteu/belegt` (auch `ghcr.io/speicherstadt/belegt`, für amd64 und arm64) erscheint mit dem ersten Release
