@@ -13,18 +13,17 @@ werden muss, bleibt bis Fristende unverändert, und danach löschst du es nachwe
 
 ![Status: Beta](https://img.shields.io/badge/Status-Beta-orange)
 [![CI](https://github.com/Speicherstadt/belegt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/belegt/actions/workflows/ci.yml)
-[![Doku](https://img.shields.io/badge/Doku-belegt.net-4f46e5)](https://belegt.net/)
 [![Lizenz: AGPL-3.0](https://img.shields.io/badge/Lizenz-AGPL--3.0-blue)](LICENSE)
+[![Doku](https://img.shields.io/badge/Doku-belegt.net-4f46e5)](https://belegt.net/)
 [![GoBD](https://img.shields.io/badge/GoBD-Siegel%20%7C%20Hash--Kette%20%7C%20Z1%20%7C%20Z3-1f6f5c)](https://belegt.net/pruefung.html)
 [![E-Rechnung](https://img.shields.io/badge/E--Rechnung-ZUGFeRD%20%7C%20XRechnung-1f6f5c)](https://belegt.net/eingang.html#text-und-e-rechnungen)
 
-[Warum](#-warum-belegt) •
-[Installation](#-installation) •
-[Funktionen](#-funktionen) •
-[Screenshots](#-screenshots) •
-[Alternativen](#-belegt-und-die-alternativen) •
-[FAQ](#-faq) •
-[Dokumentation](https://belegt.net/)
+[Warum?](#warum-belegt) •
+[Funktionen](#funktionen) •
+[Schnellstart](#schnellstart) •
+[FAQ](#faq) •
+[Dokumentation](https://belegt.net/) •
+[Entwicklung](#entwicklung)
 
 🖼️ **[Rundgang in Bildern](https://belegt.net/)**
 
@@ -36,7 +35,7 @@ werden muss, bleibt bis Fristende unverändert, und danach löschst du es nachwe
 > **Beta:** Belegt wird noch stark weiterentwickelt. Vor jedem Update sichern
 > ([Sichern](https://belegt.net/betrieb.html#sichern)); Migrationen lassen sich nicht zurückspielen.
 
-## 💡 Warum Belegt?
+## Warum Belegt?
 
 Wer ein Unternehmen führt, muss Rechnungen, Kontoauszüge und Geschäftsbriefe sechs, acht oder zehn Jahre aufbewahren,
 unverändert und auffindbar, und der Betriebsprüfung zeigen können. Ein Ordner auf dem Server oder ein
@@ -55,11 +54,60 @@ Dokumentenmanagement reicht dafür selten: Dateien lassen sich ändern, und niem
 - **Deine Daten bleiben bei dir**: eigener Server, Geheimnisse verschlüsselt, KI-Vorschläge nur mit einem Modell auf
   deinem Server
 
-## 🚀 Installation
+## Funktionen
+
+Kurz je Bereich; die Details stehen auf der verlinkten Seite, alles auf einen Blick unter
+[Alle Funktionen](https://belegt.net/ueberblick.html).
+
+| Bereich | Was Belegt kann |
+|---|---|
+| 📥 [Eingang](https://belegt.net/eingang.html) | Hochladen, Foto mit dem Handy, Teilen an die installierte App, [Scanner per FTP](https://belegt.net/scannen.html) mit Trennblättern, Postfächer per IMAP, JMAP, Microsoft 365 und Google, SMTP-Journal, EML, MBOX und PST |
+| 🔎 [Suche](https://belegt.net/eingang.html) | Volltext in PDFs, Office-Dateien, Mails und Scans (Texterkennung), fortlaufende Archivnummer |
+| 🏷️ [Ordnung](https://belegt.net/ordnung.html) | Korrespondenten, Tags, Dokumenttypen und eigene Felder, Zuordnungsregeln und gelernte Vorschläge, gespeicherte Ansichten |
+| 🧾 [E-Rechnungen](https://belegt.net/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, als Vorschlag zur Einordnung, auf Wunsch [mit dem KoSIT-Validator geprüft](https://belegt.net/betrieb.html#erechnung-pruefen) |
+| ⏳ [Fristen und Löschen](https://belegt.net/fristen.html) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen nach Fristende mit zweiter Person |
+| 🔒 [Prüfung](https://belegt.net/pruefung.html) | Siegel und Hash-Kette in PostgreSQL, Prüfbericht, Prüferzugang (Z1), Datenträger mit `index.xml` (Z3), Zeitstempel nach RFC 3161 |
+| 📘 [Verfahrensdokumentation](https://belegt.net/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
+| ⚙️ [Workflows](https://belegt.net/workflows.html) | Tags, Typ, Felder, Notiz, Webhook oder Original an eine Adresse, wenn ein Dokument ankommt oder eingeordnet wird |
+| 🔌 [Schnittstellen](https://belegt.net/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
+| 🔐 [Zugänge](https://belegt.net/zugaenge.html) | Inhaber, Steuerberatung, Prüfer und Mitarbeiter mit Sichtbereich, zweiter Faktor, [OpenID Connect und Einbetten](https://belegt.net/einbetten.html), [Teilen per Link](https://belegt.net/teilen.html) |
+| 📦 [Umzug](https://belegt.net/umzug.html) | Aus Paperless-ngx über die API oder einen Export, mit Tags, Feldern und Notizen |
+| 🌍 Oberfläche | Deutsch und Englisch, hell, dunkel oder nach dem Gerät, als App installierbar, gegen WCAG 2.2 AA geprüft |
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-suche-dunkel.png"><img src="docs/assets/screenshot-suche.png" alt="Archiv mit der Suche nach „Rechnung“: Mail, XRechnung, Rechnung des Holzhandels und Stromrechnung mit Korrespondent, Typ, Tags und Frist"></picture><br><sub><b>Suche</b>: Volltext mit Filtern und Tags</sub></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-dokument-dunkel.png"><img src="docs/assets/screenshot-dokument.png" alt="ZUGFeRD-Rechnung mit PDF-Vorschau, Nummer, Datum, Verkäufer, Gesamtbetrag, Prüfung gültig und Vorschlag zur Einordnung"></picture><br><sub><b>E-Rechnung</b>: erkannt, geprüft und vorgeschlagen</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-fristen-dunkel.png"><img src="docs/assets/screenshot-fristen.png" alt="Fristen nach § 147 AO mit einem offenen Löschantrag, der auf die zweite Person wartet"></picture><br><sub><b>Fristen</b>: Löschen mit zweiter Person</sub></td>
+    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-pruefung-dunkel.png"><img src="docs/assets/screenshot-pruefung.png" alt="Prüfung: Kette intakt, Prüfbericht mit Prüfwert und Datenträger für die Betriebsprüfung"></picture><br><sub><b>Prüfung</b>: Prüfbericht und Datenträger (Z3)</sub></td>
+  </tr>
+</table>
+
+Mehr im [Rundgang in Bildern](https://belegt.net/).
+
+## Belegt und die Alternativen
+
+| | Was es ist | Was Belegt anders macht |
+| --- | --- | --- |
+| [Paperless-ngx](https://docs.paperless-ngx.com) | selbst gehostetes Dokumentenmanagement mit Texterkennung und Suche | dasselbe Ablegen und Suchen, dazu Fristen nach § 147 AO und Unveränderbarkeit in PostgreSQL; [Umzug](https://belegt.net/umzug.html) mit Tags, Feldern und Notizen |
+| Ordner auf dem Server | Dateiablage im Dateisystem oder auf einem Netzlaufwerk | Siegel und Hash-Kette statt änderbarer Dateien, gesperrt bis Fristende, Löschen nur mit zweiter Person und Nachweis |
+
+## Schnellstart
 
 Belegt läuft als Container (`tristanteu/belegt`, amd64 und arm64) neben PostgreSQL; ein zweiter Container aus demselben
 Image ruft Postfächer ab, liest Text und stellt Webhooks zu. Du brauchst einen Server mit Docker oder Podman. Die
 Images erscheinen mit dem ersten Release auf Docker Hub und GHCR.
+
+### 1. Von einem Agenten aufsetzen lassen
+
+Gib Claude Code oder einem anderen Coding-Agenten dieses Repository und SSH-Zugang zu deinem Server und sag:
+„Setz Belegt auf meinem Server auf, nach der [Installationsanleitung](https://belegt.net/betrieb.html).“
+
+### 2. Manuell
 
 ```bash
 mkdir belegt && cd belegt
@@ -86,49 +134,7 @@ Test-Restore), `journal` (SMTP-Journal), `ftp` (für Scanner), `validator` (E-Re
 > Sichere `BELEGT_SCHLUESSEL` zusätzlich an einem zweiten Ort. Ohne ihn lassen sich Postfach-Passwörter,
 > Refresh-Tokens und Webhook-Geheimnisse nach einer Wiederherstellung nicht mehr lesen.
 
-## ✨ Funktionen
-
-Kurz je Bereich; die Details stehen auf der verlinkten Seite, alles auf einen Blick unter
-[Alle Funktionen](https://belegt.net/ueberblick.html).
-
-| Bereich | Was Belegt kann |
-|---|---|
-| 📥 [Eingang](https://belegt.net/eingang.html) | Hochladen, Foto mit dem Handy, Teilen an die installierte App, [Scanner per FTP](https://belegt.net/scannen.html) mit Trennblättern, Postfächer per IMAP, JMAP, Microsoft 365 und Google, SMTP-Journal, EML, MBOX und PST |
-| 🔎 [Suche](https://belegt.net/eingang.html) | Volltext in PDFs, Office-Dateien, Mails und Scans (Texterkennung), fortlaufende Archivnummer |
-| 🏷️ [Ordnung](https://belegt.net/ordnung.html) | Korrespondenten, Tags, Dokumenttypen und eigene Felder, Zuordnungsregeln und gelernte Vorschläge, gespeicherte Ansichten |
-| 🧾 [E-Rechnungen](https://belegt.net/eingang.html#text-und-e-rechnungen) | XRechnung und ZUGFeRD erkannt, als Vorschlag zur Einordnung, auf Wunsch [mit dem KoSIT-Validator geprüft](https://belegt.net/betrieb.html#erechnung-pruefen) |
-| ⏳ [Fristen und Löschen](https://belegt.net/fristen.html) | Fristen nach § 147 AO, Sperren bei Außenprüfung oder Rechtsstreit, Löschen nach Fristende mit zweiter Person |
-| 🔒 [Prüfung](https://belegt.net/pruefung.html) | Siegel und Hash-Kette in PostgreSQL, Prüfbericht, Prüferzugang (Z1), Datenträger mit `index.xml` (Z3), Zeitstempel nach RFC 3161 |
-| 📘 [Verfahrensdokumentation](https://belegt.net/verfahrensdoku.html) | Aus dem tatsächlichen Stand erzeugt, mit deinen Angaben und den Lücken, die noch fehlen |
-| ⚙️ [Workflows](https://belegt.net/workflows.html) | Tags, Typ, Felder, Notiz, Webhook oder Original an eine Adresse, wenn ein Dokument ankommt oder eingeordnet wird |
-| 🔌 [Schnittstellen](https://belegt.net/schnittstelle.html) | REST-API mit OpenAPI, API-Tokens, signierte Webhooks, MCP für Claude und andere Assistenten |
-| 🔐 [Zugänge](https://belegt.net/zugaenge.html) | Inhaber, Steuerberatung, Prüfer und Mitarbeiter mit Sichtbereich, zweiter Faktor, [OpenID Connect und Einbetten](https://belegt.net/einbetten.html), [Teilen per Link](https://belegt.net/teilen.html) |
-| 📦 [Umzug](https://belegt.net/umzug.html) | Aus Paperless-ngx über die API oder einen Export, mit Tags, Feldern und Notizen |
-| 🌍 Oberfläche | Deutsch und Englisch, hell, dunkel oder nach dem Gerät, als App installierbar, gegen WCAG 2.2 AA geprüft |
-
-## 📸 Screenshots
-
-<table>
-  <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-suche-dunkel.png"><img src="docs/assets/screenshot-suche.png" alt="Archiv mit der Suche nach „Rechnung“: Mail, XRechnung, Rechnung des Holzhandels und Stromrechnung mit Korrespondent, Typ, Tags und Frist"></picture><br><sub><b>Suche</b>: Volltext mit Filtern und Tags</sub></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-dokument-dunkel.png"><img src="docs/assets/screenshot-dokument.png" alt="ZUGFeRD-Rechnung mit PDF-Vorschau, Nummer, Datum, Verkäufer, Gesamtbetrag, Prüfung gültig und Vorschlag zur Einordnung"></picture><br><sub><b>E-Rechnung</b>: erkannt, geprüft und vorgeschlagen</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-fristen-dunkel.png"><img src="docs/assets/screenshot-fristen.png" alt="Fristen nach § 147 AO mit einem offenen Löschantrag, der auf die zweite Person wartet"></picture><br><sub><b>Fristen</b>: Löschen mit zweiter Person</sub></td>
-    <td width="50%"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshot-pruefung-dunkel.png"><img src="docs/assets/screenshot-pruefung.png" alt="Prüfung: Kette intakt, Prüfbericht mit Prüfwert und Datenträger für die Betriebsprüfung"></picture><br><sub><b>Prüfung</b>: Prüfbericht und Datenträger (Z3)</sub></td>
-  </tr>
-</table>
-
-Mehr im [Rundgang in Bildern](https://belegt.net/).
-
-## 🔀 Belegt und die Alternativen
-
-| | Was es ist | Was Belegt anders macht |
-| --- | --- | --- |
-| [Paperless-ngx](https://docs.paperless-ngx.com) | selbst gehostetes Dokumentenmanagement mit Texterkennung und Suche | dasselbe Ablegen und Suchen, dazu Fristen nach § 147 AO und Unveränderbarkeit in PostgreSQL; [Umzug](https://belegt.net/umzug.html) mit Tags, Feldern und Notizen |
-| Ordner auf dem Server | Dateiablage im Dateisystem oder auf einem Netzlaufwerk | Siegel und Hash-Kette statt änderbarer Dateien, gesperrt bis Fristende, Löschen nur mit zweiter Person und Nachweis |
-
-## ❓ FAQ
+## FAQ
 
 <details>
 <summary><b>Ist Belegt GoBD-konform?</b></summary>
@@ -187,7 +193,7 @@ löschen kann keiner. Für eigene Programme gibt es REST-API, Webhooks und API-T
 Die Software ist kostenlos (AGPL-3.0). Du brauchst nur einen Server.
 </details>
 
-## 📚 Dokumentation
+## Dokumentation
 
 Alles im Detail, mit Suche: **[belegt.net](https://belegt.net/)** (auf Deutsch). Jede Funktion oben verlinkt ihre
 Seite; dazu kommen:
@@ -203,7 +209,7 @@ Seite; dazu kommen:
 - **Hintergrund:** [Glossar](https://belegt.net/glossar.html), [Unterlagen für ein Testat](https://belegt.net/testat.html),
   [Entwicklung](https://belegt.net/entwicklung.html) und [Plan](https://belegt.net/plan.html)
 
-## 🛠️ Entwicklung
+## Entwicklung
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.sh)
@@ -224,16 +230,25 @@ bun run e2e          # Playwright mit axe gegen einen echten Server
 Belegt nutzt den GoBD-Kern (`@firsttris/gobd-kern`) aus [Haben](https://github.com/firsttris/haben), der
 Open-Source-Buchhaltung desselben Projekts.
 
-## 🧩 Mehr von uns
+## Mehr von uns
 
 Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
 
-## 🤝 Mitwirken
+## Mitwirken
 
 Fehler und Ideen gern als Issue, mit dem [Formular für Fehlerberichte](https://github.com/Speicherstadt/belegt/issues/new?template=fehler.yml)
 oder für [Funktionswünsche](https://github.com/Speicherstadt/belegt/issues/new?template=funktionswunsch.yml).
 Sicherheitslücken bitte privat melden, siehe [SECURITY.md](SECURITY.md). Wie du mitmachst, steht in
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Sterne im Verlauf
+
+<a href="https://www.star-history.com/#Speicherstadt/belegt&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Speicherstadt/belegt&type=Date&theme=dark">
+    <img alt="Verlauf der GitHub-Sterne von Belegt" src="https://api.star-history.com/svg?repos=Speicherstadt/belegt&type=Date">
+  </picture>
+</a>
 
 ---
 
