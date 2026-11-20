@@ -19,4 +19,4 @@ Kopf, Siegel und jedes Original gegen seinen Hash. Basis ist `postgres:18` mit d
 | `restore.sh latest` / `restore.sh <id>` | Sicherung prüfen, dann Datenbank und Originale ersetzen (Belegt vorher stoppen); bei Befunden nur mit `--trotz-befunden` |
 
 Die Tags folgen Belegt (`:latest`, `:0.2`, `:0.2.0`, `:next`). Einrichten und Wiederherstellen:
-[Betrieb › Sichern](https://belegt.net/betrieb.html#sichern).
+[Betrieb › Sichern](https://belegt.store/betrieb.html#sichern).

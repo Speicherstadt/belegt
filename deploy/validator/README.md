@@ -10,4 +10,4 @@ XRechnung in UBL und CII und EN 16931 ohne XRechnung, also auch ZUGFeRD und Fact
 - Validator 1.6.3, Konfiguration 2026-08-31 für XRechnung 3.0.2, beide Apache-2.0; Java 21 (Eclipse Temurin), ohne Root und ohne Oberfläche.
 
 Die Tags folgen Belegt (`:latest`, `:0.2`, `:0.2.0`, `:next`). Einrichten:
-[Betrieb › E-Rechnungen prüfen](https://belegt.net/betrieb.html#erechnung-pruefen).
+[Betrieb › E-Rechnungen prüfen](https://belegt.store/betrieb.html#erechnung-pruefen).

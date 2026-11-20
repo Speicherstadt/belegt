@@ -32,7 +32,7 @@ erst die Konfiguration von Belegt sie ausnutzbar, bitte hier melden.
 
 ## Getrennte Datenbankrollen
 
-Mit [getrennten Rollen](https://belegt.net/betrieb.html#getrennte-datenbankrollen) arbeitet die App als
+Mit [getrennten Rollen](https://belegt.store/betrieb.html#getrennte-datenbankrollen) arbeitet die App als
 Rolle ohne Eigentum an Tabellen und ohne Rechte, Trigger abzuschalten, Tabellen zu ändern oder zu leeren oder den
 Replikationsmodus zu setzen. Nur der Migrationsschritt nutzt den Eigentümer und vergibt danach die Rechte neu; der
 Server bekommt dessen Adresse nicht. Eine übernommene App kann so nur, was auch die Oberfläche kann, und die Trigger

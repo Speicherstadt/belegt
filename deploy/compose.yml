@@ -1,5 +1,5 @@
 # Belegt mit Postgres aus dem fertigen Image (Docker Hub): docker compose up -d (oder podman compose).
-# Geheimnisse in .env (Vorlage: compose.env.example), siehe https://belegt.net/betrieb.html
+# Geheimnisse in .env (Vorlage: compose.env.example), siehe https://belegt.store/betrieb.html
 name: belegt
 
 # Umgebung für Server, Worker und SMTP-Journal; die Eigentümeradresse bekommt nur der Server für die Migrationen

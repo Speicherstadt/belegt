@@ -18,4 +18,4 @@ unverschlüsselt über die Leitung.
 | `FTP_UID` | Besitzer der Dateien | `1000` |
 
 Die Tags folgen Belegt (`:latest`, `:0.2`, `:0.2.0`, `:next`). Einrichten mit einem Scanner:
-[Scannen](https://belegt.net/scannen.html).
+[Scannen](https://belegt.store/scannen.html).
