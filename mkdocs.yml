@@ -1,11 +1,11 @@
-# Dokumentation als Website: https://belegt.net/
+# Dokumentation als Website: https://belegt.store/
 # Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml), dem Nachfolger von MkDocs Material.
 # Lokal: pip install -r requirements-docs.txt && zensical serve
 site_name: Belegt
 site_description: >-
   Belegt, das selbst gehostete Dokumentenarchiv mit GoBD-Modus: Mails, E-Rechnungen, Scans und beliebige Dokumente,
   unveränderbar bis Fristende, durchsuchbar, mit Prüferzugang und Datenträger für die Betriebsprüfung.
-site_url: https://belegt.net/
+site_url: https://belegt.store/
 repo_url: https://github.com/Speicherstadt/belegt
 repo_name: Speicherstadt/belegt
 edit_uri: edit/main/docs/
