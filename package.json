@@ -19,13 +19,13 @@
     "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy preferredLanguage baseLocale"
   },
   "dependencies": {
-    "@better-auth/passkey": "1.7.15",
+    "@better-auth/passkey": "1.7.25",
     "@firsttris/gobd-kern": "https://github.com/firsttris/haben/releases/download/gobd-kern-v0.2.0/firsttris-gobd-kern-0.2.0.tgz",
     "@simplewebauthn/browser": "13.3.0",
     "@tanstack/react-query": "^5.107.1",
     "@tanstack/react-router": "^1.170.46",
     "aws4fetch": "^1.0.20",
-    "better-auth": "1.7.15",
+    "better-auth": "1.7.25",
     "client-zip": "2",
     "drizzle-orm": "^0.45.4",
     "fast-xml-parser": "^5.12.1",
@@ -34,7 +34,7 @@
     "imapflow": "2",
     "nodemailer": "^10.5.0",
     "pdf-lib": "^1.17.1",
-    "postal-mime": "4.2.0",
+    "postal-mime": "4.2.1",
     "postgres": "^4.1.1",
     "pst-extractor": "1",
     "react": "^19.3.1",
@@ -42,7 +42,7 @@
     "smtp-server": "3",
     "unpdf": "^2.2.0",
     "zod": "^4.6.7",
-    "zxing-wasm": "3.1.6"
+    "zxing-wasm": "3.1.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
@@ -51,7 +51,7 @@
     "@fontsource-variable/geist": "^5.3.0",
     "@inlang/paraglide-js": "^3.2.2",
     "@inlang/plugin-message-format": "^4.6.0",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@types/bun": "^1.4.4",
     "@types/nodemailer": "^8.0.2",
