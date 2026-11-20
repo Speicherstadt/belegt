@@ -12,5 +12,25 @@
       matchPackageNames: ["better-auth"],
       automerge: false,
     },
+    {
+      // Postgres läuft in compose.yml, deploy/compose.yml, dem Backup-Image und der CI: Eine neue Major-Version kommt
+      // überall zugleich, sonst prüft die CI eine Version, die niemand betreibt (und pg_dump passt nicht zum Server).
+      // Für bestehende Installationen braucht sie pg_upgrade oder Dump und Restore.
+      matchDatasources: ["docker"],
+      matchPackageNames: ["postgres", "library/postgres", "docker.io/library/postgres"],
+      matchUpdateTypes: ["major"],
+      groupName: "Postgres (major)",
+      groupSlug: "postgres",
+      automerge: false,
+    },
+    {
+      // Gotenberg (Vorschau von Office-Dateien) in den Compose-Dateien und der CI ebenso nur gemeinsam
+      matchDatasources: ["docker"],
+      matchPackageNames: ["gotenberg/gotenberg", "docker.io/gotenberg/gotenberg"],
+      matchUpdateTypes: ["major"],
+      groupName: "Gotenberg (major)",
+      groupSlug: "gotenberg",
+      automerge: false,
+    },
   ],
 }

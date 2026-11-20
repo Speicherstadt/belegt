@@ -129,6 +129,7 @@ Einmalig im Repository einzurichten:
 - Settings → Pages → Source „GitHub Actions“ für die Doku, von Hand; danach veröffentlicht `docs.yml` sie bei jeder
   Änderung an `docs/` (den ersten Lauf unter Actions → Docs → Re-run starten).
 - Die GitHub-App [Renovate](https://github.com/apps/renovate) für dieses Repository (`.github/renovate.json5`).
+  Postgres und Gotenberg hebt sie in Compose, Containerfiles und CI nur gemeinsam an, je in einem eigenen Pull Request.
 
 ## Bilder für README und Doku
 
