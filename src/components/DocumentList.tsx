@@ -384,6 +384,8 @@ export function DocumentList({
           />
         ))}
       <Pagination seite={seite} seiten={seiten} gesamt={gesamt} proSeite={proSeite} blaettern={blaettern} />
+      {/* Die Auswahlleiste schwebt unten; Platz, damit sie die letzten Einträge nicht verdeckt */}
+      {ausgewaehlt.length > 0 && <div aria-hidden="true" className="h-40" />}
     </div>
   );
 }

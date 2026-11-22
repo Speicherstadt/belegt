@@ -845,18 +845,6 @@
   "start_sources_link": "Go to sources",
   "start_chain": "Immutability",
   "start_chain_busy": "Checking the chain …",
-  "start_chain_result": "Hash chain and seals",
-  "start_chain_ok": "in order",
-  "start_chain_findings": [
-    {
-      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
-      "selectors": ["anzahlPlural"],
-      "match": {
-        "anzahlPlural=one": "{anzahl} finding",
-        "anzahlPlural=other": "{anzahl} findings"
-      }
-    }
-  ],
   "start_timestamp": "Latest timestamp",
   "start_timestamp_value": "{zeit} from {dienst}",
   "start_timestamp_none": "none yet",
@@ -1226,7 +1214,6 @@
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
   "zip_download": "Download {anzahl} as ZIP ({groesse})",
   "zip_too_large": "{groesse} in total: too large for one ZIP (at most 2 GB). Please select fewer.",
-  "start_chain_never": "not checked yet; the worker checks once a day",
   "start_chain_checked": "Last checked",
   "start_chain_checked_value": [
     {

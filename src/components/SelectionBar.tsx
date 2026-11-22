@@ -21,7 +21,7 @@ export function SelectionBar({
   fertig: (meldung: string) => void;
 }) {
   return (
-    <div className="sticky top-0 z-10 flex flex-col gap-3 rounded-lg border border-primary/40 bg-bg p-3 shadow-sm">
+    <div className="fixed inset-x-4 bottom-4 z-20 mx-auto flex max-h-[60vh] max-w-3xl flex-col gap-3 overflow-y-auto rounded-lg border border-primary/40 bg-bg p-3 shadow-lg">
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <span className="font-medium">{m.bulk_selected({ anzahl: String(gewaehlt.length) })}</span>
         <button

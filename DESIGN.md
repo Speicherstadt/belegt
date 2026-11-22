@@ -238,3 +238,9 @@ Das soll der Maintainer entscheiden:
 - Sind 40/44 px für `--control-h` und 20 px für Checkboxen so recht, oder bleibt die Oberfläche kompakter?
 - Ob eine Einstellung „größere Schrift“ oder „ruhige Ansicht“ unter „Konto“ gewünscht ist.
 - Verben der Tabelle oben: Stimmt die Zuordnung, bevor `de.json` und `en.json` angeglichen werden?
+
+## Auswahl und Kacheln
+
+Die Leiste für Sammelaktionen schwebt unten über der Liste (`SelectionBar.tsx`, `fixed`), damit beim Anhaken nichts
+verrutscht. Unter einer Kachel stehen Öffnen, Vorschau und Herunterladen als Symbole; der Text steht in `aria-label`
+und `title`, weil er in die schmale Karte nicht passt.
