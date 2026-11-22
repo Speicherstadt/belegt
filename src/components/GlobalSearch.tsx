@@ -77,7 +77,7 @@ export function GlobalSearch() {
   const nichts = !Object.values(treffer).some((l) => l.length) && !dokumente.isFetching;
 
   return (
-    <div ref={rahmen} className="relative w-full max-w-xl">
+    <div ref={rahmen} className="relative w-full max-w-md">
       <search>
         <form
           onSubmit={(e) => {
