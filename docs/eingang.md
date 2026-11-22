@@ -33,7 +33,7 @@ Das gilt für alle, die hochladen dürfen.
 Ist das Archiv noch leer, zeigt die Startseite dem Inhaber „Erste Schritte“: hochladen, Postfach verbinden, aus
 Paperless-ngx übernehmen und Belegt als App aufs Handy legen.
 
-Ganz oben zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
+Ganz oben zeigt die Startseite in einer Karte, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
 wie viele in diesem Jahr eingingen, offene Löschanträge, aktive Sperren mit der Zahl der Dokumente darunter, die Größe
 der Originale (jede Datei einmal) und die Fristen, die in den nächsten 90 Tagen enden, mit dem Tag, ab dem das
 Dokument löschbar ist. Daneben der Zustand der Quellen (letzter Abruf oder Fehler jedes Postfachs, das letzte Dokument
@@ -41,7 +41,8 @@ aus dem Eingangsordner, der letzte Umzug aus Paperless-ngx) und der Unveränderb
 [täglichen Prüfung](pruefung.md#taegliche-pruefung) von Hash-Kette und Siegeln und der letzte Zeitstempel. Gelöschte
 Dokumente zählen nirgends mit.
 
-Darunter stehen die gespeicherten Ansichten, die du für die Startseite gewählt hast: je Ansicht die Zahl der Treffer
+Darunter stehen links die gespeicherten Ansichten, rechts untereinander Unveränderbarkeit, Fristen, Quellen und
+Betrieb, jede Karte so hoch wie ihr Inhalt. Für jede Ansicht, die du für die Startseite gewählt hast, stehen dort die Zahl der Treffer
 und die ersten fünf Dokumente mit Vorschaubild, Korrespondent, Eingang und Tags. In der Seitenleiste steht die Zahl
 der Treffer neben jeder gespeicherten Ansicht.
 

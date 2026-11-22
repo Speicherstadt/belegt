@@ -56,13 +56,14 @@ export function StartNumbers({ start }: { start: Start }) {
       <h2 id="start-zahlen" className="m-0 font-semibold text-lg">
         {m.start_numbers()}
       </h2>
-      {/* Alle Zahlen in einer Reihe, sonst gleichmäßig in zwei oder drei Spalten: nie eine Karte allein in der Zeile */}
+      {/* Eine Karte, die Zahlen darin durch feine Linien getrennt (Lücke von 1 px auf --border): in einer Reihe, sonst in
+          zwei oder drei Spalten */}
       <dl
-        className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-[repeat(var(--spalten),minmax(0,1fr))]"
+        className="m-0 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 xl:grid-cols-[repeat(var(--spalten),minmax(0,1fr))]"
         style={{ "--spalten": zahlen.length } as CSSProperties}
       >
         {zahlen.map((z) => (
-          <div key={z.label} className={kachel}>
+          <div key={z.label} className="flex flex-col gap-1 bg-bg p-4">
             <dt className="flex items-center gap-2 text-muted text-sm">
               {z.bereich && <BereichSymbol bereich={z.bereich} />}
               {z.label}
@@ -92,7 +93,7 @@ export function UpcomingRetention({ fristen }: { fristen: NonNullable<Start["fri
   };
   return (
     <section aria-labelledby="start-fristen" className={kachel}>
-      <h2 id="start-fristen" className="m-0 flex items-center gap-2 font-semibold text-lg">
+      <h2 id="start-fristen" className="m-0 flex items-center gap-2 font-semibold text-base">
         <BereichSymbol bereich="/fristen" className="size-4 text-muted" />
         {m.start_retention_title()}
       </h2>

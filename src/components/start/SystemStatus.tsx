@@ -23,7 +23,7 @@ export function SourceStatus({ quellen }: { quellen: NonNullable<Start["quellen"
   const leer = !quellen.postfaecher.length && !quellen.ordner && !quellen.paperless;
   return (
     <section aria-labelledby="start-quellen" className={kachel}>
-      <h2 id="start-quellen" className="m-0 flex items-center gap-2 font-semibold text-lg">
+      <h2 id="start-quellen" className="m-0 flex items-center gap-2 font-semibold text-base">
         <BereichSymbol bereich="/quellen" className="size-4 text-muted" />
         {m.start_sources()}
       </h2>
@@ -90,14 +90,14 @@ export function ChainStatus({ inhaber }: { inhaber: boolean }) {
   const veraltet = !!lauf && Date.now() - new Date(lauf.geprueftAm).getTime() > VERALTET_STUNDEN * 3_600_000;
   return (
     <section aria-labelledby="start-kette" className={kachel}>
-      <h2 id="start-kette" className="m-0 flex items-center gap-2 font-semibold text-lg">
+      <h2 id="start-kette" className="m-0 flex items-center gap-2 font-semibold text-base">
         <BereichSymbol bereich="/pruefung" className="size-4 text-muted" />
         {m.start_chain()}
       </h2>
       {kette.error && <p className={fehler}>{kette.error.message}</p>}
       <SealBadge gross />
       {kette.data && (
-        <dl className="m-0 flex flex-col gap-1 text-sm">
+        <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 text-sm">
           <Explain term="chain" row>
             {(knopf, satz) => (
               <>
@@ -131,20 +131,23 @@ export function ChainStatus({ inhaber }: { inhaber: boolean }) {
           </dd>
         </dl>
       )}
-      {inhaber && (
-        <button
-          type="button"
-          onClick={() => jetzt.mutate()}
-          disabled={jetzt.isPending}
-          className="h-9 self-start rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle disabled:opacity-60"
-        >
-          {jetzt.isPending ? m.start_chain_busy() : m.start_chain_now()}
-        </button>
-      )}
+      {/* Knopf und Link in einer Zeile, damit die Kachel nicht höher wird als ihre Nachbarn */}
+      <div className="flex flex-wrap items-center gap-3">
+        {inhaber && (
+          <button
+            type="button"
+            onClick={() => jetzt.mutate()}
+            disabled={jetzt.isPending}
+            className="h-9 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle disabled:opacity-60"
+          >
+            {jetzt.isPending ? m.start_chain_busy() : m.start_chain_now()}
+          </button>
+        )}
+        <Link to="/pruefung" className="text-sm underline underline-offset-2">
+          {m.start_chain_link()}
+        </Link>
+      </div>
       {jetzt.error && <p className={fehler}>{jetzt.error.message}</p>}
-      <Link to="/pruefung" className="text-sm underline underline-offset-2">
-        {m.start_chain_link()}
-      </Link>
     </section>
   );
 }

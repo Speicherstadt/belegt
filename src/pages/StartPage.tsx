@@ -25,19 +25,24 @@ export function StartPage() {
       )}
       {/* Leeres Archiv: erst die ersten Schritte, für den, der einrichtet */}
       {start.data?.gesamt === 0 && ich.data?.role === "inhaber" && <FirstSteps />}
-      {/* Zuerst der Überblick: Zahlen, dann Fristen, Quellen, Siegel und Betrieb; danach die gespeicherten Ansichten */}
+      {/* Zuerst der Überblick, darunter links die gespeicherten Ansichten und rechts der Zustand */}
       {start.data && <StartNumbers start={start.data} />}
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
-        {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
-        {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
-        {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus inhaber={ich.data.role === "inhaber"} />}
-        {/* Betrieb nur für Inhaber und Steuerberatung; der Server lehnt es für andere ab */}
-        {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
-          <OperationStatus inhaber={ich.data.role === "inhaber"} />
-        )}
+      {/* Breit die gespeicherten Ansichten, daneben der Zustand untereinander: jede Karte so hoch wie ihr Inhalt */}
+      <div className="grid items-start gap-5 lg:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-3 lg:col-span-2">
+          <ViewTiles />
+        </div>
+        <div className="flex min-w-0 flex-col gap-3">
+          {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
+          {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus inhaber={ich.data.role === "inhaber"} />}
+          {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
+          {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
+          {/* Betrieb nur für Inhaber und Steuerberatung; der Server lehnt es für andere ab */}
+          {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
+            <OperationStatus inhaber={ich.data.role === "inhaber"} />
+          )}
+        </div>
       </div>
-      <ViewTiles />
     </div>
   );
 }
