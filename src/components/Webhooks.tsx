@@ -3,6 +3,7 @@ import { type FormEvent, useId, useState } from "react";
 import { api, EREIGNISSE, type Ereignisart } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { Einmalwert } from "./Einmalwert.tsx";
 
 const ART: Record<Ereignisart, () => string> = {
@@ -18,11 +19,13 @@ export function Webhooks() {
   const queryClient = useQueryClient();
   const liste = useQuery({ queryKey: ["webhooks"], queryFn: api.webhooks });
   const [geheimnis, setGeheimnis] = useState<string | null>(null);
+  const [offen, setOffen] = useState(false);
   const neu = () => queryClient.invalidateQueries({ queryKey: ["webhooks"] });
   const anlegen = useMutation({
     mutationFn: api.webhookAnlegen,
     onSuccess: async (w) => {
       setGeheimnis(w.geheimnis);
+      setOffen(false);
       await neu();
     },
   });
@@ -42,47 +45,11 @@ export function Webhooks() {
   }
 
   return (
-    <section aria-labelledby={`${id}-titel`} className="flex flex-col gap-3 rounded-lg border border-border p-4">
+    <section aria-labelledby={`${id}-titel`} className={verwaltungsKarte}>
       <h2 id={`${id}-titel`} className="m-0 font-semibold text-base">
         {m.webhooks_title()}
       </h2>
       <p className="m-0 text-muted text-sm">{m.webhooks_intro()}</p>
-      <form onSubmit={absenden} className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.tokens_name()}
-            <input name="name" required maxLength={200} className="h-9 rounded-md border border-border bg-bg px-3" />
-          </label>
-          <label className="flex min-w-64 flex-1 flex-col gap-1.5 font-medium text-sm">
-            {m.webhooks_url()}
-            <input
-              name="url"
-              type="url"
-              required
-              pattern="https?://.+"
-              className="h-9 rounded-md border border-border bg-bg px-3"
-            />
-          </label>
-        </div>
-        <fieldset className="m-0 flex flex-wrap gap-4 border-0 p-0 text-sm">
-          <legend className="mb-1.5 p-0 font-medium">{m.webhooks_events()}</legend>
-          {EREIGNISSE.map((a) => (
-            <label key={a} className="flex items-center gap-2">
-              <input type="checkbox" name="arten" value={a} defaultChecked={a === "dokument.aufgenommen"} />
-              {ART[a]()}
-            </label>
-          ))}
-        </fieldset>
-        <button type="submit" className="h-9 self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm">
-          {m.webhooks_create()}
-        </button>
-      </form>
-      {geheimnis && <Einmalwert label={m.webhooks_secret()} wert={geheimnis} />}
-      {anlegen.error && (
-        <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
-          {anlegen.error.message}
-        </p>
-      )}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {liste.data?.map((w) => (
           <li
@@ -114,6 +81,47 @@ export function Webhooks() {
           </li>
         ))}
       </ul>
+      <Ausklappbar label={m.webhooks_create()} offen={offen} setOffen={setOffen}>
+        <form onSubmit={absenden} className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.tokens_name()}
+              <input name="name" required maxLength={200} className="h-9 rounded-md border border-border bg-bg px-3" />
+            </label>
+            <label className="flex min-w-64 flex-1 flex-col gap-1.5 font-medium text-sm">
+              {m.webhooks_url()}
+              <input
+                name="url"
+                type="url"
+                required
+                pattern="https?://.+"
+                className="h-9 rounded-md border border-border bg-bg px-3"
+              />
+            </label>
+          </div>
+          <fieldset className="m-0 flex flex-wrap gap-4 border-0 p-0 text-sm">
+            <legend className="mb-1.5 p-0 font-medium">{m.webhooks_events()}</legend>
+            {EREIGNISSE.map((a) => (
+              <label key={a} className="flex items-center gap-2">
+                <input type="checkbox" name="arten" value={a} defaultChecked={a === "dokument.aufgenommen"} />
+                {ART[a]()}
+              </label>
+            ))}
+          </fieldset>
+          <button
+            type="submit"
+            className="h-9 self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+          >
+            {m.webhooks_create()}
+          </button>
+        </form>
+      </Ausklappbar>
+      {geheimnis && <Einmalwert label={m.webhooks_secret()} wert={geheimnis} />}
+      {anlegen.error && (
+        <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+          {anlegen.error.message}
+        </p>
+      )}
     </section>
   );
 }

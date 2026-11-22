@@ -5,6 +5,7 @@ import { darfSchreiben } from "../../shared/rollen.ts";
 import { type Art, api, type Feld } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
 import { m } from "../paraglide/messages.js";
+import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { feldLabel } from "./DocumentOrdnung.tsx";
 import { ausEingabe, FieldInput } from "./FieldInput.tsx";
 import { SuggestionOrder } from "./SuggestionOrder.tsx";
@@ -20,6 +21,7 @@ export function Rules() {
   const [art, setArt] = useState<Art | "">("beleg");
   // Vorgeschlagene Feldwerte: je Zeile ein Feld; der Schlüssel hält die Eingabe beim Entfernen einer Zeile fest
   const [zeilen, setZeilen] = useState<{ schluessel: number; feldId: string }[]>([]);
+  const [offen, setOffen] = useState(false);
   const [naechste, setNaechste] = useState(0);
   const [ungueltig, setUngueltig] = useState<Feld | null>(null);
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
@@ -70,13 +72,14 @@ export function Rules() {
         onSuccess: () => {
           form.reset();
           setZeilen([]);
+          setOffen(false);
         },
       },
     );
   }
 
   return (
-    <section aria-labelledby="regeln" className="flex flex-col gap-3">
+    <section aria-labelledby="regeln" className={verwaltungsKarte}>
       <h2 id="regeln" className="m-0 font-semibold text-base">
         {m.rules_title()}
       </h2>
@@ -114,140 +117,144 @@ export function Rules() {
         ))}
       </ul>
       {schreiben && (
-        <form
-          onSubmit={absenden}
-          className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] items-end gap-3 rounded-lg border border-border p-3"
-        >
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_name()}
-            <input name="name" required className={feldKlasseRegel} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_sender()}
-            <input name="absender" type="email" className={feldKlasseRegel} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_domain()}
-            <input name="domain" className={feldKlasseRegel} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_subject()}
-            <input name="betreff" className={feldKlasseRegel} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_attachment()}
-            <input name="anhang" placeholder="application/pdf" className={feldKlasseRegel} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.rules_then()}
-            <select value={art} onChange={(e) => setArt(e.target.value as Art | "")} className={feldKlasseRegel}>
-              <option value="">{m.rules_no_kind()}</option>
-              {ARTEN.map((a) => (
-                <option key={a.art} value={a.art}>
-                  {a.label()}
-                </option>
-              ))}
-            </select>
-          </label>
-          {!!korrespondenten.data?.length && (
+        <Ausklappbar label={m.rules_create()} offen={offen} setOffen={setOffen}>
+          <form onSubmit={absenden} className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] items-end gap-3">
             <label className="flex flex-col gap-1.5 font-medium text-sm">
-              {m.rules_party()}
-              <select name="korrespondent" className={feldKlasseRegel}>
-                <option value="">{m.order_party_none()}</option>
-                {korrespondenten.data.map((k) => (
-                  <option key={k.id} value={k.id}>
-                    {k.name}
+              {m.rules_name()}
+              <input name="name" required className={feldKlasseRegel} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_sender()}
+              <input name="absender" type="email" className={feldKlasseRegel} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_domain()}
+              <input name="domain" className={feldKlasseRegel} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_subject()}
+              <input name="betreff" className={feldKlasseRegel} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_attachment()}
+              <input name="anhang" placeholder="application/pdf" className={feldKlasseRegel} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.rules_then()}
+              <select value={art} onChange={(e) => setArt(e.target.value as Art | "")} className={feldKlasseRegel}>
+                <option value="">{m.rules_no_kind()}</option>
+                {ARTEN.map((a) => (
+                  <option key={a.art} value={a.art}>
+                    {a.label()}
                   </option>
                 ))}
               </select>
             </label>
-          )}
-          {!!typen.data?.length && (
-            <label className="flex flex-col gap-1.5 font-medium text-sm">
-              {m.rules_doctype()}
-              <select name="dokumenttyp" className={feldKlasseRegel}>
-                <option value="">{m.order_doctype_none()}</option>
-                {typen.data.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {!!felder.data?.length && (
-            <fieldset className="col-span-full m-0 flex flex-col gap-2 border-0 p-0 text-sm">
-              <legend className="mb-1.5 font-medium">{m.rules_fields()}</legend>
-              {zeilen.map((z, i) => {
-                const feld = feldZu(z.feldId);
-                const vergeben = new Set(zeilen.filter((x) => x !== z).map((x) => x.feldId));
-                return (
-                  <div key={z.schluessel} className="flex flex-wrap items-end gap-3">
-                    <label className="flex flex-col gap-1.5 font-medium">
-                      {m.rules_field_n({ nummer: String(i + 1) })}
-                      <select
-                        value={z.feldId}
-                        onChange={(e) => setZeilen(zeilen.map((x) => (x === z ? { ...x, feldId: e.target.value } : x)))}
-                        className={feldKlasseRegel}
-                      >
-                        <option value="">{m.filter_field_none()}</option>
-                        {felder.data.map((f) => (
-                          <option key={f.id} value={f.id} disabled={vergeben.has(f.id)}>
-                            {feldLabel(f)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    {feld && (
-                      <label htmlFor={`regel-wert-${z.schluessel}`} className="flex flex-col gap-1.5 font-medium">
-                        {m.rules_field_value_n({ nummer: String(i + 1) })}
-                        <FieldInput
-                          key={feld.id}
-                          id={`regel-wert-${z.schluessel}`}
-                          feld={feld}
-                          name={`wert-${z.schluessel}`}
-                        />
+            {!!korrespondenten.data?.length && (
+              <label className="flex flex-col gap-1.5 font-medium text-sm">
+                {m.rules_party()}
+                <select name="korrespondent" className={feldKlasseRegel}>
+                  <option value="">{m.order_party_none()}</option>
+                  {korrespondenten.data.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {!!typen.data?.length && (
+              <label className="flex flex-col gap-1.5 font-medium text-sm">
+                {m.rules_doctype()}
+                <select name="dokumenttyp" className={feldKlasseRegel}>
+                  <option value="">{m.order_doctype_none()}</option>
+                  {typen.data.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {!!felder.data?.length && (
+              <fieldset className="col-span-full m-0 flex flex-col gap-2 border-0 p-0 text-sm">
+                <legend className="mb-1.5 font-medium">{m.rules_fields()}</legend>
+                {zeilen.map((z, i) => {
+                  const feld = feldZu(z.feldId);
+                  const vergeben = new Set(zeilen.filter((x) => x !== z).map((x) => x.feldId));
+                  return (
+                    <div key={z.schluessel} className="flex flex-wrap items-end gap-3">
+                      <label className="flex flex-col gap-1.5 font-medium">
+                        {m.rules_field_n({ nummer: String(i + 1) })}
+                        <select
+                          value={z.feldId}
+                          onChange={(e) =>
+                            setZeilen(zeilen.map((x) => (x === z ? { ...x, feldId: e.target.value } : x)))
+                          }
+                          className={feldKlasseRegel}
+                        >
+                          <option value="">{m.filter_field_none()}</option>
+                          {felder.data.map((f) => (
+                            <option key={f.id} value={f.id} disabled={vergeben.has(f.id)}>
+                              {feldLabel(f)}
+                            </option>
+                          ))}
+                        </select>
                       </label>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setZeilen(zeilen.filter((x) => x !== z))}
-                      className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle"
-                    >
-                      {m.rules_field_remove({ nummer: String(i + 1) })}
-                    </button>
-                  </div>
-                );
-              })}
-              {zeilen.length < felder.data.length && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setZeilen([...zeilen, { schluessel: naechste, feldId: "" }]);
-                    setNaechste(naechste + 1);
-                  }}
-                  className="h-9 self-start rounded-md border border-border px-3 font-medium hover:bg-subtle"
-                >
-                  {m.rules_field_add()}
-                </button>
-              )}
-            </fieldset>
-          )}
-          {!!tags.data?.length && (
-            <fieldset className="col-span-full m-0 flex flex-wrap gap-3 border-0 p-0 text-sm">
-              <legend className="mb-1.5 font-medium">{m.rules_tags()}</legend>
-              {tags.data.map((t) => (
-                <label key={t.id} className="flex items-center gap-2">
-                  <input type="checkbox" name="tags" value={t.id} className="size-4" />
-                  {t.name}
-                </label>
-              ))}
-            </fieldset>
-          )}
-          <button type="submit" className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm">
-            {m.rules_create()}
-          </button>
-        </form>
+                      {feld && (
+                        <label htmlFor={`regel-wert-${z.schluessel}`} className="flex flex-col gap-1.5 font-medium">
+                          {m.rules_field_value_n({ nummer: String(i + 1) })}
+                          <FieldInput
+                            key={feld.id}
+                            id={`regel-wert-${z.schluessel}`}
+                            feld={feld}
+                            name={`wert-${z.schluessel}`}
+                          />
+                        </label>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setZeilen(zeilen.filter((x) => x !== z))}
+                        className="h-9 rounded-md border border-border px-3 font-medium hover:bg-subtle"
+                      >
+                        {m.rules_field_remove({ nummer: String(i + 1) })}
+                      </button>
+                    </div>
+                  );
+                })}
+                {zeilen.length < felder.data.length && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setZeilen([...zeilen, { schluessel: naechste, feldId: "" }]);
+                      setNaechste(naechste + 1);
+                    }}
+                    className="h-9 self-start rounded-md border border-border px-3 font-medium hover:bg-subtle"
+                  >
+                    {m.rules_field_add()}
+                  </button>
+                )}
+              </fieldset>
+            )}
+            {!!tags.data?.length && (
+              <fieldset className="col-span-full m-0 flex flex-wrap gap-3 border-0 p-0 text-sm">
+                <legend className="mb-1.5 font-medium">{m.rules_tags()}</legend>
+                {tags.data.map((t) => (
+                  <label key={t.id} className="flex items-center gap-2">
+                    <input type="checkbox" name="tags" value={t.id} className="size-4" />
+                    {t.name}
+                  </label>
+                ))}
+              </fieldset>
+            )}
+            <button
+              type="submit"
+              className="col-span-full h-9 justify-self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+            >
+              {m.rules_create()}
+            </button>
+          </form>
+        </Ausklappbar>
       )}
       {ungueltig && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">

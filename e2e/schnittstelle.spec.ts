@@ -39,6 +39,7 @@ test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abs
   const name = `Buchhaltung ${info.project.name}`;
   await page.goto("/quellen");
   const bereich = page.getByRole("region", { name: "Webhooks" });
+  await bereich.getByRole("button", { name: "+ Webhook anlegen" }).click();
   await bereich.getByLabel("Name").fill(name);
   await bereich.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/belegt");
   await bereich.getByLabel("eingeordnet").check();

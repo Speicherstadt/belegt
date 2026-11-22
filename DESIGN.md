@@ -65,6 +65,9 @@ Vorschlag:
   Auswahllisten; in Tailwind als `h-(--control-h)`, nicht mehr `h-8` oder `h-9`.
 - Checkboxen und Radios sehen überall gleich aus, nicht wie im Browser: Rand in `--primary`, gewählt gefüllt mit Haken
   oder Punkt in `--onprimary` (zentral in `src/styles.css`, keine eigenen Klassen dafür).
+- Dateifelder: Der Knopf sieht aus wie ein Zweitknopf (ebenfalls zentral in `src/styles.css`).
+- Verwaltungsseiten (Quellen, Workflows): Jeder Abschnitt ist eine Karte (`verwaltungsKarte`); zuerst steht, was es gibt,
+  das Formular zum Anlegen erscheint erst auf „+ …“ (`Ausklappbar`).
 - Ein Knopf in einer Formularzeile mit `items-end` hat kein `self-start`, sonst steht er höher als die Felder.
 - Checkboxen und Radios 20 px (`size-5`), immer mit klickbarem `<label>`. Die Trefferfläche ist am Handy mindestens
   44 × 44 px (das Label gehört zur Fläche).

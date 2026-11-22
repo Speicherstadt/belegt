@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useId, useState } from "react";
 import { api, type ImportLauf, type ImportStatus } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
+import { verwaltungsKarte } from "./Ausklappbar.tsx";
 import { ImportMapping } from "./ImportMapping.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -169,7 +170,7 @@ export function PaperlessImport() {
   const fehler = anlegen.error ?? starten.error ?? hochladen.error ?? abbrechen.error;
 
   return (
-    <section aria-labelledby={`${id}-titel`} className="flex flex-col gap-3">
+    <section aria-labelledby={`${id}-titel`} className={verwaltungsKarte}>
       <h2 id={`${id}-titel`} className="m-0 font-semibold text-base">
         {m.paperless_title()}
       </h2>

@@ -106,6 +106,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Ablage mit lesbaren Namen und Ordnern (storage paths) | niedrig | offen |
 | Workflow-Auslöser „geändert“ und „Zeitplan“; Workflows bearbeiten | niedrig | offen |
 | Weitere Sprachen der Oberfläche (heute Deutsch und Englisch) | niedrig | offen |
+| Bedienung: Zeitraum im Archiv, Workflow-Editor in Schritten, Formulare erst auf Klick, einheitliche Checkboxen | mittel | erledigt |
+| Bedienung: Ziehen und Ablegen, Tastenkürzel, Schnellaktionen und Tags auf den Kacheln, Zahlen an gespeicherten Ansichten, Suche in der Kopfzeile, Treffer hervorheben | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

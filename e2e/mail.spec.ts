@@ -31,6 +31,7 @@ function rechnungsmail(projekt: string): Buffer {
 test("Regel anlegen, Mail mit Anhang importieren, Vorschlag übernehmen", async ({ page }, info) => {
   await page.goto("/quellen");
   const regeln = page.locator("section", { has: page.getByRole("heading", { name: "Regeln" }) });
+  await regeln.getByRole("button", { name: "+ Regel anlegen" }).click();
   await regeln.getByLabel("Name").fill(`Telekom ${info.project.name}`);
   await regeln.getByLabel("Domain").fill("telekom.de");
   await regeln.getByLabel("Anhangstyp").fill("application/pdf");
@@ -82,6 +83,7 @@ test("Regel ohne Art: schlägt Tag und zwei Feldwerte vor, die Einordnung bleibt
 
   await page.goto("/quellen");
   const regeln = page.locator("section", { has: page.getByRole("heading", { name: "Regeln" }) });
+  await regeln.getByRole("button", { name: "+ Regel anlegen" }).click();
   await regeln.getByLabel("Name").fill(`Bahn ${projekt}`);
   await regeln.getByLabel("Domain").fill(`bahn-${projekt}.example`);
   await regeln.getByLabel("Dann").selectOption("");
@@ -132,6 +134,7 @@ test("ein Postfach hinzufügen; ein Abruf gegen einen nicht erreichbaren Server 
 }, info) => {
   await page.goto("/quellen");
   const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
+  await postfaecher.getByRole("button", { name: "+ Postfach hinzufügen" }).click();
   await postfaecher.getByLabel("Name").fill(`rechnung-${info.project.name}`);
   await postfaecher.getByLabel("Server").fill("127.0.0.1");
   await postfaecher.getByLabel("Port").fill("1");

@@ -1207,5 +1207,6 @@
   "workflow_add_action": "Aktion hinzufügen",
   "workflow_remove_row": "{name} entfernen",
   "workflow_actions_empty": "Noch keine Aktion. Wähle unten, was mit dem Dokument passieren soll.",
-  "workflow_cancel": "Abbrechen"
+  "workflow_cancel": "Abbrechen",
+  "form_cancel": "Abbrechen"
 }

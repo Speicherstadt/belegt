@@ -8,6 +8,7 @@ test("Aktion nach dem Abholen einstellen, Löschen nur mit Bestätigung", async 
   const name = `aktion-${info.project.name}`;
   await page.goto("/quellen");
   const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
+  await postfaecher.getByRole("button", { name: "+ Postfach hinzufügen" }).click();
   await postfaecher.getByLabel("Name").fill(name);
   await postfaecher.getByLabel("Server").fill("127.0.0.1");
   await postfaecher.getByLabel("Port").fill("1");

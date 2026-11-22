@@ -1285,5 +1285,6 @@
   "workflow_add_action": "Add action",
   "workflow_remove_row": "Remove {name}",
   "workflow_actions_empty": "No action yet. Choose below what should happen to the document.",
-  "workflow_cancel": "Cancel"
+  "workflow_cancel": "Cancel",
+  "form_cancel": "Cancel"
 }
