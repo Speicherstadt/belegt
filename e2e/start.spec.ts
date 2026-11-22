@@ -83,6 +83,7 @@ test.describe("auf Englisch", () => {
 test("die Darstellung lässt sich umschalten, bleibt nach dem Neuladen und zeigt die Version", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
+  await menueOeffnen(page);
   const darstellung = page.getByRole("group", { name: "Darstellung" });
   await expect(darstellung.getByRole("radio", { name: "System" })).toBeChecked();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme");
@@ -93,6 +94,7 @@ test("die Darstellung lässt sich umschalten, bleibt nach dem Neuladen und zeigt
   await expect(page.locator("body")).toHaveCSS("color-scheme", "dark");
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await menueOeffnen(page);
   await expect(page.getByRole("group", { name: "Darstellung" }).getByRole("radio", { name: "Dunkel" })).toBeChecked();
   const dunkel = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
   expect(dunkel.violations).toEqual([]);

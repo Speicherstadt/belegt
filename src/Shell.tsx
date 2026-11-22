@@ -42,7 +42,7 @@ export function Shell({ children }: { children: ReactNode }) {
         {m.skip_link()}
       </a>
       {/* Am Handy eine schmale Leiste mit Menü-Knopf statt der ganzen Navigation über dem Inhalt */}
-      <div className="flex items-center justify-between gap-3 border-border border-b bg-side px-4 py-2 md:hidden print:hidden">
+      <header className="flex items-center justify-between gap-3 border-border border-b bg-side px-4 py-2 md:hidden print:hidden">
         <span className="font-semibold">{m.app_name()}</span>
         <button
           type="button"
@@ -54,7 +54,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <span aria-hidden="true">{menue ? "✕" : "☰"}</span>
           {m.menu()}
         </button>
-      </div>
+      </header>
       <Sidebar
         ich={ich.data}
         eingebettet={imFrame}
