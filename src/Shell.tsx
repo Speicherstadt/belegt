@@ -69,8 +69,8 @@ export function Shell({ children }: { children: ReactNode }) {
             beim Scrollen stehen */}
         {!imFrame && !ich.data.zweiFaktorEinrichten && (
           <div className="sticky top-0 z-20 flex h-14 items-center gap-3 border-border border-b bg-bg/85 px-4 backdrop-blur sm:px-8 print:hidden">
-            <div id={KOPFZEILE_ID} className="flex min-w-0 shrink-0 items-center" />
-            <div className="ml-auto flex w-full max-w-md items-center gap-2">
+            <div id={KOPFZEILE_ID} className="flex max-w-[50%] shrink-0 items-center" />
+            <div className="ml-auto flex min-w-0 max-w-md flex-1 items-center justify-end gap-2">
               <GlobalSearch />
               {(ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <ProcessingBell />}
             </div>

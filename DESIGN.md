@@ -268,6 +268,6 @@ untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so ho
 
 ## Kopfleiste
 
-Über dem Inhalt jeder Seite eine Kopfleiste (56 px, Linie unten, bleibt beim Scrollen stehen): links Platz für einen
-Titel, den eine Seite mit `InKopfzeile` hineinstellt, rechts die Suche (höchstens `max-w-md`) und die Glocke.
+Über dem Inhalt jeder Seite eine Kopfleiste (56 px, Linie unten, bleibt beim Scrollen stehen): links der Titel der Seite
+(`PageHeader` stellt ihn mit `InKopfzeile` hinein, die Erklärung steht klein am Anfang des Inhalts), rechts die Suche (höchstens `max-w-md`) und die Glocke.
 
