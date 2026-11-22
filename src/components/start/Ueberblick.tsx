@@ -1,14 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
-import { api, type Start } from "../../lib/api.ts";
+import type { Start } from "../../lib/api.ts";
 import { groesse } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { getLocale } from "../../paraglide/runtime.js";
-import { siegelZustand } from "../SealBadge.tsx";
 import { BereichSymbol } from "../Symbole.tsx";
-import { Leiste, Verlauf } from "./Diagramme.tsx";
+import { Belegung, Ring, Verlauf } from "./Diagramme.tsx";
 
 /*
  * Kennzahlen der Startseite als Reihe gleich gebauter Kacheln (DESIGN.md, Startseite): Beschriftung, Wert (mit
@@ -76,10 +74,11 @@ function Eingang({ start }: { start: Start }) {
     <div className={kachel}>
       <Beschriftung bereich="/eingang">{m.start_inbox()}</Beschriftung>
       <dd className={wert}>{start.eingang}</dd>
-      <dd className="m-0 flex flex-col gap-1.5 self-end">
-        <Leiste teile={[{ anteil: start.gesamt ? fertig / start.gesamt : 1, klasse: "bg-fg" }]} />
-        <span className="text-muted text-xs">
-          {m.start_sorted({ fertig: String(fertig), gesamt: String(start.gesamt) })}
+      <dd className="m-0 flex h-8 items-center gap-2.5 self-end">
+        <Ring anteil={start.gesamt ? fertig / start.gesamt : 1} />
+        <span className="flex flex-col text-xs leading-tight">
+          <span className="font-medium">{start.gesamt ? Math.round((fertig / start.gesamt) * 100) : 100} %</span>
+          <span className="text-muted">{m.start_sorted({ fertig: String(fertig), gesamt: String(start.gesamt) })}</span>
         </span>
       </dd>
       <dd className={zeile}>
@@ -95,40 +94,30 @@ function Speicher({ speicher }: { speicher: NonNullable<Start["speicher"]> }) {
     <div className={kachel}>
       <Beschriftung bereich="#speicher">{m.start_storage()}</Beschriftung>
       <dd className={wert}>{groesse(speicher.bytes)}</dd>
-      <dd className="m-0 flex flex-col gap-1.5 self-end">
-        {d && (
-          <>
-            <Leiste
-              teile={[
-                { anteil: speicher.bytes / d.gesamt, klasse: "bg-fg" },
-                { anteil: (d.gesamt - d.frei - speicher.bytes) / d.gesamt, klasse: "bg-muted/60" },
-              ]}
-            />
-            <span className="flex flex-wrap gap-x-3 text-muted text-xs">
-              <span className="inline-flex items-center gap-1">
-                <span aria-hidden="true" className="size-2 rounded-full bg-fg" />
-                {m.start_legend_originals()}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span aria-hidden="true" className="size-2 rounded-full bg-muted/60" />
-                {m.start_legend_used()}
-              </span>
-            </span>
-          </>
-        )}
+      <dd className="m-0 self-end">
+        {d && <Belegung originale={speicher.bytes / d.gesamt} belegt={(d.gesamt - d.frei) / d.gesamt} />}
       </dd>
-      <dd className={zeile}>
-        {d
-          ? `${m.start_disk_free({ frei: groesse(d.frei) })} ${m.start_disk_of({ gesamt: groesse(d.gesamt) })}`
-          : m.start_storage_hint({ anzahl: String(speicher.dateien) })}
+      <dd className={`${zeile} flex flex-wrap items-center gap-x-2`}>
+        {d ? (
+          <>
+            {/* Schwarz die Originale, grau der übrige belegte Platz, frei nur der Rand; eine Zeile wie in den anderen
+                Kacheln */}
+            <span className="inline-flex items-center gap-1">
+              <span aria-hidden="true" className="size-2 rounded-[2px] bg-fg" />
+              {m.start_legend_originals()}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>{`${m.start_disk_free({ frei: groesse(d.frei) })} ${m.start_disk_of({ gesamt: groesse(d.gesamt) })}`}</span>
+          </>
+        ) : (
+          m.start_storage_hint({ anzahl: String(speicher.dateien) })
+        )}
       </dd>
     </div>
   );
 }
 
 function Pflege({ start }: { start: Start }) {
-  const kette = useQuery({ queryKey: ["kette"], queryFn: api.kette });
-  const zustand = kette.data ? siegelZustand(kette.data.lauf) : null;
   const antraege = start.loeschantraege ?? 0;
   const paar = "flex items-center justify-between gap-2";
   return (
@@ -151,20 +140,6 @@ function Pflege({ start }: { start: Start }) {
             <div className={paar}>
               <dt className="text-muted">{m.start_holds()}</dt>
               <dd className="m-0 font-medium">{start.sperren.aktiv}</dd>
-            </div>
-          )}
-          {zustand && (
-            <div className={paar}>
-              <dt className="text-muted">{m.start_seal()}</dt>
-              <dd
-                className={`m-0 font-medium ${zustand === "gut" ? "text-ok" : zustand === "befund" ? "text-danger" : "text-warn"}`}
-              >
-                {zustand === "gut"
-                  ? m.seal_ok_short()
-                  : zustand === "befund"
-                    ? m.seal_findings_short()
-                    : m.seal_open_short()}
-              </dd>
             </div>
           )}
         </dl>

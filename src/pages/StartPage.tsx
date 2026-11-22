@@ -33,7 +33,11 @@ export function StartPage() {
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-2">
           <ViewTiles />
         </div>
-        <div className="flex min-w-0 flex-col gap-3">
+        {/* Mit eigener Überschrift, damit die Karten oben auf einer Linie mit den Ansichten links beginnen */}
+        <section aria-labelledby="start-zustand" className="flex min-w-0 flex-col gap-3">
+          <h2 id="start-zustand" className="m-0 font-semibold text-lg">
+            {m.start_state()}
+          </h2>
           {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
           {ich.data && ich.data.role !== "mitarbeiter" && <ChainStatus inhaber={ich.data.role === "inhaber"} />}
           {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
@@ -42,7 +46,7 @@ export function StartPage() {
           {ich.data && (ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && (
             <OperationStatus inhaber={ich.data.role === "inhaber"} />
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

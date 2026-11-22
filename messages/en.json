@@ -1442,11 +1442,7 @@
   "start_disk_of": "of {gesamt}",
   "start_disk_free": "{frei} free",
   "start_legend_originals": "Originals",
-  "start_legend_used": "other used",
-  "start_seal": "Seals",
   "start_chart_label": "Documents received in the last twelve months",
   "start_care_waiting": "awaiting approval",
-  "seal_ok_short": "verified",
-  "seal_findings_short": "finding",
-  "seal_open_short": "pending"
+  "start_state": "Status"
 }

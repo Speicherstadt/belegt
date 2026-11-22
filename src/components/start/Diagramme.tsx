@@ -21,19 +21,48 @@ export function Verlauf({ werte, monate, label }: { werte: number[]; monate: str
   );
 }
 
-/** Anteil als schmale Leiste (8 px, ganz gerundet) auf einer Spur in --border */
-export function Leiste({ teile }: { teile: { anteil: number; klasse: string }[] }) {
+/** Anteil als kleiner Ring mit der Prozentzahl in der Mitte (32 px) */
+export function Ring({ anteil }: { anteil: number }) {
+  const r = 13;
+  const umfang = 2 * Math.PI * r;
+  const wert = Math.min(1, Math.max(0, anteil));
   return (
-    <div aria-hidden="true" className="flex h-2 gap-0.5 overflow-hidden rounded-full bg-border">
-      {teile
-        .filter((t) => t.anteil > 0)
-        .map((t) => (
+    <svg aria-hidden="true" viewBox="0 0 32 32" className="size-8 shrink-0 text-fg">
+      <circle cx="16" cy="16" r={r} fill="none" stroke="var(--border)" strokeWidth="4" />
+      <circle
+        cx="16"
+        cy="16"
+        r={r}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray={`${umfang * wert} ${umfang}`}
+        transform="rotate(-90 16 16)"
+      />
+    </svg>
+  );
+}
+
+/** Belegung eines Datenträgers als Reihe von Segmenten wie eine Festplattenanzeige: Originale, übrig belegt, frei */
+export function Belegung({ originale, belegt }: { originale: number; belegt: number }) {
+  const zellen = 20;
+  return (
+    <div aria-hidden="true" className="flex h-8 items-stretch gap-[3px]">
+      {Array.from({ length: zellen }, (_, i) => {
+        const mitte = (i + 0.5) / zellen;
+        // Die Originale bekommen mindestens ein Segment, sobald es welche gibt
+        const art = (originale > 0 && i === 0) || mitte <= originale ? "o" : mitte <= belegt ? "b" : "f";
+        return (
           <span
-            key={t.klasse}
-            className={`h-full rounded-full ${t.klasse}`}
-            style={{ width: `${Math.max(1.5, Math.min(100, t.anteil * 100))}%` }}
+            // biome-ignore lint/suspicious/noArrayIndexKey: feste Zahl von Segmenten
+            key={i}
+            className={`flex-1 rounded-[3px] border ${
+              art === "o" ? "border-fg bg-fg" : art === "b" ? "border-muted/60 bg-muted/45" : "border-border"
+            }`}
           />
-        ))}
+        );
+      })}
     </div>
   );
 }
