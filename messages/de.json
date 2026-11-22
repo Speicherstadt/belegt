@@ -767,6 +767,18 @@
   "start_sources_link": "Zu den Quellen",
   "start_chain": "Unveränderbarkeit",
   "start_chain_busy": "Die Kette wird geprüft …",
+  "start_chain_result": "Hash-Kette und Siegel",
+  "start_chain_ok": "in Ordnung",
+  "start_chain_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Befund",
+        "anzahlPlural=other": "{anzahl} Befunde"
+      }
+    }
+  ],
   "start_timestamp": "Letzter Zeitstempel",
   "start_timestamp_value": "{zeit} von {dienst}",
   "start_timestamp_none": "noch keiner",
@@ -1136,6 +1148,7 @@
   "workflow_send_fields_example": "externalSource=belegt\nexternalId=\\{id\\}\nnote=ASN \\{asn\\}: \\{titel\\}",
   "zip_download": "{anzahl} als ZIP herunterladen ({groesse})",
   "zip_too_large": "Zusammen {groesse}: zu groß für ein ZIP (höchstens 2 GB). Bitte weniger wählen.",
+  "start_chain_never": "noch nicht geprüft; der Worker prüft einmal am Tag",
   "start_chain_checked": "Zuletzt geprüft",
   "start_chain_checked_value": [
     {

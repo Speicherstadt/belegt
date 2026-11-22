@@ -67,6 +67,14 @@ const FAELLE: Fall[] = [
     "2 findings",
   ],
   [
+    "start_chain_findings",
+    (n, locale) => m.start_chain_findings({ anzahl: n }, { locale }),
+    "1 Befund",
+    "2 Befunde",
+    "1 finding",
+    "2 findings",
+  ],
+  [
     "audit_files_checked",
     (n, locale) => m.audit_files_checked({ anzahl: n }, { locale }),
     "1 Datei gegen ihren Hash geprüft.",
