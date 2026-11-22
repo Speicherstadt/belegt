@@ -23,7 +23,11 @@ Das gilt für alle, die hochladen dürfen.
 
 ## Startseite
 
-Nach dem Anmelden zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
+Ganz oben stehen die gespeicherten Ansichten, die du für die Startseite gewählt hast: je Ansicht die Zahl der Treffer
+und die ersten fünf Dokumente mit Vorschaubild, Korrespondent, Eingang und Tags. In der Seitenleiste steht die Zahl
+der Treffer neben jeder gespeicherten Ansicht.
+
+Darunter zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
 wie viele in diesem Jahr eingingen, offene Löschanträge, aktive Sperren mit der Zahl der Dokumente darunter, die Größe
 der Originale (jede Datei einmal) und die Fristen, die in den nächsten 90 Tagen enden, mit dem Tag, ab dem das
 Dokument löschbar ist. Daneben der Zustand der Quellen (letzter Abruf oder Fehler jedes Postfachs, das letzte Dokument

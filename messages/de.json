@@ -1257,5 +1257,6 @@
   "global_search_parties": "Korrespondenten",
   "global_search_doctypes": "Dokumenttypen",
   "global_search_none": "Nichts gefunden.",
-  "global_search_all": "Alle Treffer für „{suche}“ im Archiv"
+  "global_search_all": "Alle Treffer für „{suche}“ im Archiv",
+  "views_nav_count": "Treffer:"
 }

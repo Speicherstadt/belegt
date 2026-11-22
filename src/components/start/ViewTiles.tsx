@@ -1,49 +1,66 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
-import { ansichtAus } from "../../../shared/archivansicht.ts";
+import { useAnsichtTreffer } from "../../lib/ansichtTreffer.ts";
 import { api, type GespeicherteAnsicht } from "../../lib/api.ts";
-import { filterParameter } from "../../lib/ordnung.ts";
+import { tag } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
+import { TagChip } from "../TagChip.tsx";
+import { Thumbnail } from "../Thumbnail.tsx";
 
-/** Eine Kachel aus einer gespeicherten Ansicht: Zahl der Treffer und die ersten fünf in ihrer Sortierung */
+/**
+ * Eine gespeicherte Ansicht auf der Startseite: Name und Zahl der Treffer, darunter die ersten fünf Dokumente mit
+ * Vorschaubild, Korrespondent, Eingang und Tags, unten der Weg ins Archiv
+ */
 function ViewTile({ ansicht }: { ansicht: GespeicherteAnsicht }) {
-  const a = ansichtAus(ansicht.parameter);
-  const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder, enabled: !!a.feld });
-  const bereit = !a.feld || !!felder.data;
-  const parameter = filterParameter(a, felder.data ?? []);
-  const liste = useQuery({
-    queryKey: ["dokumente", a.suche, a.gruppe, parameter, 1, 5, a.sortierung],
-    queryFn: () => api.dokumente(a.suche, a.gruppe, parameter, 1, 5, a.sortierung),
-    enabled: bereit,
-  });
+  const liste = useAnsichtTreffer(ansicht);
   const id = `kachel-${ansicht.id}`;
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-2 rounded-lg border border-border p-4">
-      <h3 id={id} className="m-0 font-semibold text-base">
-        {ansicht.name}
-      </h3>
+    <section aria-labelledby={id} className="flex flex-col gap-3 rounded-lg border border-border p-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 id={id} className="m-0 font-semibold text-base">
+          {ansicht.name}
+        </h3>
+        {liste.data && (
+          <span className="text-muted text-sm">
+            <span className="font-semibold text-fg tabular-nums">{liste.data.gesamt}</span>{" "}
+            {m.start_view_count({ anzahl: String(liste.data.gesamt) })}
+          </span>
+        )}
+      </div>
       {liste.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {liste.error.message}
         </p>
       )}
       {liste.data && (
-        <>
-          <p className="m-0 text-sm">
-            <span className="font-semibold text-2xl tabular-nums">{liste.data.gesamt}</span>{" "}
-            <span className="text-muted">{m.start_view_count({ anzahl: String(liste.data.gesamt) })}</span>
-          </p>
-          <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
-            {liste.data.eintraege.map((d) => (
-              <li key={d.id} className="truncate">
-                <Link to="/dokumente/$id" params={{ id: d.id }} className="underline underline-offset-2">
+        <ul className="m-0 flex list-none flex-col divide-y divide-border p-0 text-sm">
+          {liste.data.eintraege.map((d) => (
+            <li key={d.id} className="flex items-center gap-3 py-2">
+              <div className="w-10 shrink-0">
+                <Thumbnail dokument={d} />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <Link
+                  to="/dokumente/$id"
+                  params={{ id: d.id }}
+                  className="truncate font-medium underline-offset-2 hover:underline"
+                >
                   {d.titel || d.dateiname || m.start_asn({ asn: String(d.asn) })}
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </>
+                <span className="truncate text-muted text-xs">
+                  {d.korrespondent ? `${d.korrespondent.name} · ` : ""}
+                  {tag(d.eingegangenAm)}
+                </span>
+              </div>
+              <span className="hidden max-w-[40%] flex-wrap justify-end gap-1 sm:flex">
+                {d.tags.slice(0, 2).map((t) => (
+                  <TagChip key={t.id} tag={t} />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
       <Link to="/archiv" search={ansicht.parameter} className="text-sm underline underline-offset-2">
         {m.start_view_open({ name: ansicht.name })}
@@ -83,7 +100,7 @@ export function ViewTiles() {
       </h2>
       {!ansichten.data.length && <p className="m-0 text-muted text-sm">{m.start_views_none()}</p>}
       {gewaehlt.length > 0 && (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3">
           {gewaehlt.map((a) => (
             <ViewTile key={a.id} ansicht={a} />
           ))}

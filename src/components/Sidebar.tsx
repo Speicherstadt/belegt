@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { ansichtAus, ansichtSuche } from "../../shared/archivansicht.ts";
-import { api, type Ich } from "../lib/api.ts";
+import { useAnsichtTreffer } from "../lib/ansichtTreffer.ts";
+import { api, type GespeicherteAnsicht, type Ich } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 import { Darstellung } from "./Darstellung.tsx";
 
@@ -19,6 +20,18 @@ const ITEMS = [
 
 const eintrag =
   "flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
+
+/** Zahl der Treffer einer gespeicherten Ansicht, aus derselben Abfrage wie die Kachel auf der Startseite */
+function Anzahl({ ansicht }: { ansicht: GespeicherteAnsicht }) {
+  const treffer = useAnsichtTreffer(ansicht);
+  if (!treffer.data) return null;
+  return (
+    <span className="ml-2 rounded-full bg-subtle px-1.5 text-muted text-xs tabular-nums">
+      <span className="sr-only">{m.views_nav_count()} </span>
+      {treffer.data.gesamt}
+    </span>
+  );
+}
 
 /**
  * Der Prüfer sieht nur, was er für die Prüfung braucht, der Mitarbeiter nur die Dokumente seines Sichtbereichs; die
@@ -97,7 +110,8 @@ export function Sidebar({
                       activeOptions={{ exact: true, includeSearch: true }}
                       className={eintrag}
                     >
-                      <span className="truncate">{a.name}</span>
+                      <span className="min-w-0 flex-1 truncate">{a.name}</span>
+                      <Anzahl ansicht={a} />
                     </Link>
                   </li>
                 ))}

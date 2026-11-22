@@ -1335,5 +1335,6 @@
   "global_search_parties": "Correspondents",
   "global_search_doctypes": "Document types",
   "global_search_none": "Nothing found.",
-  "global_search_all": "All results for “{suche}” in the archive"
+  "global_search_all": "All results for “{suche}” in the archive",
+  "views_nav_count": "Results:"
 }

@@ -22,6 +22,8 @@ export function StartPage() {
           {start.error.message}
         </p>
       )}
+      {/* Zuerst die Dokumente aus den gespeicherten Ansichten, dann die Zahlen und der Zustand */}
+      <ViewTiles />
       {start.data && <StartNumbers start={start.data} />}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
         {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
@@ -33,7 +35,6 @@ export function StartPage() {
           <OperationStatus inhaber={ich.data.role === "inhaber"} />
         )}
       </div>
-      <ViewTiles />
     </div>
   );
 }
