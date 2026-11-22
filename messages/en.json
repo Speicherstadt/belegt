@@ -1286,5 +1286,16 @@
   "workflow_remove_row": "Remove {name}",
   "workflow_actions_empty": "No action yet. Choose below what should happen to the document.",
   "workflow_cancel": "Cancel",
-  "form_cancel": "Cancel"
+  "form_cancel": "Cancel",
+  "doc_tab_classification": "Classification",
+  "doc_tab_notes": "Notes",
+  "doc_tab_more": "More",
+  "doc_tab_history": "History",
+  "doc_tabs_label": "Document sections",
+  "doc_nav_label": "Browse",
+  "doc_nav_prev": "Previous document (←)",
+  "doc_nav_next": "Next document (→)",
+  "doc_nav_position": "{stelle} of {anzahl}",
+  "classify_submit_next": "Classify & next",
+  "doc_event_meta": "{wann} · {wer} · No. {nr}"
 }

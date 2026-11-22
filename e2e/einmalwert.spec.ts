@@ -122,6 +122,7 @@ test("die Fehlermeldung beim Kopieren lässt die Höhe auch in der schmalen Seit
     buffer: Buffer.from(`%PDF-1.4\n%Hoehe ${info.project.name}\n`),
   });
   await page.getByRole("link", { name }).click();
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const bereich = page.getByRole("region", { name: "Teilen per Link" });
   await bereich.getByRole("button", { name: "Link anlegen" }).click();
   const wert = bereich.getByTestId("einmalwert");

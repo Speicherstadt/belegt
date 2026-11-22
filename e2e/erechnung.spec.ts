@@ -33,7 +33,7 @@ test("eine XRechnung zeigt ihre Kopfdaten und füllt die Einordnung vor", async 
   await expect(page.getByLabel("Entstanden, empfangen oder abgesandt am")).toHaveValue("2026-04-02");
   await expect(page.getByLabel("Titel (optional)")).toHaveValue(`Rechnung ${nummer}`);
   await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue("Werkstatt Beispiel GmbH");
-  await page.getByRole("button", { name: "Einordnen" }).click();
+  await page.getByRole("button", { name: "Einordnen", exact: true }).click();
   await expect(
     page
       .getByRole("region", { name: "Einordnung" })

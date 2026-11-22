@@ -36,6 +36,7 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
   await ordnung.getByRole("combobox", { name: "Tag", exact: true }).selectOption({ label: tag });
   await ordnung.getByRole("button", { name: "Hinzufügen" }).click();
   await expect(ordnung.getByRole("button", { name: `Tag ${tag} entfernen` })).toBeVisible();
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `Tag hinzugefügt: ${tag}`,
   );
@@ -105,6 +106,7 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   await expect(ordnung.getByRole("alert")).toContainText("Kein Betrag");
   await eingabe.fill("1.234,56");
   await ordnung.getByRole("button", { name: `${feld} speichern` }).click();
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `Feld gesetzt: ${feld}`,
   );

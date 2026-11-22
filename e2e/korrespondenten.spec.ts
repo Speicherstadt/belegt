@@ -55,6 +55,7 @@ test("Korrespondent mit Zuordnungsregel anlegen, Dokument hochladen, Vorschlag �
   await expect(
     ordnung.getByRole("combobox", { name: "Korrespondent", exact: true }).locator("option:checked"),
   ).toHaveText(korrespondent);
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(abschnitt(page, "Verlauf")).toContainText(`Korrespondent gesetzt: ${korrespondent}`);
   // Das Formular der Einordnung nimmt den Namen aus der Liste
   await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue(korrespondent);
@@ -106,6 +107,7 @@ test("zwei Schreibweisen zusammenführen; die Einordnung behält den Text", asyn
     abschnitt(page, "Ordnung").getByRole("combobox", { name: "Korrespondent", exact: true }).locator("option:checked"),
   ).toHaveText(kurz);
   // Der Verlauf zeigt den Namen, wie ihn die versiegelte Einordnung festhält
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(abschnitt(page, "Verlauf")).toContainText(`Eingeordnet (Korrespondent: ${lang})`);
   await barrierefrei(page);
 });

@@ -11,7 +11,7 @@ async function eingeordnetesDokument(page: Page, name: string) {
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-15");
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
   await expect(einordnung).toContainText("Buchungsbelege");
 }
 

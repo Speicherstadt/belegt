@@ -53,6 +53,7 @@ test("Workflow anlegen und seine Wirkung bei einem Upload sehen", async ({ page 
     await expect(ordnung.getByRole("button", { name: `Tag ${tag} entfernen` })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 20_000 });
   await expect(page.getByText("Vom Workflow getaggt")).toBeVisible();
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `workflow:${workflow}`,
   );
@@ -104,6 +105,7 @@ test("Original an Adresse senden: Aktion anlegen, das Ergebnis steht am Dokument
     .getByTestId("upload")
     .setInputFiles({ name, mimeType: "application/pdf", buffer: Buffer.from(`%PDF-1.7\n% ${name}\n`) });
   await page.getByRole("link", { name }).click();
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const weitergaben = page.getByRole("region", { name: "Weitergaben" });
   await expect(async () => {
     await page.reload();

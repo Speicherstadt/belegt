@@ -1208,5 +1208,16 @@
   "workflow_remove_row": "{name} entfernen",
   "workflow_actions_empty": "Noch keine Aktion. Wähle unten, was mit dem Dokument passieren soll.",
   "workflow_cancel": "Abbrechen",
-  "form_cancel": "Abbrechen"
+  "form_cancel": "Abbrechen",
+  "doc_tab_classification": "Einordnung",
+  "doc_tab_notes": "Notizen",
+  "doc_tab_more": "Weiteres",
+  "doc_tab_history": "Verlauf",
+  "doc_tabs_label": "Bereiche des Dokuments",
+  "doc_nav_label": "Blättern",
+  "doc_nav_prev": "Vorheriges Dokument (←)",
+  "doc_nav_next": "Nächstes Dokument (→)",
+  "doc_nav_position": "{stelle} von {anzahl}",
+  "classify_submit_next": "Einordnen & weiter",
+  "doc_event_meta": "{wann} · {wer} · Nr. {nr}"
 }

@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams, useRouter, useSearch } from "@tanstack/react-router";
+import { type ReactNode, useEffect } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
-import { Derivations, operationLabel } from "../components/Derivations.tsx";
+import { Derivations } from "../components/Derivations.tsx";
+import { DocumentDetails } from "../components/DocumentDetails.tsx";
 import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { Forwardings } from "../components/Forwardings.tsx";
@@ -14,64 +16,64 @@ import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
-import { Explain } from "../components/WasIstDas.tsx";
-import { ansichtUrl, api, archivfassungUrl, dateiUrl, type Ereignis } from "../lib/api.ts";
-import { groesse, zeitpunkt } from "../lib/format.ts";
+import { ansichtUrl, api, archivfassungUrl, dateiUrl } from "../lib/api.ts";
+import { listeLesen, nachbarn } from "../lib/blaettern.ts";
 import { m } from "../paraglide/messages.js";
 
-const QUELLE: Record<string, () => string> = {
-  upload: () => m.source_upload(),
-  mail: () => m.source_mail(),
-  ordner: () => m.source_ordner(),
-  api: () => m.source_api(),
-  abgeleitet: () => m.source_abgeleitet(),
-  import: () => m.source_import(),
+const REITER = ["einordnung", "notizen", "weiteres", "verlauf"] as const;
+type Reiter = (typeof REITER)[number];
+const REITER_LABEL: Record<Reiter, () => string> = {
+  einordnung: () => m.doc_tab_classification(),
+  notizen: () => m.doc_tab_notes(),
+  weiteres: () => m.doc_tab_more(),
+  verlauf: () => m.doc_tab_history(),
 };
 
-function ereignis(e: Ereignis): string {
-  if (e.tabelle === "seals") return m.event_seal();
-  if (e.tabelle === "einordnungen")
-    return e.detail ? m.event_classified_party({ name: e.detail }) : m.event_classified();
-  const name = e.detail ?? "–";
-  if (e.tabelle === "dokument_tags")
-    return e.aktion === "DELETE" ? m.event_tag_removed({ name }) : m.event_tag_added({ name });
-  if (e.tabelle === "dokument_dokumenttypen")
-    return e.aktion === "DELETE" ? m.event_doctype_removed({ name }) : m.event_doctype_set({ name });
-  if (e.tabelle === "dokument_korrespondenten")
-    return e.aktion === "DELETE" ? m.event_party_removed({ name }) : m.event_party_set({ name });
-  if (e.tabelle === "feldwerte")
-    return e.aktion === "DELETE" ? m.event_field_removed({ name }) : m.event_field_set({ name });
-  if (e.tabelle === "notizen") return e.aktion === "DELETE" ? m.event_note_removed() : m.event_note_added();
-  if (e.tabelle === "notiz_widerrufe") return e.aktion === "DELETE" ? m.event_note_removed() : m.event_note_withdrawn();
-  if (e.tabelle === "ableitungen")
-    return e.richtung === "aus"
-      ? m.event_derived_from({ operation: operationLabel(e.detail) })
-      : m.event_derived_into({ operation: operationLabel(e.detail) });
-  if (e.aktion === "INSERT") return m.event_insert();
-  return m.event_other({ aktion: e.aktion });
-}
+/** Tasten zum Blättern gelten nicht, solange jemand tippt */
+const tipptGerade = (e: KeyboardEvent) =>
+  e.altKey ||
+  e.ctrlKey ||
+  e.metaKey ||
+  (e.target instanceof HTMLElement && !!e.target.closest("input, textarea, select, [contenteditable]"));
 
+const knopf = "flex h-9 items-center rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle";
+
+/**
+ * Ein Dokument: links die Vorschau, groß und beim Scrollen stehend; rechts Reiter für Einordnung, Notizen, Weiteres und
+ * Verlauf. Der Reiter steht in der Adresse. Kommt man aus einer Liste, blättern ← und → (auch als Tasten) darin
+ */
 export function DocumentPage() {
   const { id } = useParams({ from: "/app/dokumente/$id" });
+  const search = useSearch({ strict: false }) as { reiter?: string };
+  const navigate = useNavigate();
+  const router = useRouter();
+  const reiter: Reiter = REITER.includes(search.reiter as Reiter) ? (search.reiter as Reiter) : "einordnung";
   const dok = useQuery({ queryKey: ["dokument", id], queryFn: () => api.dokument(id) });
-  const verlauf = useQuery({ queryKey: ["verlauf", id], queryFn: () => api.verlauf(id) });
-  const inhalt = useQuery({ queryKey: ["inhalt", id], queryFn: () => api.inhalt(id) });
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
+  const liste = listeLesen();
+  const { vorher, weiter, stelle, anzahl } = nachbarn(liste, id);
+  // Zurück in die Liste, aus der man kam; sonst ins Archiv
+  const zurueck = anzahl && liste ? liste.zurueck : "/archiv";
+  const oeffnen = (ziel: string) =>
+    void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: reiter === "einordnung" ? {} : { reiter } });
+
+  useEffect(() => {
+    function taste(e: KeyboardEvent) {
+      if (tipptGerade(e)) return;
+      const ziel = e.key === "ArrowLeft" ? vorher : e.key === "ArrowRight" ? weiter : null;
+      if (!ziel) return;
+      e.preventDefault();
+      void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: reiter === "einordnung" ? {} : { reiter } });
+    }
+    window.addEventListener("keydown", taste);
+    return () => window.removeEventListener("keydown", taste);
+  }, [vorher, weiter, reiter, navigate]);
 
   if (dok.error) return <EmptyState title={m.doc_not_found()} text="" />;
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
   const d = dok.data;
   const geloescht = !!d.loeschung?.bestaetigtAm;
-  const einordnen = !geloescht && (
-    <Classification
-      key={d.einordnung?.id ?? "neu"}
-      dokumentId={d.id}
-      einordnung={d.einordnung}
-      eingang={d.eingegangenAm}
-      dokumenttyp={d.dokumenttyp}
-      korrespondent={d.korrespondent}
-    />
-  );
+  const offen = !d.einordnung;
   // Bei Scans die durchsuchbare Fassung: Text lässt sich darin suchen und markieren
   const vorschau = geloescht
     ? null
@@ -84,161 +86,149 @@ export function DocumentPage() {
           : d.ansicht
             ? "ansicht"
             : null;
+  const rahmen = "h-[calc(100vh-14rem)] min-h-96 w-full rounded bg-white";
+
+  const inhalt: Record<Reiter, ReactNode> = {
+    einordnung: (
+      <>
+        {!geloescht && (
+          <Classification
+            key={d.einordnung?.id ?? "neu"}
+            dokumentId={d.id}
+            einordnung={d.einordnung}
+            eingang={d.eingegangenAm}
+            dokumenttyp={d.dokumenttyp}
+            korrespondent={d.korrespondent}
+            weiter={offen && weiter ? () => oeffnen(weiter) : undefined}
+          />
+        )}
+        <DocumentOrdnung
+          dokumentId={d.id}
+          ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, korrespondent: d.korrespondent, felder: d.felder }}
+          geloescht={geloescht}
+        />
+        <MailSection dokumentId={d.id} />
+        <EInvoice dokumentId={d.id} />
+      </>
+    ),
+    notizen: ich.data && ich.data.role !== "pruefer" && (
+      <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />
+    ),
+    weiteres: (
+      <>
+        {!geloescht && ich.data?.role === "inhaber" && <ShareLinks key={d.id} dokumentId={d.id} />}
+        {(ich.data?.role === "inhaber" || ich.data?.role === "steuerberatung") && <Forwardings dokumentId={d.id} />}
+        <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
+        {!geloescht && <Similar dokumentId={d.id} />}
+        <Deletion dokumentId={d.id} einordnung={d.einordnung} vormalsAnders={d.vormalsAnders} loeschung={d.loeschung} />
+      </>
+    ),
+    verlauf: <DocumentDetails d={d} />,
+  };
+  const reiterSichtbar = REITER.filter((r) => r !== "notizen" || (ich.data && ich.data.role !== "pruefer"));
 
   return (
-    <div className="flex flex-col gap-5">
-      <Link to="/archiv" className="self-start text-muted text-sm underline-offset-2 hover:underline">
-        {m.doc_back()}
-      </Link>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <a
+          href={zurueck}
+          onClick={(e) => {
+            e.preventDefault();
+            router.history.push(zurueck);
+          }}
+          className="text-muted text-sm underline-offset-2 hover:underline"
+        >
+          {m.doc_back()}
+        </a>
+        {anzahl > 1 && (
+          <nav aria-label={m.doc_nav_label()} className="flex items-center gap-2 text-sm">
+            <button
+              type="button"
+              disabled={!vorher}
+              onClick={() => vorher && oeffnen(vorher)}
+              aria-label={m.doc_nav_prev()}
+              title={m.doc_nav_prev()}
+              className={`${knopf} disabled:opacity-40`}
+            >
+              ←
+            </button>
+            <span className="text-muted tabular-nums">
+              {m.doc_nav_position({ stelle: String(stelle), anzahl: String(anzahl) })}
+            </span>
+            <button
+              type="button"
+              disabled={!weiter}
+              onClick={() => weiter && oeffnen(weiter)}
+              aria-label={m.doc_nav_next()}
+              title={m.doc_nav_next()}
+              className={`${knopf} disabled:opacity-40`}
+            >
+              →
+            </button>
+          </nav>
+        )}
+      </div>
       <PageHeader title={d.einordnung?.titel ?? d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
       {!geloescht && (
         <div className="flex flex-wrap items-start gap-3">
-          <a
-            href={dateiUrl(d.id)}
-            className="h-9 rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
-          >
+          <a href={dateiUrl(d.id)} className={knopf}>
             {m.doc_download()}
           </a>
           {d.archivfassung && (
-            <a
-              href={archivfassungUrl(d.id)}
-              download
-              className="h-9 rounded-md border border-border px-3 py-2 font-medium text-sm hover:bg-subtle"
-            >
+            <a href={archivfassungUrl(d.id)} download className={knopf}>
               {m.doc_download_searchable()}
             </a>
           )}
           <OpenWith dokumentId={d.id} mimeType={d.mimeType} />
         </div>
       )}
-      <div className="flex flex-wrap items-start gap-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
         <section
           aria-label={m.doc_preview()}
-          className="min-w-0 flex-[3_1_420px] rounded-lg border border-border bg-subtle p-4"
+          className="min-w-0 rounded-lg border border-border bg-subtle p-3 lg:sticky lg:top-4"
         >
-          {vorschau === "pdf" && (
-            <iframe title={m.doc_preview()} src={dateiUrl(d.id, true)} className="h-[70vh] w-full rounded bg-white" />
-          )}
+          {vorschau === "pdf" && <iframe title={m.doc_preview()} src={dateiUrl(d.id, true)} className={rahmen} />}
           {vorschau === "bild" && (
-            <img src={dateiUrl(d.id, true)} alt={d.dateiname ?? m.unnamed()} className="mx-auto max-h-[70vh]" />
+            <img
+              src={dateiUrl(d.id, true)}
+              alt={d.dateiname ?? m.unnamed()}
+              className="mx-auto max-h-[calc(100vh-14rem)]"
+            />
           )}
           {vorschau === "ansicht" && (
             <>
               <p className="m-0 mb-3 text-muted text-sm">{m.doc_derived_view()}</p>
-              <iframe title={m.doc_preview()} src={ansichtUrl(d.id)} className="h-[70vh] w-full rounded bg-white" />
+              <iframe title={m.doc_preview()} src={ansichtUrl(d.id)} className={rahmen} />
             </>
           )}
           {vorschau === "archivfassung" && (
             <>
               <p className="m-0 mb-3 text-muted text-sm">{m.doc_searchable_view()}</p>
-              <iframe
-                title={m.doc_preview()}
-                src={archivfassungUrl(d.id)}
-                className="h-[70vh] w-full rounded bg-white"
-              />
+              <iframe title={m.doc_preview()} src={archivfassungUrl(d.id)} className={rahmen} />
             </>
           )}
           {!vorschau && <p className="m-0 text-muted text-sm">{m.doc_no_preview()}</p>}
         </section>
-        <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-5">
-          {/* Offen: Die Einordnung ist der nächste Schritt und steht zuerst */}
-          {!d.einordnung && einordnen}
-          <MailSection dokumentId={d.id} />
-          <Derivations dokumentId={d.id} schreiben={!geloescht && darfSchreiben(ich.data?.role)} />
-          <EInvoice dokumentId={d.id} />
-          {(ich.data?.role === "inhaber" || ich.data?.role === "steuerberatung") && <Forwardings dokumentId={d.id} />}
-          <Deletion
-            dokumentId={d.id}
-            einordnung={d.einordnung}
-            vormalsAnders={d.vormalsAnders}
-            loeschung={d.loeschung}
-          />
-          {!geloescht && ich.data?.role === "inhaber" && <ShareLinks key={d.id} dokumentId={d.id} />}
-          {d.einordnung && einordnen}
-          {ich.data && ich.data.role !== "pruefer" && <Notes dokumentId={d.id} ich={ich.data} geloescht={geloescht} />}
-          {!geloescht && <Similar dokumentId={d.id} />}
-          <DocumentOrdnung
-            dokumentId={d.id}
-            ordnung={{ tags: d.tags, dokumenttyp: d.dokumenttyp, korrespondent: d.korrespondent, felder: d.felder }}
-            geloescht={geloescht}
-          />
-          <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
-            <h2 id="angaben" className="m-0 font-semibold text-base">
-              {m.doc_details()}
-            </h2>
-            <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
-              <Explain term="asn" row>
-                {(knopf, satz) => (
-                  <>
-                    <dt className="text-muted">{m.doc_asn()}</dt>
-                    <dd className="m-0 flex items-center">
-                      <span className="tabular-nums" data-testid="asn">
-                        {d.asn}
-                      </span>
-                      {knopf}
-                    </dd>
-                    {satz}
-                  </>
-                )}
-              </Explain>
-              <dt className="text-muted">{m.doc_source()}</dt>
-              <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
-              <dt className="text-muted">{m.doc_received()}</dt>
-              <dd className="m-0">{zeitpunkt(d.eingegangenAm)}</dd>
-              <dt className="text-muted">{m.doc_type()}</dt>
-              <dd className="m-0">{d.mimeType}</dd>
-              <dt className="text-muted">{m.doc_size()}</dt>
-              <dd className="m-0 tabular-nums">{groesse(d.groesse)}</dd>
-              {inhalt.data && (
-                <>
-                  <dt className="text-muted">{m.doc_text()}</dt>
-                  <dd className="m-0">
-                    {inhalt.data.fehler
-                      ? m.doc_text_error()
-                      : inhalt.data.ocr
-                        ? m.doc_text_ocr({ anzahl: String(inhalt.data.textLaenge) })
-                        : m.doc_text_file({ anzahl: String(inhalt.data.textLaenge) })}
-                  </dd>
-                </>
-              )}
-            </dl>
-          </section>
-          <section aria-labelledby="verlauf" className="flex flex-col gap-2 rounded-lg border border-border p-4">
-            <h2 id="verlauf" className="m-0 font-semibold text-base">
-              {m.doc_history()}
-            </h2>
-            <ol className="m-0 flex list-none flex-col gap-3 p-0">
-              {verlauf.data?.ereignisse.map((e) => (
-                <li key={e.seq} className="flex flex-col text-sm">
-                  <span className="font-medium">{ereignis(e)}</span>
-                  <span className="text-muted text-xs">
-                    {zeitpunkt(e.at)} · {e.akteur ?? "–"} · Nr. {e.seq}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-          <section aria-labelledby="nachweis" className="flex flex-col gap-2 rounded-lg border border-border p-4">
-            <h2 id="nachweis" className="m-0 font-semibold text-base">
-              {m.doc_proof()}
-            </h2>
-            <dl className="m-0 flex flex-col gap-2 text-sm">
-              <dt className="text-muted">{m.doc_hash()}</dt>
-              <dd className="m-0 break-all font-mono text-xs">{d.sha256}</dd>
-              <Explain term="seal" row>
-                {(knopf, satz) => (
-                  <>
-                    <dt className="flex items-center text-muted">
-                      {m.doc_seal()}
-                      {knopf}
-                    </dt>
-                    <dd className="m-0 break-all font-mono text-xs">{verlauf.data?.siegel ?? "–"}</dd>
-                    {satz}
-                  </>
-                )}
-              </Explain>
-            </dl>
-          </section>
+        <div className="flex min-w-0 flex-col gap-4">
+          <div role="tablist" aria-label={m.doc_tabs_label()} className="flex gap-1 border-border border-b">
+            {reiterSichtbar.map((r) => (
+              <Link
+                key={r}
+                role="tab"
+                aria-selected={reiter === r}
+                to="/dokumente/$id"
+                params={{ id: d.id }}
+                search={r === "einordnung" ? {} : { reiter: r }}
+                replace
+                className="-mb-px border-transparent border-b-2 px-3 py-2 font-medium text-muted text-sm hover:text-fg aria-selected:border-fg aria-selected:text-fg"
+              >
+                {REITER_LABEL[r]()}
+              </Link>
+            ))}
+          </div>
+          <div role="tabpanel" aria-label={REITER_LABEL[reiter]()} className="flex flex-col gap-5">
+            {inhalt[reiter]}
+          </div>
         </div>
       </div>
       {!geloescht && d.mimeType === "application/pdf" && darfSchreiben(ich.data?.role) && (
