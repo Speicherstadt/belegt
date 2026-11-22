@@ -146,6 +146,16 @@ const liste = (summary: string) => ({
 });
 
 export const ordnungPfade = {
+  "/api/fristvorlagen": {
+    ...liste("Eigene Fristvorlagen: Name und Dauer in Monaten"),
+    post: {
+      summary: "Fristvorlage anlegen (name, monate 1–1200); nur der Inhaber",
+      responses: { "201": { description: "Angelegt" } },
+    },
+  },
+  "/api/fristvorlagen/{id}": {
+    delete: { summary: "Fristvorlage löschen; nur der Inhaber", responses: { "200": { description: "Gelöscht" } } },
+  },
   "/api/tags": liste("Tags mit Name, Farbe und Anzahl der Dokumente"),
   "/api/dokumenttypen": liste("Dokumenttypen mit Vorgabe-Art"),
   "/api/korrespondenten": liste("Korrespondenten mit Zuordnungsregel und Anzahl der Dokumente"),

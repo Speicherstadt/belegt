@@ -7,6 +7,7 @@ import { betriebRouten } from "./http/betrieb.ts";
 import { mitClientIp } from "./http/client-ip.ts";
 import { dokumenteRouten } from "./http/dokumente.ts";
 import { freigabeRouten } from "./http/freigabe.ts";
+import { fristvorlagenRouten } from "./http/fristvorlagen.ts";
 import { type App, type AppUmgebung, MAX_UPLOAD, VERSION } from "./http/gemeinsam.ts";
 import { kontoRouten } from "./http/konto.ts";
 import { mailRouten } from "./http/mail.ts";
@@ -79,6 +80,7 @@ export function createApp(umgebung?: AppUmgebung) {
     archivansichtenRouten(app, umgebung);
     startRouten(app, umgebung);
     workflowsRouten(app, umgebung);
+    fristvorlagenRouten(app, umgebung);
     seitenRouten(app, umgebung);
     notizenRouten(app, umgebung);
     ordnungRouten(app, umgebung);

@@ -51,10 +51,11 @@ test("Sperren anlegen und aufheben", async ({ page }, info) => {
   await page.goto("/fristen");
   await expect(page.getByText("Im Archiv", { exact: true })).toBeVisible();
   const sperren = page.locator("section", { has: page.getByRole("heading", { name: "Sperren" }) });
+  await sperren.getByRole("button", { name: "+ Sperre anlegen" }).click();
   await sperren.getByLabel("Grund").fill(grund);
   await sperren.getByLabel("Von").fill("2022-01-01");
   await sperren.getByLabel("Bis").fill("2024-12-31");
-  await sperren.getByRole("button", { name: "Sperre anlegen" }).click();
+  await sperren.getByRole("button", { name: "Sperre anlegen", exact: true }).click();
   const eintrag = sperren.getByRole("listitem").filter({ hasText: grund });
   await expect(eintrag).toContainText("aktiv");
   expect((await axe(page)).violations).toEqual([]);

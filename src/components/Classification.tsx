@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useRef, useState } from "react";
+import { bisNachMonaten } from "../../shared/fristvorlage.ts";
 import { darfBearbeiten } from "../../shared/rollen.ts";
 import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
@@ -49,6 +50,12 @@ export function Classification({
     queryKey: ["korrespondenten"],
     queryFn: api.korrespondenten,
     enabled: darfBearbeiten(ich.data),
+  });
+  // Eigene Fristvorlagen füllen bei „freiwillig mit Frist“ das Fristende aus
+  const vorlagen = useQuery({
+    queryKey: ["fristvorlagen"],
+    queryFn: api.fristvorlagen,
+    enabled: darfBearbeiten(ich.data) && art === "freiwillig",
   });
   const speichern = useMutation({
     mutationFn: (eingabe: Parameters<typeof api.einordnen>[1]) => api.einordnen(dokumentId, eingabe),
@@ -264,6 +271,30 @@ export function Classification({
               className={feld}
             />
           </label>
+          {art === "freiwillig" && !!vorlagen.data?.length && (
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.classify_template()}
+              <select
+                defaultValue=""
+                onChange={(e) => {
+                  const v = vorlagen.data?.find((x) => x.id === e.target.value);
+                  const form = e.currentTarget.form;
+                  const entstanden = form?.elements.namedItem("entstanden") as HTMLInputElement | null;
+                  const bis = form?.elements.namedItem("freiwilligBis") as HTMLInputElement | null;
+                  const ende = v && entstanden ? bisNachMonaten(entstanden.value, v.monate) : null;
+                  if (ende && bis) bis.value = ende;
+                }}
+                className={feld}
+              >
+                <option value="">{m.classify_template_none()}</option>
+                {vorlagen.data.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {m.classify_template_option({ name: v.name, monate: String(v.monate) })}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {art === "freiwillig" && (
             <label className="flex flex-col gap-1.5 font-medium text-sm">
               {m.classify_voluntary_until()}

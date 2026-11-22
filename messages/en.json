@@ -1355,5 +1355,31 @@
       }
     }
   ],
-  "bulk_clear": "Clear selection"
+  "bulk_clear": "Clear selection",
+  "classify_template": "Template",
+  "classify_template_none": "Choose the end yourself",
+  "classify_template_option": "{name} ({monate} months)",
+  "templates_title": "Custom retention templates",
+  "templates_intro": "For documents without a legal duty that you still want to keep for a while, such as warranties. When classifying as “voluntary with period”, a template fills in the end date; legal periods stay as they are.",
+  "templates_none": "No templates yet.",
+  "templates_months": [
+    {
+      "declarations": ["input monate", "local monatePlural = monate: plural"],
+      "selectors": ["monatePlural"],
+      "match": {
+        "monatePlural=one": "{monate} month from creation",
+        "monatePlural=other": "{monate} months from creation"
+      }
+    }
+  ],
+  "templates_delete": "Delete template {name}",
+  "templates_create": "Create template",
+  "templates_name": "Name",
+  "templates_name_example": "e.g. warranty",
+  "templates_duration": "Duration in months",
+  "retention_legal": "Legal retention periods",
+  "due_title": "Due soon",
+  "due_all": "All by end of period",
+  "due_none": "No documents with a period.",
+  "due_until": "until {datum}"
 }

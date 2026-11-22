@@ -9,6 +9,14 @@ type Fall = [string, (n: string, locale: "de" | "en") => string, string, string,
 
 const FAELLE: Fall[] = [
   [
+    "templates_months",
+    (n, locale) => m.templates_months({ monate: n }, { locale }),
+    "1 Monat ab Entstehung",
+    "2 Monate ab Entstehung",
+    "1 month from creation",
+    "2 months from creation",
+  ],
+  [
     "bulk_selected",
     (n, locale) => m.bulk_selected({ anzahl: n }, { locale }),
     "1 Dokument ausgewählt",

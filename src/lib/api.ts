@@ -20,6 +20,7 @@ export type {
   Bericht,
   Einstellungen,
   Ereignisart,
+  Fristvorlage,
   PostfachAktion,
   Quelle,
   Regel,

@@ -39,6 +39,20 @@ Ein neues Dokument liegt im Eingang, bis es eingeordnet ist. Auf seiner Seite w�
 entstanden, empfangen oder abgesandt wurde; Belegt rechnet daraus die Frist und speichert sie mit. Jede Einordnung
 ist versiegelt. Eine Änderung kommt als neue Version dazu, die alte bleibt im Verlauf; es gilt die neueste.
 
+## Die Seite Fristen
+
+Oben stehen die Zahlen und die Dokumente, deren Frist als nächstes endet, darunter offene Löschanträge, Sperren und
+eigene Fristvorlagen. Die gesetzlichen Fristen stehen zugeklappt unten; „Sperre anlegen“ und „Vorlage anlegen“ öffnen
+ihr Formular erst auf Klick.
+
+## Eigene Vorlagen { #eigene-vorlagen }
+
+Für Dokumente ohne gesetzliche Pflicht, die du trotzdem eine Weile behalten willst (Garantie, Mietvertrag), legst du
+unter Fristen eine Vorlage mit Namen und Dauer in Monaten an. Beim Einordnen als „Freiwillig mit Frist“ wählst du sie
+aus, und Belegt trägt das Fristende ein: Entstehung plus so viele Monate (gibt es den Tag im Zielmonat nicht, der
+letzte Tag des Monats). Das Ende lässt sich danach noch ändern. Vorlagen gelten nur für „freiwillig“; die Frist der
+übrigen Arten bleibt die gesetzliche. Anlegen und löschen darf der Inhaber, jede Änderung steht im Audit-Log.
+
 ## Sperren
 
 Eine Sperre hält alle Dokumente, die in ihrem Zeitraum entstanden sind, auch nach Fristende fest, etwa während einer
