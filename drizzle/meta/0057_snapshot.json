@@ -82,26 +82,18 @@
         "ableitungen_dokument_id_dokumente_id_fk": {
           "name": "ableitungen_dokument_id_dokumente_id_fk",
           "tableFrom": "ableitungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "ableitungen_quelle_id_dokumente_id_fk": {
           "name": "ableitungen_quelle_id_dokumente_id_fk",
           "tableFrom": "ableitungen",
-          "columnsFrom": [
-            "quelle_id"
-          ],
+          "columnsFrom": ["quelle_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -110,10 +102,7 @@
       "uniqueConstraints": {
         "ableitungen_eindeutig": {
           "name": "ableitungen_eindeutig",
-          "columns": [
-            "dokument_id",
-            "position"
-          ],
+          "columns": ["dokument_id", "position"],
           "nullsNotDistinct": false
         }
       },
@@ -240,13 +229,9 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -335,13 +320,9 @@
         "ansichten_dokument_id_dokumente_id_fk": {
           "name": "ansichten_dokument_id_dokumente_id_fk",
           "tableFrom": "ansichten",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -401,9 +382,7 @@
       "uniqueConstraints": {
         "api_tokens_token_hash_unique": {
           "name": "api_tokens_token_hash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -461,13 +440,9 @@
         "archivfassungen_dokument_id_dokumente_id_fk": {
           "name": "archivfassungen_dokument_id_dokumente_id_fk",
           "tableFrom": "archivfassungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -518,13 +493,9 @@
         "archivnummern_dokument_id_dokumente_id_fk": {
           "name": "archivnummern_dokument_id_dokumente_id_fk",
           "tableFrom": "archivnummern",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -533,16 +504,12 @@
       "uniqueConstraints": {
         "archivnummern_id_unique": {
           "name": "archivnummern_id_unique",
-          "columns": [
-            "id"
-          ],
+          "columns": ["id"],
           "nullsNotDistinct": false
         },
         "archivnummern_nummer_unique": {
           "name": "archivnummern_nummer_unique",
-          "columns": [
-            "nummer"
-          ],
+          "columns": ["nummer"],
           "nullsNotDistinct": false
         }
       },
@@ -846,26 +813,18 @@
         "dokument_dokumenttypen_dokument_id_dokumente_id_fk": {
           "name": "dokument_dokumenttypen_dokument_id_dokumente_id_fk",
           "tableFrom": "dokument_dokumenttypen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "dokument_dokumenttypen_dokumenttyp_id_dokumenttypen_id_fk": {
           "name": "dokument_dokumenttypen_dokumenttyp_id_dokumenttypen_id_fk",
           "tableFrom": "dokument_dokumenttypen",
-          "columnsFrom": [
-            "dokumenttyp_id"
-          ],
+          "columnsFrom": ["dokumenttyp_id"],
           "tableTo": "dokumenttypen",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -874,9 +833,7 @@
       "uniqueConstraints": {
         "dokument_dokumenttypen_id_unique": {
           "name": "dokument_dokumenttypen_id_unique",
-          "columns": [
-            "id"
-          ],
+          "columns": ["id"],
           "nullsNotDistinct": false
         }
       },
@@ -936,26 +893,18 @@
         "dokument_korrespondenten_dokument_id_dokumente_id_fk": {
           "name": "dokument_korrespondenten_dokument_id_dokumente_id_fk",
           "tableFrom": "dokument_korrespondenten",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "dokument_korrespondenten_korrespondent_id_korrespondenten_id_fk": {
           "name": "dokument_korrespondenten_korrespondent_id_korrespondenten_id_fk",
           "tableFrom": "dokument_korrespondenten",
-          "columnsFrom": [
-            "korrespondent_id"
-          ],
+          "columnsFrom": ["korrespondent_id"],
           "tableTo": "korrespondenten",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -964,9 +913,7 @@
       "uniqueConstraints": {
         "dokument_korrespondenten_id_unique": {
           "name": "dokument_korrespondenten_id_unique",
-          "columns": [
-            "id"
-          ],
+          "columns": ["id"],
           "nullsNotDistinct": false
         }
       },
@@ -1026,26 +973,18 @@
         "dokument_tags_dokument_id_dokumente_id_fk": {
           "name": "dokument_tags_dokument_id_dokumente_id_fk",
           "tableFrom": "dokument_tags",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "dokument_tags_tag_id_tags_id_fk": {
           "name": "dokument_tags_tag_id_tags_id_fk",
           "tableFrom": "dokument_tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
+          "columnsFrom": ["tag_id"],
           "tableTo": "tags",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1054,10 +993,7 @@
       "uniqueConstraints": {
         "dokument_tags_eindeutig": {
           "name": "dokument_tags_eindeutig",
-          "columns": [
-            "dokument_id",
-            "tag_id"
-          ],
+          "columns": ["dokument_id", "tag_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1340,9 +1276,7 @@
       "uniqueConstraints": {
         "einladungen_token_hash_unique": {
           "name": "einladungen_token_hash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -1392,26 +1326,18 @@
         "einlieferungen_dokument_id_dokumente_id_fk": {
           "name": "einlieferungen_dokument_id_dokumente_id_fk",
           "tableFrom": "einlieferungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "einlieferungen_nutzer_id_user_id_fk": {
           "name": "einlieferungen_nutzer_id_user_id_fk",
           "tableFrom": "einlieferungen",
-          "columnsFrom": [
-            "nutzer_id"
-          ],
+          "columnsFrom": ["nutzer_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1504,13 +1430,9 @@
         "einordnungen_dokument_id_dokumente_id_fk": {
           "name": "einordnungen_dokument_id_dokumente_id_fk",
           "tableFrom": "einordnungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1693,13 +1615,9 @@
         "erechnung_pruefungen_dokument_id_dokumente_id_fk": {
           "name": "erechnung_pruefungen_dokument_id_dokumente_id_fk",
           "tableFrom": "erechnung_pruefungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1866,26 +1784,18 @@
         "feldwerte_dokument_id_dokumente_id_fk": {
           "name": "feldwerte_dokument_id_dokumente_id_fk",
           "tableFrom": "feldwerte",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "feldwerte_feld_id_felder_id_fk": {
           "name": "feldwerte_feld_id_felder_id_fk",
           "tableFrom": "feldwerte",
-          "columnsFrom": [
-            "feld_id"
-          ],
+          "columnsFrom": ["feld_id"],
           "tableTo": "felder",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1894,10 +1804,7 @@
       "uniqueConstraints": {
         "feldwerte_eindeutig": {
           "name": "feldwerte_eindeutig",
-          "columns": [
-            "dokument_id",
-            "feld_id"
-          ],
+          "columns": ["dokument_id", "feld_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1956,13 +1863,9 @@
         "freigabe_abrufe_freigabe_id_freigaben_id_fk": {
           "name": "freigabe_abrufe_freigabe_id_freigaben_id_fk",
           "tableFrom": "freigabe_abrufe",
-          "columnsFrom": [
-            "freigabe_id"
-          ],
+          "columnsFrom": ["freigabe_id"],
           "tableTo": "freigaben",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2002,13 +1905,9 @@
         "freigabe_widerrufe_freigabe_id_freigaben_id_fk": {
           "name": "freigabe_widerrufe_freigabe_id_freigaben_id_fk",
           "tableFrom": "freigabe_widerrufe",
-          "columnsFrom": [
-            "freigabe_id"
-          ],
+          "columnsFrom": ["freigabe_id"],
           "tableTo": "freigaben",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2074,13 +1973,9 @@
         "freigaben_dokument_id_dokumente_id_fk": {
           "name": "freigaben_dokument_id_dokumente_id_fk",
           "tableFrom": "freigaben",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2089,9 +1984,7 @@
       "uniqueConstraints": {
         "freigaben_token_hash_unique": {
           "name": "freigaben_token_hash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -2384,26 +2277,18 @@
         "import_eintraege_import_id_importe_id_fk": {
           "name": "import_eintraege_import_id_importe_id_fk",
           "tableFrom": "import_eintraege",
-          "columnsFrom": [
-            "import_id"
-          ],
+          "columnsFrom": ["import_id"],
           "tableTo": "importe",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "import_eintraege_dokument_id_dokumente_id_fk": {
           "name": "import_eintraege_dokument_id_dokumente_id_fk",
           "tableFrom": "import_eintraege",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2412,10 +2297,7 @@
       "uniqueConstraints": {
         "import_eintraege_eindeutig": {
           "name": "import_eintraege_eindeutig",
-          "columns": [
-            "import_id",
-            "paperless_id"
-          ],
+          "columns": ["import_id", "paperless_id"],
           "nullsNotDistinct": false
         }
       },
@@ -2624,13 +2506,9 @@
         "importe_quelle_id_paperless_quellen_id_fk": {
           "name": "importe_quelle_id_paperless_quellen_id_fk",
           "tableFrom": "importe",
-          "columnsFrom": [
-            "quelle_id"
-          ],
+          "columnsFrom": ["quelle_id"],
           "tableTo": "paperless_quellen",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2703,13 +2581,9 @@
         "inhalte_dokument_id_dokumente_id_fk": {
           "name": "inhalte_dokument_id_dokumente_id_fk",
           "tableFrom": "inhalte",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2845,13 +2719,9 @@
         "ki_vorschlaege_dokument_id_dokumente_id_fk": {
           "name": "ki_vorschlaege_dokument_id_dokumente_id_fk",
           "tableFrom": "ki_vorschlaege",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3049,13 +2919,9 @@
         "loeschungen_dokument_id_dokumente_id_fk": {
           "name": "loeschungen_dokument_id_dokumente_id_fk",
           "tableFrom": "loeschungen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3064,9 +2930,7 @@
       "uniqueConstraints": {
         "loeschungen_dokument_id_unique": {
           "name": "loeschungen_dokument_id_unique",
-          "columns": [
-            "dokument_id"
-          ],
+          "columns": ["dokument_id"],
           "nullsNotDistinct": false
         }
       },
@@ -3130,26 +2994,18 @@
         "mail_anhaenge_mail_dokument_id_dokumente_id_fk": {
           "name": "mail_anhaenge_mail_dokument_id_dokumente_id_fk",
           "tableFrom": "mail_anhaenge",
-          "columnsFrom": [
-            "mail_dokument_id"
-          ],
+          "columnsFrom": ["mail_dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "mail_anhaenge_anhang_dokument_id_dokumente_id_fk": {
           "name": "mail_anhaenge_anhang_dokument_id_dokumente_id_fk",
           "tableFrom": "mail_anhaenge",
-          "columnsFrom": [
-            "anhang_dokument_id"
-          ],
+          "columnsFrom": ["anhang_dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3158,9 +3014,7 @@
       "uniqueConstraints": {
         "mail_anhaenge_anhang_dokument_id_unique": {
           "name": "mail_anhaenge_anhang_dokument_id_unique",
-          "columns": [
-            "anhang_dokument_id"
-          ],
+          "columns": ["anhang_dokument_id"],
           "nullsNotDistinct": false
         }
       },
@@ -3240,26 +3094,18 @@
         "mail_verweise_mail_dokument_id_dokumente_id_fk": {
           "name": "mail_verweise_mail_dokument_id_dokumente_id_fk",
           "tableFrom": "mail_verweise",
-          "columnsFrom": [
-            "mail_dokument_id"
-          ],
+          "columnsFrom": ["mail_dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "mail_verweise_dokument_id_dokumente_id_fk": {
           "name": "mail_verweise_dokument_id_dokumente_id_fk",
           "tableFrom": "mail_verweise",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3372,13 +3218,9 @@
         "mails_dokument_id_dokumente_id_fk": {
           "name": "mails_dokument_id_dokumente_id_fk",
           "tableFrom": "mails",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3387,9 +3229,7 @@
       "uniqueConstraints": {
         "mails_id_unique": {
           "name": "mails_id_unique",
-          "columns": [
-            "id"
-          ],
+          "columns": ["id"],
           "nullsNotDistinct": false
         }
       },
@@ -3426,13 +3266,9 @@
         "notiz_widerrufe_notiz_id_notizen_id_fk": {
           "name": "notiz_widerrufe_notiz_id_notizen_id_fk",
           "tableFrom": "notiz_widerrufe",
-          "columnsFrom": [
-            "notiz_id"
-          ],
+          "columnsFrom": ["notiz_id"],
           "tableTo": "notizen",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3529,13 +3365,9 @@
         "notizen_dokument_id_dokumente_id_fk": {
           "name": "notizen_dokument_id_dokumente_id_fk",
           "tableFrom": "notizen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3770,13 +3602,9 @@
         "passkey_user_id_user_id_fk": {
           "name": "passkey_user_id_user_id_fk",
           "tableFrom": "passkey",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3899,39 +3727,27 @@
         "postfach_aktionen_postfach_mail_id_postfach_mails_id_fk": {
           "name": "postfach_aktionen_postfach_mail_id_postfach_mails_id_fk",
           "tableFrom": "postfach_aktionen",
-          "columnsFrom": [
-            "postfach_mail_id"
-          ],
+          "columnsFrom": ["postfach_mail_id"],
           "tableTo": "postfach_mails",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "postfach_aktionen_quelle_id_quellen_id_fk": {
           "name": "postfach_aktionen_quelle_id_quellen_id_fk",
           "tableFrom": "postfach_aktionen",
-          "columnsFrom": [
-            "quelle_id"
-          ],
+          "columnsFrom": ["quelle_id"],
           "tableTo": "quellen",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "postfach_aktionen_dokument_id_dokumente_id_fk": {
           "name": "postfach_aktionen_dokument_id_dokumente_id_fk",
           "tableFrom": "postfach_aktionen",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -4132,26 +3948,18 @@
         "postfach_mails_quelle_id_quellen_id_fk": {
           "name": "postfach_mails_quelle_id_quellen_id_fk",
           "tableFrom": "postfach_mails",
-          "columnsFrom": [
-            "quelle_id"
-          ],
+          "columnsFrom": ["quelle_id"],
           "tableTo": "quellen",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "postfach_mails_dokument_id_dokumente_id_fk": {
           "name": "postfach_mails_dokument_id_dokumente_id_fk",
           "tableFrom": "postfach_mails",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -4541,13 +4349,9 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4556,9 +4360,7 @@
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "nullsNotDistinct": false
         }
       },
@@ -4671,13 +4473,9 @@
         "start_kacheln_ansicht_id_gespeicherte_ansichten_id_fk": {
           "name": "start_kacheln_ansicht_id_gespeicherte_ansichten_id_fk",
           "tableFrom": "start_kacheln",
-          "columnsFrom": [
-            "ansicht_id"
-          ],
+          "columnsFrom": ["ansicht_id"],
           "tableTo": "gespeicherte_ansichten",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4685,10 +4483,7 @@
       "compositePrimaryKeys": {
         "start_kacheln_besitzer_ansicht_id_pk": {
           "name": "start_kacheln_besitzer_ansicht_id_pk",
-          "columns": [
-            "besitzer",
-            "ansicht_id"
-          ]
+          "columns": ["besitzer", "ansicht_id"]
         }
       },
       "uniqueConstraints": {},
@@ -4860,13 +4655,9 @@
         "two_factor_user_id_user_id_fk": {
           "name": "two_factor_user_id_user_id_fk",
           "tableFrom": "two_factor",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -4994,9 +4785,7 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         }
       },
@@ -5113,13 +4902,9 @@
         "vorschaubilder_dokument_id_dokumente_id_fk": {
           "name": "vorschaubilder_dokument_id_dokumente_id_fk",
           "tableFrom": "vorschaubilder",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -5214,26 +4999,18 @@
         "webhook_zustellungen_webhook_id_webhooks_id_fk": {
           "name": "webhook_zustellungen_webhook_id_webhooks_id_fk",
           "tableFrom": "webhook_zustellungen",
-          "columnsFrom": [
-            "webhook_id"
-          ],
+          "columnsFrom": ["webhook_id"],
           "tableTo": "webhooks",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "webhook_zustellungen_ereignis_id_webhook_ereignisse_id_fk": {
           "name": "webhook_zustellungen_ereignis_id_webhook_ereignisse_id_fk",
           "tableFrom": "webhook_zustellungen",
-          "columnsFrom": [
-            "ereignis_id"
-          ],
+          "columnsFrom": ["ereignis_id"],
           "tableTo": "webhook_ereignisse",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -5241,10 +5018,7 @@
       "compositePrimaryKeys": {
         "webhook_zustellungen_webhook_id_ereignis_id_pk": {
           "name": "webhook_zustellungen_webhook_id_ereignis_id_pk",
-          "columns": [
-            "webhook_id",
-            "ereignis_id"
-          ]
+          "columns": ["webhook_id", "ereignis_id"]
         }
       },
       "uniqueConstraints": {},
@@ -5457,13 +5231,9 @@
         "weitergaben_dokument_id_dokumente_id_fk": {
           "name": "weitergaben_dokument_id_dokumente_id_fk",
           "tableFrom": "weitergaben",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -5472,11 +5242,7 @@
       "uniqueConstraints": {
         "weitergaben_einmal": {
           "name": "weitergaben_einmal",
-          "columns": [
-            "workflow_id",
-            "position",
-            "dokument_id"
-          ],
+          "columns": ["workflow_id", "position", "dokument_id"],
           "nullsNotDistinct": false
         }
       },
@@ -5528,13 +5294,9 @@
         "workflow_geheimnisse_workflow_id_workflows_id_fk": {
           "name": "workflow_geheimnisse_workflow_id_workflows_id_fk",
           "tableFrom": "workflow_geheimnisse",
-          "columnsFrom": [
-            "workflow_id"
-          ],
+          "columnsFrom": ["workflow_id"],
           "tableTo": "workflows",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -5543,10 +5305,7 @@
       "uniqueConstraints": {
         "workflow_geheimnisse_einmal": {
           "name": "workflow_geheimnisse_einmal",
-          "columns": [
-            "workflow_id",
-            "position"
-          ],
+          "columns": ["workflow_id", "position"],
           "nullsNotDistinct": false
         }
       },
@@ -5657,13 +5416,9 @@
         "workflow_laeufe_dokument_id_dokumente_id_fk": {
           "name": "workflow_laeufe_dokument_id_dokumente_id_fk",
           "tableFrom": "workflow_laeufe",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -5672,10 +5427,7 @@
       "uniqueConstraints": {
         "workflow_laeufe_einmal": {
           "name": "workflow_laeufe_einmal",
-          "columns": [
-            "workflow_id",
-            "dokument_id"
-          ],
+          "columns": ["workflow_id", "dokument_id"],
           "nullsNotDistinct": false
         }
       },
@@ -5890,13 +5642,9 @@
         "zuordnung_vorschlaege_dokument_id_dokumente_id_fk": {
           "name": "zuordnung_vorschlaege_dokument_id_dokumente_id_fk",
           "tableFrom": "zuordnung_vorschlaege",
-          "columnsFrom": [
-            "dokument_id"
-          ],
+          "columnsFrom": ["dokument_id"],
           "tableTo": "dokumente",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
