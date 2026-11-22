@@ -1341,5 +1341,15 @@
   ],
   "seal_stale": "Siegel: letzte Prüfung zu alt",
   "seal_never": "Siegel: noch nicht geprüft",
-  "seal_checked": "zuletzt {zeit}"
+  "seal_checked": "zuletzt {zeit}",
+  "card_pages": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Seite",
+        "anzahlPlural=other": "{anzahl} Seiten"
+      }
+    }
+  ]
 }

@@ -32,6 +32,10 @@ const dokument = {
     quelle: { type: "string", enum: ["upload", "mail", "ordner", "api", "abgeleitet", "import"] },
     eingegangenAm: { type: "string", format: "date-time" },
     vorschaubild: { type: "boolean", description: "Nur in der Liste: ob es ein Vorschaubild gibt" },
+    seiten: {
+      type: ["integer", "null"],
+      description: "Nur in der Liste: Seitenzahl, wenn bekannt (PDF und Office mit Ansicht, nach dem Vorschaubild)",
+    },
     ...ordnungsFelder,
   },
 } as const;

@@ -24,7 +24,7 @@ Bilder nebeneinander, mit den Tags auf dem Bild, Korrespondent, Typ und den Knö
 Der Worker erzeugt die Bilder kurz nach dem Eingang mit `pdftoppm` (Poppler, im Image enthalten): aus PDFs, aus JPEG
 und PNG und bei Office-Dateien aus ihrer [Ansicht](eingang.md#ansicht-von-office-dateien). Mails, Textdateien, WebP,
 TIFF und HEIC bekommen keins, dort steht das Kürzel des Formats. Ein Vorschaubild ist wie die Ansicht aus dem Original
-abgeleitet, 300 Pixel breit und höchstens viermal so hoch (eine längere Seite zeigt ihren oberen Teil), und geht mit der Löschung mit; maßgeblich bleibt das Original.
+abgeleitet, 300 Pixel breit und höchstens viermal so hoch (eine längere Seite zeigt ihren oberen Teil), und geht mit der Löschung mit; maßgeblich bleibt das Original. Bei PDFs und Office-Dateien zählt der Worker dabei die Seiten mit; die Kacheln zeigen sie (bei Dokumenten, deren Vorschaubild schon vor dieser Funktion entstand, fehlt die Zahl).
 
 ## Durchsuchbares PDF
 

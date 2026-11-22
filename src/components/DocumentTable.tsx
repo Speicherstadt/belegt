@@ -195,6 +195,7 @@ export function DocumentGrid({
               <span className="text-muted text-xs tabular-nums">
                 {d.dokumenttyp ? `${d.dokumenttyp.name} · ` : ""}
                 {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
+                {d.seiten ? ` · ${m.card_pages({ anzahl: String(d.seiten) })}` : ""}
               </span>
               <span className="text-xs">{aufbewahrung(d)}</span>
             </div>

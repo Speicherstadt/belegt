@@ -2,7 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { vorschaubilder } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
 import { speicherbar } from "../inhalt/erechnung.ts";
-import { BILDER, rasterVerfuegbar, vorschaubild } from "./raster.ts";
+import { BILDER, rasterVerfuegbar, seitenzahl, vorschaubild } from "./raster.ts";
 
 /*
  * Vorschaubilder für Liste und Kacheln, erzeugt im Worker: die erste Seite eines PDFs, ein verkleinertes JPEG oder PNG
@@ -39,6 +39,7 @@ export async function vorschaubilderErzeugen(
   let fehler = 0;
   for (const d of offen) {
     let bild: Uint8Array;
+    let seiten: number | null = null;
     try {
       // Office: aus der Ansicht, die schon ein PDF ist; sonst aus dem Original
       const quelle = d.ansicht
@@ -51,7 +52,10 @@ export async function vorschaubilderErzeugen(
               throw nichtErreichbar("Speicher nicht erreichbar");
             },
           );
-      bild = await vorschaubild(quelle, d.ansicht ? "application/pdf" : d.mime_type, zeitlimit);
+      const typ = d.ansicht ? "application/pdf" : d.mime_type;
+      bild = await vorschaubild(quelle, typ, zeitlimit);
+      // Die Seitenzahl nebenbei; fehlt sie, bleibt das Bild trotzdem
+      if (typ === "application/pdf") seiten = await seitenzahl(quelle, zeitlimit).catch(() => null);
       if (bild.byteLength > MAX_VORSCHAUBILD) throw new Error("Vorschaubild zu groß");
     } catch (err) {
       if (err instanceof Error && "nichtErreichbar" in err) return { erzeugt, fehler, meldung: err.message };
@@ -64,7 +68,7 @@ export async function vorschaubilderErzeugen(
     }
     await db
       .insert(vorschaubilder)
-      .values({ dokumentId: d.id, bild: Buffer.from(bild) })
+      .values({ dokumentId: d.id, bild: Buffer.from(bild), seiten })
       .onConflictDoNothing();
     erzeugt++;
   }

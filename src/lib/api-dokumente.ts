@@ -45,6 +45,8 @@ export interface Eintrag extends Dokument {
   korrespondent: { id: string; name: string } | null;
   /** Ob es ein Vorschaubild der ersten Seite gibt */
   vorschaubild: boolean;
+  /** Seitenzahl, wenn bekannt (PDF, Office mit Ansicht) */
+  seiten: number | null;
 }
 
 /** Wie sicher ein gelernter Vorschlag ist und woraus er gelernt ist */

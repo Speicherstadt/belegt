@@ -86,6 +86,8 @@ export interface Eintrag extends Dokument {
   korrespondent: { id: string; name: string } | null;
   /** Ob es ein Vorschaubild gibt (GET /api/dokumente/:id/vorschaubild) */
   vorschaubild: boolean;
+  /** Seitenzahl, wenn bekannt (PDF und Office-Dateien mit Ansicht, nach dem Vorschaubild) */
+  seiten: number | null;
 }
 
 /** „ASN 123“, „asn123“ oder nur „123“: die gesuchte Archivnummer, sonst null */
@@ -199,6 +201,7 @@ export async function listen(
     dokumenttyp: Eintrag["dokumenttyp"];
     korrespondent: Eintrag["korrespondent"];
     vorschaubild: boolean;
+    seiten: number | null;
   }>(sql`
     select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel,
            (select coalesce(json_agg(json_build_object('id', t.id, 'name', t.name, 'farbe', t.farbe)
@@ -210,7 +213,8 @@ export async function listen(
            (select json_build_object('id', k.id, 'name', k.name)
               from dokument_korrespondenten dk join korrespondenten k on k.id = dk.korrespondent_id
              where dk.dokument_id = d.id) as korrespondent,
-           exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild
+           exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild,
+           (select v.seiten from vorschaubilder v where v.dokument_id = d.id) as seiten
       ${listenQuelle(abfrage)}
      order by ${REIHENFOLGE[sortierung]}
      limit ${limit} offset ${versatz}`);
@@ -230,6 +234,7 @@ export async function listen(
     dokumenttyp: z.dokumenttyp,
     korrespondent: z.korrespondent,
     vorschaubild: z.vorschaubild,
+    seiten: z.seiten,
   }));
 }
 

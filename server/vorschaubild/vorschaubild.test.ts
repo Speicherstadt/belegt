@@ -103,7 +103,7 @@ describe.skipIf(!testDatenbankUrl || !rasterVerfuegbar())("Vorschaubilder gegen 
   afterAll(() => t?.aufraeumen());
 
   it("erzeugt Bilder für PDF, PNG und Office mit Ansicht, keins für Mail und Text", async () => {
-    const pdf = await hoch(await pdfMit("Rechnung"), "rechnung.pdf");
+    const pdf = await hoch(await pdfMit("Rechnung", 3), "rechnung.pdf");
     const bild = await hoch(await png("Kassenbon"), "bon.png");
     const docx = await hoch(
       zipSync({ "[Content_Types].xml": strToU8("<Types/>"), "word/document.xml": strToU8("<w:document/>") }),
@@ -138,6 +138,14 @@ describe.skipIf(!testDatenbankUrl || !rasterVerfuegbar())("Vorschaubilder gegen 
       false,
       false,
     ]);
+    // Beim PDF und bei Office (über die Ansicht) zählt der Worker die Seiten mit, beim Bild nicht
+    const seiten = Object.fromEntries(
+      ((await (await als("/api/dokumente")).json()) as { id: string; seiten: number | null }[]).map((e) => [
+        e.id,
+        e.seiten,
+      ]),
+    );
+    expect([seiten[pdf.id], seiten[docx.id], seiten[bild.id], seiten[text.id]]).toEqual([3, 1, null, null]);
   });
 
   it("hält fest, was sich nicht rastern lässt, und wartet, wenn der Speicher fehlt", async () => {

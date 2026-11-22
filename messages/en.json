@@ -1419,5 +1419,15 @@
   ],
   "seal_stale": "Seals: last check too old",
   "seal_never": "Seals: not checked yet",
-  "seal_checked": "last {zeit}"
+  "seal_checked": "last {zeit}",
+  "card_pages": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} page",
+        "anzahlPlural=other": "{anzahl} pages"
+      }
+    }
+  ]
 }
