@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import type { Sortierung } from "../../shared/archivansicht.ts";
 import { dateiUrl, type Eintrag } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
@@ -23,6 +24,46 @@ export interface Auswahl {
   umschalten: (id: string) => void;
   alleGewaehlt: boolean;
   alleUmschalten: () => void;
+}
+
+/**
+ * Kopf einer sortierbaren Spalte: ein Knopf, der nach dieser Spalte sortiert, bei Eingang zwischen neu und alt wechselnd;
+ * aria-sort sagt Screenreadern, wonach die Liste gerade sortiert ist. Ohne sortieren ein schlichter Kopf
+ */
+function SortKopf({
+  label,
+  auf,
+  ab,
+  rechts,
+  sortierung,
+  sortieren,
+}: {
+  label: string;
+  auf: Sortierung;
+  ab?: Sortierung;
+  rechts: boolean;
+  sortierung?: Sortierung;
+  sortieren?: (s: Sortierung) => void;
+}) {
+  const aktiv = sortierung === auf || (!!ab && sortierung === ab);
+  // „neu“ heißt absteigend, alles andere aufsteigend (Titel A–Z, Frist die nächste zuerst)
+  const richtung = !aktiv ? "none" : sortierung === "neu" ? "descending" : "ascending";
+  const klasse = `px-3 py-2.5 font-medium ${rechts ? "text-right" : ""}`;
+  if (!sortieren) return <th className={klasse}>{label}</th>;
+  return (
+    <th className={klasse} aria-sort={richtung}>
+      <button
+        type="button"
+        onClick={() => sortieren(aktiv && ab ? (sortierung === auf ? ab : auf) : auf)}
+        className="inline-flex items-center gap-1 rounded hover:text-fg"
+      >
+        {label}
+        <span aria-hidden="true" className={aktiv ? "text-fg" : "opacity-40"}>
+          {richtung === "descending" ? "↓" : richtung === "ascending" ? "↑" : "↕"}
+        </span>
+      </button>
+    </th>
+  );
 }
 
 /** Text mit markierten Suchtreffern */
@@ -85,11 +126,19 @@ export function DocumentTable({
   eintraege,
   auswahl,
   suche = "",
+  sortierung,
+  sortieren,
 }: {
   eintraege: Eintrag[];
   auswahl: Auswahl;
   suche?: string;
+  /** Mit sortieren lassen sich Name, Aufbewahrung und Eingang per Klick auf den Spaltenkopf sortieren */
+  sortierung?: Sortierung;
+  sortieren?: (s: Sortierung) => void;
 }) {
+  const kopf = (label: string, auf: Sortierung, ab?: Sortierung, rechts = false) => (
+    <SortKopf label={label} auf={auf} ab={ab} rechts={rechts} sortierung={sortierung} sortieren={sortieren} />
+  );
   return (
     // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
     <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
@@ -111,11 +160,11 @@ export function DocumentTable({
             <th className="w-14 px-1 py-2.5">
               <span className="sr-only">{m.col_thumbnail()}</span>
             </th>
-            <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
-            <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
+            {kopf(m.col_name(), "titel")}
+            {kopf(m.col_retention(), "frist")}
             <th className="px-3 py-2.5 font-medium">{m.col_type()}</th>
             <th className="px-3 py-2.5 text-right font-medium">{m.col_size()}</th>
-            <th className="px-3 py-2.5 text-right font-medium">{m.col_received()}</th>
+            {kopf(m.col_received(), "neu", "alt", true)}
           </tr>
         </thead>
         <tbody>

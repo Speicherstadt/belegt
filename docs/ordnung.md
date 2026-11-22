@@ -123,7 +123,7 @@ Tage, nicht die am Tag des Speicherns. Die Liste zeigt Korrespondent, Tags und D
 zeigt alle seine Dokumente. Die Suche findet die Namen von Korrespondent, Tags und Dokumenttyp und die Werte der
 Felder vom Typ Text, Auswahl und Link.
 
-Sortiert wird nach Eingang (neueste oder älteste zuerst), Titel, Tag der Entstehung oder Fristende. Suche, Filter,
+Sortiert wird nach Eingang (neueste oder älteste zuerst), Titel, Tag der Entstehung oder Fristende, über die Auswahl „Sortierung“ oder in der Liste per Klick auf die Spaltenköpfe Name, Aufbewahrung und Eingang (ein zweiter Klick auf Eingang kehrt die Reihenfolge um). Suche, Filter,
 Sortierung, Liste oder Kacheln und die Zahl je Seite stehen in der Adresse des Archivs; so lässt sich jede Ansicht als
 Link weitergeben oder als Lesezeichen ablegen.
 

@@ -6,7 +6,6 @@ import { api, type Doppelt, type Gruppe } from "../lib/api.ts";
 import { listeMerken } from "../lib/blaettern.ts";
 import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
-import { BulkEdit } from "./BulkEdit.tsx";
 import { CameraButton } from "./CameraButton.tsx";
 import { DateFilter } from "./DateFilter.tsx";
 import { type Auswahl, DocumentGrid, DocumentTable } from "./DocumentTable.tsx";
@@ -15,8 +14,8 @@ import { MergePdfs } from "./MergePdfs.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { Pagination } from "./Pagination.tsx";
+import { SelectionBar } from "./SelectionBar.tsx";
 import { UploadDuplicates } from "./UploadDuplicates.tsx";
-import { ZipDownload } from "./ZipDownload.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
   { gruppe: "alle", label: () => m.filter_all() },
@@ -295,31 +294,17 @@ export function DocumentList({
         </p>
       )}
       {hochladen.data && <UploadDuplicates doppelt={hochladen.data} />}
-      {/* Die Auswahl als Leiste, die beim Scrollen oben stehen bleibt: was gewählt ist und was damit geht */}
       {ausgewaehlt.length > 0 && (
-        <div className="sticky top-0 z-10 flex flex-col gap-3 rounded-lg border border-primary/40 bg-bg p-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="font-medium">{m.bulk_selected({ anzahl: String(ausgewaehlt.length) })}</span>
-            <button
-              type="button"
-              onClick={() => setAuswahl(new Set())}
-              className="h-9 rounded-md px-3 font-medium text-muted hover:bg-subtle hover:text-fg"
-            >
-              {m.bulk_clear()}
-            </button>
-            <ZipDownload gewaehlt={gewaehlteEintraege} />
-          </div>
-          {bearbeiten && liste.data && (
-            <BulkEdit
-              gewaehlt={ausgewaehlt}
-              eintraege={liste.data}
-              fertig={(meldung) => {
-                setAuswahl(new Set());
-                setSammelMeldung(meldung);
-              }}
-            />
-          )}
-        </div>
+        <SelectionBar
+          gewaehlt={ausgewaehlt}
+          gewaehlteEintraege={gewaehlteEintraege}
+          eintraege={bearbeiten ? liste.data : undefined}
+          aufheben={() => setAuswahl(new Set())}
+          fertig={(meldung) => {
+            setAuswahl(new Set());
+            setSammelMeldung(meldung);
+          }}
+        />
       )}
       {schreiben && liste.data && (
         <MergePdfs
@@ -390,7 +375,13 @@ export function DocumentList({
             kompakt={darstellung === "kompakt"}
           />
         ) : (
-          <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} suche={suche} />
+          <DocumentTable
+            eintraege={liste.data}
+            auswahl={auswahlFuerListe}
+            suche={suche}
+            sortierung={sortierung}
+            sortieren={feste ? undefined : (s) => setAnsicht({ ...ansicht, sortierung: s })}
+          />
         ))}
       <Pagination seite={seite} seiten={seiten} gesamt={gesamt} proSeite={proSeite} blaettern={blaettern} />
     </div>
