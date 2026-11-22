@@ -1437,5 +1437,15 @@
   "quick_mode_start": "Quick classify",
   "quick_mode_keys": "Quick mode: 1 to 7 picks the kind, Enter classifies and opens the next document, ← and → browse.",
   "doc_proof_pdf": "Proof (PDF)",
-  "doc_proof_pdf_hint": "Shows this original is unchanged: hash, seal, timestamp and history"
+  "doc_proof_pdf_hint": "Shows this original is unchanged: hash, seal, timestamp and history",
+  "first_title": "First steps",
+  "first_intro": "The archive is still empty. This is how documents get in:",
+  "first_upload": "Upload documents",
+  "first_upload_text": "Upload in the inbox or just drag files onto any page.",
+  "first_mailbox": "Connect a mailbox",
+  "first_mailbox_text": "Belegt fetches invoices and letters from your mailbox every few minutes.",
+  "first_paperless": "Move over from Paperless-ngx",
+  "first_paperless_text": "Move documents with tags, types, fields and notes, each original checked against its checksum.",
+  "first_app": "As an app on your phone",
+  "first_app_text": "Put Belegt on your home screen, photograph receipts and share from other apps."
 }

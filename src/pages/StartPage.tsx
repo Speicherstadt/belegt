@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "../components/PageHeader.tsx";
+import { FirstSteps } from "../components/start/FirstSteps.tsx";
 import { OperationStatus } from "../components/start/OperationStatus.tsx";
 import { StartNumbers, UpcomingRetention } from "../components/start/StartNumbers.tsx";
 import { ChainStatus, SourceStatus } from "../components/start/SystemStatus.tsx";
@@ -22,6 +23,8 @@ export function StartPage() {
           {start.error.message}
         </p>
       )}
+      {/* Leeres Archiv: erst die ersten Schritte, für den, der einrichtet */}
+      {start.data?.gesamt === 0 && ich.data?.role === "inhaber" && <FirstSteps />}
       {/* Zuerst die Dokumente aus den gespeicherten Ansichten, dann die Zahlen und der Zustand */}
       <ViewTiles />
       {start.data && <StartNumbers start={start.data} />}
