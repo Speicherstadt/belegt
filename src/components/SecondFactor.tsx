@@ -7,6 +7,8 @@ import { m } from "../paraglide/messages.js";
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 const knopf = "h-8 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle";
 const primaer = "h-9 self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60";
+/** In einer Formularzeile mit items-end: ohne self-start, sonst steht der Knopf höher als die Felder */
+const primaerZeile = primaer.replace(" self-start", "");
 
 /** Backup-Codes einmal zeigen, als Textdatei zum Herunterladen; Belegt zeigt sie danach nie wieder */
 export function BackupCodes({ codes, schliessen }: { codes: string[]; schliessen: () => void }) {
@@ -91,7 +93,7 @@ function PasskeyZeile({ p }: { p: Konto["passkeys"][number] }) {
             {m.account_passkey_name()}
             <input name="name" required maxLength={60} defaultValue={p.name ?? ""} className={feld} />
           </label>
-          <button type="submit" className={primaer}>
+          <button type="submit" className={primaerZeile}>
             {m.access_save()}
           </button>
         </form>
@@ -141,7 +143,7 @@ export function Passkeys({ passkeys, einrichten }: { passkeys: Konto["passkeys"]
           {m.account_passkey_name()}
           <input name="name" required maxLength={60} placeholder={m.account_passkey_placeholder()} className={feld} />
         </label>
-        <button type="submit" disabled={hinzufuegen.isPending} className={primaer}>
+        <button type="submit" disabled={hinzufuegen.isPending} className={primaerZeile}>
           {m.account_passkey_add()}
         </button>
       </form>

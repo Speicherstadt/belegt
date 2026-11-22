@@ -7,6 +7,8 @@ import { m } from "../paraglide/messages.js";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 const primaer = "h-9 self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60";
+/** In einer Formularzeile mit items-end: ohne self-start, sonst steht der Knopf höher als die Felder */
+const primaerZeile = primaer.replace(" self-start", "");
 const knopf = "h-9 self-start rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle";
 
 /** QR-Code als SVG mit Ruhezone von vier Modulen; der Server liefert nur den Pfad der dunklen Module */
@@ -55,7 +57,7 @@ function TotpEinrichten({ fertig }: { fertig: (codes: string[]) => void }) {
             {m.account_password()}
             <input name="passwort" type="password" required autoComplete="current-password" className={feld} />
           </label>
-          <button type="submit" disabled={anlegen.isPending} className={primaer}>
+          <button type="submit" disabled={anlegen.isPending} className={primaerZeile}>
             {m.account_totp_start()}
           </button>
         </form>
@@ -139,7 +141,7 @@ function TotpVerwalten({ neueCodes }: { neueCodes: (codes: string[]) => void }) 
             {m.account_password()}
             <input name="passwort" type="password" required autoComplete="current-password" className={feld} />
           </label>
-          <button type="submit" disabled={ausfuehren.isPending} className={primaer}>
+          <button type="submit" disabled={ausfuehren.isPending} className={primaerZeile}>
             {aktion === "codes" ? m.account_backup_new() : m.account_totp_remove()}
           </button>
         </form>

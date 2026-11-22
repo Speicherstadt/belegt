@@ -63,6 +63,9 @@ Vorschlag:
 
 - Token `--control-h`: 40 px am Desktop, 44 px bei `@media (pointer: coarse)`. Er gilt für Knöpfe, Felder und
   Auswahllisten; in Tailwind als `h-(--control-h)`, nicht mehr `h-8` oder `h-9`.
+- Checkboxen und Radios sehen überall gleich aus, nicht wie im Browser: Rand in `--primary`, gewählt gefüllt mit Haken
+  oder Punkt in `--onprimary` (zentral in `src/styles.css`, keine eigenen Klassen dafür).
+- Ein Knopf in einer Formularzeile mit `items-end` hat kein `self-start`, sonst steht er höher als die Felder.
 - Checkboxen und Radios 20 px (`size-5`), immer mit klickbarem `<label>`. Die Trefferfläche ist am Handy mindestens
   44 × 44 px (das Label gehört zur Fläche).
 - Kein Ziel unter 24 px, auch nicht das × an einem Tag (WCAG 2.5.8). Zwischen kleinen Zielen mindestens 8 px.
