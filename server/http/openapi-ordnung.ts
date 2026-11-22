@@ -146,6 +146,7 @@ const liste = (summary: string) => ({
 });
 
 export const ordnungPfade = {
+  "/api/verarbeitung": liste("Wie viele Dokumente noch auf ihren Text warten (textOffen)"),
   "/api/fristvorlagen": {
     ...liste("Eigene Fristvorlagen: Name und Dauer in Monaten"),
     post: {

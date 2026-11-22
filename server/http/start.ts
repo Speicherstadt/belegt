@@ -1,3 +1,4 @@
+import { verarbeitungsstand } from "../inhalt/verarbeitung.ts";
 import { KachelEingabe, kachelnListen, kachelnSetzen, startZahlen } from "../start/start.ts";
 import { type App, type AppUmgebung, akteur, heute } from "./gemeinsam.ts";
 
@@ -11,6 +12,9 @@ export function startRouten(app: App, umgebung: AppUmgebung) {
       await startZahlen(umgebung.db, c.get("nutzer"), { heute: heute(), eingangsordner: umgebung.eingangsordner }),
     ),
   );
+
+  // Wie viel der Worker noch zu lesen hat; Inhaber und Steuerberatung (Mitarbeiter und Prüfer lehnt die Middleware ab)
+  app.get("/api/verarbeitung", async (c) => c.json(await verarbeitungsstand(umgebung.db)));
 
   app.get("/api/start/kacheln", async (c) => c.json({ ansichten: await kachelnListen(umgebung.db, c.get("nutzer")) }));
 

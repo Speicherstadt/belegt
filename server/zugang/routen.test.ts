@@ -89,6 +89,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/loeschungen": "verboten",
   "POST /api/loeschungen/:id/bestaetigen": "verboten",
   "DELETE /api/loeschungen/:id": "verboten",
+  "GET /api/verarbeitung": "verboten",
   "GET /api/fristvorlagen": "sicht",
   "POST /api/fristvorlagen": "verboten",
   "DELETE /api/fristvorlagen/:id": "verboten",

@@ -197,6 +197,7 @@ export const betriebApi = {
   sperreAnlegen: (eingabe: { grund: string; von: string; bis: string }) =>
     aufruf<Sperre>("/api/sperren", json(eingabe)),
   sperreAufheben: (id: string) => aufruf<Sperre>(`/api/sperren/${id}/aufheben`, { method: "POST" }),
+  verarbeitung: () => aufruf<{ textOffen: number }>("/api/verarbeitung"),
   fristvorlagen: () => aufruf<Fristvorlage[]>("/api/fristvorlagen"),
   fristvorlageAnlegen: (v: { name: string; monate: number }) => aufruf<Fristvorlage>("/api/fristvorlagen", json(v)),
   fristvorlageLoeschen: (id: string) => aufruf<{ ok: true }>(`/api/fristvorlagen/${id}`, { method: "DELETE" }),

@@ -1305,5 +1305,27 @@
   "due_none": "Keine Dokumente mit Frist.",
   "due_until": "bis {datum}",
   "preview_title": "Vorschau: {name}",
-  "card_preview_short": "Vorschau"
+  "card_preview_short": "Vorschau",
+  "bell_idle": "Verarbeitung: alles gelesen",
+  "bell_idle_text": "Alle Dokumente sind gelesen; Volltext und Vorschläge sind aktuell.",
+  "bell_busy": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Verarbeitung: {anzahl} Dokument wird gelesen",
+        "anzahlPlural=other": "Verarbeitung: {anzahl} Dokumente werden gelesen"
+      }
+    }
+  ],
+  "bell_busy_text": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument wartet noch auf seinen Text. Bis dahin findet die Volltextsuche es nur über Name und Ordnung.",
+        "anzahlPlural=other": "{anzahl} Dokumente warten noch auf ihren Text. Bis dahin findet die Volltextsuche sie nur über Name und Ordnung."
+      }
+    }
+  ]
 }
