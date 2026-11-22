@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 
 const SEITEN = [
   { pfad: "/", titel: "Start" },
@@ -16,19 +17,26 @@ const SEITEN = [
 test("der Eingang zeigt Überschrift und Navigation", async ({ page }) => {
   await page.goto("/eingang");
   await expect(page.getByRole("heading", { level: 1, name: "Eingang" })).toBeVisible();
+  await menueOeffnen(page);
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: "Eingang" })).toHaveAttribute("aria-current", "page");
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: "Start" })).not.toHaveAttribute("aria-current", "page");
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
 test("die Navigation führt zu jeder Seite und markiert sie", async ({ page }) => {
   await page.goto("/");
+  await menueOeffnen(page);
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
+  await menueOeffnen(page);
   await nav.getByRole("link", { name: "Fristen" }).click();
   await expect(page).toHaveURL(/\/fristen$/);
   await expect(page.getByRole("heading", { level: 1, name: "Fristen" })).toBeVisible();
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: "Fristen" })).toHaveAttribute("aria-current", "page");
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: "Start" })).not.toHaveAttribute("aria-current", "page");
 });
 

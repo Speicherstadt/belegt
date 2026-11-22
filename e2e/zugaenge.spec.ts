@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 
 test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoch", async ({ page, browser }, info) => {
   await page.goto("/zugaenge");
@@ -68,14 +69,18 @@ test("ein Prüfer sieht nur Archiv und Prüfung und nur Dokumente seines Zeitrau
     await expect(pruefer.getByRole("heading", { name: "Quellen" })).toHaveCount(0);
     await expect(pruefer.getByRole("heading", { name: "Unveränderbarkeit" })).toBeVisible();
 
+    await menueOeffnen(pruefer);
     const nav = pruefer.getByRole("navigation", { name: "Hauptnavigation" });
+    await menueOeffnen(pruefer);
     await expect(nav.getByRole("link")).toHaveText(["Start", "Eingang", "Archiv", "Prüfung"]);
 
+    await menueOeffnen(pruefer);
     await nav.getByRole("link", { name: "Archiv" }).click();
     await expect(pruefer.getByRole("link", { name })).toBeVisible();
     // Was andere Tests heute hochladen, liegt außerhalb von 2001; übrig bleibt nur die Kopfzeile
     await expect(pruefer.getByRole("row").filter({ hasNotText: "pruefung-2001-" })).toHaveCount(1);
 
+    await menueOeffnen(pruefer);
     await nav.getByRole("link", { name: "Prüfung" }).click();
     await expect(pruefer.getByText("Freigegeben für deinen Zugang: 01.01.2001 bis 31.12.2001.")).toBeVisible();
     await expect(pruefer.getByLabel("Von")).toHaveValue("2001-01-01");
@@ -132,8 +137,11 @@ test("ein Mitarbeiter sieht nur die Dokumente seines Sichtbereichs und bearbeite
     await expect(kollege.getByRole("heading", { name: "Unveränderbarkeit" })).toHaveCount(0);
     await expect(kollege.getByRole("alert")).toHaveCount(0);
 
+    await menueOeffnen(kollege);
     const nav = kollege.getByRole("navigation", { name: "Hauptnavigation" });
+    await menueOeffnen(kollege);
     await expect(nav.getByRole("link")).toHaveText(["Start", "Eingang", "Archiv"]);
+    await menueOeffnen(kollege);
     await nav.getByRole("link", { name: "Archiv" }).click();
     await expect(kollege.getByRole("link", { name: sichtbar })).toBeVisible();
     await expect(kollege.getByRole("link", { name: geheim })).toHaveCount(0);

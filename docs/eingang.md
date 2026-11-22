@@ -58,6 +58,9 @@ vor der Archivnummer eingegangen sind, haben ihre Nummer nach der Zeit ihres Ein
 
 ## Unterwegs mit dem Handy
 
+Am Handy steht oben nur eine schmale Leiste mit „Menü“; darunter kommen gleich Suche und Inhalt. Das Menü klappt die
+Navigation auf und nach dem Wechsel auf eine andere Seite wieder zu.
+
 **App installieren.** Belegt lässt sich als App auf den Startbildschirm legen: in Chrome oder Edge über „App
 installieren“ bzw. „Zum Startbildschirm hinzufügen“, auf dem iPhone in Safari über Teilen → „Zum Home-Bildschirm“. Das
 braucht HTTPS (oder `localhost`). Die App ist dieselbe Oberfläche in einem eigenen Fenster; die Dokumente bleiben auf

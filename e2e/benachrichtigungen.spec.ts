@@ -1,10 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 
 const axe = (page: Page) => new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
 
 test("Benachrichtigungen einstellen und eine Testmail schicken", async ({ page }) => {
   await page.goto("/");
+  await menueOeffnen(page);
   await page
     .getByRole("navigation", { name: "Hauptnavigation" })
     .getByRole("link", { name: "Benachrichtigungen" })

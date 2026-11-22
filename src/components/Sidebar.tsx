@@ -47,8 +47,11 @@ export function Sidebar({
   eingebettet = false,
   oidc = null,
   version,
+  offen = false,
 }: {
   ich: Ich;
+  /** Am Handy: ob das Menü aufgeklappt ist; ab md steht die Leiste immer da */
+  offen?: boolean;
   /** Im Frame einer anderen Seite: ohne Namen und Konto, die zeigt die einbettende Seite */
   eingebettet?: boolean;
   oidc?: { name: string } | null;
@@ -74,9 +77,12 @@ export function Sidebar({
     await navigate({ to: "/anmelden" });
   }
   return (
-    <aside className="flex flex-[1_1_240px] print:hidden flex-col gap-5 border-border border-b bg-side px-3 py-4 sm:max-w-64 sm:border-r sm:border-b-0">
+    <aside
+      id="seitenleiste"
+      className={`${offen ? "flex" : "hidden"} print:hidden flex-col gap-5 border-border border-b bg-side px-3 py-4 md:flex md:w-64 md:shrink-0 md:border-r md:border-b-0`}
+    >
       {!eingebettet && (
-        <div className="flex flex-col px-2">
+        <div className="hidden flex-col px-2 md:flex">
           <span className="font-semibold text-[15px]">{m.app_name()}</span>
           <span className="text-muted text-xs">{m.app_claim()}</span>
         </div>

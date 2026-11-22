@@ -70,6 +70,8 @@ Vorschlag:
 - Checkboxen und Radios sehen überall gleich aus, nicht wie im Browser: Rand in `--primary`, gewählt gefüllt mit Haken
   oder Punkt in `--onprimary` (zentral in `src/styles.css`, keine eigenen Klassen dafür).
 - Dateifelder: Der Knopf sieht aus wie ein Zweitknopf (ebenfalls zentral in `src/styles.css`).
+- Am Handy (unter 768 px) steht oben eine schmale Leiste mit Namen und „Menü“; die Seitenleiste klappt erst darauf auf
+  und nach einem Seitenwechsel wieder zu. Suche und Inhalt kommen sofort darunter.
 - Verwaltungsseiten (Quellen, Workflows): Jeder Abschnitt ist eine Karte (`verwaltungsKarte`); zuerst steht, was es gibt,
   das Formular zum Anlegen erscheint erst auf „+ …“ (`Ausklappbar`).
 - Ein Knopf in einer Formularzeile mit `items-end` hat kein `self-start`, sonst steht er höher als die Felder.

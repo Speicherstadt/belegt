@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useLocation } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
@@ -21,6 +21,11 @@ export function Shell({ children }: { children: ReactNode }) {
   // Im Frame einmal still über den Anbieter anmelden; hat die Person dort eine Sitzung, kommt sie direkt zurück.
   // Einmal entschieden (null: noch nicht), denn stillAnmeldenErlaubt merkt sich den Versuch
   const [still, setStill] = useState<boolean | null>(null);
+  // Menü am Handy; ein Wechsel der Seite klappt es wieder zu
+  const [menue, setMenue] = useState(false);
+  const pfad = useLocation({ select: (l) => l.pathname + l.searchStr });
+  // biome-ignore lint/correctness/useExhaustiveDependencies: der Pfad ist der Anlass, nicht ein gelesener Wert
+  useEffect(() => setMenue(false), [pfad]);
   useEffect(() => {
     if (!abgemeldet || !status.data || still !== null) return;
     const versuchen = imFrame && !!status.data.oidc && stillAnmeldenErlaubt();
@@ -32,15 +37,35 @@ export function Shell({ children }: { children: ReactNode }) {
     return <ServerAntwortetNicht error={ich.error} erneut={() => void ich.refetch()} />;
   if (!ich.data) return <p className="p-8 text-muted text-sm">{m.loading()}</p>;
   return (
-    <div className="flex min-h-screen flex-wrap bg-bg text-fg">
+    <div className="flex min-h-screen flex-col bg-bg text-fg md:flex-row">
       <a
         href="#inhalt"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-onprimary"
       >
         {m.skip_link()}
       </a>
-      <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} version={status.data?.version} />
-      <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
+      {/* Am Handy eine schmale Leiste mit Menü-Knopf statt der ganzen Navigation über dem Inhalt */}
+      <div className="flex items-center justify-between gap-3 border-border border-b bg-side px-4 py-2 md:hidden print:hidden">
+        <span className="font-semibold">{m.app_name()}</span>
+        <button
+          type="button"
+          aria-expanded={menue}
+          aria-controls="seitenleiste"
+          onClick={() => setMenue(!menue)}
+          className="flex h-10 items-center gap-2 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle"
+        >
+          <span aria-hidden="true">{menue ? "✕" : "☰"}</span>
+          {m.menu()}
+        </button>
+      </div>
+      <Sidebar
+        ich={ich.data}
+        eingebettet={imFrame}
+        oidc={status.data?.oidc ?? null}
+        version={status.data?.version}
+        offen={menue}
+      />
+      <main id="inhalt" className="min-w-0 flex-1 px-4 py-6 sm:px-8">
         {!imFrame && !ich.data.zweiFaktorEinrichten && (
           <div className="mb-6 flex items-center justify-end gap-2">
             <GlobalSearch />

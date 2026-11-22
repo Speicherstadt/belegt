@@ -1430,5 +1430,6 @@
       }
     }
   ],
-  "view_compact": "Compact"
+  "view_compact": "Compact",
+  "menu": "Menu"
 }
