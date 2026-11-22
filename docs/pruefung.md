@@ -25,6 +25,10 @@ statt bei jedem Aufruf die ganze Kette zu lesen; ist er älter als zwei Tage, we
 [Benachrichtigung](betrieb.md#benachrichtigungen) „Kette“. Die Prüfung unter **Prüfung** rechnet wie bisher bei jedem
 Aufruf neu.
 
+Den Stand dieses Laufs zeigt ein Abzeichen auf der Startseite und im Kopf jedes Dokuments: **grün mit Haken**, wenn der
+letzte Lauf höchstens zwei Tage alt ist und nichts gefunden hat; **gelb**, wenn noch keiner lief oder er älter ist;
+**rot** mit der Zahl der Befunde. Ein Klick führt zur Prüfung. Mitarbeiter sehen es nicht, die Prüfung ist nichts für sie.
+
 ## Prüferzugang (Z1)
 
 Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.

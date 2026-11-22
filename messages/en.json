@@ -1405,5 +1405,19 @@
         "anzahlPlural=other": "{anzahl} documents are still waiting for their text. Until then, full-text search finds them only by name and classification."
       }
     }
-  ]
+  ],
+  "seal_ok": "Seals checked: nothing changed",
+  "seal_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Seals checked: {anzahl} finding",
+        "anzahlPlural=other": "Seals checked: {anzahl} findings"
+      }
+    }
+  ],
+  "seal_stale": "Seals: last check too old",
+  "seal_never": "Seals: not checked yet",
+  "seal_checked": "last {zeit}"
 }

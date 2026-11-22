@@ -1327,5 +1327,19 @@
         "anzahlPlural=other": "{anzahl} Dokumente warten noch auf ihren Text. Bis dahin findet die Volltextsuche sie nur über Name und Ordnung."
       }
     }
-  ]
+  ],
+  "seal_ok": "Siegel geprüft: alles unverändert",
+  "seal_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Siegel geprüft: {anzahl} Befund",
+        "anzahlPlural=other": "Siegel geprüft: {anzahl} Befunde"
+      }
+    }
+  ],
+  "seal_stale": "Siegel: letzte Prüfung zu alt",
+  "seal_never": "Siegel: noch nicht geprüft",
+  "seal_checked": "zuletzt {zeit}"
 }
