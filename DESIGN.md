@@ -256,8 +256,9 @@ mit Frist `--c-amber`, frei `--muted`). Keine Akzentfarbe: Hauptknopf und aktive
 
 ## Startseite
 
-Oben der Überblick als Raster ungleich breiter Karten (`src/components/start/Ueberblick.tsx`): Archiv doppelt breit
-mit dem Verlauf der letzten zwölf Monate als Linie, Eingang mit einem Ring für den eingeordneten Anteil, Speicher mit
-der Belegung des Datenträgers als Segmente, Pflege als kurze Liste. Diagramme sind einfarbig (`currentColor`,
-`--muted`, `--border`) und schmückend; Zahl und Text daneben sagen dasselbe. Darunter links breit die gespeicherten
-Ansichten, rechts untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so hoch wie ihr Inhalt.
+Oben vier Kennzahl-Kacheln gleicher Bauart (`src/components/start/Ueberblick.tsx`): Beschriftung mit Symbol rechts,
+Wert (proportionale Ziffern, keine `tabular-nums`), ein kleines Diagramm, eine Zeile darunter. Die vier Zeilen liegen
+in einem Subgrid, damit sie über alle Kacheln auf einer Linie stehen. Diagramme: Verlauf der letzten zwölf Monate als
+Balken (Vergangenheit `--muted`, laufender Monat `--fg`, Tooltip je Monat), Anteile als schmale Leiste (8 px, ganz
+gerundet, Spur `--border`); kein Ring und keine Torte. Darunter links breit die gespeicherten Ansichten, rechts
+untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so hoch wie ihr Inhalt.

@@ -1365,7 +1365,10 @@
   "start_disk_free": "frei {frei}",
   "start_legend_originals": "Originale",
   "start_legend_used": "übrig belegt",
-  "start_care": "Pflege",
   "start_seal": "Siegel",
-  "start_chart_label": "Eingänge der letzten zwölf Monate"
+  "start_chart_label": "Eingänge der letzten zwölf Monate",
+  "start_care_waiting": "wartet auf Freigabe",
+  "seal_ok_short": "geprüft",
+  "seal_findings_short": "Befund",
+  "seal_open_short": "offen"
 }
