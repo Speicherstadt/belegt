@@ -1,5 +1,6 @@
 import type { Algorithmus } from "../../shared/abgleich.ts";
 import type { Farbe, Feldtyp, Feldwert } from "../../shared/ordnung.ts";
+import type { Datumsart, Zeitraum } from "../../shared/zeitraum.ts";
 import { ApiFehler, aufruf, json } from "./api-aufruf.ts";
 import type { Art } from "./api-dokumente.ts";
 
@@ -71,7 +72,7 @@ export interface SammelEinordnung {
 
 export type SammelErgebnis = { id: string; ok: true; eingeordnet: boolean } | { id: string; ok: false; fehler: string };
 
-/** Filter der Archivliste nach Tags, Dokumenttyp und einem Feld (server/ordnung/filter.ts) */
+/** Filter der Archivliste nach Tags, Dokumenttyp, einem Feld und einem Zeitraum (server/ordnung/filter.ts) */
 export interface ListenFilter {
   tags: string[];
   /** „alle“: jedes gewählte Tag; „einer“: mindestens eines */
@@ -80,6 +81,11 @@ export interface ListenFilter {
   /** ID eines Korrespondenten, „ohne“ oder leer */
   korrespondent: string;
   feld: { feldId: string; art: "gesetzt" | "enthaelt" | "bereich"; text: string; von: string; bis: string } | null;
+  /** Zeitraum nach Entstehung oder Eingang (shared/zeitraum.ts) */
+  datumArt: Datumsart;
+  zeitraum: Zeitraum;
+  datumVon: string;
+  datumBis: string;
 }
 
 /** Vorschlag für Tags, Dokumenttyp, Korrespondent und Feldwerte aus einer Regel oder vom Sprachmodell, mit Namen */

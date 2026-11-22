@@ -7,6 +7,7 @@ import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
 import { CameraButton } from "./CameraButton.tsx";
+import { DateFilter } from "./DateFilter.tsx";
 import { type Auswahl, DocumentGrid, DocumentTable } from "./DocumentTable.tsx";
 import { ListOptions } from "./ListOptions.tsx";
 import { MergePdfs } from "./MergePdfs.tsx";
@@ -264,6 +265,7 @@ export function DocumentList({
         </fieldset>
       )}
       {!feste && <OrderFilter filter={ansicht} onChange={(f) => setAnsicht({ ...ansicht, ...f })} />}
+      {!feste && <DateFilter filter={ansicht} onChange={(f) => setAnsicht({ ...ansicht, ...f })} />}
       {!feste && <ListOptions ansicht={{ ...ansicht, darstellung }} setAnsicht={setAnsicht} />}
       {liste.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">

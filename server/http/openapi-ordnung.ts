@@ -119,6 +119,12 @@ export const listenParameter = [
     schema: { type: "string" },
     description: "ID eines Korrespondenten aus der Liste oder „ohne“",
   },
+  ...(["entstandenVon", "entstandenBis", "eingegangenVon", "eingegangenBis"] as const).map((name) => ({
+    name,
+    in: "query" as const,
+    schema: { type: "string" as const, format: "date" as const },
+    description: "Tag der Entstehung oder des Eingangs (Europe/Berlin), Grenze eingeschlossen",
+  })),
 ] as const;
 
 const liste = (summary: string) => ({

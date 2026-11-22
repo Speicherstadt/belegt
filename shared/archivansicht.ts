@@ -1,10 +1,12 @@
 /*
  * Der Zustand der Archivliste als URL-Suchparameter: Suche, Gruppe, Tags mit Modus, Dokumenttyp, Korrespondent, ein
- * Feldfilter,
+ * Feldfilter, Zeitraum,
  * Sortierung, Darstellung und Einträge je Seite. Dieselbe Form steht in einer gespeicherten Ansicht
  * (server/archivansichten/), damit eine Ansicht nur ein Link ist und sich teilen lässt. Alles sind einfache Texte, mehrere
  * Tags mit Komma getrennt; Unbekanntes oder Ungültiges fällt auf die Vorgabe zurück, statt die Seite zu brechen.
  */
+
+import { DATUMSARTEN, type Datumsart, ZEITRAEUME, type Zeitraum } from "./zeitraum.ts";
 
 export const GRUPPEN = [
   "alle",
@@ -44,6 +46,13 @@ export interface ArchivAnsicht {
   /** ID eines Korrespondenten, „ohne“ oder leer für alle */
   korrespondent: string;
   feld: FeldFilterZustand | null;
+  /** Welcher Tag gefiltert wird: Entstehung (Vorgabe) oder Eingang */
+  datumArt: Datumsart;
+  /** Schnellwahl oder „eigen“; leer ohne Datumsfilter */
+  zeitraum: Zeitraum;
+  /** Nur beim eigenen Zeitraum, JJJJ-MM-TT */
+  datumVon: string;
+  datumBis: string;
   sortierung: Sortierung;
   /** null: was der Browser sich gemerkt hat */
   darstellung: "liste" | "kacheln" | null;
@@ -58,11 +67,17 @@ export const LEERE_ANSICHT: ArchivAnsicht = {
   dokumenttyp: "",
   korrespondent: "",
   feld: null,
+  datumArt: "entstanden",
+  zeitraum: "",
+  datumVon: "",
+  datumBis: "",
   sortierung: "neu",
   darstellung: null,
   proSeite: PRO_SEITE_VORGABE,
 };
 
+const TAG = /^\d{4}-\d{2}-\d{2}$/;
+const tagOderLeer = (wert: string | undefined) => (wert && TAG.test(wert) ? wert : "");
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const aus = <T extends string>(liste: readonly T[], wert: string | undefined, vorgabe: T): T =>
   liste.includes(wert as T) ? (wert as T) : vorgabe;
@@ -82,6 +97,7 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
   const korrespondent = p.korrespondent ?? "";
   const feldId = (p.feld ?? "").toLowerCase();
   const proSeite = Number(p.proSeite);
+  const zeitraum = aus(ZEITRAEUME, p.zeitraum, "");
   return {
     suche: kurz(p.suche, 500),
     gruppe: aus(GRUPPEN, p.gruppe, "alle"),
@@ -98,6 +114,10 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
           bis: kurz(p.feldBis, 40),
         }
       : null,
+    datumArt: aus(DATUMSARTEN, p.datum, "entstanden"),
+    zeitraum,
+    datumVon: zeitraum === "eigen" ? tagOderLeer(p.datumVon) : "",
+    datumBis: zeitraum === "eigen" ? tagOderLeer(p.datumBis) : "",
     sortierung: aus(SORTIERUNGEN, p.sortierung, "neu"),
     darstellung: p.darstellung === "liste" || p.darstellung === "kacheln" ? p.darstellung : null,
     proSeite: PRO_SEITE_WAHL.includes(proSeite as 25) ? proSeite : PRO_SEITE_VORGABE,
@@ -120,6 +140,14 @@ export function ansichtZuParametern(a: ArchivAnsicht): Record<string, string> {
     if (a.feld.art === "bereich") {
       if (a.feld.von.trim()) p.feldVon = a.feld.von.trim();
       if (a.feld.bis.trim()) p.feldBis = a.feld.bis.trim();
+    }
+  }
+  if (a.zeitraum) {
+    if (a.datumArt !== "entstanden") p.datum = a.datumArt;
+    p.zeitraum = a.zeitraum;
+    if (a.zeitraum === "eigen") {
+      if (a.datumVon) p.datumVon = a.datumVon;
+      if (a.datumBis) p.datumBis = a.datumBis;
     }
   }
   if (a.sortierung !== "neu") p.sortierung = a.sortierung;

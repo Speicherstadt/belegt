@@ -1,4 +1,5 @@
 import { betragAusText, type Feldtyp, type Feldwert } from "../../shared/ordnung.ts";
+import { zeitraumGrenzen } from "../../shared/zeitraum.ts";
 import { m } from "../paraglide/messages.js";
 import type { Feld, ListenFilter } from "./api.ts";
 import { betrag, tag } from "./format.ts";
@@ -27,6 +28,10 @@ export const LEERER_FILTER: ListenFilter = {
   dokumenttyp: "",
   korrespondent: "",
   feld: null,
+  datumArt: "entstanden",
+  zeitraum: "",
+  datumVon: "",
+  datumBis: "",
 };
 
 /**
@@ -52,6 +57,9 @@ export function filterParameter(f: ListenFilter, felder: Feld[]): string {
       if (f.feld.bis.trim()) p.set(`${name}.bis`, grenze(feld, f.feld.bis.trim()));
     }
   }
+  const { von, bis } = zeitraumGrenzen(f.zeitraum, { von: f.datumVon, bis: f.datumBis });
+  if (von) p.set(`${f.datumArt}Von`, von);
+  if (bis) p.set(`${f.datumArt}Bis`, bis);
   const text = p.toString();
   return text ? `&${text}` : "";
 }

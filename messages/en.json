@@ -1266,5 +1266,16 @@
   "einmalwert_once": "Only shown now.",
   "einmalwert_copy_failed": "Copying is not possible, please select the value.",
   "einmalwert_copy": "Copy",
-  "einmalwert_copied": "Copied."
+  "einmalwert_copied": "Copied.",
+  "date_filter_legend": "Filter by date",
+  "date_filter_period": "Period",
+  "date_filter_kind": "Date",
+  "date_filter_any": "Any time",
+  "date_filter_7d": "Last 7 days",
+  "date_filter_30d": "Last 30 days",
+  "date_filter_year": "This year",
+  "date_filter_last_year": "Last year",
+  "date_filter_custom": "Custom period",
+  "date_filter_created": "Created",
+  "date_filter_received": "Received"
 }
