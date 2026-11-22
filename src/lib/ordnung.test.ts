@@ -16,6 +16,12 @@ describe("filterParameter", () => {
     expect(p.get(`feld.${summe.id}.bis`)).toBe("123450");
   });
 
+  it("schickt ausgeschlossene Tags und „ohne Tag“", () => {
+    expect(filterParameter({ ...LEERER_FILTER, tagsNicht: ["a", "b"], ohneTags: true }, [])).toBe(
+      "&tagNicht=a&tagNicht=b&ohneTags=1",
+    );
+  });
+
   it("macht aus dem Zeitraum feste Grenzen für die gewählte Art", () => {
     const eigen = filterParameter(
       { ...LEERER_FILTER, datumArt: "eingegangen", zeitraum: "eigen", datumVon: "2026-01-01", datumBis: "" },

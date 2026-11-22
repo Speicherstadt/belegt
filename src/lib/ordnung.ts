@@ -25,6 +25,8 @@ export function feldwertText(typ: Feldtyp, wert: Feldwert): string {
 export const LEERER_FILTER: ListenFilter = {
   tags: [],
   tagModus: "alle",
+  tagsNicht: [],
+  ohneTags: false,
   dokumenttyp: "",
   korrespondent: "",
   feld: null,
@@ -45,6 +47,8 @@ export function filterParameter(f: ListenFilter, felder: Feld[]): string {
   const p = new URLSearchParams();
   for (const t of f.tags) p.append("tag", t);
   if (f.tags.length > 1 && f.tagModus === "einer") p.set("tagModus", "einer");
+  for (const t of f.tagsNicht) p.append("tagNicht", t);
+  if (f.ohneTags) p.set("ohneTags", "1");
   if (f.dokumenttyp) p.set("dokumenttyp", f.dokumenttyp);
   if (f.korrespondent) p.set("korrespondent", f.korrespondent);
   const feld = f.feld && felder.find((x) => x.id === f.feld!.feldId);

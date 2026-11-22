@@ -107,6 +107,20 @@ export const listenParameter = [
     schema: { type: "string", enum: ["alle", "einer"], default: "alle" },
   },
   {
+    name: "tagNicht",
+    in: "query",
+    schema: { type: "array", items: uuid },
+    style: "form",
+    explode: true,
+    description: "Dokumente mit einem dieser Tags fallen weg",
+  },
+  {
+    name: "ohneTags",
+    in: "query",
+    schema: { type: "string", enum: ["1"] },
+    description: "Nur Dokumente ohne jeden Tag",
+  },
+  {
     name: "dokumenttyp",
     in: "query",
     schema: { type: "string" },

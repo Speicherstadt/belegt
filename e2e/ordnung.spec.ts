@@ -53,8 +53,12 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
   await expect(page.getByRole("row", { name: new RegExp(name) })).toContainText(tag);
   // Die Suche findet den Namen des Tags
+  // Zweiter Klick schließt den Tag aus: Das Dokument mit dem Tag fällt weg, das andere kommt wieder
   await page.getByRole("button", { name: tag, exact: true }).click();
+  await expect(page.getByRole("link", { name: anderes })).toBeVisible();
+  await expect(page.getByRole("link", { name, exact: true })).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: `Tag ${tag} aus dem Filter nehmen` }).click();
   await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(`"${tag}"`);
   await expect(page.getByRole("link", { name })).toBeVisible();
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);

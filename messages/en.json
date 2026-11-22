@@ -1337,5 +1337,8 @@
   "views_nav_count": "Results:",
   "filter_choice_clear": "Clear filter {name}",
   "filter_choice_search": "Search {name}",
-  "filter_choice_all": "All"
+  "filter_choice_all": "All",
+  "filter_tags_without": "No tag",
+  "filter_tags_hint": "Click to include, click again to exclude.",
+  "filter_tag_excluded": "excluded"
 }

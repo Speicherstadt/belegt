@@ -42,12 +42,24 @@ export function TagFilter({
     };
   }, [offen]);
 
-  const umschalten = (id: string) =>
+  // Erster Klick wählt, zweiter schließt aus, dritter hebt beides auf
+  const umschalten = (id: string) => {
+    const drin = filter.tags.includes(id);
+    const raus = filter.tagsNicht.includes(id);
     onChange({
       ...filter,
-      tags: filter.tags.includes(id) ? filter.tags.filter((t) => t !== id) : [...filter.tags, id],
+      tags: drin ? filter.tags.filter((t) => t !== id) : raus ? filter.tags : [...filter.tags, id],
+      tagsNicht: drin ? [...filter.tagsNicht, id] : filter.tagsNicht.filter((t) => t !== id),
     });
-  const gewaehlt = tags.filter((t) => filter.tags.includes(t.id));
+  };
+  const loesen = (id: string) =>
+    onChange({
+      ...filter,
+      tags: filter.tags.filter((t) => t !== id),
+      tagsNicht: filter.tagsNicht.filter((t) => t !== id),
+    });
+  const gewaehlt = tags.filter((t) => filter.tags.includes(t.id) || filter.tagsNicht.includes(t.id));
+  const anzahl = gewaehlt.length + (filter.ohneTags ? 1 : 0);
   const treffer = tags.filter((t) => t.name.toLowerCase().includes(suche.trim().toLowerCase()));
 
   return (
@@ -59,8 +71,8 @@ export function TagFilter({
         className="flex h-9 items-center gap-2 rounded-md border border-border px-3 font-medium hover:bg-subtle aria-expanded:bg-subtle"
       >
         {m.filter_tags()}
-        {!!gewaehlt.length && (
-          <span className="rounded-full bg-primary px-1.5 text-onprimary text-xs tabular-nums">{gewaehlt.length}</span>
+        {!!anzahl && (
+          <span className="rounded-full bg-primary px-1.5 text-onprimary text-xs tabular-nums">{anzahl}</span>
         )}
         <span aria-hidden="true">▾</span>
       </button>
@@ -68,15 +80,26 @@ export function TagFilter({
         <button
           key={t.id}
           type="button"
-          onClick={() => umschalten(t.id)}
+          onClick={() => loesen(t.id)}
           aria-label={m.filter_tag_remove({ name: t.name })}
           className="flex h-8 items-center gap-2 rounded-full border border-border px-3 hover:bg-subtle"
         >
           {punkt(t)}
-          {t.name}
+          {filter.tagsNicht.includes(t.id) ? <s>{t.name}</s> : t.name}
           <span aria-hidden="true">×</span>
         </button>
       ))}
+      {filter.ohneTags && (
+        <button
+          type="button"
+          onClick={() => onChange({ ...filter, ohneTags: false })}
+          aria-label={m.filter_tag_remove({ name: m.filter_tags_without() })}
+          className="flex h-8 items-center gap-2 rounded-full border border-border px-3 italic hover:bg-subtle"
+        >
+          {m.filter_tags_without()}
+          <span aria-hidden="true">×</span>
+        </button>
+      )}
       {offen && (
         <div className="absolute top-10 left-0 z-20 flex w-72 flex-col gap-2 rounded-lg border border-border bg-bg p-2 shadow-lg">
           <input
@@ -103,17 +126,32 @@ export function TagFilter({
               ))}
             </fieldset>
           )}
+          <p className="m-0 px-1 text-muted text-xs">{m.filter_tags_hint()}</p>
           <ul className="m-0 flex max-h-72 list-none flex-col overflow-y-auto p-0">
+            <li>
+              <button
+                type="button"
+                aria-pressed={filter.ohneTags}
+                onClick={() => onChange({ ...filter, ohneTags: !filter.ohneTags })}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left italic hover:bg-subtle aria-pressed:font-medium"
+              >
+                <span aria-hidden="true" className="w-4 text-center">
+                  {filter.ohneTags ? "✓" : ""}
+                </span>
+                {m.filter_tags_without()}
+              </button>
+            </li>
             {treffer.map((t) => (
               <li key={t.id}>
                 <button
                   type="button"
-                  aria-pressed={filter.tags.includes(t.id)}
+                  aria-pressed={filter.tags.includes(t.id) ? true : filter.tagsNicht.includes(t.id) ? "mixed" : false}
+                  aria-description={filter.tagsNicht.includes(t.id) ? m.filter_tag_excluded() : undefined}
                   onClick={() => umschalten(t.id)}
                   className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-subtle aria-pressed:font-medium"
                 >
                   <span aria-hidden="true" className="w-4 text-center">
-                    {filter.tags.includes(t.id) ? "✓" : ""}
+                    {filter.tags.includes(t.id) ? "✓" : filter.tagsNicht.includes(t.id) ? "⊘" : ""}
                   </span>
                   {punkt(t)}
                   <span className="min-w-0 flex-1 truncate">{t.name}</span>

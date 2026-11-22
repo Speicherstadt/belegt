@@ -77,6 +77,9 @@ export interface ListenFilter {
   tags: string[];
   /** „alle“: jedes gewählte Tag; „einer“: mindestens eines */
   tagModus: "alle" | "einer";
+  /** Ausgeschlossene Tags und „nur ohne Tag“ */
+  tagsNicht: string[];
+  ohneTags: boolean;
   dokumenttyp: string;
   /** ID eines Korrespondenten, „ohne“ oder leer */
   korrespondent: string;

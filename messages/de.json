@@ -1259,5 +1259,8 @@
   "views_nav_count": "Treffer:",
   "filter_choice_clear": "Filter {name} aufheben",
   "filter_choice_search": "{name} suchen",
-  "filter_choice_all": "Alle"
+  "filter_choice_all": "Alle",
+  "filter_tags_without": "Ohne Tag",
+  "filter_tags_hint": "Klick wählt, zweiter Klick schließt aus.",
+  "filter_tag_excluded": "ausgeschlossen"
 }

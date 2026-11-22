@@ -108,3 +108,12 @@ describe("Datumsfilter in der Ansicht", () => {
     expect(ansichtAus({ zeitraum: "irgendwann", datum: "morgen", datumVon: "kaputt" })).toEqual(LEERE_ANSICHT);
   });
 });
+
+describe("Tags ausschließen und ohne Tag", () => {
+  it("hält ausgeschlossene Tags und „ohne Tag“ in der Adresse; ein gewählter Tag ist nicht zugleich ausgeschlossen", () => {
+    const a = ansichtAus({ tags: TAG_A, tagsNicht: `${TAG_A},${TAG_B}`, ohneTags: "1" });
+    expect(a.tagsNicht).toEqual([TAG_B]);
+    expect(a.ohneTags).toBe(true);
+    expect(ansichtZuParametern(a)).toEqual({ tags: TAG_A, tagsNicht: TAG_B, ohneTags: "1" });
+  });
+});
