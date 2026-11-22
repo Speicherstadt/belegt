@@ -5,7 +5,7 @@ import { groesse, tag } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { BereichSymbol } from "../Symbole.tsx";
 
-const kachel = "flex flex-col gap-1 rounded-lg border border-border p-4";
+const kachel = "flex flex-col gap-1 rounded-lg border border-border p-3.5";
 
 /** Zahlen der Startseite als Beschreibungsliste: jede Zahl mit ihrer Beschriftung, für Screenreader zusammen gelesen */
 export function StartNumbers({ start }: { start: Start }) {

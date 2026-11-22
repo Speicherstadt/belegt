@@ -16,7 +16,7 @@ export function StartPage() {
   const start = useQuery({ queryKey: ["start"], queryFn: api.start });
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <PageHeader title={m.start_title()} intro={m.start_intro()} />
       {start.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
@@ -28,7 +28,7 @@ export function StartPage() {
       {/* Zuerst die Dokumente aus den gespeicherten Ansichten, dann die Zahlen und der Zustand */}
       <ViewTiles />
       {start.data && <StartNumbers start={start.data} />}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
         {start.data?.quellen && <SourceStatus quellen={start.data.quellen} />}
         {/* Die Prüfung der Kette ist nichts für Mitarbeiter; der Server lehnt sie für sie ab */}
