@@ -36,7 +36,7 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
 
   // Eine Ansicht speichern und als Kachel wählen
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(name);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(name);
   await page.getByRole("button", { name: "Ansicht speichern" }).click();
   await page.getByLabel("Name der Ansicht").fill(ansicht);
   await page.getByRole("button", { name: "Speichern", exact: true }).click();
@@ -55,5 +55,7 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
     expect(axe.violations, colorScheme).toEqual([]);
   }
   await kachel.getByRole("link", { name: `Alle in „${ansicht}“` }).click();
-  await expect(page.getByRole("searchbox")).toHaveValue(name);
+  await expect(
+    page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
+  ).toHaveValue(name);
 });

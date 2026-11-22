@@ -481,7 +481,6 @@
   "filter_tags_mode": "Selected tags",
   "filter_tags_all": "all",
   "filter_tags_any": "at least one",
-  "filter_doctype_all": "All document types",
   "filter_field": "Field",
   "filter_field_none": "No field",
   "filter_field_condition": "Condition",
@@ -957,7 +956,6 @@
   "event_party_set": "Correspondent set: {name}",
   "event_party_removed": "Correspondent removed: {name}",
   "bulk_party": "Set correspondent",
-  "filter_party_all": "All correspondents",
   "match_legend": "Matching rule",
   "match_label": "Matching",
   "match_none": "None",
@@ -1286,5 +1284,58 @@
   "workflow_remove_row": "Remove {name}",
   "workflow_actions_empty": "No action yet. Choose below what should happen to the document.",
   "workflow_cancel": "Cancel",
-  "form_cancel": "Cancel"
+  "form_cancel": "Cancel",
+  "doc_tab_classification": "Classification",
+  "doc_tab_notes": "Notes",
+  "doc_tab_more": "More",
+  "doc_tab_history": "History",
+  "doc_tabs_label": "Document sections",
+  "doc_nav_label": "Browse",
+  "doc_nav_prev": "Previous document (←)",
+  "doc_nav_next": "Next document (→)",
+  "doc_nav_position": "{stelle} of {anzahl}",
+  "classify_submit_next": "Classify & next",
+  "doc_event_meta": "{wann} · {wer} · No. {nr}",
+  "filter_tag_remove": "Remove tag {name} from the filter",
+  "filter_tags_search": "Search tags",
+  "filter_tags_none": "No matching tag.",
+  "card_open_short": "Open",
+  "card_download_short": "Download",
+  "drop_title": "Drop files here",
+  "drop_text": "They go to the inbox; the original stays unchanged.",
+  "drop_busy": "Uploading: {fertig} of {gesamt}",
+  "drop_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document received",
+        "anzahlPlural=other": "{anzahl} documents received"
+      }
+    }
+  ],
+  "drop_duplicates": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} file was already in the archive and was not added twice.",
+        "anzahlPlural=other": "{anzahl} files were already in the archive and were not added twice."
+      }
+    }
+  ],
+  "drop_to_inbox": "To the inbox",
+  "drop_close": "Close",
+  "global_search": "Search all documents",
+  "global_search_placeholder": "Search: documents, tags, correspondents …",
+  "global_search_results": "Results",
+  "global_search_documents": "Documents",
+  "global_search_parties": "Correspondents",
+  "global_search_doctypes": "Document types",
+  "global_search_none": "Nothing found.",
+  "global_search_all": "All results for “{suche}” in the archive",
+  "views_nav_count": "Results:",
+  "filter_choice_clear": "Clear filter {name}",
+  "filter_choice_search": "Search {name}",
+  "filter_choice_all": "All"
 }

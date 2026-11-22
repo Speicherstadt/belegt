@@ -8,6 +8,7 @@ test("Teilen per Link: Link anlegen, ohne Anmeldung herunterladen, Abruf sehen, 
   await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: inhalt });
   await page.getByRole("link", { name }).click();
 
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const bereich = page.getByRole("region", { name: "Teilen per Link" });
   await bereich.getByRole("radio", { name: "1 Tag" }).check();
   await bereich.getByRole("button", { name: "Link anlegen" }).click();
@@ -49,6 +50,7 @@ test("Teilen per Link: Wer den frisch angelegten Link widerruft, sieht ihn nicht
     buffer: Buffer.from(`%PDF-1.4\n%Widerruf ${info.project.name}\n`),
   });
   await page.getByRole("link", { name: `widerruf-${info.project.name}.pdf` }).click();
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const bereich = page.getByRole("region", { name: "Teilen per Link" });
   await bereich.getByRole("button", { name: "Link anlegen" }).click();
   await expect(bereich.getByTestId("einmalwert")).toBeVisible();

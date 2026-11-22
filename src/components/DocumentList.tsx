@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { type ArchivAnsicht, LEERE_ANSICHT } from "../../shared/archivansicht.ts";
 import { darfBearbeiten, darfSchreiben } from "../../shared/rollen.ts";
 import { api, type Doppelt, type Gruppe } from "../lib/api.ts";
+import { listeMerken } from "../lib/blaettern.ts";
 import { filterParameter } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { BulkEdit } from "./BulkEdit.tsx";
@@ -85,6 +86,11 @@ export function DocumentList({
   const seiten = Math.max(1, Math.ceil(gesamt / proSeite));
   const blaettern = (neu: number) => setSeiteWahl({ seite: neu, fuer: abfrage });
   // Ist die Seite leer geworden (etwa nach dem Einordnen im Eingang), zur letzten mit Einträgen
+  // Reihenfolge für das Blättern auf der Dokumentseite
+  useEffect(() => {
+    if (!liste.data || abfrageDaten.isPlaceholderData) return;
+    listeMerken({ ids: liste.data.map((d) => d.id), zurueck: window.location.pathname + window.location.search });
+  }, [liste.data, abfrageDaten.isPlaceholderData]);
   const leereSeite = !abfrageDaten.isPlaceholderData && liste.data?.length === 0 && seite > 1;
   useEffect(() => {
     if (leereSeite) setSeiteWahl({ seite: seiten, fuer: abfrage });

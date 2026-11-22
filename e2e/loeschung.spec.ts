@@ -14,8 +14,9 @@ test("nach Fristende: Inhaber beantragt, die Steuerberatung bestätigt, übrig b
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2017-05-10");
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
 
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const loeschung = page.locator("section", { has: page.getByRole("heading", { name: "Löschung", exact: true }) });
   await expect(loeschung).toContainText("§ 147 Abs. 3 Satz 5 AO");
   await loeschung.getByRole("button", { name: "Löschung beantragen" }).click();
@@ -75,8 +76,9 @@ test("frei abgelegt: „Jetzt löschen“ fragt nach, „Abbrechen“ löscht ni
   await page.getByRole("link", { name }).click();
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await einordnung.getByLabel("Art").selectOption("frei");
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
 
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const loeschung = page.locator("section", { has: page.getByRole("heading", { name: "Löschung", exact: true }) });
   const jetzt = loeschung.getByRole("button", { name: "Jetzt löschen" });
   const frage = page.getByRole("dialog", { name: "Dokument jetzt löschen?" });
@@ -118,11 +120,14 @@ test("nachträglich als frei eingeordnet: kein „Jetzt löschen“, sondern der
   const einordnung = page.locator("section", { has: page.getByRole("heading", { name: "Einordnung" }) });
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-01");
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
+  // Erst wenn die Einordnung gespeichert ist, steht das Formular neu da; ein früherer Klick ginge verloren
+  await expect(einordnung).toContainText("31.12.2034");
   await einordnung.getByRole("button", { name: "Einordnung ändern" }).click();
   await einordnung.getByRole("combobox", { name: "Art" }).selectOption("frei");
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
 
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const loeschung = page.locator("section", { has: page.getByRole("heading", { name: "Löschung", exact: true }) });
   await expect(loeschung.getByRole("button", { name: "Löschung beantragen" })).toBeVisible();
   await expect(loeschung.getByRole("button", { name: "Jetzt löschen" })).toHaveCount(0);

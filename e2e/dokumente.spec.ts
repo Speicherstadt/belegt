@@ -23,6 +23,7 @@ test("ein hochgeladenes Original erscheint im Archiv, mit Verlauf, Nachweis und 
   await link.click();
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
   await expect(page).toHaveTitle(`${name} · Belegt`);
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   const verlauf = page
     .getByRole("region", { name: "Verlauf" })
     .or(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) }));

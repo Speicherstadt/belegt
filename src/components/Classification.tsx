@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { darfBearbeiten } from "../../shared/rollen.ts";
 import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/api.ts";
 import { ARTEN, artLabel } from "../lib/arten.ts";
@@ -18,6 +18,7 @@ export function Classification({
   eingang,
   dokumenttyp,
   korrespondent,
+  weiter,
 }: {
   dokumentId: string;
   einordnung: Einordnung | null;
@@ -26,10 +27,14 @@ export function Classification({
   dokumenttyp?: { name: string; vorgabeArt: Art | null } | null;
   /** Korrespondent aus der Liste; das Formular nimmt seinen heutigen Namen */
   korrespondent?: { id: string; name: string } | null;
+  /** Gibt es ein nächstes Dokument in der Liste, kommt „Einordnen & weiter“ dazu und springt danach dorthin */
+  weiter?: () => void;
 }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const queryClient = useQueryClient();
   const [offen, setOffen] = useState(!einordnung);
+  // Welcher Knopf abgeschickt hat: „Einordnen & weiter“ springt nach dem Speichern zum nächsten Dokument
+  const springen = useRef(false);
   const [art, setArt] = useState<Art>(einordnung?.art ?? dokumenttyp?.vorgabeArt ?? "beleg");
   // Angaben aus einer erkannten E-Rechnung; das Formular übernimmt sie beim Klick auf „Übernehmen“
   const [vorgabe, setVorgabe] = useState<{ entstanden?: string; titel?: string; korrespondent?: string } | null>(null);
@@ -50,6 +55,7 @@ export function Classification({
     onSuccess: async () => {
       setOffen(false);
       await queryClient.invalidateQueries();
+      if (springen.current) weiter?.();
     },
   });
 
@@ -65,6 +71,7 @@ export function Classification({
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    springen.current = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "weiter";
     const f = new FormData(e.currentTarget);
     const text = (k: string) => String(f.get(k) ?? "").trim() || undefined;
     speichern.mutate({
@@ -299,13 +306,25 @@ export function Classification({
               {m.classify_failed({ meldung: speichern.error.message })}
             </p>
           )}
-          <button
-            type="submit"
-            disabled={speichern.isPending}
-            className="h-9 self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
-          >
-            {m.classify_submit()}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="submit"
+              disabled={speichern.isPending}
+              className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+            >
+              {m.classify_submit()}
+            </button>
+            {weiter && (
+              <button
+                type="submit"
+                value="weiter"
+                disabled={speichern.isPending}
+                className="h-9 rounded-md border border-border px-4 font-medium text-sm hover:bg-subtle disabled:opacity-60"
+              >
+                {m.classify_submit_next()}
+              </button>
+            )}
+          </div>
         </form>
       )}
     </section>

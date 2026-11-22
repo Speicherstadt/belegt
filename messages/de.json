@@ -445,7 +445,6 @@
   "filter_tags_mode": "Gewählte Tags",
   "filter_tags_all": "alle",
   "filter_tags_any": "mindestens einer",
-  "filter_doctype_all": "Alle Dokumenttypen",
   "filter_field": "Feld",
   "filter_field_none": "Kein Feld",
   "filter_field_condition": "Bedingung",
@@ -879,7 +878,6 @@
   "event_party_set": "Korrespondent gesetzt: {name}",
   "event_party_removed": "Korrespondent entfernt: {name}",
   "bulk_party": "Korrespondent setzen",
-  "filter_party_all": "Alle Korrespondenten",
   "match_legend": "Zuordnungsregel",
   "match_label": "Zuordnung",
   "match_none": "Keine",
@@ -1208,5 +1206,58 @@
   "workflow_remove_row": "{name} entfernen",
   "workflow_actions_empty": "Noch keine Aktion. Wähle unten, was mit dem Dokument passieren soll.",
   "workflow_cancel": "Abbrechen",
-  "form_cancel": "Abbrechen"
+  "form_cancel": "Abbrechen",
+  "doc_tab_classification": "Einordnung",
+  "doc_tab_notes": "Notizen",
+  "doc_tab_more": "Weiteres",
+  "doc_tab_history": "Verlauf",
+  "doc_tabs_label": "Bereiche des Dokuments",
+  "doc_nav_label": "Blättern",
+  "doc_nav_prev": "Vorheriges Dokument (←)",
+  "doc_nav_next": "Nächstes Dokument (→)",
+  "doc_nav_position": "{stelle} von {anzahl}",
+  "classify_submit_next": "Einordnen & weiter",
+  "doc_event_meta": "{wann} · {wer} · Nr. {nr}",
+  "filter_tag_remove": "Tag {name} aus dem Filter nehmen",
+  "filter_tags_search": "Tags durchsuchen",
+  "filter_tags_none": "Kein Tag passt.",
+  "card_open_short": "Öffnen",
+  "card_download_short": "Herunterladen",
+  "drop_title": "Dateien hier ablegen",
+  "drop_text": "Sie landen im Eingang, das Original bleibt unverändert.",
+  "drop_busy": "Lädt hoch: {fertig} von {gesamt}",
+  "drop_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument aufgenommen",
+        "anzahlPlural=other": "{anzahl} Dokumente aufgenommen"
+      }
+    }
+  ],
+  "drop_duplicates": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Datei lag schon im Archiv und wurde nicht doppelt angelegt.",
+        "anzahlPlural=other": "{anzahl} Dateien lagen schon im Archiv und wurden nicht doppelt angelegt."
+      }
+    }
+  ],
+  "drop_to_inbox": "Zum Eingang",
+  "drop_close": "Schließen",
+  "global_search": "Suche in allen Dokumenten",
+  "global_search_placeholder": "Suchen: Dokumente, Tags, Korrespondenten …",
+  "global_search_results": "Treffer",
+  "global_search_documents": "Dokumente",
+  "global_search_parties": "Korrespondenten",
+  "global_search_doctypes": "Dokumenttypen",
+  "global_search_none": "Nichts gefunden.",
+  "global_search_all": "Alle Treffer für „{suche}“ im Archiv",
+  "views_nav_count": "Treffer:",
+  "filter_choice_clear": "Filter {name} aufheben",
+  "filter_choice_search": "{name} suchen",
+  "filter_choice_all": "Alle"
 }

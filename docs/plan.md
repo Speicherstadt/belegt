@@ -107,7 +107,13 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Workflow-Auslöser „geändert“ und „Zeitplan“; Workflows bearbeiten | niedrig | offen |
 | Weitere Sprachen der Oberfläche (heute Deutsch und Englisch) | niedrig | offen |
 | Bedienung: Zeitraum im Archiv, Workflow-Editor in Schritten, Formulare erst auf Klick, einheitliche Checkboxen | mittel | erledigt |
-| Bedienung: Ziehen und Ablegen, Tastenkürzel, Schnellaktionen und Tags auf den Kacheln, Zahlen an gespeicherten Ansichten, Suche in der Kopfzeile, Treffer hervorheben | mittel | offen |
+| Bedienung: Dokumentseite mit großer Vorschau, Reitern und Blättern, „Einordnen & weiter“ | mittel | erledigt |
+| Bedienung: Tags-Filter als durchsuchbare Liste, Kacheln mit Tags und Schnellknöpfen | mittel | erledigt |
+| Bedienung: Hochladen durch Ziehen und Ablegen auf jeder Seite, mit Stand | mittel | erledigt |
+| Bedienung: Suche in der Kopfzeile mit Vorschlägen | mittel | erledigt |
+| Bedienung: Startseite mit Dokumenten aus gespeicherten Ansichten, Zahlen in der Seitenleiste | mittel | erledigt |
+| Bedienung: Korrespondent und Dokumenttyp als durchsuchbare Filterlisten mit Anzahl | mittel | erledigt |
+| Bedienung: Tags „nicht zugeordnet“ und ausschließen im Filter, Fristen-Seite mit eigenen Vorlagen, Anlegen direkt im Dokument, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

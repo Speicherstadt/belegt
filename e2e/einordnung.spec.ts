@@ -24,12 +24,13 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-15");
   await einordnung.getByLabel("Titel (optional)").fill(titel);
-  await einordnung.getByRole("button", { name: "Einordnen" }).click();
+  await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: titel })).toBeVisible();
   await expect(einordnung).toContainText("Buchungsbelege");
-  // Eingeordnet: Die Reihenfolge der Karten ist wieder die übliche, die Einordnung steht nicht mehr zuerst
-  await expect(spalte.locator("> section").first()).not.toHaveAttribute("aria-labelledby", "einordnung");
+  // Die Einordnung steht im ersten Reiter der Dokumentseite
+  await expect(page.getByRole("tab", { name: "Einordnung" })).toHaveAttribute("aria-selected", "true");
   await expect(einordnung).toContainText("31.12.2034");
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     "Eingeordnet",
   );
@@ -86,6 +87,6 @@ test("der Vorschlag des Sprachmodells füllt die Einordnung vor, eingeordnet wir
   await expect(page.getByLabel("Entstanden, empfangen oder abgesandt am")).toHaveValue("2026-09-15");
   await expect(page.getByLabel("Titel (optional)")).toHaveValue("Angebot Werkstatt");
   await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue("Werkstatt Beispiel");
-  await page.getByRole("button", { name: "Einordnen" }).click();
+  await page.getByRole("button", { name: "Einordnen", exact: true }).click();
   await expect(page.getByText("31.12.2032").first()).toBeVisible();
 });

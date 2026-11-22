@@ -78,13 +78,17 @@ test("Seite drehen legt ein neues Dokument mit Verweis auf das Original an", asy
   await expect(neu).toBeVisible({ timeout: 20_000 });
   await neu.click();
 
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const ableitungen = page.getByRole("region", { name: "Ableitungen" });
   await expect(ableitungen).toContainText("Abgeleitet aus");
   await expect(ableitungen).toContainText("Seiten gedreht");
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.getByRole("region", { name: "Verlauf" })).toContainText("Abgeleitet aus einem anderen Dokument");
   await axeHellUndDunkel(page);
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   await ableitungen.getByRole("link", { name, exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/dokumente/${id}$`));
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   await expect(page.getByRole("region", { name: "Ableitungen" })).toContainText("Daraus abgeleitet");
 });
 
@@ -104,6 +108,7 @@ test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", asyn
   const neu = `teil-a-${info.project.name} (zusammengefügt).pdf`;
   await expect(page.getByRole("status").filter({ hasText: neu })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("link", { name: neu }).click();
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const ableitungen = page.getByRole("region", { name: "Ableitungen" });
   await expect(ableitungen.getByRole("link")).toHaveText([erstes, zweites]);
   await expect(page.getByRole("region", { name: "Seiten" }).getByRole("img")).toHaveCount(3);
@@ -135,17 +140,19 @@ test("Notiz anlegen und über die Suche finden", async ({ page }, info) => {
   const wort = `Lieferschein${info.project.name}fehlt`;
   await hochladen(page, name, await pdf("Notiz"));
   await page.getByRole("link", { name, exact: true }).click();
+  await page.getByRole("tab", { name: "Notizen" }).click();
   const notizen = page.getByRole("region", { name: "Notizen" });
   await expect(notizen).toContainText("Noch keine Notizen.");
   await notizen.getByLabel("Neue Notiz").fill(`Beim Lieferanten nachgefragt: ${wort}`);
   await notizen.getByRole("button", { name: "Notiz hinzufügen" }).click();
   await expect(notizen.getByRole("listitem")).toContainText(wort);
   await expect(notizen.getByRole("listitem")).toContainText("nutzer:");
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.getByRole("region", { name: "Verlauf" })).toContainText("Notiz hinzugefügt");
   await axeHellUndDunkel(page);
 
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(wort);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(wort);
   await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   await expect(page.getByRole("row")).toHaveCount(2);
 });
@@ -164,6 +171,7 @@ test("ähnliche Dokumente stehen auf der Seite des Dokuments", async ({ page }, 
     })
     .toBeGreaterThan(0);
   await page.goto(`/dokumente/${id}`);
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const aehnliche = page.getByRole("region", { name: "Ähnliche Dokumente" });
   await expect(aehnliche.getByRole("link", { name: erstes, exact: true })).toBeVisible();
   await axeHellUndDunkel(page);
@@ -183,6 +191,7 @@ test("ein frisch angelegter Freigabelink bleibt nicht beim Wechsel zu einem ande
     })
     .toBeGreaterThan(0);
   await page.goto(`/dokumente/${id}`);
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   const teilen = page.getByRole("region", { name: "Teilen per Link" });
   await teilen.getByRole("button", { name: "Link anlegen" }).click();
   await expect(teilen.getByTestId("einmalwert")).toBeVisible();

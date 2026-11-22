@@ -6,10 +6,20 @@ description: >-
 
 # Dokument
 
+## Aufbau der Seite
+
+Links steht die Vorschau, groß und beim Scrollen stehend. Rechts teilen Reiter den Rest auf: **Einordnung** (Art,
+Frist, Tags, Korrespondent, Felder, Mail, E-Rechnung, Angaben mit ASN), **Notizen**, **Weiteres** (Teilen, Weitergaben, Ableitungen,
+ähnliche Dokumente, Löschung) und **Verlauf** (Verlauf und Nachweis). Der Reiter steht in der Adresse.
+
+Kommst du aus dem Eingang oder dem Archiv, blätterst du mit ← und → (Knöpfe oder Pfeiltasten, solange du nicht tippst)
+durch dieselbe Liste; „Zurück“ führt in die Liste mit ihren Filtern. Im Eingang ordnet „Einordnen & weiter“ das
+Dokument ein und öffnet gleich das nächste.
+
 ## Vorschaubilder
 
 Eingang und Archiv zeigen vor dem Namen ein kleines Bild der ersten Seite; „Kacheln“ zeigt die Dokumente als größere
-Bilder nebeneinander, „Liste“ wieder als Tabelle. Die Wahl merkt sich der Browser.
+Bilder nebeneinander, mit den Tags auf dem Bild, Korrespondent, Typ und den Knöpfen „Öffnen“ und „Herunterladen“; „Liste“ wieder als Tabelle. Die Wahl merkt sich der Browser.
 
 Der Worker erzeugt die Bilder kurz nach dem Eingang mit `pdftoppm` (Poppler, im Image enthalten): aus PDFs, aus JPEG
 und PNG und bei Office-Dateien aus ihrer [Ansicht](eingang.md#ansicht-von-office-dateien). Mails, Textdateien, WebP,

@@ -55,8 +55,10 @@ test("Korrespondent mit Zuordnungsregel anlegen, Dokument hochladen, Vorschlag �
   await expect(
     ordnung.getByRole("combobox", { name: "Korrespondent", exact: true }).locator("option:checked"),
   ).toHaveText(korrespondent);
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(abschnitt(page, "Verlauf")).toContainText(`Korrespondent gesetzt: ${korrespondent}`);
   // Das Formular der Einordnung nimmt den Namen aus der Liste
+  await page.getByRole("tab", { name: "Einordnung" }).click();
   await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue(korrespondent);
 
   // Im Archiv als Chip, der auf alle Dokumente des Korrespondenten filtert
@@ -67,7 +69,8 @@ test("Korrespondent mit Zuordnungsregel anlegen, Dokument hochladen, Vorschlag �
     .click();
   await expect(page).toHaveURL(/korrespondent=/);
   await expect(page.getByRole("link", { name })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Korrespondent", exact: true })).toHaveValue(/[0-9a-f-]{36}/);
+  // Der Filter zeigt den gewählten Korrespondenten
+  await expect(page.getByRole("button", { name: `Korrespondent: ${korrespondent}` })).toBeVisible();
   await barrierefrei(page);
 });
 
@@ -106,6 +109,7 @@ test("zwei Schreibweisen zusammenführen; die Einordnung behält den Text", asyn
     abschnitt(page, "Ordnung").getByRole("combobox", { name: "Korrespondent", exact: true }).locator("option:checked"),
   ).toHaveText(kurz);
   // Der Verlauf zeigt den Namen, wie ihn die versiegelte Einordnung festhält
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(abschnitt(page, "Verlauf")).toContainText(`Eingeordnet (Korrespondent: ${lang})`);
   await barrierefrei(page);
 });

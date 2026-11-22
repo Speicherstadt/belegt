@@ -36,6 +36,7 @@ test.describe("bei 390 px Breite", () => {
     await page.goto("/archiv");
     await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: await pdf("Umbruch") });
     await page.getByRole("link", { name, exact: true }).click();
+    await page.getByRole("tab", { name: "Verlauf" }).click();
     await expect(page.locator("dd.font-mono").first()).toBeVisible();
     expect(await breiteUeberschuss(page)).toBeLessThanOrEqual(0);
     expect((await axe(page)).violations).toEqual([]);
@@ -44,7 +45,7 @@ test.describe("bei 390 px Breite", () => {
 
 test("Suchfeld im Archiv zeigt den Fokus am Rand", async ({ page }) => {
   await page.goto("/archiv");
-  const such = page.getByRole("searchbox");
+  const such = page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" });
   const label = page.locator("label").filter({ has: such });
   const rand = () => label.evaluate((el) => getComputedStyle(el).borderTopColor);
   const vorher = await rand();
@@ -93,7 +94,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 test("Suchfeld zeigt den Fokus auch bei erzwungenen Farben", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.goto("/archiv");
-  const such = page.getByRole("searchbox");
+  const such = page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" });
   const label = page.locator("label").filter({ has: such });
   const zustand = async () => ({
     rand: await label.evaluate((el) => getComputedStyle(el).borderTopColor),

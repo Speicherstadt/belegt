@@ -9,9 +9,25 @@ description: >-
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art
 bestimmt die Frist ([Fristen](fristen.md)).
 
+## Suche oben
+
+Oben auf jeder Seite steht eine Suche; „/“ springt hinein. Schon beim Tippen zeigt sie passende Dokumente (Volltext)
+und Tags, Korrespondenten und Dokumenttypen. Ein Klick öffnet das Dokument oder das Archiv mit diesem Filter, Enter
+das Archiv mit der Suche.
+
+## Ziehen und ablegen
+
+Dateien lassen sich auf jeder Seite ins Fenster ziehen. Belegt zeigt eine Fläche zum Ablegen, lädt die Dateien hoch
+und meldet unten rechts, wie viele aufgenommen sind und wie viele schon im Archiv lagen; „Zum Eingang“ führt zu ihnen.
+Das gilt für alle, die hochladen dürfen.
+
 ## Startseite
 
-Nach dem Anmelden zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
+Ganz oben stehen die gespeicherten Ansichten, die du für die Startseite gewählt hast: je Ansicht die Zahl der Treffer
+und die ersten fünf Dokumente mit Vorschaubild, Korrespondent, Eingang und Tags. In der Seitenleiste steht die Zahl
+der Treffer neben jeder gespeicherten Ansicht.
+
+Darunter zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
 wie viele in diesem Jahr eingingen, offene Löschanträge, aktive Sperren mit der Zahl der Dokumente darunter, die Größe
 der Originale (jede Datei einmal) und die Fristen, die in den nächsten 90 Tagen enden, mit dem Tag, ab dem das
 Dokument löschbar ist. Daneben der Zustand der Quellen (letzter Abruf oder Fehler jedes Postfachs, das letzte Dokument

@@ -36,6 +36,7 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
   await ordnung.getByRole("combobox", { name: "Tag", exact: true }).selectOption({ label: tag });
   await ordnung.getByRole("button", { name: "Hinzufügen" }).click();
   await expect(ordnung.getByRole("button", { name: `Tag ${tag} entfernen` })).toBeVisible();
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `Tag hinzugefügt: ${tag}`,
   );
@@ -46,13 +47,15 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
 
   await page.goto("/archiv");
   await expect(page.getByRole("link", { name: anderes })).toBeVisible();
-  await page.getByRole("button", { name: tag }).click();
-  await expect(page.getByRole("button", { name: tag })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Tags", exact: true }).click();
+  await page.getByRole("button", { name: tag, exact: true }).click();
+  await expect(page.getByRole("button", { name: tag, exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
   await expect(page.getByRole("row", { name: new RegExp(name) })).toContainText(tag);
   // Die Suche findet den Namen des Tags
-  await page.getByRole("button", { name: tag }).click();
-  await page.getByRole("searchbox").fill(`"${tag}"`);
+  await page.getByRole("button", { name: tag, exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(`"${tag}"`);
   await expect(page.getByRole("link", { name })).toBeVisible();
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
 });
@@ -71,13 +74,16 @@ test("Tag-Filter: alle gewählten oder mindestens einer", async ({ page }, info)
   await r.post(`/api/dokumente/${id(zweites)}/ordnung`, { data: { tagsHinzu: [tagB.id] } });
 
   await page.goto("/archiv");
-  await page.getByRole("button", { name: `Modus A ${projekt}` }).click();
-  await page.getByRole("button", { name: `Modus B ${projekt}` }).click();
+  await page.getByRole("button", { name: "Tags", exact: true }).click();
+  await page.getByRole("button", { name: `Modus A ${projekt}`, exact: true }).click();
+  await page.getByRole("button", { name: `Modus B ${projekt}`, exact: true }).click();
   await expect(page.getByRole("button", { name: "alle", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: erstes })).toHaveCount(0);
   await page.getByRole("button", { name: "mindestens einer" }).click();
   await expect(page.getByRole("link", { name: erstes })).toBeVisible();
   await expect(page.getByRole("link", { name: zweites })).toBeVisible();
+  // Die offene Liste liegt über der Tabelle; geprüft wird die Seite mit geschlossener Liste
+  await page.keyboard.press("Escape");
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
     expect((await axe(page)).violations, colorScheme).toEqual([]);
@@ -105,9 +111,11 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   await expect(ordnung.getByRole("alert")).toContainText("Kein Betrag");
   await eingabe.fill("1.234,56");
   await ordnung.getByRole("button", { name: `${feld} speichern` }).click();
+  await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `Feld gesetzt: ${feld}`,
   );
+  await page.getByRole("tab", { name: "Einordnung" }).click();
   await expect(ordnung.getByLabel(`${feld} (EUR)`)).toHaveValue("1234,56");
 
   await page.goto("/archiv");
@@ -131,7 +139,7 @@ test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag
   await expect(tags.getByRole("listitem").filter({ hasText: tag })).toBeVisible();
 
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(praefix);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(praefix);
   await expect(page.getByRole("link", { name: `${praefix}-1.pdf` })).toBeVisible();
   await expect(page.getByRole("link", { name: `${praefix}-2.pdf` })).toBeVisible();
   await page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" }).check();

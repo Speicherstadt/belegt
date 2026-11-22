@@ -110,8 +110,8 @@ Dokumenttyp. „Übernehmen“ auf der Seite des Dokuments setzt sie. Die Reihen
 
 ## Filter und Suche
 
-Im Archiv filterst du nach Tags (das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach
-Korrespondent und Dokumenttyp (auch „Ohne …“) und nach einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und
+Im Archiv filterst du nach Tags (der Knopf „Tags“ öffnet eine durchsuchbare Liste mit der Zahl der Dokumente je Tag; das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach
+Korrespondent und Dokumenttyp (je ein Knopf mit durchsuchbarer Liste und der Zahl der Dokumente, auch „Ohne …“) und nach einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und
 Datum von–bis. Dazu kommt ein Zeitraum nach dem Tag der Entstehung oder des Eingangs: letzte 7 oder 30 Tage,
 dieses oder letztes Jahr oder eigene Tage. Eine gespeicherte Ansicht mit „letzte 30 Tage“ meint immer die letzten 30
 Tage, nicht die am Tag des Speicherns. Die Liste zeigt Korrespondent, Tags und Dokumenttyp unter dem Namen; ein Klick auf den Korrespondenten
