@@ -9,8 +9,8 @@ description: >-
 ## Aufbau der Seite
 
 Links steht die Vorschau, groß und beim Scrollen stehend. Rechts teilen Reiter den Rest auf: **Einordnung** (Art,
-Frist, Tags, Korrespondent, Felder, Mail, E-Rechnung), **Notizen**, **Weiteres** (Teilen, Weitergaben, Ableitungen,
-ähnliche Dokumente, Löschung) und **Verlauf** (Angaben, Verlauf, Nachweis). Der Reiter steht in der Adresse.
+Frist, Tags, Korrespondent, Felder, Mail, E-Rechnung, Angaben mit ASN), **Notizen**, **Weiteres** (Teilen, Weitergaben, Ableitungen,
+ähnliche Dokumente, Löschung) und **Verlauf** (Verlauf und Nachweis). Der Reiter steht in der Adresse.
 
 Kommst du aus dem Eingang oder dem Archiv, blätterst du mit ← und → (Knöpfe oder Pfeiltasten, solange du nicht tippst)
 durch dieselbe Liste; „Zurück“ führt in die Liste mit ihren Filtern. Im Eingang ordnet „Einordnen & weiter“ das

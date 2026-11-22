@@ -36,6 +36,7 @@ test.describe("bei 390 px Breite", () => {
     await page.goto("/archiv");
     await page.getByTestId("upload").setInputFiles({ name, mimeType: "application/pdf", buffer: await pdf("Umbruch") });
     await page.getByRole("link", { name, exact: true }).click();
+    await page.getByRole("tab", { name: "Verlauf" }).click();
     await expect(page.locator("dd.font-mono").first()).toBeVisible();
     expect(await breiteUeberschuss(page)).toBeLessThanOrEqual(0);
     expect((await axe(page)).violations).toEqual([]);

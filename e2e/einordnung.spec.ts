@@ -27,8 +27,8 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
   await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: titel })).toBeVisible();
   await expect(einordnung).toContainText("Buchungsbelege");
-  // Eingeordnet: Die Reihenfolge der Karten ist wieder die übliche, die Einordnung steht nicht mehr zuerst
-  await expect(spalte.locator("> section").first()).not.toHaveAttribute("aria-labelledby", "einordnung");
+  // Die Einordnung steht im ersten Reiter der Dokumentseite
+  await expect(page.getByRole("tab", { name: "Einordnung" })).toHaveAttribute("aria-selected", "true");
   await expect(einordnung).toContainText("31.12.2034");
   await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(

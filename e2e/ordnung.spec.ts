@@ -110,6 +110,7 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(
     `Feld gesetzt: ${feld}`,
   );
+  await page.getByRole("tab", { name: "Einordnung" }).click();
   await expect(ordnung.getByLabel(`${feld} (EUR)`)).toHaveValue("1234,56");
 
   await page.goto("/archiv");

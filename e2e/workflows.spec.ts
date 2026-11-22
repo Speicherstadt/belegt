@@ -52,6 +52,7 @@ test("Workflow anlegen und seine Wirkung bei einem Upload sehen", async ({ page 
     await page.reload();
     await expect(ordnung.getByRole("button", { name: `Tag ${tag} entfernen` })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 20_000 });
+  await page.getByRole("tab", { name: "Notizen" }).click();
   await expect(page.getByText("Vom Workflow getaggt")).toBeVisible();
   await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.locator("section", { has: page.getByRole("heading", { name: "Verlauf" }) })).toContainText(

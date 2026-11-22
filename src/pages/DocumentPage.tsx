@@ -5,7 +5,7 @@ import { darfSchreiben } from "../../shared/rollen.ts";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
 import { Derivations } from "../components/Derivations.tsx";
-import { DocumentDetails } from "../components/DocumentDetails.tsx";
+import { DocumentDetails, DocumentFacts } from "../components/DocumentDetails.tsx";
 import { DocumentOrdnung } from "../components/DocumentOrdnung.tsx";
 import { EInvoice } from "../components/EInvoice.tsx";
 import { Forwardings } from "../components/Forwardings.tsx";
@@ -109,6 +109,7 @@ export function DocumentPage() {
         />
         <MailSection dokumentId={d.id} />
         <EInvoice dokumentId={d.id} />
+        <DocumentFacts d={d} />
       </>
     ),
     notizen: ich.data && ich.data.role !== "pruefer" && (

@@ -58,6 +58,7 @@ test("Korrespondent mit Zuordnungsregel anlegen, Dokument hochladen, Vorschlag Ã
   await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(abschnitt(page, "Verlauf")).toContainText(`Korrespondent gesetzt: ${korrespondent}`);
   // Das Formular der Einordnung nimmt den Namen aus der Liste
+  await page.getByRole("tab", { name: "Einordnung" }).click();
   await expect(page.getByLabel("Korrespondent (optional)")).toHaveValue(korrespondent);
 
   // Im Archiv als Chip, der auf alle Dokumente des Korrespondenten filtert

@@ -85,6 +85,7 @@ test("Seite drehen legt ein neues Dokument mit Verweis auf das Original an", asy
   await page.getByRole("tab", { name: "Verlauf" }).click();
   await expect(page.getByRole("region", { name: "Verlauf" })).toContainText("Abgeleitet aus einem anderen Dokument");
   await axeHellUndDunkel(page);
+  await page.getByRole("tab", { name: "Weiteres" }).click();
   await ableitungen.getByRole("link", { name, exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/dokumente/${id}$`));
   await page.getByRole("tab", { name: "Weiteres" }).click();

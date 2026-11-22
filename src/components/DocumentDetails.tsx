@@ -6,7 +6,7 @@ import { m } from "../paraglide/messages.js";
 import { operationLabel } from "./Derivations.tsx";
 import { Explain } from "./WasIstDas.tsx";
 
-/* Reiter „Verlauf“ der Dokumentseite: Angaben, Verlauf und Nachweis */
+/* Dokumentseite: Angaben (Reiter „Einordnung“), Verlauf und Nachweis (Reiter „Verlauf“) */
 
 const QUELLE: Record<string, () => string> = {
   upload: () => m.source_upload(),
@@ -40,53 +40,11 @@ function ereignis(e: Ereignis): string {
   return m.event_other({ aktion: e.aktion });
 }
 
-/** Angaben, Verlauf und Nachweis eines Dokuments */
+/** Verlauf und Nachweis eines Dokuments (Reiter „Verlauf“) */
 export function DocumentDetails({ d }: { d: Awaited<ReturnType<typeof api.dokument>> }) {
   const verlauf = useQuery({ queryKey: ["verlauf", d.id], queryFn: () => api.verlauf(d.id) });
-  const inhalt = useQuery({ queryKey: ["inhalt", d.id], queryFn: () => api.inhalt(d.id) });
   return (
     <>
-      <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
-        <h2 id="angaben" className="m-0 font-semibold text-base">
-          {m.doc_details()}
-        </h2>
-        <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
-          <Explain term="asn" row>
-            {(knopf, satz) => (
-              <>
-                <dt className="text-muted">{m.doc_asn()}</dt>
-                <dd className="m-0 flex items-center">
-                  <span className="tabular-nums" data-testid="asn">
-                    {d.asn}
-                  </span>
-                  {knopf}
-                </dd>
-                {satz}
-              </>
-            )}
-          </Explain>
-          <dt className="text-muted">{m.doc_source()}</dt>
-          <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
-          <dt className="text-muted">{m.doc_received()}</dt>
-          <dd className="m-0">{zeitpunkt(d.eingegangenAm)}</dd>
-          <dt className="text-muted">{m.doc_type()}</dt>
-          <dd className="m-0">{d.mimeType}</dd>
-          <dt className="text-muted">{m.doc_size()}</dt>
-          <dd className="m-0 tabular-nums">{groesse(d.groesse)}</dd>
-          {inhalt.data && (
-            <>
-              <dt className="text-muted">{m.doc_text()}</dt>
-              <dd className="m-0">
-                {inhalt.data.fehler
-                  ? m.doc_text_error()
-                  : inhalt.data.ocr
-                    ? m.doc_text_ocr({ anzahl: String(inhalt.data.textLaenge) })
-                    : m.doc_text_file({ anzahl: String(inhalt.data.textLaenge) })}
-              </dd>
-            </>
-          )}
-        </dl>
-      </section>
       <section aria-labelledby="verlauf" className="flex flex-col gap-2 rounded-lg border border-border p-4">
         <h2 id="verlauf" className="m-0 font-semibold text-base">
           {m.doc_history()}
@@ -124,5 +82,53 @@ export function DocumentDetails({ d }: { d: Awaited<ReturnType<typeof api.dokume
         </dl>
       </section>
     </>
+  );
+}
+
+/** Angaben zum Original: ASN, Quelle, Eingang, Typ, Größe, Text (Reiter „Einordnung“, die ASN braucht man oft) */
+export function DocumentFacts({ d }: { d: Awaited<ReturnType<typeof api.dokument>> }) {
+  const inhalt = useQuery({ queryKey: ["inhalt", d.id], queryFn: () => api.inhalt(d.id) });
+  return (
+    <section aria-labelledby="angaben" className="flex flex-col gap-2 rounded-lg border border-border p-4">
+      <h2 id="angaben" className="m-0 font-semibold text-base">
+        {m.doc_details()}
+      </h2>
+      <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
+        <Explain term="asn" row>
+          {(knopf, satz) => (
+            <>
+              <dt className="text-muted">{m.doc_asn()}</dt>
+              <dd className="m-0 flex items-center">
+                <span className="tabular-nums" data-testid="asn">
+                  {d.asn}
+                </span>
+                {knopf}
+              </dd>
+              {satz}
+            </>
+          )}
+        </Explain>
+        <dt className="text-muted">{m.doc_source()}</dt>
+        <dd className="m-0">{QUELLE[d.quelle]?.() ?? d.quelle}</dd>
+        <dt className="text-muted">{m.doc_received()}</dt>
+        <dd className="m-0">{zeitpunkt(d.eingegangenAm)}</dd>
+        <dt className="text-muted">{m.doc_type()}</dt>
+        <dd className="m-0">{d.mimeType}</dd>
+        <dt className="text-muted">{m.doc_size()}</dt>
+        <dd className="m-0 tabular-nums">{groesse(d.groesse)}</dd>
+        {inhalt.data && (
+          <>
+            <dt className="text-muted">{m.doc_text()}</dt>
+            <dd className="m-0">
+              {inhalt.data.fehler
+                ? m.doc_text_error()
+                : inhalt.data.ocr
+                  ? m.doc_text_ocr({ anzahl: String(inhalt.data.textLaenge) })
+                  : m.doc_text_file({ anzahl: String(inhalt.data.textLaenge) })}
+            </dd>
+          </>
+        )}
+      </dl>
+    </section>
   );
 }
