@@ -1249,5 +1249,13 @@
     }
   ],
   "drop_to_inbox": "Zum Eingang",
-  "drop_close": "Schließen"
+  "drop_close": "Schließen",
+  "global_search": "Suche in allen Dokumenten",
+  "global_search_placeholder": "Suchen: Dokumente, Tags, Korrespondenten …",
+  "global_search_results": "Treffer",
+  "global_search_documents": "Dokumente",
+  "global_search_parties": "Korrespondenten",
+  "global_search_doctypes": "Dokumenttypen",
+  "global_search_none": "Nichts gefunden.",
+  "global_search_all": "Alle Treffer für „{suche}“ im Archiv"
 }

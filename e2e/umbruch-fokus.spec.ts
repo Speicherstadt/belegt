@@ -45,7 +45,7 @@ test.describe("bei 390 px Breite", () => {
 
 test("Suchfeld im Archiv zeigt den Fokus am Rand", async ({ page }) => {
   await page.goto("/archiv");
-  const such = page.getByRole("searchbox");
+  const such = page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" });
   const label = page.locator("label").filter({ has: such });
   const rand = () => label.evaluate((el) => getComputedStyle(el).borderTopColor);
   const vorher = await rand();
@@ -94,7 +94,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 test("Suchfeld zeigt den Fokus auch bei erzwungenen Farben", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.goto("/archiv");
-  const such = page.getByRole("searchbox");
+  const such = page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" });
   const label = page.locator("label").filter({ has: such });
   const zustand = async () => ({
     rand: await label.evaluate((el) => getComputedStyle(el).borderTopColor),

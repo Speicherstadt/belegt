@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
 import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
+import { GlobalSearch } from "./components/GlobalSearch.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { ApiFehler, api } from "./lib/api.ts";
 import { eingebettet, stillAnmeldenErlaubt } from "./lib/einbetten.ts";
@@ -39,6 +40,11 @@ export function Shell({ children }: { children: ReactNode }) {
       </a>
       <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} version={status.data?.version} />
       <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
+        {!imFrame && !ich.data.zweiFaktorEinrichten && (
+          <div className="mb-6 flex justify-end">
+            <GlobalSearch />
+          </div>
+        )}
         {/* Pflicht zum zweiten Faktor: bis er eingerichtet ist, auf jeder Seite die Einrichtung (der Server sperrt alles
             andere) */}
         {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}

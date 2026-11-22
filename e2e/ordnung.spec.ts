@@ -137,7 +137,7 @@ test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag
   await expect(tags.getByRole("listitem").filter({ hasText: tag })).toBeVisible();
 
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(praefix);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(praefix);
   await expect(page.getByRole("link", { name: `${praefix}-1.pdf` })).toBeVisible();
   await expect(page.getByRole("link", { name: `${praefix}-2.pdf` })).toBeVisible();
   await page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" }).check();

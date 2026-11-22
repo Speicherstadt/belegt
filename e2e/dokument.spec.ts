@@ -152,7 +152,7 @@ test("Notiz anlegen und über die Suche finden", async ({ page }, info) => {
   await axeHellUndDunkel(page);
 
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(wort);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(wort);
   await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
   await expect(page.getByRole("row")).toHaveCount(2);
 });

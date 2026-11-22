@@ -9,6 +9,12 @@ description: >-
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art
 bestimmt die Frist ([Fristen](fristen.md)).
 
+## Suche oben
+
+Oben auf jeder Seite steht eine Suche; „/“ springt hinein. Schon beim Tippen zeigt sie passende Dokumente (Volltext)
+und Tags, Korrespondenten und Dokumenttypen. Ein Klick öffnet das Dokument oder das Archiv mit diesem Filter, Enter
+das Archiv mit der Suche.
+
 ## Ziehen und ablegen
 
 Dateien lassen sich auf jeder Seite ins Fenster ziehen. Belegt zeigt eine Fläche zum Ablegen, lädt die Dateien hoch

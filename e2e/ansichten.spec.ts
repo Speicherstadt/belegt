@@ -14,7 +14,7 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
   await expect(page.getByRole("link", { name })).toBeVisible();
 
   await page.goto("/archiv");
-  await page.getByRole("searchbox").fill(name);
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(name);
   await page.getByRole("button", { name: "Im Eingang", exact: true }).click();
   await page.getByLabel("Sortierung").selectOption({ label: "Zuerst eingegangen" });
   await expect(page).toHaveURL(/sortierung=alt/);
@@ -32,11 +32,15 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
 
   // Ohne Filter ins Archiv, dann über die Ansicht in der Seitenleiste zurück
   await page.goto("/archiv");
-  await expect(page.getByRole("searchbox")).toHaveValue("");
+  await expect(
+    page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
+  ).toHaveValue("");
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
   if (info.project.name === "handy") await nav.scrollIntoViewIfNeeded();
   await nav.getByRole("link", { name: ansicht }).click();
-  await expect(page.getByRole("searchbox")).toHaveValue(name);
+  await expect(
+    page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
+  ).toHaveValue(name);
   await expect(page.getByLabel("Sortierung")).toHaveValue("alt");
   await expect(page.getByRole("button", { name: "Im Eingang", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(nav.getByRole("link", { name: ansicht })).toHaveAttribute("aria-current", "page");
@@ -45,7 +49,9 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
 
   // Die Adresse allein reicht: neu laden zeigt dieselbe Ansicht
   await page.reload();
-  await expect(page.getByRole("searchbox")).toHaveValue(name);
+  await expect(
+    page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
+  ).toHaveValue(name);
 
   // Umbenennen und löschen
   await page.getByText("Eigene Ansichten verwalten").click();
