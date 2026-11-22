@@ -111,7 +111,7 @@ function FeldZeile({ feld, schreiben }: { feld: Feld; schreiben: boolean }) {
 }
 
 /** Eigene Felder: Typ bei der Anlage fest; Name und Optionen einer Auswahl lassen sich ändern */
-export function FieldsAdmin({ schreiben }: { schreiben: boolean }) {
+export function FieldsAdmin({ schreiben, filter = "" }: { schreiben: boolean; filter?: string }) {
   const queryClient = useQueryClient();
   const liste = useQuery({ queryKey: ["felder"], queryFn: api.felder });
   const [typ, setTyp] = useState<Feldtyp>("text");
@@ -135,9 +135,11 @@ export function FieldsAdmin({ schreiben }: { schreiben: boolean }) {
       <p className="m-0 text-muted text-sm">{m.order_fields_intro()}</p>
       {liste.data?.length === 0 && <p className="m-0 text-sm">{m.order_fields_none()}</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {liste.data?.map((f) => (
-          <FeldZeile key={f.id} feld={f} schreiben={schreiben} />
-        ))}
+        {liste.data
+          ?.filter((f) => f.name.toLowerCase().includes(filter.trim().toLowerCase()))
+          .map((f) => (
+            <FeldZeile key={f.id} feld={f} schreiben={schreiben} />
+          ))}
       </ul>
       {schreiben && (
         <form

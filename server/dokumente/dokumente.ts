@@ -9,6 +9,7 @@ import { notizPasst } from "../notizen/notizen.ts";
 import { filterBedingung, type OrdnungFilter } from "../ordnung/filter.ts";
 import { tagMitNamen } from "../ordnung/ordnung.ts";
 import { fremdeMail, type Sicht, sichtBedingung } from "../zugang/sicht.ts";
+import { ausschnittAus } from "./ausschnitt.ts";
 import { dateityp } from "./dateityp.ts";
 
 /** Was ein Modul braucht: Datenbank und Speicher kommen von außen, nie aus globalen Variablen */
@@ -88,6 +89,11 @@ export interface Eintrag extends Dokument {
   vorschaubild: boolean;
   /** Seitenzahl, wenn bekannt (PDF und Office-Dateien mit Ansicht, nach dem Vorschaubild) */
   seiten: number | null;
+  /**
+   * Nur bei einer Suche: ein Ausschnitt aus dem Text, in dem sie trifft; Treffer zwischen \u0002 und \u0003 (die
+   * Oberfläche macht daraus eine Markierung, ohne HTML vom Server). null ohne Treffer im Text
+   */
+  ausschnitt: string | null;
 }
 
 /** „ASN 123“, „asn123“ oder nur „123“: die gesuchte Archivnummer, sonst null */
@@ -202,6 +208,7 @@ export async function listen(
     korrespondent: Eintrag["korrespondent"];
     vorschaubild: boolean;
     seiten: number | null;
+    ausschnitt: string | null;
   }>(sql`
     select d.*, a.nummer as asn, e.art, e.frist_bis::text as frist_bis, e.titel,
            (select coalesce(json_agg(json_build_object('id', t.id, 'name', t.name, 'farbe', t.farbe)
@@ -214,7 +221,8 @@ export async function listen(
               from dokument_korrespondenten dk join korrespondenten k on k.id = dk.korrespondent_id
              where dk.dokument_id = d.id) as korrespondent,
            exists (select 1 from vorschaubilder v where v.dokument_id = d.id and v.bild is not null) as vorschaubild,
-           (select v.seiten from vorschaubilder v where v.dokument_id = d.id) as seiten
+           (select v.seiten from vorschaubilder v where v.dokument_id = d.id) as seiten,
+           ${ausschnittAus(abfrage.suche?.trim() ?? "")} as ausschnitt
       ${listenQuelle(abfrage)}
      order by ${REIHENFOLGE[sortierung]}
      limit ${limit} offset ${versatz}`);
@@ -235,6 +243,7 @@ export async function listen(
     korrespondent: z.korrespondent,
     vorschaubild: z.vorschaubild,
     seiten: z.seiten,
+    ausschnitt: z.ausschnitt,
   }));
 }
 

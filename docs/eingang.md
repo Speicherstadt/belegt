@@ -13,7 +13,8 @@ bestimmt die Frist ([Fristen](fristen.md)).
 
 Oben auf jeder Seite steht eine Suche; „/“ springt hinein. Schon beim Tippen zeigt sie passende Dokumente (Volltext)
 und Tags, Korrespondenten und Dokumenttypen. Ein Klick öffnet das Dokument oder das Archiv mit diesem Filter, Enter
-das Archiv mit der Suche.
+das Archiv mit der Suche. Im Archiv steht unter jedem Treffer ein Ausschnitt aus dem Text, das Suchwort markiert:
+So sieht man, warum ein Dokument gefunden wurde, auch wenn das Wort nicht im Namen steht.
 
 ## Stand der Verarbeitung
 
@@ -57,6 +58,9 @@ lässt sie sich nicht. Scheitert eine Aufnahme, bleibt ihre Nummer unbenutzt, es
 vor der Archivnummer eingegangen sind, haben ihre Nummer nach der Zeit ihres Eingangs bekommen.
 
 ## Unterwegs mit dem Handy
+
+Am Handy steht oben nur eine schmale Leiste mit „Menü“; darunter kommen gleich Suche und Inhalt. Das Menü klappt die
+Navigation auf und nach dem Wechsel auf eine andere Seite wieder zu.
 
 **App installieren.** Belegt lässt sich als App auf den Startbildschirm legen: in Chrome oder Edge über „App
 installieren“ bzw. „Zum Startbildschirm hinzufügen“, auf dem iPhone in Safari über Teilen → „Zum Home-Bildschirm“. Das

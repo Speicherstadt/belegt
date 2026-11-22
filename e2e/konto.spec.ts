@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { type Browser, expect, type Page, test } from "@playwright/test";
 import { base32, totpCode } from "../server/test-totp.ts";
+import { menueOeffnen } from "./menue.ts";
 
 /*
  * Zweiter Faktor (docs/zugaenge.md#zwei-faktor) mit eigenen Zugängen, nie mit dem Inhaber: dessen Sitzung teilen alle
@@ -65,6 +66,7 @@ test("TOTP einrichten, Backup-Codes herunterladen und mit dem Code anmelden", as
   const { kontext, fremd } = await eingeladen(page, browser, "steuerberatung", email);
   try {
     await expect(fremd.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
+    await menueOeffnen(fremd);
     await fremd.getByRole("link", { name: "Konto" }).click();
     await expect(fremd.getByRole("heading", { level: 1, name: "Konto" })).toBeVisible();
     await axeHellUndDunkel(fremd);
@@ -87,6 +89,7 @@ test("TOTP einrichten, Backup-Codes herunterladen und mit dem Code anmelden", as
     await fremd.getByRole("button", { name: "Ich habe sie gesichert" }).click();
     await expect(fremd.getByText("TOTP ist eingerichtet.")).toBeVisible();
 
+    await menueOeffnen(fremd);
     await fremd.getByRole("button", { name: "Abmelden" }).click();
     await anmelden(fremd, email);
     await expect(fremd.getByRole("heading", { level: 1, name: "Zweiter Schritt" })).toBeVisible();
@@ -98,6 +101,7 @@ test("TOTP einrichten, Backup-Codes herunterladen und mit dem Code anmelden", as
     await expect(fremd.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
 
     // Ohne App: ein Backup-Code, genau einmal
+    await menueOeffnen(fremd);
     await fremd.getByRole("button", { name: "Abmelden" }).click();
     await anmelden(fremd, email);
     await fremd.getByRole("button", { name: "Stattdessen einen Backup-Code verwenden" }).click();
@@ -151,11 +155,13 @@ test("Pflicht zum zweiten Faktor: Einrichtung mit Passkey, danach Anmeldung mit 
     await fremd.getByRole("button", { name: "Passkey hinzufügen" }).click();
     // Belegt meldet gleich mit dem neuen Passkey an; danach erscheint die Seite, die er aufgerufen hatte
     await expect(fremd.getByRole("heading", { level: 1, name: "Archiv" })).toBeVisible();
+    await menueOeffnen(fremd);
     await fremd.getByRole("link", { name: "Konto" }).click();
     await expect(fremd.getByText("Virtueller Schlüssel")).toBeVisible();
     await expect(fremd.getByText("ist ein zweiter Faktor Pflicht")).toHaveCount(0);
 
     // Mit nur einem Passkey gilt das Passwort allein nicht mehr
+    await menueOeffnen(fremd);
     await fremd.getByRole("button", { name: "Abmelden" }).click();
     await anmelden(fremd, email);
     await expect(fremd.getByRole("alert")).toContainText("mit seinem Passkey");

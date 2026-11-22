@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 import { INHABER_EMAIL, INHABER_PASSWORT } from "./zugang.ts";
 
 /*
@@ -178,6 +179,7 @@ test.describe("ohne Sitzung", () => {
     await expect(page.getByRole("list", { name: "Geteilte Dateien" })).toContainText(name);
 
     // Nicht aufgenommen und abgemeldet: Danach liegt nichts mehr im Browser außer der Hinweisseite
+    await menueOeffnen(page);
     await page.getByRole("button", { name: "Abmelden" }).click();
     await expect(page).toHaveURL(/\/anmelden$/);
     expect((await gecacht(page)).every((u) => u.endsWith("/offline.html"))).toBe(true);

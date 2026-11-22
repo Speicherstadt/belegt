@@ -1,11 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 
 test("eine unbekannte Adresse zeigt die Meldung in der Shell, der Knopf führt ins Archiv", async ({ page }) => {
   await page.goto("/gibt-es-nicht");
   await expect(page.getByRole("heading", { level: 1, name: "Diese Seite gibt es nicht." })).toBeVisible();
   await expect(page.getByText("Deine Dokumente sind nicht betroffen.")).toBeVisible();
   // Die Seitenleiste bleibt: Die Shell umschließt die Meldung
+  await menueOeffnen(page);
   await expect(page.getByRole("navigation").first()).toBeVisible();
   const ergebnis = await new AxeBuilder({ page }).analyze();
   expect(ergebnis.violations).toEqual([]);
@@ -40,6 +42,7 @@ test("antwortet /api/ich nicht, steht eine Meldung statt „Lädt …“, und �
   kaputt = false;
   await page.getByRole("button", { name: "Erneut versuchen" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Der Server antwortet gerade nicht." })).toBeHidden();
+  await menueOeffnen(page);
   await expect(page.getByRole("navigation").first()).toBeVisible();
 });
 

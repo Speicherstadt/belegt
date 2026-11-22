@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { menueOeffnen } from "./menue.ts";
 
 const axe = (page: import("@playwright/test").Page) =>
   new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
@@ -35,15 +36,19 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
   await expect(
     page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
   ).toHaveValue("");
+  await menueOeffnen(page);
   const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
   if (info.project.name === "handy") await nav.scrollIntoViewIfNeeded();
+  await menueOeffnen(page);
   await nav.getByRole("link", { name: ansicht }).click();
   await expect(
     page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }),
   ).toHaveValue(name);
   await expect(page.getByLabel("Sortierung")).toHaveValue("alt");
   await expect(page.getByRole("button", { name: "Im Eingang", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: ansicht })).toHaveAttribute("aria-current", "page");
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: "Archiv", exact: true })).not.toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("link", { name })).toBeVisible();
 
@@ -58,7 +63,9 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
   await page.getByRole("button", { name: `Ansicht „${ansicht}“ umbenennen` }).click();
   await page.getByRole("textbox", { name: "Name der Ansicht" }).fill(`${ansicht} neu`);
   await page.getByRole("button", { name: "Speichern", exact: true }).click();
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: `${ansicht} neu` })).toBeVisible();
   await page.getByRole("button", { name: `Ansicht „${ansicht} neu“ löschen` }).click();
+  await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: `${ansicht} neu` })).toHaveCount(0);
 });

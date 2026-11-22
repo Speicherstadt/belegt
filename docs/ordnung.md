@@ -11,6 +11,10 @@ Dokumenttypen und eigenen Feldern. Das sind Metadaten, nicht das Original: Sie l
 Zeitpunkt im Audit-Log und im Verlauf des Dokuments. Anlegen darf nur der Inhaber, zuweisen auch
 [Mitarbeiter](zugaenge.md#mitarbeiter) mit dem Recht „bearbeiten“ in ihrem Sichtbereich; Steuerberatung und Prüfer sehen sie. Verwaltet werden sie auf der Seite Ordnung.
 
+
+Die Seite Ordnung hat vier Reiter: Korrespondenten, Tags, Dokumenttypen und eigene Felder. Der Reiter steht in der
+Adresse (`?bereich=tags`), ein Feld filtert die Liste nach Namen.
+
 ## Korrespondenten
 
 Ein Korrespondent ist, von wem ein Dokument kommt oder an wen es geht, etwa „Stadtwerke“; jedes Dokument hat höchstens
@@ -123,7 +127,7 @@ Tage, nicht die am Tag des Speicherns. Die Liste zeigt Korrespondent, Tags und D
 zeigt alle seine Dokumente. Die Suche findet die Namen von Korrespondent, Tags und Dokumenttyp und die Werte der
 Felder vom Typ Text, Auswahl und Link.
 
-Sortiert wird nach Eingang (neueste oder älteste zuerst), Titel, Tag der Entstehung oder Fristende. Suche, Filter,
+Sortiert wird nach Eingang (neueste oder älteste zuerst), Titel, Tag der Entstehung oder Fristende, über die Auswahl „Sortierung“ oder in der Liste per Klick auf die Spaltenköpfe Name, Aufbewahrung und Eingang (ein zweiter Klick auf Eingang kehrt die Reihenfolge um). Suche, Filter,
 Sortierung, Liste oder Kacheln und die Zahl je Seite stehen in der Adresse des Archivs; so lässt sich jede Ansicht als
 Link weitergeben oder als Lesezeichen ablegen.
 

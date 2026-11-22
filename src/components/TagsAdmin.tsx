@@ -128,7 +128,7 @@ function TagZeile({ tag, schreiben }: { tag: Tag; schreiben: boolean }) {
 }
 
 /** Tags: Liste mit Anzahl der Dokumente, anlegen, ändern und löschen (löschen entfernt nur die Zuordnungen) */
-export function TagsAdmin({ schreiben }: { schreiben: boolean }) {
+export function TagsAdmin({ schreiben, filter = "" }: { schreiben: boolean; filter?: string }) {
   const queryClient = useQueryClient();
   const liste = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const anlegen = useMutation({ mutationFn: api.tagAnlegen, onSuccess: () => queryClient.invalidateQueries() });
@@ -151,9 +151,11 @@ export function TagsAdmin({ schreiben }: { schreiben: boolean }) {
       <p className="m-0 text-muted text-sm">{m.order_tags_intro()}</p>
       {liste.data?.length === 0 && <p className="m-0 text-sm">{m.order_tags_none()}</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {liste.data?.map((t) => (
-          <TagZeile key={t.id} tag={t} schreiben={schreiben} />
-        ))}
+        {liste.data
+          ?.filter((t) => t.name.toLowerCase().includes(filter.trim().toLowerCase()))
+          .map((t) => (
+            <TagZeile key={t.id} tag={t} schreiben={schreiben} />
+          ))}
       </ul>
       {schreiben && (
         <form

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import type { Sortierung } from "../../shared/archivansicht.ts";
 import { dateiUrl, type Eintrag } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
@@ -25,6 +26,46 @@ export interface Auswahl {
   alleUmschalten: () => void;
 }
 
+/**
+ * Kopf einer sortierbaren Spalte: ein Knopf, der nach dieser Spalte sortiert, bei Eingang zwischen neu und alt wechselnd;
+ * aria-sort sagt Screenreadern, wonach die Liste gerade sortiert ist. Ohne sortieren ein schlichter Kopf
+ */
+function SortKopf({
+  label,
+  auf,
+  ab,
+  rechts,
+  sortierung,
+  sortieren,
+}: {
+  label: string;
+  auf: Sortierung;
+  ab?: Sortierung;
+  rechts: boolean;
+  sortierung?: Sortierung;
+  sortieren?: (s: Sortierung) => void;
+}) {
+  const aktiv = sortierung === auf || (!!ab && sortierung === ab);
+  // „neu“ heißt absteigend, alles andere aufsteigend (Titel A–Z, Frist die nächste zuerst)
+  const richtung = !aktiv ? "none" : sortierung === "neu" ? "descending" : "ascending";
+  const klasse = `px-3 py-2.5 font-medium ${rechts ? "text-right" : ""}`;
+  if (!sortieren) return <th className={klasse}>{label}</th>;
+  return (
+    <th className={klasse} aria-sort={richtung}>
+      <button
+        type="button"
+        onClick={() => sortieren(aktiv && ab ? (sortierung === auf ? ab : auf) : auf)}
+        className="inline-flex items-center gap-1 rounded hover:text-fg"
+      >
+        {label}
+        <span aria-hidden="true" className={aktiv ? "text-fg" : "opacity-40"}>
+          {richtung === "descending" ? "↓" : richtung === "ascending" ? "↑" : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 /** Text mit markierten Suchtreffern */
 function Markiert({ text, suche }: { text: string; suche: string }) {
   return (
@@ -40,6 +81,28 @@ function Markiert({ text, suche }: { text: string; suche: string }) {
         ),
       )}
     </>
+  );
+}
+
+/**
+ * Ausschnitt aus dem Text, in dem eine Suche trifft (vom Server, Treffer zwischen \u0002 und \u0003): zeigt, warum ein
+ * Dokument gefunden wurde, auch wenn das Wort nicht im Namen steht
+ */
+function Ausschnitt({ text }: { text: string | null }) {
+  if (!text) return null;
+  return (
+    <span className="mt-1 line-clamp-3 font-normal text-muted text-xs">
+      {text.split("\u0002").map((teil, i) => {
+        const [treffer, rest] = i === 0 ? ["", teil] : (teil.split("\u0003") as [string, string?]);
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: die Stücke eines Texts haben keine eigene ID, ihre Folge ist fest
+          <span key={i}>
+            {treffer && <mark className="rounded bg-yellow-200 px-0.5 text-fg dark:bg-yellow-700/60">{treffer}</mark>}
+            {rest}
+          </span>
+        );
+      })}
+    </span>
   );
 }
 
@@ -63,11 +126,19 @@ export function DocumentTable({
   eintraege,
   auswahl,
   suche = "",
+  sortierung,
+  sortieren,
 }: {
   eintraege: Eintrag[];
   auswahl: Auswahl;
   suche?: string;
+  /** Mit sortieren lassen sich Name, Aufbewahrung und Eingang per Klick auf den Spaltenkopf sortieren */
+  sortierung?: Sortierung;
+  sortieren?: (s: Sortierung) => void;
 }) {
+  const kopf = (label: string, auf: Sortierung, ab?: Sortierung, rechts = false) => (
+    <SortKopf label={label} auf={auf} ab={ab} rechts={rechts} sortierung={sortierung} sortieren={sortieren} />
+  );
   return (
     // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
     <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
@@ -89,11 +160,11 @@ export function DocumentTable({
             <th className="w-14 px-1 py-2.5">
               <span className="sr-only">{m.col_thumbnail()}</span>
             </th>
-            <th className="px-3 py-2.5 font-medium">{m.col_name()}</th>
-            <th className="px-3 py-2.5 font-medium">{m.col_retention()}</th>
+            {kopf(m.col_name(), "titel")}
+            {kopf(m.col_retention(), "frist")}
             <th className="px-3 py-2.5 font-medium">{m.col_type()}</th>
             <th className="px-3 py-2.5 text-right font-medium">{m.col_size()}</th>
-            <th className="px-3 py-2.5 text-right font-medium">{m.col_received()}</th>
+            {kopf(m.col_received(), "neu", "alt", true)}
           </tr>
         </thead>
         <tbody>
@@ -119,6 +190,7 @@ export function DocumentTable({
                   <Markiert text={name(d)} suche={suche} />
                 </Link>
                 <Ordnungszeile d={d} />
+                <Ausschnitt text={d.ausschnitt} />
               </td>
               <td className="px-3 py-3">{aufbewahrung(d)}</td>
               <td className="px-3 py-3 text-muted">{d.mimeType}</td>
@@ -203,6 +275,7 @@ export function DocumentGrid({
               >
                 <Markiert text={name(d)} suche={suche} />
               </Link>
+              {!kompakt && <Ausschnitt text={d.ausschnitt} />}
               <span className="text-muted text-xs tabular-nums">
                 {d.dokumenttyp ? `${d.dokumenttyp.name} · ` : ""}
                 {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
