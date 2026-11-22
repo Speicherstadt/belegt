@@ -1,10 +1,11 @@
 import { trennblattUrl } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
+import { verwaltungsKarte } from "./Ausklappbar.tsx";
 
 /** Scannen: Trennblatt zum Ausdrucken, an dem Belegt einen gescannten Stapel teilt */
 export function Scanning() {
   return (
-    <section aria-labelledby="scannen" className="flex flex-col gap-3">
+    <section aria-labelledby="scannen" className={verwaltungsKarte}>
       <h2 id="scannen" className="m-0 font-semibold text-base">
         {m.scan_title()}
       </h2>

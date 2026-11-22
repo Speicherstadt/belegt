@@ -4,6 +4,7 @@ import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { MailboxAction } from "./MailboxAction.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -22,6 +23,7 @@ export function Mailboxes() {
   const [art, setArt] = useState<"imap" | "jmap">("imap");
   const anbieter = useQuery({ queryKey: ["oauth"], queryFn: api.oauthAnbieter, enabled: ich.data?.role === "inhaber" });
   // Rückkehr vom Anbieter: /quellen?oauth=verbunden|abgelehnt|abgelaufen|fehler
+  const [offen, setOffen] = useState(false);
   const oauthErgebnis = new URLSearchParams(window.location.search).get("oauth");
 
   function absenden(e: FormEvent<HTMLFormElement>) {
@@ -39,12 +41,17 @@ export function Mailboxes() {
         ordner: String(f.get("ordner")),
         art,
       },
-      { onSuccess: () => form.reset() },
+      {
+        onSuccess: () => {
+          form.reset();
+          setOffen(false);
+        },
+      },
     );
   }
 
   return (
-    <section aria-labelledby="postfaecher" className="flex flex-col gap-3">
+    <section aria-labelledby="postfaecher" className={verwaltungsKarte}>
       <h2 id="postfaecher" className="m-0 font-semibold text-base">
         {m.mailboxes_title()}
       </h2>
@@ -108,58 +115,60 @@ export function Mailboxes() {
         </div>
       )}
       {schreiben && (
-        <form
-          onSubmit={absenden}
-          className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] items-end gap-3 rounded-lg border border-border p-3"
-        >
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_name()}
-            <input name="name" required className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_kind()}
-            <select value={art} onChange={(e) => setArt(e.target.value as typeof art)} className={feld}>
-              <option value="imap">IMAP</option>
-              <option value="jmap">JMAP</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_host()}
-            <input name="host" required className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_port()}
-            <input
-              key={art}
-              name="port"
-              type="number"
-              required
-              min={1}
-              max={65535}
-              defaultValue={art === "jmap" ? 443 : 993}
-              className={feld}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_user()}
-            <input name="benutzer" required autoComplete="off" className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_password()}
-            <input name="passwort" type="password" required autoComplete="new-password" className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.mailboxes_folder()}
-            <input name="ordner" required defaultValue="INBOX" className={feld} />
-          </label>
-          <label className="flex h-9 items-center gap-2 font-medium text-sm">
-            <input name="tls" type="checkbox" defaultChecked className="size-4" />
-            {m.mailboxes_tls()}
-          </label>
-          <button type="submit" className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm">
-            {m.mailboxes_create()}
-          </button>
-        </form>
+        <Ausklappbar label={m.mailboxes_create()} offen={offen} setOffen={setOffen}>
+          <form onSubmit={absenden} className="grid items-end gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_name()}
+              <input name="name" required className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_kind()}
+              <select value={art} onChange={(e) => setArt(e.target.value as typeof art)} className={feld}>
+                <option value="imap">IMAP</option>
+                <option value="jmap">JMAP</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_host()}
+              <input name="host" required className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_port()}
+              <input
+                key={art}
+                name="port"
+                type="number"
+                required
+                min={1}
+                max={65535}
+                defaultValue={art === "jmap" ? 443 : 993}
+                className={feld}
+              />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_user()}
+              <input name="benutzer" required autoComplete="off" className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_password()}
+              <input name="passwort" type="password" required autoComplete="new-password" className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.mailboxes_folder()}
+              <input name="ordner" required defaultValue="INBOX" className={feld} />
+            </label>
+            <label className="flex h-9 items-center gap-2 font-medium text-sm">
+              <input name="tls" type="checkbox" defaultChecked className="size-4" />
+              {m.mailboxes_tls()}
+            </label>
+            <button
+              type="submit"
+              className="col-span-full h-9 justify-self-start rounded-md bg-primary px-4 font-medium text-onprimary text-sm"
+            >
+              {m.mailboxes_create()}
+            </button>
+          </form>
+        </Ausklappbar>
       )}
       {(anlegen.error ?? abrufen.error) && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">

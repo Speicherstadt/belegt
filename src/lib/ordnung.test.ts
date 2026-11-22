@@ -15,4 +15,16 @@ describe("filterParameter", () => {
     expect(p.get(`feld.${summe.id}.von`)).toBe("10000");
     expect(p.get(`feld.${summe.id}.bis`)).toBe("123450");
   });
+
+  it("macht aus dem Zeitraum feste Grenzen für die gewählte Art", () => {
+    const eigen = filterParameter(
+      { ...LEERER_FILTER, datumArt: "eingegangen", zeitraum: "eigen", datumVon: "2026-01-01", datumBis: "" },
+      [],
+    );
+    expect(eigen).toBe("&eingegangenVon=2026-01-01");
+    const jahr = new Date().getFullYear();
+    expect(filterParameter({ ...LEERER_FILTER, zeitraum: "vorjahr" }, [])).toBe(
+      `&entstandenVon=${jahr - 1}-01-01&entstandenBis=${jahr - 1}-12-31`,
+    );
+  });
 });

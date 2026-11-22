@@ -81,3 +81,30 @@ describe("Ansicht des Archivs als URL", () => {
     expect(parameterNormalisieren({ suche: " a ", fremd: "x", seite: "3" })).toEqual({ suche: "a" });
   });
 });
+
+describe("Datumsfilter in der Ansicht", () => {
+  it("hält Art, Schnellwahl und eigenen Zeitraum in der Adresse", () => {
+    const ansicht = {
+      ...LEERE_ANSICHT,
+      datumArt: "eingegangen" as const,
+      zeitraum: "eigen" as const,
+      datumVon: "2026-01-01",
+      datumBis: "2026-01-31",
+    };
+    const parameter = ansichtZuParametern(ansicht);
+    expect(parameter).toEqual({
+      datum: "eingegangen",
+      zeitraum: "eigen",
+      datumVon: "2026-01-01",
+      datumBis: "2026-01-31",
+    });
+    expect(ansichtAus(parameter)).toEqual(ansicht);
+  });
+
+  it("speichert bei einer Schnellwahl keine festen Tage und verwirft Ungültiges", () => {
+    expect(ansichtZuParametern({ ...LEERE_ANSICHT, zeitraum: "30t", datumVon: "2026-01-01" })).toEqual({
+      zeitraum: "30t",
+    });
+    expect(ansichtAus({ zeitraum: "irgendwann", datum: "morgen", datumVon: "kaputt" })).toEqual(LEERE_ANSICHT);
+  });
+});

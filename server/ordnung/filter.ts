@@ -26,7 +26,14 @@ export interface OrdnungFilter {
   /** ID eines Korrespondenten oder „ohne“ für Dokumente ohne */
   korrespondent?: string;
   felder?: FeldFilter[];
+  /** Tag der Entstehung (wie die Sortierung „entstanden“) und Tag des Eingangs in Berlin, je JJJJ-MM-TT, Grenzen eingeschlossen */
+  entstandenVon?: string;
+  entstandenBis?: string;
+  eingegangenVon?: string;
+  eingegangenBis?: string;
 }
+
+const DATUMSGRENZEN = ["entstandenVon", "entstandenBis", "eingegangenVon", "eingegangenBis"] as const;
 
 const Id = z.uuid();
 
@@ -34,6 +41,7 @@ const Id = z.uuid();
  * Liest den Filter aus den Parametern einer Anfrage: tag (mehrfach), tagModus (alle oder einer), dokumenttyp,
  * korrespondent (ID oder „ohne“), feld.<id>=gesetzt,
  * feld.<id>.enthaelt, feld.<id>.von und feld.<id>.bis (Betrag in Cent oder „1.234,56“, Datum JJJJ-MM-TT, Zahl).
+ * entstandenVon, entstandenBis, eingegangenVon und eingegangenBis (JJJJ-MM-TT; von nach bis ist ein Fehler).
  * Unbekannte Felder und unpassende Werte sind ein Fehler (null), kein stilles Ignorieren.
  */
 export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): OrdnungFilter | null {
@@ -45,6 +53,16 @@ export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): 
   if (typ !== undefined && typ !== "ohne" && !Id.safeParse(typ).success) return null;
   const korrespondent = parameter.korrespondent?.[0];
   if (korrespondent !== undefined && korrespondent !== "ohne" && !Id.safeParse(korrespondent).success) return null;
+  const daten: Partial<Record<(typeof DATUMSGRENZEN)[number], string>> = {};
+  for (const name of DATUMSGRENZEN) {
+    const wert = parameter[name]?.[0];
+    if (wert === undefined || wert === "") continue;
+    const datum = Datum.safeParse(wert);
+    if (!datum.success) return null;
+    daten[name] = datum.data;
+  }
+  if (daten.entstandenVon && daten.entstandenBis && daten.entstandenVon > daten.entstandenBis) return null;
+  if (daten.eingegangenVon && daten.eingegangenBis && daten.eingegangenVon > daten.eingegangenBis) return null;
   const jeFeld = new Map<string, FeldFilter>();
   const jeId = new Map(felder.map((f) => [f.id, f]));
   for (const [schluessel, werte] of Object.entries(parameter)) {
@@ -73,6 +91,7 @@ export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): 
     ...(typ ? { dokumenttyp: typ } : {}),
     ...(korrespondent ? { korrespondent } : {}),
     ...(jeFeld.size ? { felder: [...jeFeld.values()] } : {}),
+    ...daten,
   };
 }
 
@@ -121,5 +140,10 @@ export function filterBedingung(f: OrdnungFilter | undefined): SQL {
     }
     teile.push(sql`exists (select 1 from feldwerte fw where ${sql.join(bedingungen, sql` and `)})`);
   }
+  if (f?.entstandenVon) teile.push(sql`belegt_dokument_tag(d.id) >= ${f.entstandenVon}::date`);
+  if (f?.entstandenBis) teile.push(sql`belegt_dokument_tag(d.id) <= ${f.entstandenBis}::date`);
+  const eingang = sql`(d.eingegangen_am at time zone 'Europe/Berlin')::date`;
+  if (f?.eingegangenVon) teile.push(sql`${eingang} >= ${f.eingegangenVon}::date`);
+  if (f?.eingegangenBis) teile.push(sql`${eingang} <= ${f.eingegangenBis}::date`);
   return teile.length ? sql.join(teile, sql` and `) : sql`true`;
 }
