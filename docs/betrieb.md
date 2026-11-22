@@ -194,7 +194,7 @@ Unter **Benachrichtigungen** (nur der Inhaber) schaltest du jeden Anlass an oder
 | Postfach | seit X Tagen nicht erfolgreich abgerufen, oder eine [Aktion im Postfach](eingang.md#nach-dem-abholen) fehlgeschlagen | an, 1 Tag |
 | Kette | die [tägliche Prüfung](pruefung.md#taegliche-pruefung) von Kette, Kopf und Siegeln meldet Befunde | an |
 | Löschung | ein Antrag wartet auf die zweite Person; geht an Inhaber und Steuerberatung außer dem Antragsteller | an |
-| Fristen | wöchentlich: Fristen, die in den nächsten 30 Tagen enden | an |
+| Fristen | wöchentlich: Fristen, die in den nächsten 30 Tagen enden, getrennt nach gesetzlichen (danach löschbar) und freiwilligen wie Garantie oder Kündigung (eine Erinnerung, noch etwas zu tun) | an |
 | Eingang | mehr als N Dokumente warten auf ihre Einordnung | aus, 50 |
 | Workflows | Läufe sind fehlgeschlagen oder Belegt hat das [Senden eines Originals](workflows.md#original-an-adresse-senden) aufgegeben, mit den Namen der Workflows | an |
 

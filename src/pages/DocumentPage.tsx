@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams, useRouter, useSearch } from "@tanstack/react-router";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useMemo } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
 import { Classification } from "../components/Classification.tsx";
 import { Deletion } from "../components/Deletion.tsx";
@@ -17,7 +17,7 @@ import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { SealBadge } from "../components/SealBadge.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
-import { ansichtUrl, api, archivfassungUrl, dateiUrl } from "../lib/api.ts";
+import { ansichtUrl, api, archivfassungUrl, dateiUrl, nachweisUrl } from "../lib/api.ts";
 import { listeLesen, nachbarn } from "../lib/blaettern.ts";
 import { m } from "../paraglide/messages.js";
 
@@ -45,7 +45,9 @@ const knopf = "flex h-9 items-center rounded-md border border-border px-3 font-m
  */
 export function DocumentPage() {
   const { id } = useParams({ from: "/app/dokumente/$id" });
-  const search = useSearch({ strict: false }) as { reiter?: string };
+  const search = useSearch({ strict: false }) as { reiter?: string; schnell?: string };
+  // Schnellmodus des Eingangs: bleibt beim Blättern, endet im leeren Eingang
+  const schnell = search.schnell === "1";
   const navigate = useNavigate();
   const router = useRouter();
   const reiter: Reiter = REITER.includes(search.reiter as Reiter) ? (search.reiter as Reiter) : "einordnung";
@@ -55,8 +57,12 @@ export function DocumentPage() {
   const { vorher, weiter, stelle, anzahl } = nachbarn(liste, id);
   // Zurück in die Liste, aus der man kam; sonst ins Archiv
   const zurueck = anzahl && liste ? liste.zurueck : "/archiv";
-  const oeffnen = (ziel: string) =>
-    void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: reiter === "einordnung" ? {} : { reiter } });
+  // Was beim Blättern in der Adresse bleibt: der Reiter und der Schnellmodus
+  const folge = useMemo(
+    () => ({ ...(reiter === "einordnung" ? {} : { reiter }), ...(schnell ? { schnell: "1" } : {}) }),
+    [reiter, schnell],
+  );
+  const oeffnen = (ziel: string) => void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: folge });
 
   useEffect(() => {
     function taste(e: KeyboardEvent) {
@@ -64,11 +70,11 @@ export function DocumentPage() {
       const ziel = e.key === "ArrowLeft" ? vorher : e.key === "ArrowRight" ? weiter : null;
       if (!ziel) return;
       e.preventDefault();
-      void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: reiter === "einordnung" ? {} : { reiter } });
+      void navigate({ to: "/dokumente/$id", params: { id: ziel }, search: folge });
     }
     window.addEventListener("keydown", taste);
     return () => window.removeEventListener("keydown", taste);
-  }, [vorher, weiter, reiter, navigate]);
+  }, [vorher, weiter, folge, navigate]);
 
   if (dok.error) return <EmptyState title={m.doc_not_found()} text="" />;
   if (!dok.data) return <p className="text-muted text-sm">{m.loading()}</p>;
@@ -100,7 +106,14 @@ export function DocumentPage() {
             eingang={d.eingegangenAm}
             dokumenttyp={d.dokumenttyp}
             korrespondent={d.korrespondent}
-            weiter={offen && weiter ? () => oeffnen(weiter) : undefined}
+            weiter={
+              offen && weiter
+                ? () => oeffnen(weiter)
+                : offen && schnell
+                  ? () => void navigate({ to: "/eingang" })
+                  : undefined
+            }
+            schnell={schnell && offen}
           />
         )}
         <DocumentOrdnung
@@ -183,6 +196,9 @@ export function DocumentPage() {
               {m.doc_download_searchable()}
             </a>
           )}
+          <a href={nachweisUrl(d.id)} className={knopf} title={m.doc_proof_pdf_hint()}>
+            {m.doc_proof_pdf()}
+          </a>
           <OpenWith dokumentId={d.id} mimeType={d.mimeType} />
         </div>
       )}

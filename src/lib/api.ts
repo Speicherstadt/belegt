@@ -56,6 +56,7 @@ export {
   archivfassungUrl,
   dateiUrl,
   exportUrl,
+  nachweisUrl,
   PRO_SEITE,
   seiteUrl,
   trennblattUrl,

@@ -27,6 +27,8 @@ import {
   zurueckziehen as loeschungZurueckziehen,
   regelVerletzt,
 } from "../loeschung/loeschung.ts";
+import { nachweisZu } from "../nachweis/nachweis.ts";
+import { nachweisPdf } from "../nachweis/nachweis-pdf.ts";
 import { filterAus } from "../ordnung/filter.ts";
 import { felderListen } from "../ordnung/ordnung.ts";
 import { ordnungZu } from "../ordnung/zuordnung.ts";
@@ -36,6 +38,12 @@ import { vorschaubildZu } from "../vorschaubild/vorschaubild.ts";
 import { istSichtbereichsFehler, sichtVon } from "../zugang/sicht.ts";
 
 import { ANSICHT, type App, type AppUmgebung, akteur, dateinameKodiert, heute, Id, MAX_UPLOAD } from "./gemeinsam.ts";
+
+/** Wie beim Verlauf: Prüfer sehen keine Notizen, Mitarbeiter nur Ableitungen in ihrer Sicht */
+const nachweisSicht = (n: Parameters<typeof sichtVon>[0] & { zeitraum?: unknown }) => ({
+  notizen: !n.zeitraum,
+  sicht: sichtVon(n),
+});
 
 /** Nummer einer Seite der Liste, ab 1 */
 const Seite = z
@@ -332,6 +340,23 @@ export function dokumenteRouten(app: App, umgebung: AppUmgebung) {
     // das Ergebnis des KoSIT-Validators für eine E-Rechnung, null ohne (server/erechnung/pruefung.ts)
     const inhalt = await inhaltZu(umgebung.db, dokument.id);
     return c.json(inhalt && { ...inhalt, pruefung: await pruefungZu(umgebung.db, dokument.id) });
+  });
+
+  // Nachweis über das Original (docs/pruefung.md#nachweis): JSON für Programme, PDF für Menschen
+  app.get("/api/dokumente/:id/nachweis", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const n = id.success ? await nachweisZu(umgebung.db, id.data, nachweisSicht(c.get("nutzer"))) : null;
+    return n ? c.json(n) : c.json({ fehler: "Nicht gefunden" }, 404);
+  });
+
+  app.get("/api/dokumente/:id/nachweis.pdf", async (c) => {
+    const id = Id.safeParse(c.req.param("id"));
+    const n = id.success ? await nachweisZu(umgebung.db, id.data, nachweisSicht(c.get("nutzer"))) : null;
+    if (!n) return c.json({ fehler: "Nicht gefunden" }, 404);
+    return c.body(Buffer.from(await nachweisPdf(n)), 200, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="nachweis-asn-${n.dokument.asn}.pdf"`,
+    });
   });
 
   app.get("/api/dokumente/:id/verlauf", async (c) => {

@@ -161,30 +161,40 @@ async function loeschung(db: Datenbank): Promise<Meldung[]> {
   });
 }
 
-/** Wöchentlich: Fristen, die in den nächsten 30 Tagen enden; Zustand ist die Kalenderwoche */
+/**
+ * Wöchentlich: Fristen, die in den nächsten 30 Tagen enden; Zustand ist die Kalenderwoche. Gesetzliche Fristen enden
+ * zum Löschen hin, freiwillige (etwa Garantie oder Kündigung) sind eine Erinnerung; die Mail nennt beide getrennt
+ */
 async function fristen(db: Datenbank, { heute }: Lage): Promise<Meldung[]> {
-  const zeilen = await db.execute<{ asn: number; gesamt: string }>(sql`
-    with f as (
-      select a.nummer as asn from dokumente d
-        join archivnummern a on a.dokument_id = d.id
-        join lateral (select x.frist_bis from einordnungen x where x.dokument_id = d.id
-                       order by x.erstellt_am desc, x.id desc limit 1) e on true
-       where not ${geloescht} and e.frist_bis between ${heute}::date and ${heute}::date + 30
-    ) select asn, count(*) over () as gesamt from f order by asn limit 20`);
-  const gesamt = Number(zeilen[0]?.gesamt ?? 0);
+  const zeilen = await db.execute<{ asn: number; freiwillig: boolean }>(sql`
+    select a.nummer as asn, e.art = 'freiwillig' as freiwillig from dokumente d
+      join archivnummern a on a.dokument_id = d.id
+      join lateral (select x.frist_bis, x.art from einordnungen x where x.dokument_id = d.id
+                     order by x.erstellt_am desc, x.id desc limit 1) e on true
+     where not ${geloescht} and e.frist_bis between ${heute}::date and ${heute}::date + 30
+     order by a.nummer`);
+  const gesamt = zeilen.length;
   if (!gesamt) return [];
   const woche = await db.execute<{ woche: string }>(sql`select to_char(${heute}::date, 'IYYY-IW') as woche`);
+  const gesetzlich = zeilen.filter((z) => !z.freiwillig).map((z) => Number(z.asn));
+  const freiwillig = zeilen.filter((z) => z.freiwillig).map((z) => Number(z.asn));
+  const liste = (asns: number[]) => asnListe(asns.slice(0, 20), asns.length);
   return [
     {
       anlass: "fristen",
       zustand: `woche:${woche[0]!.woche}`,
       betreff: `Belegt: ${gesamt} Frist${gesamt > 1 ? "en enden" : " endet"} in den nächsten 30 Tagen`,
       zeilen: [
-        `In den nächsten 30 Tagen ${gesamt > 1 ? "enden die Fristen" : "endet die Frist"} von ${gesamt} Dokument${gesamt > 1 ? "en" : ""}: ${asnListe(
-          zeilen.map((z) => Number(z.asn)),
-          gesamt,
-        )}.`,
-        "Danach lassen sie sich löschen; gelöscht wird nur auf Antrag.",
+        ...(gesetzlich.length
+          ? [
+              `Gesetzliche Frist: ${gesetzlich.length} Dokument${gesetzlich.length > 1 ? "e" : ""}, ${liste(gesetzlich)}. Danach lassen sie sich löschen; gelöscht wird nur auf Antrag.`,
+            ]
+          : []),
+        ...(freiwillig.length
+          ? [
+              `Freiwillige Frist, etwa Garantie oder Kündigung: ${freiwillig.length} Dokument${freiwillig.length > 1 ? "e" : ""}, ${liste(freiwillig)}. Jetzt ist die Zeit, noch etwas zu tun.`,
+            ]
+          : []),
       ],
       pfad: "/fristen",
       abstandStunden: 24 * 7,

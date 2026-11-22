@@ -30,6 +30,9 @@ Das gilt für alle, die hochladen dürfen.
 
 ## Startseite
 
+Ist das Archiv noch leer, zeigt die Startseite dem Inhaber „Erste Schritte“: hochladen, Postfach verbinden, aus
+Paperless-ngx übernehmen und Belegt als App aufs Handy legen.
+
 Ganz oben stehen die gespeicherten Ansichten, die du für die Startseite gewählt hast: je Ansicht die Zahl der Treffer
 und die ersten fünf Dokumente mit Vorschaubild, Korrespondent, Eingang und Tags. In der Seitenleiste steht die Zahl
 der Treffer neben jeder gespeicherten Ansicht.
@@ -48,6 +51,12 @@ dieselbe Startseite; der Prüfer nur die Zahlen seines Zeitraums und die Kette, 
 Quellen und Speicher; ein [Mitarbeiter](zugaenge.md#mitarbeiter) nur die Zahlen seines Sichtbereichs. Der Eingang selbst liegt unter `/eingang`.
 
 ![Startseite mit Zahlen zu Eingang, Archiv, Löschanträgen, Sperren und Speicher, Fristen der nächsten 90 Tage, Quellen, Unveränderbarkeit und einer Kachel aus einer gespeicherten Ansicht](assets/screenshot-start.png)
+
+## Schnell einordnen
+
+„Schnell einordnen“ im Eingang öffnet das erste Dokument im Schnellmodus: Die Tasten 1 bis 7 wählen die Art (in der
+Reihenfolge der Auswahl), Enter ordnet ein und öffnet das nächste Dokument, ← und → blättern. Titel und Korrespondent
+lassen sich weiter tippen; nach dem letzten Dokument geht es zurück in den leeren Eingang.
 
 ## Archivnummer
 

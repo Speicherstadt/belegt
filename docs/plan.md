@@ -120,6 +120,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Treffer markieren, Vorschau aus der Kachel, Blatt mit Formatkürzel, Glocke mit Stand der Verarbeitung | mittel | erledigt |
 | Bedienung: Seitenzahl auf Kacheln, dritte Darstellung „Kompakt“ | niedrig | erledigt |
 | Bedienung: Handy mit Menü-Leiste, Textausschnitt mit Treffern in der Suche | hoch | erledigt |
+| Abheben: Schnellmodus zum Einordnen mit Tasten, Nachweis über ein Original (PDF und JSON) | hoch | erledigt |
+| Abheben: Erinnerungen an Garantie- und Kündigungsfristen, Teilen vom Handy, Einstieg für Neue | mittel | erledigt |
 | Bedienung: Tabelle per Spaltenkopf sortieren, Spalten wählen; Seite Ordnung als Tabelle mit „zuletzt genutzt“; Seitenleiste einklappen; verschachtelte Tags | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |

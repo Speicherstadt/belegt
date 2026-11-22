@@ -1355,5 +1355,19 @@
   "view_compact": "Kompakt",
   "menu": "Menü",
   "order_tabs_label": "Bereiche der Ordnung",
-  "order_filter": "Nach Namen filtern"
+  "order_filter": "Nach Namen filtern",
+  "quick_mode_start": "Schnell einordnen",
+  "quick_mode_keys": "Schnellmodus: 1 bis 7 wählt die Art, Enter ordnet ein und öffnet das nächste Dokument, ← und → blättern.",
+  "doc_proof_pdf": "Nachweis (PDF)",
+  "doc_proof_pdf_hint": "Belegt, dass dieses Original unverändert vorliegt: Hash, Siegel, Zeitstempel und Verlauf",
+  "first_title": "Erste Schritte",
+  "first_intro": "Das Archiv ist noch leer. So kommen Dokumente hinein:",
+  "first_upload": "Dokumente hochladen",
+  "first_upload_text": "Im Eingang hochladen oder Dateien einfach auf eine beliebige Seite ziehen.",
+  "first_mailbox": "Postfach verbinden",
+  "first_mailbox_text": "Belegt holt Rechnungen und Briefe aus deinem Postfach ab, alle paar Minuten.",
+  "first_paperless": "Aus Paperless-ngx übernehmen",
+  "first_paperless_text": "Dokumente mit Tags, Typen, Feldern und Notizen umziehen, jedes Original gegen seine Prüfsumme geprüft.",
+  "first_app": "Als App aufs Handy",
+  "first_app_text": "Belegt auf den Startbildschirm legen, Belege fotografieren und aus anderen Apps teilen."
 }

@@ -234,6 +234,10 @@ describe.skipIf(!testDatenbankUrl)("Benachrichtigungen gegen Postgres und SMTP",
       expect(alles).not.toContain(inhalt);
     expect(alles).toMatch(/ASN \d+/);
     expect(alles).toContain("http://localhost:3000/fristen");
+    // Eine freiwillige Frist (etwa eine Garantie) ist eine Erinnerung, kein Hinweis aufs Löschen
+    const fristMail = smtp.post.find((m) => m.betreff.includes("Frist"))!.text;
+    expect(fristMail).toContain("Freiwillige Frist, etwa Garantie oder Kündigung");
+    expect(fristMail).not.toContain("Danach lassen sie sich löschen");
     expect(alles).toContain("Stromrechnungen");
     expect(alles).not.toContain(PASSWORT);
 

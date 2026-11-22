@@ -10,7 +10,7 @@ const ERLAUBT = [
   /^\/api\/ich$/,
   /^\/api\/start$/,
   /^\/api\/dokumente$/,
-  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|vorschaubild|ableitungen|aehnliche))?$/,
+  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|nachweis|nachweis\.pdf|vorschaubild|ableitungen|aehnliche))?$/,
   /^\/api\/(tags|dokumenttypen|korrespondenten|felder)$/,
   /^\/api\/export$/,
   /^\/api\/pruefung$/,

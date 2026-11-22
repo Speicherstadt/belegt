@@ -29,6 +29,15 @@ Den Stand dieses Laufs zeigt ein Abzeichen auf der Startseite und im Kopf jedes 
 letzte Lauf höchstens zwei Tage alt ist und nichts gefunden hat; **gelb**, wenn noch keiner lief oder er älter ist;
 **rot** mit der Zahl der Befunde. Ein Klick führt zur Prüfung. Mitarbeiter sehen es nicht, die Prüfung ist nichts für sie.
 
+## Nachweis über ein Original { #nachweis }
+
+**Nachweis (PDF)** auf der Seite eines Dokuments fasst zusammen, was Belegt über dieses Original belegen kann: Dateiname,
+Archivnummer, Eingang mit seiner Nummer im Audit-Log, den SHA-256 des Originals, das Siegel der Zeile, den ersten
+Zeitstempel nach dem Eingang (er geht über den Kopf der Hash-Kette und zeigt, dass das Original spätestens dann so
+vorlag), die letzte Prüfung der Kette und den Verlauf. Gedacht für Streit mit Versicherung, Vermieter oder Finanzamt:
+Wer den SHA-256 einer Datei berechnet und er gleicht dem im Nachweis, hält dasselbe Original in der Hand. Programme
+bekommen dasselbe als JSON unter `GET /api/dokumente/:id/nachweis`.
+
 ## Prüferzugang (Z1)
 
 Unter **[Zugänge](zugaenge.md)** lädst du einen Prüfer mit einem Zeitraum ein, etwa den Prüfungszeitraum aus der Prüfungsanordnung.
