@@ -108,6 +108,11 @@ Dokumenttyp. „Übernehmen“ auf der Seite des Dokuments setzt sie. Die Reihen
 [Eingang](eingang.md#vorschläge). Mit `EINGANG_ORDNER_TAGS=true` werden die Unterordner des
 [Eingangsordners](eingang.md#eingangsordner) zu Tags.
 
+## Direkt im Dokument anlegen
+
+Fehlt ein Tag, Korrespondent oder Dokumenttyp, legt „+ Neu“ unter der Auswahl im Dokument ihn an und setzt ihn gleich;
+die Seite Ordnung braucht es dafür nicht. Farbe und Zuordnungsregel lassen sich später dort ändern.
+
 ## Filter und Suche
 
 Im Archiv filterst du nach Tags (der Knopf „Tags“ öffnet eine durchsuchbare Liste mit der Zahl der Dokumente je Tag; ein zweiter Klick schließt einen Tag aus, „Ohne Tag“ zeigt nur Dokumente ohne Tag; das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach

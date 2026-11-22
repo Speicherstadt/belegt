@@ -1340,5 +1340,9 @@
   "filter_choice_all": "All",
   "filter_tags_without": "No tag",
   "filter_tags_hint": "Click to include, click again to exclude.",
-  "filter_tag_excluded": "excluded"
+  "filter_tag_excluded": "excluded",
+  "quick_create": "New: {was}",
+  "quick_create_name": "Name for new: {was}",
+  "quick_create_submit": "Create and set",
+  "quick_create_tag": "Tag"
 }

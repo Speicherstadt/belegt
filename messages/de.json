@@ -1262,5 +1262,9 @@
   "filter_choice_all": "Alle",
   "filter_tags_without": "Ohne Tag",
   "filter_tags_hint": "Klick wählt, zweiter Klick schließt aus.",
-  "filter_tag_excluded": "ausgeschlossen"
+  "filter_tag_excluded": "ausgeschlossen",
+  "quick_create": "Neu: {was}",
+  "quick_create_name": "Name für neu: {was}",
+  "quick_create_submit": "Anlegen und setzen",
+  "quick_create_tag": "Tag"
 }

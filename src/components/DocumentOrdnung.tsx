@@ -6,6 +6,7 @@ import { feldwertText } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
 import { ausEingabe, FieldInput, feldKlasse } from "./FieldInput.tsx";
 import { PartyChip } from "./PartyChip.tsx";
+import { QuickCreate } from "./QuickCreate.tsx";
 import { TagChip } from "./TagChip.tsx";
 
 /** Bezeichnung eines Feldes; ein Betrag nennt die Währung */
@@ -75,6 +76,15 @@ export function DocumentOrdnung({
         ) : (
           <p className="m-0 text-muted">{m.order_no_tags()}</p>
         )}
+        {schreiben && (
+          <QuickCreate
+            was={m.quick_create_tag()}
+            anlegen={async (name) => {
+              const tag = await api.tagAnlegen({ name, farbe: "grau" });
+              await aendern.mutateAsync({ tagsHinzu: [tag.id] });
+            }}
+          />
+        )}
         {schreiben && frei.length > 0 && (
           <form onSubmit={tagHinzu} className="flex flex-wrap items-end gap-2">
             <label className="flex min-w-0 flex-col gap-1.5 font-medium">
@@ -94,7 +104,7 @@ export function DocumentOrdnung({
         )}
       </div>
       <div className="flex flex-col gap-2 text-sm">
-        {schreiben && korrespondenten.data?.length ? (
+        {schreiben ? (
           <label className="flex flex-col gap-1.5 font-medium">
             {m.order_party()}
             <select
@@ -103,13 +113,22 @@ export function DocumentOrdnung({
               className={feldKlasse}
             >
               <option value="">{m.order_party_none()}</option>
-              {korrespondenten.data.map((k) => (
+              {(korrespondenten.data ?? []).map((k) => (
                 <option key={k.id} value={k.id}>
                   {k.name}
                 </option>
               ))}
             </select>
           </label>
+        ) : null}
+        {schreiben ? (
+          <QuickCreate
+            was={m.order_party()}
+            anlegen={async (name) => {
+              const k = await api.korrespondentAnlegen({ name });
+              await aendern.mutateAsync({ korrespondent: k.id });
+            }}
+          />
         ) : (
           <p className="m-0 flex flex-wrap items-center gap-1.5">
             <span className="text-muted">{m.order_party()}: </span>
@@ -118,7 +137,7 @@ export function DocumentOrdnung({
         )}
       </div>
       <div className="flex flex-col gap-2 text-sm">
-        {schreiben && typen.data?.length ? (
+        {schreiben ? (
           <label className="flex flex-col gap-1.5 font-medium">
             {m.order_doctype()}
             <select
@@ -127,13 +146,22 @@ export function DocumentOrdnung({
               className={feldKlasse}
             >
               <option value="">{m.order_doctype_none()}</option>
-              {typen.data.map((t) => (
+              {(typen.data ?? []).map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
                 </option>
               ))}
             </select>
           </label>
+        ) : null}
+        {schreiben ? (
+          <QuickCreate
+            was={m.order_doctype()}
+            anlegen={async (name) => {
+              const typ = await api.dokumenttypAnlegen({ name, vorgabeArt: null });
+              await aendern.mutateAsync({ dokumenttyp: typ.id });
+            }}
+          />
         ) : (
           <p className="m-0">
             <span className="text-muted">{m.order_doctype()}: </span>
