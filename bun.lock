@@ -6,7 +6,7 @@
       "name": "belegt",
       "dependencies": {
         "@better-auth/passkey": "1.7.25",
-        "@firsttris/gobd-kern": "https://github.com/firsttris/haben/releases/download/gobd-kern-v0.2.0/firsttris-gobd-kern-0.2.0.tgz",
+        "@firsttris/gobd-kern": "https://github.com/Speicherstadt/haben/releases/download/gobd-kern-v0.2.1/firsttris-gobd-kern-0.2.1.tgz",
         "@simplewebauthn/browser": "14.0.0",
         "@tanstack/react-query": "^5.107.1",
         "@tanstack/react-router": "^1.170.46",
@@ -192,7 +192,7 @@
 
     "@firsttris/checks": ["@firsttris/checks@github:firsttris/workflows#c45f6a8", { "dependencies": { "oxc-parser": "^0.156.0" }, "bin": { "checks": "checks/cli.ts" } }, "firsttris-workflows-c45f6a8", "sha512-4ANBCavyTl07BQZTRKmi1Ay6vwE0wSpr3PFu64WCjBKfOS1uenafAu8aYf+3F8QnCh+juCyMIfgN5I7GhLzNFw=="],
 
-    "@firsttris/gobd-kern": ["@firsttris/gobd-kern@https://github.com/firsttris/haben/releases/download/gobd-kern-v0.2.0/firsttris-gobd-kern-0.2.0.tgz", { "dependencies": { "zod": "^4.6.5" } }, "sha512-BrgfdfwfX+bU2wRnjKb+UTWl5sfIa5eCBcqYyxrL0JdU/CAb6myndEpNuF1q2SZPo/uQssJJ2fK4tb57PYbbDQ=="],
+    "@firsttris/gobd-kern": ["@firsttris/gobd-kern@https://github.com/Speicherstadt/haben/releases/download/gobd-kern-v0.2.1/firsttris-gobd-kern-0.2.1.tgz", { "dependencies": { "zod": "^4.6.5" } }, "sha512-YFRBj0Z59KYOxUTunJUcR9z8oDOVe0b/5FeAdDFD4PrfOYvB8Ll+/LpgYnXlSCUKAYGfJdUCkgn8z14S4Q/jgg=="],
 
     "@fontsource-variable/geist": ["@fontsource-variable/geist@5.3.0", "", {}, "sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA=="],
 

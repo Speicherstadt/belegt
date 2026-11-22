@@ -400,6 +400,13 @@
       "when": 1795361404441,
       "tag": "0056_vorschaubild_seiten",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1795365613730,
+      "tag": "0057_siegel_aus_der_kette",
+      "breakpoints": true
     }
   ]
 }

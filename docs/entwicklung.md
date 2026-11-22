@@ -111,7 +111,9 @@ Migration: Nach jedem Lauf leitet `server/db/rollen.ts` sie aus den Triggern ab 
 DELETE); `server/db/rollen.test.ts` versucht als App-Rolle, was verboten ist. Eine Migration, die schon
 auf `main` ist, wird nie mehr geändert.
 
-Der Kern kommt als Datei vom Release in Haben (`package.json`); eine neue Version trägt man dort mit der neuen URL ein.
+Der Kern kommt als Datei vom Release in Haben (`package.json`); eine neue Version trägt man dort mit der neuen URL ein. Ändert
+sie das SQL der Vorlage, übernimmt eine neue Migration die geänderte Funktion mit `CREATE OR REPLACE`, erzeugt aus
+dem Paket (so `0057_siegel_aus_der_kette.sql` für die Prüfung aus 0.2.1, die fehlende Siegel aus der Kette meldet).
 
 ## Veröffentlichen
 
