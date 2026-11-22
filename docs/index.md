@@ -29,8 +29,8 @@ nachweisbar.</p>
 </div>
 
 <div class="showcase-shot showcase-shot--hero" markdown>
-![Startseite von Belegt: Eingang, Archiv, offener Löschantrag, Sperre und Speicher, Fristen, Quellen, Zustand der Hash-Kette und eine gespeicherte Ansicht](assets/screenshot-start.png#only-light){ width="1504" height="972" }
-![Startseite von Belegt: Eingang, Archiv, offener Löschantrag, Sperre und Speicher, Fristen, Quellen, Zustand der Hash-Kette und eine gespeicherte Ansicht](assets/screenshot-start-dunkel.png#only-dark){ width="1504" height="972" }
+![Startseite von Belegt: Eingang, Archiv, offener Löschantrag, Sperre und Speicher, Fristen, Quellen, Zustand der Hash-Kette und eine gespeicherte Ansicht](assets/screenshot-start.png#only-light){ width="1504" height="1312" }
+![Startseite von Belegt: Eingang, Archiv, offener Löschantrag, Sperre und Speicher, Fristen, Quellen, Zustand der Hash-Kette und eine gespeicherte Ansicht](assets/screenshot-start-dunkel.png#only-dark){ width="1504" height="1312" }
 </div>
 
 <div class="showcase-feature" id="rundgang" markdown>

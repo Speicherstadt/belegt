@@ -196,14 +196,6 @@ const FAELLE: Fall[] = [
     "fertig: 2 taken over, 2 errors, heute",
   ],
   [
-    "start_holds_hint",
-    (n, locale) => m.start_holds_hint({ anzahl: n }, { locale }),
-    "1 Dokument darunter",
-    "2 Dokumente darunter",
-    "1 document covered",
-    "2 documents covered",
-  ],
-  [
     "start_storage_hint",
     (n, locale) => m.start_storage_hint({ anzahl: n }, { locale }),
     "1 Datei, ohne gelöschte",

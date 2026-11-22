@@ -254,3 +254,13 @@ festes Symbol (`src/components/Symbole.tsx`), dasselbe in Seitenleiste, Kacheln 
 mit Bedeutung: Siegel (`--ok`, `--warn`, `--danger`) und die Punkte der Aufbewahrung (Pflicht `--c-blue`, freiwillig
 mit Frist `--c-amber`, frei `--muted`). Keine Akzentfarbe: Hauptknopf und aktiver Filter bleiben `--primary`.
 
+## Startseite
+
+Oben vier Kennzahl-Kacheln gleicher Bauart (`src/components/start/Ueberblick.tsx`): Beschriftung mit Symbol rechts,
+Wert (proportionale Ziffern, keine `tabular-nums`), ein kleines Diagramm, eine Zeile darunter. Die vier Zeilen liegen
+in einem Subgrid, damit sie über alle Kacheln auf einer Linie stehen. Jede Kachel hat ihre eigene Art Diagramm, alle 32 px hoch:
+Archiv den Verlauf der letzten zwölf Monate als Balken (Vergangenheit `--muted`, laufender Monat `--fg`, Tooltip je
+Monat), Eingang einen kleinen Ring für den eingeordneten Anteil mit der Prozentzahl daneben, Speicher die Belegung des
+Datenträgers als Segmente wie eine Festplattenanzeige (Originale `--fg`, übrig belegt `--muted`, frei nur Rand) mit
+Legende darunter. Darunter links breit die gespeicherten Ansichten, rechts
+untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so hoch wie ihr Inhalt.

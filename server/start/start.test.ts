@@ -84,14 +84,22 @@ describe.skipIf(!testDatenbankUrl)("Startseite gegen Postgres", { timeout: 30_00
     expect(s.quellen).toEqual({ postfaecher: [], ordner: null, paperless: null });
     expect(offen.id).toBeTruthy();
     // Die Steuerberatung sieht dieselben Zahlen
-    expect(await start(steuer)).toEqual(s);
+    // Der freie Platz des Datenträgers ändert sich zwischen zwei Abfragen; alles andere ist gleich
+    const ohneFrei = (x: Start) => ({ ...x, speicher: { ...x.speicher, datentraeger: undefined } });
+    expect(ohneFrei(await start(steuer))).toEqual(ohneFrei(s));
   });
 
   it("der Prüfer bekommt nur Zahlen seines Zeitraums, ohne Betrieb", async () => {
     const s = await start(pruefer);
     // Im Zeitraum 2024 liegen vertrag, spaeter, 2024 und der Antrag (2020) nicht; Eingang zählt nach Eingangstag
-    expect(Object.keys(s).sort()).toEqual(["diesesJahr", "eingang", "gesamt"]);
-    expect(s).toEqual({ eingang: 0, gesamt: 3, diesesJahr: 3 });
+    expect(Object.keys(s).sort()).toEqual(["diesesJahr", "eingang", "gesamt", "verlauf", "vorjahr"]);
+    expect(s).toEqual({
+      eingang: 0,
+      gesamt: 3,
+      diesesJahr: 3,
+      vorjahr: 0,
+      verlauf: [...Array(11).fill(0), 3],
+    });
   });
 
   it("Kacheln aus Ansichten je Zugang, nur sichtbare, im Audit-Log; gelöschte Ansichten verschwinden", async () => {

@@ -36,6 +36,8 @@ async function bild(page: Page, name: string, oben?: string) {
         .locator(ziel)
         .first()
         .evaluate((e) => e.scrollIntoView({ block: "start" }));
+    // Sonst von oben: ein Klick vorher (etwa „Jetzt prüfen“ auf der Startseite) hat die Seite gescrollt
+    else await page.evaluate(() => window.scrollTo(0, 0));
     const png = await page.screenshot({ animations: "disabled", caret: "hide" });
     const pfad = `${ASSETS}/screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
     await writeFile(pfad, await mitRahmen(rahmenBrowser, png, modus === "Dunkel" ? "dunkel" : "hell", mobil ? 36 : 12));
@@ -118,7 +120,10 @@ test("Bilder für README und Doku", async ({ page, browser }) => {
   await expect(page.getByRole("region", { name: "Steuer 2026" })).toContainText("Dokumente");
   await page.getByRole("region", { name: "Unveränderbarkeit" }).getByRole("button", { name: "Jetzt prüfen" }).click();
   await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
+  // Die Startseite ganz, mit den Kacheln unten: höher als die übrigen Bilder (docs/index.md nennt die Größe)
+  await page.setViewportSize({ width: 1440, height: 1240 });
   await bild(page, "start");
+  await page.setViewportSize({ width: 1440, height: 900 });
 
   // Am Handy: der Eingang mit „Foto aufnehmen“, als Kacheln
   await page.setViewportSize(MOBIL);

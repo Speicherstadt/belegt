@@ -15,7 +15,7 @@ export function OperationStatus({ inhaber = false }: { inhaber?: boolean }) {
   const db = stand.data?.datenbank;
   return (
     <section aria-labelledby="start-betrieb" className={kachel}>
-      <h2 id="start-betrieb" className="m-0 font-semibold text-lg">
+      <h2 id="start-betrieb" className="m-0 font-semibold text-base">
         {m.start_operation()}
       </h2>
       {stand.error && <p className={fehler}>{stand.error.message}</p>}

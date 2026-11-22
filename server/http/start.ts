@@ -1,3 +1,4 @@
+import { statfs } from "node:fs/promises";
 import { verarbeitungsstand } from "../inhalt/verarbeitung.ts";
 import { KachelEingabe, kachelnListen, kachelnSetzen, startZahlen } from "../start/start.ts";
 import { type App, type AppUmgebung, akteur, heute } from "./gemeinsam.ts";
@@ -9,7 +10,11 @@ import { type App, type AppUmgebung, akteur, heute } from "./gemeinsam.ts";
 export function startRouten(app: App, umgebung: AppUmgebung) {
   app.get("/api/start", async (c) =>
     c.json(
-      await startZahlen(umgebung.db, c.get("nutzer"), { heute: heute(), eingangsordner: umgebung.eingangsordner }),
+      await startZahlen(umgebung.db, c.get("nutzer"), {
+        heute: heute(),
+        eingangsordner: umgebung.eingangsordner,
+        datentraeger: await datentraeger(umgebung.speicherOrdner),
+      }),
     ),
   );
 
@@ -26,4 +31,15 @@ export function startRouten(app: App, umgebung: AppUmgebung) {
     if (!ok) return c.json({ fehler: "Unbekannte Ansicht" }, 404);
     return c.json({ ansichten: await kachelnListen(umgebung.db, nutzer) });
   });
+}
+
+/** Größe und freier Platz des Datenträgers mit den Originalen; ohne Ordner (S3) oder bei einem Fehler keine Angabe */
+async function datentraeger(ordner: string | undefined) {
+  if (!ordner) return undefined;
+  try {
+    const s = await statfs(ordner);
+    return { gesamt: s.blocks * s.bsize, frei: s.bavail * s.bsize };
+  } catch {
+    return undefined;
+  }
 }

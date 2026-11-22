@@ -29,6 +29,8 @@ export type AppUmgebung = Umgebung & {
   kiModell?: { modell: string; host: string };
   /** E-Rechnungen werden mit dem Validator der KoSIT geprüft (VALIDATOR_URL; Filter und Verfahrensdokumentation) */
   erechnungPruefung?: boolean;
+  /** Ordner der Originale (DOCUMENTS_DIR), wenn sie nicht in S3 liegen: für die Belegung auf der Startseite */
+  speicherOrdner?: string;
   /** Der Worker überwacht einen Eingangsordner (für die Verfahrensdokumentation) */
   eingangsordner?: boolean;
   /** Code auf Trennblättern (TRENNBLATT_CODE), Vorgabe BELEGT-TRENNER */

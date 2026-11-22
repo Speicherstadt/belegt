@@ -56,6 +56,7 @@ const app = createApp({
   embedOrigin: env.BELEGT_EMBED_ORIGIN,
   objektsperre: !!sperrbar,
   eingangsordner: !!env.EINGANG_ORDNER,
+  speicherOrdner: env.S3_ENDPUNKT ? undefined : env.DOCUMENTS_DIR,
   erechnungPruefung: !!env.VALIDATOR_URL,
   trennblattCode: env.TRENNBLATT_CODE,
   kiModell: env.KI_URL && env.KI_MODELL ? { modell: env.KI_MODELL, host: new URL(env.KI_URL).host } : undefined,
