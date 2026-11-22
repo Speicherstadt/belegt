@@ -8,6 +8,7 @@ import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { LearnedSuggestion, RuleMatchSuggestion } from "./MatchSuggestions.tsx";
 import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
+import { useSchnellTasten } from "./schnellTasten.ts";
 import { Explain } from "./WasIstDas.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -20,6 +21,7 @@ export function Classification({
   dokumenttyp,
   korrespondent,
   weiter,
+  schnell = false,
 }: {
   dokumentId: string;
   einordnung: Einordnung | null;
@@ -30,13 +32,17 @@ export function Classification({
   korrespondent?: { id: string; name: string } | null;
   /** Gibt es ein nächstes Dokument in der Liste, kommt „Einordnen & weiter“ dazu und springt danach dorthin */
   weiter?: () => void;
+  /** Schnellmodus des Eingangs: Tasten 1 bis 7 für die Art, Enter ordnet ein und geht weiter */
+  schnell?: boolean;
 }) {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const queryClient = useQueryClient();
   const [offen, setOffen] = useState(!einordnung);
   // Welcher Knopf abgeschickt hat: „Einordnen & weiter“ springt nach dem Speichern zum nächsten Dokument
   const springen = useRef(false);
+  const formular = useRef<HTMLFormElement>(null);
   const [art, setArt] = useState<Art>(einordnung?.art ?? dokumenttyp?.vorgabeArt ?? "beleg");
+  useSchnellTasten(schnell, formular, setArt);
   // Angaben aus einer erkannten E-Rechnung; das Formular übernimmt sie beim Klick auf „Übernehmen“
   const [vorgabe, setVorgabe] = useState<{ entstanden?: string; titel?: string; korrespondent?: string } | null>(null);
   const vorschlag = useQuery({
@@ -247,10 +253,12 @@ export function Classification({
       )}
       {darfBearbeiten(ich.data) && offen && (
         <form
+          ref={formular}
           key={`${JSON.stringify(vorgabe)}:${korrespondent?.id ?? ""}`}
           onSubmit={absenden}
           className="flex flex-col gap-3"
         >
+          {schnell && <p className="m-0 rounded-md bg-subtle px-3 py-2 text-muted text-xs">{m.quick_mode_keys()}</p>}
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_kind()}
             <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feld}>
