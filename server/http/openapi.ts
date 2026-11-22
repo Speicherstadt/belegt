@@ -51,7 +51,7 @@ export const openapi = {
     title: "Belegt",
     version: VERSION,
     description:
-      "Dokumentenarchiv mit GoBD-Modus. Programme melden sich mit `Authorization: Bearer belegt_…` an (API-Token mit dem Recht lesen oder schreiben); Tokens legt nur der Inhaber an, sie sehen alle Dokumente. Mitarbeiter mit Sichtbereich bekommen keine Tokens und erreichen dieselben Pfade nur mit ihrer Sitzung, für Dokumente außerhalb ihres Sichtbereichs mit `404`. Webhooks melden `dokument.aufgenommen`, `dokument.eingeordnet`, `dokument.geloescht` und `dokument.workflow` (von einem Workflow, dann mit `workflow`: seinem Namen) als JSON `{id, art, dokumentId, zeitpunkt}`, signiert in `X-Belegt-Signatur: sha256=<HMAC-SHA256 des Rumpfs>`.",
+      "Dokumentenarchiv mit GoBD-Modus. Beschrieben ist die Programmschnittstelle; Verwaltung, die nur mit Sitzung geht, steht in docs/api.md. Programme melden sich mit `Authorization: Bearer belegt_…` an (API-Token mit dem Recht lesen oder schreiben); Tokens legt nur der Inhaber an, sie sehen alle Dokumente. Mitarbeiter mit Sichtbereich bekommen keine Tokens und erreichen dieselben Pfade nur mit ihrer Sitzung, für Dokumente außerhalb ihres Sichtbereichs mit `404`. Webhooks melden `dokument.aufgenommen`, `dokument.eingeordnet`, `dokument.geloescht` und `dokument.workflow` (von einem Workflow, dann mit `workflow`: seinem Namen) als JSON `{id, art, dokumentId, zeitpunkt}`, signiert in `X-Belegt-Signatur: sha256=<HMAC-SHA256 des Rumpfs>`.",
   },
   components: {
     securitySchemes: { token: { type: "http", scheme: "bearer" } },
@@ -181,7 +181,15 @@ export const openapi = {
     "/api/dokumente/{id}/datei": {
       get: {
         summary: "Das Original, geprüft gegen seinen Hash",
-        parameters: [idParam],
+        parameters: [
+          idParam,
+          {
+            name: "ansicht",
+            in: "query",
+            schema: { type: "string", enum: ["1"] },
+            description: "PDFs und Bilder zum Anzeigen im Browser statt als Download",
+          },
+        ],
         responses: {
           "200": { description: "Datei", content: { "application/octet-stream": {} } },
           "409": fehler,

@@ -41,8 +41,23 @@ derselben Kopfzeile. Ein Assistent kann damit suchen (`dokumente_suchen`), Angab
 `dokument_text`), jeweils mit Archivnummer, Tags, Dokumenttyp, Korrespondent und Feldern, und die vorhandenen Tags,
 Dokumenttypen, Korrespondenten und Felder abfragen (`ordnung_listen`) und die Notizen eines Dokuments lesen (`notizen_lesen`). Mit dem Recht **schreiben**
 nimmt er Dateien auf, ordnet ein, setzt Tags, Dokumenttyp, Korrespondent und Feldwerte und schreibt Notizen (`dokument_aufnehmen`,
-`dokument_einordnen`, `dokument_ordnen`, `notiz_schreiben`). Neue Tags, Typen oder Felder
-anlegen und löschen kann er nicht. In Claude Code etwa:
+`dokument_einordnen`, `dokument_ordnen`, `notiz_schreiben`). Neue Tags, Typen, Korrespondenten oder Felder
+anlegen, Notizen zurückziehen und Dokumente löschen kann er nicht. Ein Token mit dem Recht **lesen** bekommt die
+schreibenden Werkzeuge gar nicht erst angezeigt (`tools/list`); mit einer Sitzung statt Token schreibt nur der Inhaber.
+
+| Werkzeug | Eingaben | Schreibt |
+| --- | --- | --- |
+| `dokumente_suchen` | `suche` (bis 500 Zeichen, Volltext wie im Archiv), `gruppe` (`offen`, `pflicht`, `freiwillig`, `frei`, `loeschbar`, `geloescht`), `limit` 1 bis 100 (Vorgabe 20) | nein |
+| `dokument_lesen` | `id` | nein |
+| `dokument_text` | `id`, `von` (ab Zeichen, Vorgabe 0), `laenge` 1 bis 50 000 (Vorgabe 20 000): der Text kommt in Stücken | nein |
+| `ordnung_listen` | – | nein |
+| `notizen_lesen` | `id` | nein |
+| `dokument_aufnehmen` | `dateiname`, `inhalt` als Base64 (bis 100 MB); liegt die Datei schon im Archiv, kommt der Hinweis auf das vorhandene Dokument | ja |
+| `dokument_einordnen` | `id`, `art`, `entstanden`, bei `freiwillig` dazu `freiwilligBis` | ja |
+| `dokument_ordnen` | `id`, `tagsHinzu` und `tagsWeg` (je bis 50), `dokumenttyp`, `korrespondent`, `felder`; `null` entfernt, Beträge in Cent oder `1.234,56` | ja |
+| `notiz_schreiben` | `id`, `text` (1 bis 5000 Zeichen) | ja |
+
+In Claude Code etwa:
 
 ```bash
 claude mcp add --transport http belegt https://belegt.example/api/mcp --header "Authorization: Bearer belegt_…"
