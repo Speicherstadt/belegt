@@ -204,6 +204,22 @@ export function DocumentTable({
   );
 }
 
+const PFADE = {
+  oeffnen: "M7 17 17 7M9 7h8v8",
+  vorschau:
+    "M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Zm9.5 2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z",
+  laden: "M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14",
+};
+
+/** Symbole für die Knöpfe unter einer Kachel: Text passt in die schmale Karte nicht, er steht in aria-label und title */
+function KartenSymbol({ art }: { art: keyof typeof PFADE }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none">
+      <path d={PFADE[art]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /**
  * Die Liste als Kacheln: großes Vorschaubild mit den Tags darauf, darunter Korrespondent und Titel, Typ, Eingang und
  * Aufbewahrung, unten Öffnen und Herunterladen
@@ -291,23 +307,29 @@ export function DocumentGrid({
                 to="/dokumente/$id"
                 params={{ id: d.id }}
                 className="flex h-9 items-center justify-center font-medium hover:bg-subtle"
+                aria-label={m.card_open_short()}
+                title={m.card_open_short()}
               >
-                {m.card_open_short()}
+                <KartenSymbol art="oeffnen" />
               </Link>
               {hatVorschau(d.mimeType) && (
                 <button
                   type="button"
                   onClick={() => setVorschau(d)}
                   className="flex h-9 items-center justify-center border-border border-l font-medium hover:bg-subtle"
+                  aria-label={m.card_preview_short()}
+                  title={m.card_preview_short()}
                 >
-                  {m.card_preview_short()}
+                  <KartenSymbol art="vorschau" />
                 </button>
               )}
               <a
                 href={dateiUrl(d.id)}
                 className="flex h-9 items-center justify-center border-border border-l font-medium hover:bg-subtle"
+                aria-label={m.card_download_short()}
+                title={m.card_download_short()}
               >
-                {m.card_download_short()}
+                <KartenSymbol art="laden" />
               </a>
             </div>
           </li>

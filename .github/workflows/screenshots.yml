@@ -1,0 +1,33 @@
+name: Screenshots erneuern
+
+# Nimmt die Bilder für README und Doku neu auf (docs/assets/screenshot-*.png, hell und dunkel, und docs/social-preview.png)
+# und committet, was sich geändert hat: bun run docs:screenshots (e2e/screenshots.ts) im Playwright-Image, damit Browser
+# und Schriften bei jedem Lauf gleich sind. Nach einer Änderung am Aussehen von Hand starten (Actions → Screenshots
+# erneuern → Run workflow).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    uses: firsttris/workflows/.github/workflows/screenshots.yml@v1
+    with:
+      lockfile: bun.lock
+      bun: true
+      # Dieselbe Version wie packageManager in package.json
+      bun-version: 1.4.4
+      install: bun install --frozen-lockfile
+      postgres: postgres:18
+      postgres-db: belegt_bilder
+      # Vorschaubilder rendert pdftoppm, durchsuchbare PDFs Tesseract; das Image bringt beide nicht mit
+      command: >-
+        apt-get update -q && apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils &&
+        E2E_DATABASE_URL="$POSTGRES_URL" bun run docs:screenshots
+      paths: |
+        docs/assets/screenshot-*.png
+        docs/social-preview.png
+      commit-message: Screenshots erneuert
+    permissions:
+      contents: write
