@@ -16,8 +16,11 @@ let rahmenBrowser: Browser;
 
 /** Hell und dunkel über den Schalter „Darstellung“ der App (speichert belegt.darstellung), ohne Neuladen */
 async function darstellung(page: Page, modus: "Hell" | "Dunkel") {
-  // Ein Klick im DOM, damit die Seite nicht zum Schalter scrollt
-  await page.getByRole("radio", { name: modus }).evaluate((e: HTMLInputElement) => e.click());
+  // Ein Klick im DOM, damit die Seite nicht zum Schalter scrollt; am Handy ist das Menü zu und der Schalter verborgen,
+  // getByRole fände ihn dann nicht
+  await page
+    .locator(`input[name="darstellung"][value="${modus.toLowerCase()}"]`)
+    .evaluate((e: HTMLInputElement) => e.click());
   await expect.poll(() => page.evaluate(() => localStorage.getItem("belegt.darstellung"))).toBe(modus.toLowerCase());
   await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
 }
