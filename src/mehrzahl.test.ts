@@ -8,6 +8,7 @@ import { m } from "./paraglide/messages.js";
 type Fall = [string, (n: string, locale: "de" | "en") => string, string, string, string, string];
 
 const FAELLE: Fall[] = [
+  ["card_pages", (n, locale) => m.card_pages({ anzahl: n }, { locale }), "1 Seite", "2 Seiten", "1 page", "2 pages"],
   [
     "seal_findings",
     (n, locale) => m.seal_findings({ anzahl: n }, { locale }),

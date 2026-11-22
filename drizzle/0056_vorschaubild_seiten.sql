@@ -1,0 +1,1 @@
+ALTER TABLE "vorschaubilder" ADD COLUMN "seiten" integer;

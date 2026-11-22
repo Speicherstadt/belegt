@@ -59,7 +59,7 @@ export interface ArchivAnsicht {
   datumBis: string;
   sortierung: Sortierung;
   /** null: was der Browser sich gemerkt hat */
-  darstellung: "liste" | "kacheln" | null;
+  darstellung: "liste" | "kacheln" | "kompakt" | null;
   proSeite: number;
 }
 
@@ -135,7 +135,8 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
     datumVon: zeitraum === "eigen" ? tagOderLeer(p.datumVon) : "",
     datumBis: zeitraum === "eigen" ? tagOderLeer(p.datumBis) : "",
     sortierung: aus(SORTIERUNGEN, p.sortierung, "neu"),
-    darstellung: p.darstellung === "liste" || p.darstellung === "kacheln" ? p.darstellung : null,
+    darstellung:
+      p.darstellung === "liste" || p.darstellung === "kacheln" || p.darstellung === "kompakt" ? p.darstellung : null,
     proSeite: PRO_SEITE_WAHL.includes(proSeite as 25) ? proSeite : PRO_SEITE_VORGABE,
   };
 }

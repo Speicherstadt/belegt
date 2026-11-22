@@ -525,6 +525,8 @@ export const vorschaubilder = pgTable("vorschaubilder", {
     .references(() => dokumente.id),
   bild: bytea("bild"),
   fehler: text("fehler"),
+  /** Seitenzahl, wenn die Quelle ein PDF ist (PDF oder Ansicht einer Office-Datei); für die Kacheln der Liste */
+  seiten: integer("seiten"),
   erzeugtAm: timestamp("erzeugt_am", { withTimezone: true }).notNull().defaultNow(),
 });
 
