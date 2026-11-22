@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
 import type { Start } from "../../lib/api.ts";
 import { groesse, tag } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
@@ -54,7 +55,11 @@ export function StartNumbers({ start }: { start: Start }) {
       <h2 id="start-zahlen" className="m-0 font-semibold text-lg">
         {m.start_numbers()}
       </h2>
-      <dl className="m-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+      {/* Alle Zahlen in einer Reihe, sonst gleichmäßig in zwei oder drei Spalten: nie eine Karte allein in der Zeile */}
+      <dl
+        className="m-0 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-[repeat(var(--spalten),minmax(0,1fr))]"
+        style={{ "--spalten": zahlen.length } as CSSProperties}
+      >
         {zahlen.map((z) => (
           <div key={z.label} className={kachel}>
             <dt className="flex items-center gap-2 text-muted text-sm">
