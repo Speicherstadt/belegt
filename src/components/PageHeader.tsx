@@ -2,15 +2,25 @@ import { type ReactNode, useEffect } from "react";
 import { m } from "../paraglide/messages.js";
 import { LeerSymbol } from "./Symbole.tsx";
 
-export function PageHeader({ title, intro }: { title: string; intro: string }) {
+export function PageHeader({
+  title,
+  intro,
+  versteckt = false,
+}: {
+  title: string;
+  intro?: string;
+  /** Nur für Screenreader und den Titel im Tab, etwa auf der Startseite, deren Inhalt für sich spricht */
+  versteckt?: boolean;
+}) {
   // WCAG 2.4.2: Der Titel im Tab nennt die Seite, nicht nur die App
   useEffect(() => {
     document.title = `${title} · ${m.app_name()}`;
   }, [title]);
+  if (versteckt) return <h1 className="sr-only">{title}</h1>;
   return (
     <header className="flex flex-col gap-1">
       <h1 className="m-0 font-semibold text-2xl tracking-tight [overflow-wrap:anywhere]">{title}</h1>
-      <p className="m-0 text-muted text-sm">{intro}</p>
+      {intro && <p className="m-0 text-muted text-sm">{intro}</p>}
     </header>
   );
 }
