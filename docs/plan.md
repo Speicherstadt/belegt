@@ -109,7 +109,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Zeitraum im Archiv, Workflow-Editor in Schritten, Formulare erst auf Klick, einheitliche Checkboxen | mittel | erledigt |
 | Bedienung: Dokumentseite mit großer Vorschau, Reitern und Blättern, „Einordnen & weiter“ | mittel | erledigt |
 | Bedienung: Tags-Filter als durchsuchbare Liste, Kacheln mit Tags und Schnellknöpfen | mittel | erledigt |
-| Bedienung: Ziehen und Ablegen, Zahlen an gespeicherten Ansichten, Suche in der Kopfzeile, Treffer hervorheben | mittel | offen |
+| Bedienung: Hochladen durch Ziehen und Ablegen auf jeder Seite, mit Stand | mittel | erledigt |
+| Bedienung: Suche in der Kopfzeile, Startseite mit gespeicherten Ansichten und Zahlen, Fristen-Seite mit eigenen Vorlagen, Anlegen direkt im Dokument, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

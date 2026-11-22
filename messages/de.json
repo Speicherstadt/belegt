@@ -1224,5 +1224,30 @@
   "filter_tags_search": "Tags durchsuchen",
   "filter_tags_none": "Kein Tag passt.",
   "card_open_short": "Öffnen",
-  "card_download_short": "Herunterladen"
+  "card_download_short": "Herunterladen",
+  "drop_title": "Dateien hier ablegen",
+  "drop_text": "Sie landen im Eingang, das Original bleibt unverändert.",
+  "drop_busy": "Lädt hoch: {fertig} von {gesamt}",
+  "drop_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Dokument aufgenommen",
+        "anzahlPlural=other": "{anzahl} Dokumente aufgenommen"
+      }
+    }
+  ],
+  "drop_duplicates": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} Datei lag schon im Archiv und wurde nicht doppelt angelegt.",
+        "anzahlPlural=other": "{anzahl} Dateien lagen schon im Archiv und wurden nicht doppelt angelegt."
+      }
+    }
+  ],
+  "drop_to_inbox": "Zum Eingang",
+  "drop_close": "Schließen"
 }

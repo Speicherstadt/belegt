@@ -1302,5 +1302,30 @@
   "filter_tags_search": "Search tags",
   "filter_tags_none": "No matching tag.",
   "card_open_short": "Open",
-  "card_download_short": "Download"
+  "card_download_short": "Download",
+  "drop_title": "Drop files here",
+  "drop_text": "They go to the inbox; the original stays unchanged.",
+  "drop_busy": "Uploading: {fertig} of {gesamt}",
+  "drop_done": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document received",
+        "anzahlPlural=other": "{anzahl} documents received"
+      }
+    }
+  ],
+  "drop_duplicates": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} file was already in the archive and was not added twice.",
+        "anzahlPlural=other": "{anzahl} files were already in the archive and were not added twice."
+      }
+    }
+  ],
+  "drop_to_inbox": "To the inbox",
+  "drop_close": "Close"
 }

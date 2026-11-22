@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
+import { darfBearbeiten } from "../shared/rollen.ts";
+import { DropUpload } from "./components/DropUpload.tsx";
 import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { ApiFehler, api } from "./lib/api.ts";
@@ -41,6 +43,7 @@ export function Shell({ children }: { children: ReactNode }) {
             andere) */}
         {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}
       </main>
+      {!ich.data.zweiFaktorEinrichten && darfBearbeiten(ich.data) && <DropUpload />}
     </div>
   );
 }

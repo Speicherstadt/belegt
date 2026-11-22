@@ -9,6 +9,22 @@ type Fall = [string, (n: string, locale: "de" | "en") => string, string, string,
 
 const FAELLE: Fall[] = [
   [
+    "drop_done",
+    (n, locale) => m.drop_done({ anzahl: n }, { locale }),
+    "1 Dokument aufgenommen",
+    "2 Dokumente aufgenommen",
+    "1 document received",
+    "2 documents received",
+  ],
+  [
+    "drop_duplicates",
+    (n, locale) => m.drop_duplicates({ anzahl: n }, { locale }),
+    "1 Datei lag schon im Archiv und wurde nicht doppelt angelegt.",
+    "2 Dateien lagen schon im Archiv und wurden nicht doppelt angelegt.",
+    "1 file was already in the archive and was not added twice.",
+    "2 files were already in the archive and were not added twice.",
+  ],
+  [
     "order_count",
     (n, locale) => m.order_count({ anzahl: n }, { locale }),
     "1 Dokument",

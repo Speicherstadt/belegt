@@ -9,6 +9,12 @@ description: >-
 Was ankommt, wird zuerst unverändert gesichert und landet dann im Eingang. Dort legst du fest, was es ist; die Art
 bestimmt die Frist ([Fristen](fristen.md)).
 
+## Ziehen und ablegen
+
+Dateien lassen sich auf jeder Seite ins Fenster ziehen. Belegt zeigt eine Fläche zum Ablegen, lädt die Dateien hoch
+und meldet unten rechts, wie viele aufgenommen sind und wie viele schon im Archiv lagen; „Zum Eingang“ führt zu ihnen.
+Das gilt für alle, die hochladen dürfen.
+
 ## Startseite
 
 Nach dem Anmelden zeigt die Startseite, was ansteht: wie viel im Eingang liegt, wie viele Dokumente das Archiv hat und
