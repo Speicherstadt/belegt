@@ -47,13 +47,15 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
 
   await page.goto("/archiv");
   await expect(page.getByRole("link", { name: anderes })).toBeVisible();
-  await page.getByRole("button", { name: tag }).click();
-  await expect(page.getByRole("button", { name: tag })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Tags", exact: true }).click();
+  await page.getByRole("button", { name: tag, exact: true }).click();
+  await expect(page.getByRole("button", { name: tag, exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
   await expect(page.getByRole("row", { name: new RegExp(name) })).toContainText(tag);
   // Die Suche findet den Namen des Tags
-  await page.getByRole("button", { name: tag }).click();
-  await page.getByRole("searchbox").fill(`"${tag}"`);
+  await page.getByRole("button", { name: tag, exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("searchbox", { name: "Volltext in Dokumenten, Mails und Anhängen oder ASN" }).fill(`"${tag}"`);
   await expect(page.getByRole("link", { name })).toBeVisible();
   await expect(page.getByRole("link", { name: anderes })).toHaveCount(0);
 });
@@ -72,8 +74,9 @@ test("Tag-Filter: alle gewählten oder mindestens einer", async ({ page }, info)
   await r.post(`/api/dokumente/${id(zweites)}/ordnung`, { data: { tagsHinzu: [tagB.id] } });
 
   await page.goto("/archiv");
-  await page.getByRole("button", { name: `Modus A ${projekt}` }).click();
-  await page.getByRole("button", { name: `Modus B ${projekt}` }).click();
+  await page.getByRole("button", { name: "Tags", exact: true }).click();
+  await page.getByRole("button", { name: `Modus A ${projekt}`, exact: true }).click();
+  await page.getByRole("button", { name: `Modus B ${projekt}`, exact: true }).click();
   await expect(page.getByRole("button", { name: "alle", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: erstes })).toHaveCount(0);
   await page.getByRole("button", { name: "mindestens einer" }).click();

@@ -1297,5 +1297,10 @@
   "doc_nav_next": "Next document (→)",
   "doc_nav_position": "{stelle} of {anzahl}",
   "classify_submit_next": "Classify & next",
-  "doc_event_meta": "{wann} · {wer} · No. {nr}"
+  "doc_event_meta": "{wann} · {wer} · No. {nr}",
+  "filter_tag_remove": "Remove tag {name} from the filter",
+  "filter_tags_search": "Search tags",
+  "filter_tags_none": "No matching tag.",
+  "card_open_short": "Open",
+  "card_download_short": "Download"
 }

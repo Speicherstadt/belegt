@@ -1219,5 +1219,10 @@
   "doc_nav_next": "Nächstes Dokument (→)",
   "doc_nav_position": "{stelle} von {anzahl}",
   "classify_submit_next": "Einordnen & weiter",
-  "doc_event_meta": "{wann} · {wer} · Nr. {nr}"
+  "doc_event_meta": "{wann} · {wer} · Nr. {nr}",
+  "filter_tag_remove": "Tag {name} aus dem Filter nehmen",
+  "filter_tags_search": "Tags durchsuchen",
+  "filter_tags_none": "Kein Tag passt.",
+  "card_open_short": "Öffnen",
+  "card_download_short": "Herunterladen"
 }

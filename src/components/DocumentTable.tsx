@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { Eintrag } from "../lib/api.ts";
+import { dateiUrl, type Eintrag } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -103,7 +103,10 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
   );
 }
 
-/** Die Liste als Kacheln mit großem Vorschaubild */
+/**
+ * Die Liste als Kacheln: großes Vorschaubild mit den Tags darauf, darunter Korrespondent und Titel, Typ, Eingang und
+ * Aufbewahrung, unten Öffnen und Herunterladen
+ */
 export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; auswahl: Auswahl }) {
   return (
     <section aria-label={m.list_label()} className="flex flex-col gap-3">
@@ -113,34 +116,63 @@ export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; aus
           {m.bulk_select_page()}
         </label>
       )}
-      <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3 p-0">
+      <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3 p-0">
         {eintraege.map((d) => (
-          <li key={d.id} className="relative flex flex-col gap-2 rounded-lg border border-border p-2 hover:bg-subtle">
-            <Thumbnail dokument={d} gross />
-            <div className="flex items-start gap-2">
+          <li
+            key={d.id}
+            className={`flex flex-col overflow-hidden rounded-lg border hover:shadow-sm ${
+              auswahl.gewaehlt.has(d.id) ? "border-primary" : "border-border"
+            }`}
+          >
+            <div className="relative bg-subtle p-2">
+              <Thumbnail dokument={d} gross />
               {auswahl.waehlbar && (
                 <input
                   type="checkbox"
                   checked={auswahl.gewaehlt.has(d.id)}
                   onChange={() => auswahl.umschalten(d.id)}
                   aria-label={m.bulk_select({ name: name(d) })}
-                  className="mt-0.5 size-4 shrink-0"
+                  className="absolute top-3 left-3 size-4"
                 />
               )}
-              <div className="flex min-w-0 flex-col text-sm">
-                <Link
-                  to="/dokumente/$id"
-                  params={{ id: d.id }}
-                  className="break-words font-medium underline-offset-2 hover:underline"
-                >
-                  {name(d)}
-                </Link>
-                <span className="text-muted text-xs tabular-nums">
-                  {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
+              {!!d.tags.length && (
+                <span className="absolute top-3 right-3 flex max-w-[70%] flex-col items-end gap-1">
+                  {d.tags.slice(0, 3).map((t) => (
+                    <TagChip key={t.id} tag={t} />
+                  ))}
+                  {d.tags.length > 3 && <span className="rounded-full bg-bg px-2 text-xs">+{d.tags.length - 3}</span>}
                 </span>
-                <span className="text-xs">{aufbewahrung(d)}</span>
-                <Ordnungszeile d={d} />
-              </div>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col gap-1 p-3 text-sm">
+              {d.korrespondent && <PartyChip korrespondent={d.korrespondent} />}
+              <Link
+                to="/dokumente/$id"
+                params={{ id: d.id }}
+                className="break-words font-medium underline-offset-2 hover:underline"
+              >
+                {name(d)}
+              </Link>
+              <span className="text-muted text-xs tabular-nums">
+                {d.dokumenttyp ? `${d.dokumenttyp.name} · ` : ""}
+                {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
+              </span>
+              <span className="text-xs">{aufbewahrung(d)}</span>
+            </div>
+            <div className="grid grid-cols-2 border-border border-t text-xs">
+              <Link
+                to="/dokumente/$id"
+                params={{ id: d.id }}
+                className="flex h-9 items-center justify-center font-medium hover:bg-subtle"
+              >
+                {m.card_open_short()}
+              </Link>
+              <a
+                href={dateiUrl(d.id)}
+                className="flex h-9 items-center justify-center border-border border-l font-medium hover:bg-subtle"
+              >
+                {m.card_download_short()}
+              </a>
             </div>
           </li>
         ))}
