@@ -25,8 +25,7 @@ export function StartPage() {
       )}
       {/* Leeres Archiv: erst die ersten Schritte, für den, der einrichtet */}
       {start.data?.gesamt === 0 && ich.data?.role === "inhaber" && <FirstSteps />}
-      {/* Zuerst die Dokumente aus den gespeicherten Ansichten, dann die Zahlen und der Zustand */}
-      <ViewTiles />
+      {/* Zuerst der Überblick: Zahlen, dann Fristen, Quellen, Siegel und Betrieb; danach die gespeicherten Ansichten */}
       {start.data && <StartNumbers start={start.data} />}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {start.data?.fristen && <UpcomingRetention fristen={start.data.fristen} />}
@@ -38,6 +37,7 @@ export function StartPage() {
           <OperationStatus inhaber={ich.data.role === "inhaber"} />
         )}
       </div>
+      <ViewTiles />
     </div>
   );
 }

@@ -28,7 +28,7 @@ export function StartNumbers({ start }: { start: Start }) {
       wert: String(start.gesamt),
       link: { to: "/archiv", text: m.start_archive_link() },
     },
-    { label: m.start_this_year(), wert: String(start.diesesJahr) },
+    { label: m.start_this_year(), bereich: "#jahr", wert: String(start.diesesJahr) },
   ];
   if (start.loeschantraege !== undefined)
     zahlen.push({
@@ -47,6 +47,7 @@ export function StartNumbers({ start }: { start: Start }) {
   if (start.speicher)
     zahlen.push({
       label: m.start_storage(),
+      bereich: "#speicher",
       wert: groesse(start.speicher.bytes),
       hinweis: m.start_storage_hint({ anzahl: String(start.speicher.dateien) }),
     });

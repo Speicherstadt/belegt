@@ -2,7 +2,9 @@ import {
   Archive,
   Bell,
   CalendarClock,
+  CalendarDays,
   FileText,
+  HardDrive,
   House,
   Inbox,
   type LucideIcon,
@@ -27,6 +29,9 @@ export const BEREICH: Record<string, LucideIcon> = {
   "/verfahrensdoku": FileText,
   "/zugaenge": Users,
   "/benachrichtigungen": Bell,
+  // Keine Seiten, nur Kacheln der Startseite
+  "#jahr": CalendarDays,
+  "#speicher": HardDrive,
 };
 
 /** Symbol eines Bereichs in der Textfarbe drumherum (Seitenleiste, Beschriftungen); rein schmückend */
