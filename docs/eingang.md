@@ -13,7 +13,8 @@ bestimmt die Frist ([Fristen](fristen.md)).
 
 Oben auf jeder Seite steht eine Suche; „/“ springt hinein. Schon beim Tippen zeigt sie passende Dokumente (Volltext)
 und Tags, Korrespondenten und Dokumenttypen. Ein Klick öffnet das Dokument oder das Archiv mit diesem Filter, Enter
-das Archiv mit der Suche.
+das Archiv mit der Suche. Im Archiv steht unter jedem Treffer ein Ausschnitt aus dem Text, das Suchwort markiert:
+So sieht man, warum ein Dokument gefunden wurde, auch wenn das Wort nicht im Namen steht.
 
 ## Stand der Verarbeitung
 

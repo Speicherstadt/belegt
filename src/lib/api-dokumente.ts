@@ -47,6 +47,8 @@ export interface Eintrag extends Dokument {
   vorschaubild: boolean;
   /** Seitenzahl, wenn bekannt (PDF, Office mit Ansicht) */
   seiten: number | null;
+  /** Nur bei einer Suche: Ausschnitt aus dem Text, Treffer zwischen \u0002 und \u0003 */
+  ausschnitt: string | null;
 }
 
 /** Wie sicher ein gelernter Vorschlag ist und woraus er gelernt ist */

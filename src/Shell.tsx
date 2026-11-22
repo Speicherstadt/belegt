@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigate, useLocation } from "@tanstack/react-router";
+import { Navigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
@@ -21,11 +21,8 @@ export function Shell({ children }: { children: ReactNode }) {
   // Im Frame einmal still über den Anbieter anmelden; hat die Person dort eine Sitzung, kommt sie direkt zurück.
   // Einmal entschieden (null: noch nicht), denn stillAnmeldenErlaubt merkt sich den Versuch
   const [still, setStill] = useState<boolean | null>(null);
-  // Menü am Handy; ein Wechsel der Seite klappt es wieder zu
+  // Menü am Handy; ein Klick auf einen Link darin klappt es wieder zu (Sidebar, onNavigiert)
   const [menue, setMenue] = useState(false);
-  const pfad = useLocation({ select: (l) => l.pathname + l.searchStr });
-  // biome-ignore lint/correctness/useExhaustiveDependencies: der Pfad ist der Anlass, nicht ein gelesener Wert
-  useEffect(() => setMenue(false), [pfad]);
   useEffect(() => {
     if (!abgemeldet || !status.data || still !== null) return;
     const versuchen = imFrame && !!status.data.oidc && stillAnmeldenErlaubt();
@@ -64,6 +61,7 @@ export function Shell({ children }: { children: ReactNode }) {
         oidc={status.data?.oidc ?? null}
         version={status.data?.version}
         offen={menue}
+        onNavigiert={() => setMenue(false)}
       />
       <main id="inhalt" className="min-w-0 flex-1 px-4 py-6 sm:px-8">
         {!imFrame && !ich.data.zweiFaktorEinrichten && (

@@ -48,10 +48,13 @@ export function Sidebar({
   oidc = null,
   version,
   offen = false,
+  onNavigiert,
 }: {
   ich: Ich;
   /** Am Handy: ob das Menü aufgeklappt ist; ab md steht die Leiste immer da */
   offen?: boolean;
+  /** Ein Link in der Leiste wurde geklickt; am Handy klappt die Shell das Menü dann zu */
+  onNavigiert?: () => void;
   /** Im Frame einer anderen Seite: ohne Namen und Konto, die zeigt die einbettende Seite */
   eingebettet?: boolean;
   oidc?: { name: string } | null;
@@ -79,6 +82,9 @@ export function Sidebar({
   return (
     <aside
       id="seitenleiste"
+      onClickCapture={(e) => {
+        if (e.target instanceof Element && e.target.closest("a")) onNavigiert?.();
+      }}
       className={`${offen ? "flex" : "hidden"} print:hidden flex-col gap-5 border-border border-b bg-side px-3 py-4 md:flex md:w-64 md:shrink-0 md:border-r md:border-b-0`}
     >
       {!eingebettet && (

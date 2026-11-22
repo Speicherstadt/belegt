@@ -32,6 +32,11 @@ const dokument = {
     quelle: { type: "string", enum: ["upload", "mail", "ordner", "api", "abgeleitet", "import"] },
     eingegangenAm: { type: "string", format: "date-time" },
     vorschaubild: { type: "boolean", description: "Nur in der Liste: ob es ein Vorschaubild gibt" },
+    ausschnitt: {
+      type: ["string", "null"],
+      description:
+        "Nur in der Liste mit suche: Ausschnitt aus dem Text, in dem sie trifft; Treffer zwischen den Zeichen U+0002 und U+0003",
+    },
     seiten: {
       type: ["integer", "null"],
       description: "Nur in der Liste: Seitenzahl, wenn bekannt (PDF und Office mit Ansicht, nach dem Vorschaubild)",

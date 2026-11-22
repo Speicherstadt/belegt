@@ -43,6 +43,28 @@ function Markiert({ text, suche }: { text: string; suche: string }) {
   );
 }
 
+/**
+ * Ausschnitt aus dem Text, in dem eine Suche trifft (vom Server, Treffer zwischen \u0002 und \u0003): zeigt, warum ein
+ * Dokument gefunden wurde, auch wenn das Wort nicht im Namen steht
+ */
+function Ausschnitt({ text }: { text: string | null }) {
+  if (!text) return null;
+  return (
+    <span className="mt-1 line-clamp-3 font-normal text-muted text-xs">
+      {text.split("\u0002").map((teil, i) => {
+        const [treffer, rest] = i === 0 ? ["", teil] : (teil.split("\u0003") as [string, string?]);
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: die Stücke eines Texts haben keine eigene ID, ihre Folge ist fest
+          <span key={i}>
+            {treffer && <mark className="rounded bg-yellow-200 px-0.5 text-fg dark:bg-yellow-700/60">{treffer}</mark>}
+            {rest}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 export const name = (d: Eintrag) => d.titel ?? d.dateiname ?? m.unnamed();
 
 export function Ordnungszeile({ d }: { d: Eintrag }) {
@@ -119,6 +141,7 @@ export function DocumentTable({
                   <Markiert text={name(d)} suche={suche} />
                 </Link>
                 <Ordnungszeile d={d} />
+                <Ausschnitt text={d.ausschnitt} />
               </td>
               <td className="px-3 py-3">{aufbewahrung(d)}</td>
               <td className="px-3 py-3 text-muted">{d.mimeType}</td>
@@ -203,6 +226,7 @@ export function DocumentGrid({
               >
                 <Markiert text={name(d)} suche={suche} />
               </Link>
+              {!kompakt && <Ausschnitt text={d.ausschnitt} />}
               <span className="text-muted text-xs tabular-nums">
                 {d.dokumenttyp ? `${d.dokumenttyp.name} · ` : ""}
                 {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
