@@ -254,3 +254,10 @@ festes Symbol (`src/components/Symbole.tsx`), dasselbe in Seitenleiste, Kacheln 
 mit Bedeutung: Siegel (`--ok`, `--warn`, `--danger`) und die Punkte der Aufbewahrung (Pflicht `--c-blue`, freiwillig
 mit Frist `--c-amber`, frei `--muted`). Keine Akzentfarbe: Hauptknopf und aktiver Filter bleiben `--primary`.
 
+## Startseite
+
+Oben der Überblick als Raster ungleich breiter Karten (`src/components/start/Ueberblick.tsx`): Archiv doppelt breit
+mit dem Verlauf der letzten zwölf Monate als Linie, Eingang mit einem Ring für den eingeordneten Anteil, Speicher mit
+der Belegung des Datenträgers als Segmente, Pflege als kurze Liste. Diagramme sind einfarbig (`currentColor`,
+`--muted`, `--border`) und schmückend; Zahl und Text daneben sagen dasselbe. Darunter links breit die gespeicherten
+Ansichten, rechts untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so hoch wie ihr Inhalt.

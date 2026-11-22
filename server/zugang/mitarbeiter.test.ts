@@ -152,7 +152,7 @@ describe.skipIf(!testDatenbankUrl)("Mitarbeiter gegen Postgres", () => {
     });
     // Startseite: nur die beiden sichtbaren, ohne Fristen, Sperren, Quellen und Speicher
     const start = await (await als(m)("/api/start")).json();
-    expect(start).toEqual({ eingang: 2, gesamt: 2, diesesJahr: 2 });
+    expect(start).toEqual({ eingang: 2, gesamt: 2, diesesJahr: 2, vorjahr: 0, verlauf: [...Array(11).fill(0), 2] });
     // Suche nach einem Wort aus einem unsichtbaren Dateinamen: nichts, auch nicht in der Gesamtzahl
     const suche = await als(m)("/api/dokumente?suche=gehalt");
     expect(await suche.json()).toEqual([]);

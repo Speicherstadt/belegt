@@ -18,6 +18,10 @@ export interface Start {
   eingang: number;
   gesamt: number;
   diesesJahr: number;
+  /** Im Vorjahr bis zum selben Tag */
+  vorjahr: number;
+  /** Eingänge je Monat der letzten zwölf Monate, der laufende zuletzt */
+  verlauf: number[];
   fristen?: {
     anzahl: number;
     naechste: { id: string; asn: number; titel: string | null; dateiname: string | null; fristBis: string }[];
@@ -36,7 +40,7 @@ export interface Start {
     ordner: { letzterEingang: string | null } | null;
     paperless: { status: string; fehler: number; uebernommen: number; zeitpunkt: string } | null;
   };
-  speicher?: { bytes: number; dateien: number };
+  speicher?: { bytes: number; dateien: number; datentraeger?: { gesamt: number; frei: number } };
 }
 
 export const alltagApi = {

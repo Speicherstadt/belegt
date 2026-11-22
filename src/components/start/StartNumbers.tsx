@@ -1,88 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import type { CSSProperties } from "react";
 import type { Start } from "../../lib/api.ts";
-import { groesse, tag } from "../../lib/format.ts";
+import { tag } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { BereichSymbol } from "../Symbole.tsx";
 
 const kachel = "flex flex-col gap-1 rounded-lg border border-border p-3.5";
-
-/** Zahlen der Startseite als Beschreibungsliste: jede Zahl mit ihrer Beschriftung, für Screenreader zusammen gelesen */
-export function StartNumbers({ start }: { start: Start }) {
-  const zahlen: {
-    label: string;
-    wert: string;
-    link?: { to: string; text: string };
-    hinweis?: string;
-    bereich?: string;
-  }[] = [
-    {
-      label: m.start_inbox(),
-      bereich: "/eingang",
-      wert: String(start.eingang),
-      link: { to: "/eingang", text: m.start_inbox_link() },
-    },
-    {
-      label: m.start_total(),
-      bereich: "/archiv",
-      wert: String(start.gesamt),
-      link: { to: "/archiv", text: m.start_archive_link() },
-    },
-    { label: m.start_this_year(), bereich: "#jahr", wert: String(start.diesesJahr) },
-  ];
-  if (start.loeschantraege !== undefined)
-    zahlen.push({
-      label: m.start_deletion_requests(),
-      bereich: "/fristen",
-      wert: String(start.loeschantraege),
-      link: { to: "/fristen", text: m.start_retention_link() },
-    });
-  if (start.sperren)
-    zahlen.push({
-      label: m.start_holds(),
-      bereich: "/pruefung",
-      wert: String(start.sperren.aktiv),
-      hinweis: m.start_holds_hint({ anzahl: String(start.sperren.dokumente) }),
-    });
-  if (start.speicher)
-    zahlen.push({
-      label: m.start_storage(),
-      bereich: "#speicher",
-      wert: groesse(start.speicher.bytes),
-      hinweis: m.start_storage_hint({ anzahl: String(start.speicher.dateien) }),
-    });
-  return (
-    <section aria-labelledby="start-zahlen" className="flex flex-col gap-3">
-      <h2 id="start-zahlen" className="m-0 font-semibold text-lg">
-        {m.start_numbers()}
-      </h2>
-      {/* Eine Karte, die Zahlen darin durch feine Linien getrennt (Lücke von 1 px auf --border): in einer Reihe, sonst in
-          zwei oder drei Spalten */}
-      <dl
-        className="m-0 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 xl:grid-cols-[repeat(var(--spalten),minmax(0,1fr))]"
-        style={{ "--spalten": zahlen.length } as CSSProperties}
-      >
-        {zahlen.map((z) => (
-          <div key={z.label} className="flex flex-col gap-1 bg-bg p-4">
-            <dt className="flex items-center gap-2 text-muted text-sm">
-              {z.bereich && <BereichSymbol bereich={z.bereich} />}
-              {z.label}
-            </dt>
-            <dd className="m-0 font-semibold text-2xl tabular-nums">{z.wert}</dd>
-            {z.hinweis && <dd className="m-0 text-muted text-xs">{z.hinweis}</dd>}
-            {z.link && (
-              <dd className="m-0 text-sm">
-                <Link to={z.link.to} className="underline underline-offset-2">
-                  {z.link.text}
-                </Link>
-              </dd>
-            )}
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
-}
 
 /** Fristen, die in den nächsten 90 Tagen enden: Zahl und die nächsten fünf mit dem Tag, ab dem sie löschbar sind */
 export function UpcomingRetention({ fristen }: { fristen: NonNullable<Start["fristen"]> }) {

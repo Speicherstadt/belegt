@@ -121,7 +121,7 @@ test("Bilder für README und Doku", async ({ page, browser }) => {
   await page.getByRole("region", { name: "Unveränderbarkeit" }).getByRole("button", { name: "Jetzt prüfen" }).click();
   await expect(page.getByRole("region", { name: "Unveränderbarkeit" })).toContainText("in Ordnung");
   // Die Startseite ganz, mit den Kacheln unten: höher als die übrigen Bilder (docs/index.md nennt die Größe)
-  await page.setViewportSize({ width: 1440, height: 1120 });
+  await page.setViewportSize({ width: 1440, height: 1240 });
   await bild(page, "start");
   await page.setViewportSize({ width: 1440, height: 900 });
 

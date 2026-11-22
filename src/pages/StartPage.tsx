@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "../components/PageHeader.tsx";
 import { FirstSteps } from "../components/start/FirstSteps.tsx";
 import { OperationStatus } from "../components/start/OperationStatus.tsx";
-import { StartNumbers, UpcomingRetention } from "../components/start/StartNumbers.tsx";
+import { UpcomingRetention } from "../components/start/StartNumbers.tsx";
 import { ChainStatus, SourceStatus } from "../components/start/SystemStatus.tsx";
+import { Ueberblick } from "../components/start/Ueberblick.tsx";
 import { ViewTiles } from "../components/start/ViewTiles.tsx";
 import { api } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
@@ -26,7 +27,7 @@ export function StartPage() {
       {/* Leeres Archiv: erst die ersten Schritte, für den, der einrichtet */}
       {start.data?.gesamt === 0 && ich.data?.role === "inhaber" && <FirstSteps />}
       {/* Zuerst der Überblick, darunter links die gespeicherten Ansichten und rechts der Zustand */}
-      {start.data && <StartNumbers start={start.data} />}
+      {start.data && <Ueberblick start={start.data} />}
       {/* Breit die gespeicherten Ansichten, daneben der Zustand untereinander: jede Karte so hoch wie ihr Inhalt */}
       <div className="grid items-start gap-5 lg:grid-cols-3">
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-2">

@@ -786,21 +786,9 @@
   "start_inbox": "In the inbox, not yet classified",
   "start_inbox_link": "Go to the inbox",
   "start_total": "Documents in the archive",
-  "start_archive_link": "Go to the archive",
-  "start_this_year": "Received this year",
   "start_deletion_requests": "Open deletion requests",
   "start_retention_link": "Go to retention",
   "start_holds": "Active holds",
-  "start_holds_hint": [
-    {
-      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
-      "selectors": ["anzahlPlural"],
-      "match": {
-        "anzahlPlural=one": "{anzahl} document covered",
-        "anzahlPlural=other": "{anzahl} documents covered"
-      }
-    }
-  ],
   "start_storage": "Storage for originals",
   "start_storage_hint": [
     {
@@ -1447,5 +1435,15 @@
   "first_paperless": "Move over from Paperless-ngx",
   "first_paperless_text": "Move documents with tags, types, fields and notes, each original checked against its checksum.",
   "first_app": "As an app on your phone",
-  "first_app_text": "Put Belegt on your home screen, photograph receipts and share from other apps."
+  "first_app_text": "Put Belegt on your home screen, photograph receipts and share from other apps.",
+  "start_this_year_short": "{anzahl} of them this year",
+  "start_trend": "{prozent} on last year",
+  "start_sorted": "{fertig} of {gesamt} filed",
+  "start_disk_of": "of {gesamt}",
+  "start_disk_free": "{frei} free",
+  "start_legend_originals": "Originals",
+  "start_legend_used": "other used",
+  "start_care": "Upkeep",
+  "start_seal": "Seals",
+  "start_chart_label": "Documents received in the last twelve months"
 }

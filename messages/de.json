@@ -723,21 +723,9 @@
   "start_inbox": "Im Eingang, noch nicht eingeordnet",
   "start_inbox_link": "Zum Eingang",
   "start_total": "Dokumente im Archiv",
-  "start_archive_link": "Zum Archiv",
-  "start_this_year": "In diesem Jahr eingegangen",
   "start_deletion_requests": "Offene Löschanträge",
   "start_retention_link": "Zu den Fristen",
   "start_holds": "Aktive Sperren",
-  "start_holds_hint": [
-    {
-      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
-      "selectors": ["anzahlPlural"],
-      "match": {
-        "anzahlPlural=one": "{anzahl} Dokument darunter",
-        "anzahlPlural=other": "{anzahl} Dokumente darunter"
-      }
-    }
-  ],
   "start_storage": "Speicher für Originale",
   "start_storage_hint": [
     {
@@ -1369,5 +1357,15 @@
   "first_paperless": "Aus Paperless-ngx übernehmen",
   "first_paperless_text": "Dokumente mit Tags, Typen, Feldern und Notizen umziehen, jedes Original gegen seine Prüfsumme geprüft.",
   "first_app": "Als App aufs Handy",
-  "first_app_text": "Belegt auf den Startbildschirm legen, Belege fotografieren und aus anderen Apps teilen."
+  "first_app_text": "Belegt auf den Startbildschirm legen, Belege fotografieren und aus anderen Apps teilen.",
+  "start_this_year_short": "davon {anzahl} in diesem Jahr",
+  "start_trend": "{prozent} zum Vorjahr",
+  "start_sorted": "{fertig} von {gesamt} eingeordnet",
+  "start_disk_of": "von {gesamt}",
+  "start_disk_free": "frei {frei}",
+  "start_legend_originals": "Originale",
+  "start_legend_used": "übrig belegt",
+  "start_care": "Pflege",
+  "start_seal": "Siegel",
+  "start_chart_label": "Eingänge der letzten zwölf Monate"
 }

@@ -17,7 +17,6 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
   for (const beschriftung of [
     "Im Eingang, noch nicht eingeordnet",
     "Dokumente im Archiv",
-    "In diesem Jahr eingegangen",
     "Offene Löschanträge",
     "Aktive Sperren",
     "Speicher für Originale",
@@ -26,6 +25,9 @@ test("die Startseite zeigt Zahlen mit Beschriftung und Kacheln aus einer gespeic
   // Mindestens das eben hochgeladene Dokument liegt im Eingang
   const eingang = ueberblick.locator("dl > div").filter({ hasText: "Im Eingang, noch nicht eingeordnet" });
   await expect(eingang.getByRole("definition").first()).toHaveText(/^[1-9]\d*$/);
+  // Das Archiv nennt, wie viele davon in diesem Jahr eingingen, und zeigt den Verlauf der letzten zwölf Monate
+  await expect(ueberblick).toContainText(/davon [1-9]\d* in diesem Jahr/);
+  await expect(ueberblick.getByRole("img", { name: "Eingänge der letzten zwölf Monate" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Fristen der nächsten 90 Tage" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Quellen" })).toBeVisible();
   // Die Startseite zeigt den letzten gespeicherten Lauf; der Inhaber prüft auf Wunsch sofort

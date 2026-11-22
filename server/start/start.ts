@@ -27,6 +27,10 @@ export interface Start {
   gesamt: number;
   /** In diesem Kalenderjahr eingegangen */
   diesesJahr: number;
+  /** Im Vorjahr bis zum selben Tag eingegangen, zum Vergleich mit diesesJahr */
+  vorjahr: number;
+  /** Eingänge je Monat der letzten zwölf Monate, der laufende zuletzt */
+  verlauf: number[];
   /** Frist endet in den nächsten 90 Tagen (löschbar ab dem Tag danach); die nächsten fünf */
   fristen?: { anzahl: number; naechste: FristEintrag[] };
   loeschantraege?: number;
@@ -46,7 +50,12 @@ export interface Start {
     paperless: { status: string; fehler: number; uebernommen: number; zeitpunkt: string } | null;
   };
   /** Größe der Originale im Speicher, jede Datei einmal; ohne gelöschte */
-  speicher?: { bytes: number; dateien: number };
+  speicher?: {
+    bytes: number;
+    dateien: number;
+    /** Datenträger mit den Originalen (DOCUMENTS_DIR); ohne ihn (S3) keine Angabe */
+    datentraeger?: { gesamt: number; frei: number };
+  };
 }
 
 const geloescht = sql`exists (select 1 from loeschungen l where l.dokument_id = d.id and l.bestaetigt_am is not null)`;
@@ -55,10 +64,21 @@ const geloescht = sql`exists (select 1 from loeschungen l where l.dokument_id = 
 export async function startZahlen(
   db: Datenbank,
   nutzer: Pick<Angemeldet, "id" | "role" | "zeitraum" | "sichtbereich">,
-  { heute, eingangsordner = false }: { heute: string; eingangsordner?: boolean },
+  {
+    heute,
+    eingangsordner = false,
+    datentraeger,
+  }: { heute: string; eingangsordner?: boolean; datentraeger?: { gesamt: number; frei: number } },
 ): Promise<Start> {
   const sicht = sichtVon(nutzer);
-  const [zahlen] = await db.execute<{ gesamt: string; eingang: string; dieses_jahr: string; fristen: string }>(sql`
+  const [zahlen] = await db.execute<{
+    gesamt: string;
+    eingang: string;
+    dieses_jahr: string;
+    vorjahr: string;
+    fristen: string;
+    verlauf: string[];
+  }>(sql`
     with aktiv as (
       select d.id, d.eingegangen_am, e.id as einordnung, e.frist_bis
         from dokumente d
@@ -70,12 +90,23 @@ export async function startZahlen(
            count(*) filter (where einordnung is null) as eingang,
            count(*) filter (where (eingegangen_am at time zone 'Europe/Berlin')::date
                                   >= date_trunc('year', ${heute}::date)::date) as dieses_jahr,
+           count(*) filter (where (eingegangen_am at time zone 'Europe/Berlin')::date
+                                  between (date_trunc('year', ${heute}::date) - interval '1 year')::date
+                                      and (${heute}::date - interval '1 year')::date) as vorjahr,
+           (select array_agg(n order by monat) from (
+              select m.monat, count(a.id) as n
+                from generate_series(date_trunc('month', ${heute}::date) - interval '11 months',
+                                     date_trunc('month', ${heute}::date), interval '1 month') m(monat)
+                left join aktiv a on date_trunc('month', a.eingegangen_am at time zone 'Europe/Berlin') = m.monat
+               group by m.monat) v) as verlauf,
            count(*) filter (where frist_bis between ${heute}::date and ${heute}::date + 90) as fristen
       from aktiv`);
   const basis: Start = {
     eingang: Number(zahlen?.eingang ?? 0),
     gesamt: Number(zahlen?.gesamt ?? 0),
     diesesJahr: Number(zahlen?.dieses_jahr ?? 0),
+    vorjahr: Number(zahlen?.vorjahr ?? 0),
+    verlauf: (zahlen?.verlauf ?? []).map(Number),
   };
   if (sicht) return basis;
   const [naechste, betrieb, postfaecher, ordner, laeufe] = await Promise.all([
@@ -104,6 +135,7 @@ export async function startZahlen(
     ...basis,
     fristen: { anzahl: Number(zahlen?.fristen ?? 0), naechste },
     ...betrieb,
+    speicher: { ...betrieb.speicher, ...(datentraeger ? { datentraeger } : {}) },
     quellen: {
       postfaecher: postfaecher.map((p) => ({
         ...p,
@@ -150,7 +182,11 @@ async function fristenNaechste(db: Datenbank, heute: string): Promise<FristEintr
 }
 
 /** Offene Löschanträge, Sperren mit den Dokumenten darin, Größe der Originale */
-async function betriebZahlen(db: Datenbank): Promise<Pick<Start, "loeschantraege" | "sperren" | "speicher">> {
+async function betriebZahlen(db: Datenbank): Promise<{
+  loeschantraege: number;
+  sperren: { aktiv: number; dokumente: number };
+  speicher: { bytes: number; dateien: number };
+}> {
   const [r] = await db.execute<{
     antraege: string;
     sperren: string;

@@ -85,6 +85,7 @@ Bun.serve({
     auth,
     schluessel,
     importOrdner,
+    speicherOrdner: verzeichnis,
     mail,
     oeffnen: imapOeffnen,
     erechnungPruefung: true,

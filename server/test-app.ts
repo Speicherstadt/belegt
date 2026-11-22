@@ -69,6 +69,7 @@ export async function testApp({
     objektsperre,
     clientIp,
     mail,
+    speicherOrdner: verzeichnis,
   });
 
   /** Anfrage wie aus dem Browser, mit Origin für die CSRF-Prüfung von Better Auth */
