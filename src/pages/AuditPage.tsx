@@ -38,15 +38,15 @@ export function AuditPage() {
       {pruefung.data && (
         <SealStatus
           zustand={pruefung.data.ok ? "gut" : "befund"}
-          satz={pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) })}
-          detail={[
-            m.seal_checked({ zeit: zeitpunkt(pruefung.data.bericht.zeitpunkt) }),
+          satz={[
+            pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) }),
             pruefung.data.dateienGeprueft !== undefined
               ? m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })
               : "",
           ]
             .filter(Boolean)
             .join(" ")}
+          detail={m.seal_checked({ zeit: zeitpunkt(pruefung.data.bericht.zeitpunkt) })}
         />
       )}
       {pruefung.data && (
