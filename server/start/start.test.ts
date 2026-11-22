@@ -84,7 +84,9 @@ describe.skipIf(!testDatenbankUrl)("Startseite gegen Postgres", { timeout: 30_00
     expect(s.quellen).toEqual({ postfaecher: [], ordner: null, paperless: null });
     expect(offen.id).toBeTruthy();
     // Die Steuerberatung sieht dieselben Zahlen
-    expect(await start(steuer)).toEqual(s);
+    // Der freie Platz des Datenträgers ändert sich zwischen zwei Abfragen; alles andere ist gleich
+    const ohneFrei = (x: Start) => ({ ...x, speicher: { ...x.speicher, datentraeger: undefined } });
+    expect(ohneFrei(await start(steuer))).toEqual(ohneFrei(s));
   });
 
   it("der Prüfer bekommt nur Zahlen seines Zeitraums, ohne Betrieb", async () => {
