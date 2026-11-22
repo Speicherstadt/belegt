@@ -7,7 +7,7 @@ test("Workflow anlegen und seine Wirkung bei einem Upload sehen", async ({ page 
   const kennung = `wf-${info.project.name}`;
   const name = `${kennung}-rechnung.pdf`;
 
-  await page.goto("/ordnung");
+  await page.goto("/ordnung?bereich=tags");
   const tags = page.locator("section", { has: page.getByRole("heading", { name: "Tags", exact: true }) });
   await tags.getByLabel("Neuer Tag").fill(tag);
   await tags.getByRole("button", { name: "Tag anlegen" }).click();

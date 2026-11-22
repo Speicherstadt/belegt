@@ -1431,5 +1431,7 @@
     }
   ],
   "view_compact": "Compact",
-  "menu": "Menu"
+  "menu": "Menu",
+  "order_tabs_label": "Classification sections",
+  "order_filter": "Filter by name"
 }

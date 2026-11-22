@@ -19,7 +19,7 @@ test("Tag anlegen, einem Dokument zuweisen und im Archiv danach filtern", async 
   await hochladen(page, anderes);
   await hochladen(page, name);
 
-  await page.goto("/ordnung");
+  await page.goto("/ordnung?bereich=tags");
   const tags = page.locator("section", { has: page.getByRole("heading", { name: "Tags", exact: true }) });
   await tags.getByLabel("Neuer Tag").fill(tag);
   await tags.getByRole("combobox", { name: "Farbe" }).selectOption("blau");
@@ -99,7 +99,7 @@ test("ein Betragsfeld definieren, „1.234,56“ eingeben und nach Betrag filter
   const name = `Angebot-${info.project.name}.pdf`;
   await hochladen(page, name);
 
-  await page.goto("/ordnung");
+  await page.goto("/ordnung?bereich=felder");
   const felder = page.locator("section", { has: page.getByRole("heading", { name: "Eigene Felder" }) });
   await felder.getByLabel("Neues Feld").fill(feld);
   await felder.getByRole("combobox", { name: "Typ" }).selectOption("betrag");
@@ -136,7 +136,7 @@ test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag
   const praefix = `Stapel-${info.project.name}`;
   await hochladen(page, `${praefix}-1.pdf`);
   await hochladen(page, `${praefix}-2.pdf`);
-  await page.goto("/ordnung");
+  await page.goto("/ordnung?bereich=tags");
   const tags = page.locator("section", { has: page.getByRole("heading", { name: "Tags", exact: true }) });
   await tags.getByLabel("Neuer Tag").fill(tag);
   await tags.getByRole("button", { name: "Tag anlegen" }).click();

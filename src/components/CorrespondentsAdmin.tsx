@@ -140,7 +140,7 @@ function KorrespondentZeile({ k, alle, schreiben }: { k: Korrespondent; alle: Ko
 }
 
 /** Korrespondenten als Liste: anlegen mit Zuordnungsregel, umbenennen, zusammenführen, löschen */
-export function CorrespondentsAdmin({ schreiben }: { schreiben: boolean }) {
+export function CorrespondentsAdmin({ schreiben, filter = "" }: { schreiben: boolean; filter?: string }) {
   const queryClient = useQueryClient();
   const liste = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const anlegen = useMutation({
@@ -164,9 +164,11 @@ export function CorrespondentsAdmin({ schreiben }: { schreiben: boolean }) {
       <p className="m-0 text-muted text-sm">{m.order_parties_intro()}</p>
       {liste.data?.length === 0 && <p className="m-0 text-sm">{m.order_parties_none()}</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {liste.data?.map((k) => (
-          <KorrespondentZeile key={k.id} k={k} alle={liste.data} schreiben={schreiben} />
-        ))}
+        {liste.data
+          ?.filter((k) => k.name.toLowerCase().includes(filter.trim().toLowerCase()))
+          .map((k) => (
+            <KorrespondentZeile key={k.id} k={k} alle={liste.data} schreiben={schreiben} />
+          ))}
       </ul>
       {schreiben && (
         <form

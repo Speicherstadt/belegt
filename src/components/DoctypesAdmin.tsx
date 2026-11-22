@@ -109,7 +109,7 @@ function TypZeile({ typ, schreiben }: { typ: Dokumenttyp; schreiben: boolean }) 
 }
 
 /** Dokumenttypen: frei definierbar, getrennt von der Art; die Vorgabe-Art schlägt beim Einordnen nur vor */
-export function DoctypesAdmin({ schreiben }: { schreiben: boolean }) {
+export function DoctypesAdmin({ schreiben, filter = "" }: { schreiben: boolean; filter?: string }) {
   const queryClient = useQueryClient();
   const liste = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
   const anlegen = useMutation({
@@ -132,9 +132,11 @@ export function DoctypesAdmin({ schreiben }: { schreiben: boolean }) {
       <p className="m-0 text-muted text-sm">{m.order_doctypes_intro()}</p>
       {liste.data?.length === 0 && <p className="m-0 text-sm">{m.order_doctypes_none()}</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {liste.data?.map((t) => (
-          <TypZeile key={t.id} typ={t} schreiben={schreiben} />
-        ))}
+        {liste.data
+          ?.filter((t) => t.name.toLowerCase().includes(filter.trim().toLowerCase()))
+          .map((t) => (
+            <TypZeile key={t.id} typ={t} schreiben={schreiben} />
+          ))}
       </ul>
       {schreiben && (
         <form

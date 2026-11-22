@@ -11,6 +11,10 @@ Dokumenttypen und eigenen Feldern. Das sind Metadaten, nicht das Original: Sie l
 Zeitpunkt im Audit-Log und im Verlauf des Dokuments. Anlegen darf nur der Inhaber, zuweisen auch
 [Mitarbeiter](zugaenge.md#mitarbeiter) mit dem Recht „bearbeiten“ in ihrem Sichtbereich; Steuerberatung und Prüfer sehen sie. Verwaltet werden sie auf der Seite Ordnung.
 
+
+Die Seite Ordnung hat vier Reiter: Korrespondenten, Tags, Dokumenttypen und eigene Felder. Der Reiter steht in der
+Adresse (`?bereich=tags`), ein Feld filtert die Liste nach Namen.
+
 ## Korrespondenten
 
 Ein Korrespondent ist, von wem ein Dokument kommt oder an wen es geht, etwa „Stadtwerke“; jedes Dokument hat höchstens

@@ -1353,5 +1353,7 @@
     }
   ],
   "view_compact": "Kompakt",
-  "menu": "Menü"
+  "menu": "Menü",
+  "order_tabs_label": "Bereiche der Ordnung",
+  "order_filter": "Nach Namen filtern"
 }
