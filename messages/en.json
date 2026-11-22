@@ -1344,5 +1344,16 @@
   "quick_create": "New: {was}",
   "quick_create_name": "Name for new: {was}",
   "quick_create_submit": "Create and set",
-  "quick_create_tag": "Tag"
+  "quick_create_tag": "Tag",
+  "bulk_selected": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document selected",
+        "anzahlPlural=other": "{anzahl} documents selected"
+      }
+    }
+  ],
+  "bulk_clear": "Clear selection"
 }

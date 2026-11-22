@@ -9,6 +9,14 @@ type Fall = [string, (n: string, locale: "de" | "en") => string, string, string,
 
 const FAELLE: Fall[] = [
   [
+    "bulk_selected",
+    (n, locale) => m.bulk_selected({ anzahl: n }, { locale }),
+    "1 Dokument ausgewählt",
+    "2 Dokumente ausgewählt",
+    "1 document selected",
+    "2 documents selected",
+  ],
+  [
     "drop_done",
     (n, locale) => m.drop_done({ anzahl: n }, { locale }),
     "1 Dokument aufgenommen",

@@ -115,7 +115,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Korrespondent und Dokumenttyp als durchsuchbare Filterlisten mit Anzahl | mittel | erledigt |
 | Bedienung: Tags ausschließen und „Ohne Tag“ im Filter | mittel | erledigt |
 | Bedienung: Tags, Korrespondent und Dokumenttyp direkt im Dokument anlegen | mittel | erledigt |
-| Bedienung: Fristen-Seite mit eigenen Vorlagen, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
+| Bedienung: Auswahl als stehende Leiste mit Massenbearbeitung | mittel | erledigt |
+| Bedienung: Fristen-Seite mit eigenen Vorlagen, Treffer hervorheben | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 
