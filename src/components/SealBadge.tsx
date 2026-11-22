@@ -49,12 +49,14 @@ function Schild({ zustand, klein }: { zustand: SiegelZustand; klein?: boolean })
  */
 export function SealStatus({ zustand, satz, detail }: { zustand: SiegelZustand; satz: string; detail?: string }) {
   return (
-    <div role="status" className="flex items-start gap-3 rounded-md border border-border bg-subtle px-3 py-2.5">
+    <div className="flex items-start gap-3 rounded-md border border-border bg-subtle px-3 py-2.5">
       <span className="mt-0.5">
         <Schild zustand={zustand} />
       </span>
       <span className="flex flex-col">
-        <span className="font-medium text-sm">{satz}</span>
+        <span role="status" className="font-medium text-sm">
+          {satz}
+        </span>
         {detail && <span className="text-muted text-xs">{detail}</span>}
       </span>
     </div>
