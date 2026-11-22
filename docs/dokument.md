@@ -19,7 +19,7 @@ Dokument ein und öffnet gleich das nächste.
 ## Vorschaubilder
 
 Eingang und Archiv zeigen vor dem Namen ein kleines Bild der ersten Seite; „Kacheln“ zeigt die Dokumente als größere
-Bilder nebeneinander, mit den Tags auf dem Bild, Korrespondent, Typ und den Knöpfen „Öffnen“, „Vorschau“ (PDF und Bilder, in einem Dialog) und „Herunterladen“; Treffer einer Suche sind im Namen markiert; „Liste“ wieder als Tabelle. Die Wahl merkt sich der Browser.
+Bilder nebeneinander, mit den Tags auf dem Bild, Korrespondent, Typ und den Knöpfen „Öffnen“, „Vorschau“ (PDF und Bilder, in einem Dialog) und „Herunterladen“; Treffer einer Suche sind im Namen markiert; „Kompakt“ zeigt kleinere Kacheln ohne Knöpfe, damit mehr auf einen Blick passt; „Liste“ wieder als Tabelle. Die Wahl merkt sich der Browser.
 
 Der Worker erzeugt die Bilder kurz nach dem Eingang mit `pdftoppm` (Poppler, im Image enthalten): aus PDFs, aus JPEG
 und PNG und bei Office-Dateien aus ihrer [Ansicht](eingang.md#ansicht-von-office-dateien). Mails, Textdateien, WebP,

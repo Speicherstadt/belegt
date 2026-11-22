@@ -30,13 +30,14 @@ const FILTER: { gruppe: Gruppe; label: () => string }[] = [
 /** Nur mit eingerichtetem Prüfdienst (VALIDATOR_URL) */
 const UNGUELTIG = { gruppe: "erechnung_ungueltig" as const, label: () => m.filter_einvoice_invalid() };
 
-type Darstellung = "liste" | "kacheln";
+type Darstellung = "liste" | "kacheln" | "kompakt";
 const DARSTELLUNG = "belegt.darstellung.liste";
 
-/** Liste oder Kacheln, je Browser gemerkt; ohne Speicher (privates Fenster) die Liste */
+/** Liste, Kacheln oder kompakte Kacheln, je Browser gemerkt; ohne Speicher (privates Fenster) die Liste */
 function gemerkteDarstellung(): Darstellung {
   try {
-    return localStorage.getItem(DARSTELLUNG) === "kacheln" ? "kacheln" : "liste";
+    const wert = localStorage.getItem(DARSTELLUNG);
+    return wert === "kacheln" || wert === "kompakt" ? wert : "liste";
   } catch {
     return "liste";
   }
@@ -241,7 +242,7 @@ export function DocumentList({
         )}
         <fieldset className="m-0 flex gap-1 border-0 p-0">
           <legend className="sr-only">{m.view_label()}</legend>
-          {(["liste", "kacheln"] as const).map((d) => (
+          {(["liste", "kacheln", "kompakt"] as const).map((d) => (
             <button
               key={d}
               type="button"
@@ -249,7 +250,7 @@ export function DocumentList({
               onClick={() => darstellen(d)}
               className="h-10 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
             >
-              {d === "liste" ? m.view_list() : m.view_grid()}
+              {d === "liste" ? m.view_list() : d === "kacheln" ? m.view_grid() : m.view_compact()}
             </button>
           ))}
         </fieldset>
@@ -381,8 +382,13 @@ export function DocumentList({
         </EmptyState>
       )}
       {!!liste.data?.length &&
-        (darstellung === "kacheln" ? (
-          <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} suche={suche} />
+        (darstellung !== "liste" ? (
+          <DocumentGrid
+            eintraege={liste.data}
+            auswahl={auswahlFuerListe}
+            suche={suche}
+            kompakt={darstellung === "kompakt"}
+          />
         ) : (
           <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} suche={suche} />
         ))}

@@ -20,12 +20,15 @@ export function kuerzel(mimeType: string): string {
 export function Thumbnail({
   dokument,
   gross = false,
+  kompakt = false,
 }: {
   dokument: { id: string; mimeType: string; vorschaubild: boolean };
   gross?: boolean;
+  /** Mit gross: niedriger, für die kompakten Kacheln */
+  kompakt?: boolean;
 }) {
   const [kaputt, setKaputt] = useState(false);
-  const masse = gross ? "h-48 w-full" : "h-14 w-10";
+  const masse = gross ? (kompakt ? "h-32 w-full" : "h-48 w-full") : "h-14 w-10";
   if (dokument.vorschaubild && !kaputt)
     return (
       <img
@@ -43,7 +46,7 @@ export function Thumbnail({
   return (
     <span aria-hidden="true" className={`${masse} relative flex items-center justify-center`}>
       <span
-        className={`${gross ? "h-40 w-32" : "h-14 w-10"} relative flex flex-col items-center justify-center gap-1.5 border border-border bg-bg shadow-sm [clip-path:polygon(0_0,75%_0,100%_18%,100%_100%,0_100%)]`}
+        className={`${gross ? (kompakt ? "h-28 w-20" : "h-40 w-32") : "h-14 w-10"} relative flex flex-col items-center justify-center gap-1.5 border border-border bg-bg shadow-sm [clip-path:polygon(0_0,75%_0,100%_18%,100%_100%,0_100%)]`}
       >
         {gross && (
           <span className="flex w-16 flex-col gap-1.5">

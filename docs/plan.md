@@ -118,7 +118,7 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Auswahl als stehende Leiste mit Massenbearbeitung | mittel | erledigt |
 | Bedienung: Fristen-Seite mit „Demnächst fällig“ und eigenen Fristvorlagen | mittel | erledigt |
 | Bedienung: Treffer markieren, Vorschau aus der Kachel, Blatt mit Formatkürzel, Glocke mit Stand der Verarbeitung | mittel | erledigt |
-| Bedienung: Seitenzahl auf Kacheln, dritte Darstellung (kleine Karten) | niedrig | offen |
+| Bedienung: Seitenzahl auf Kacheln, dritte Darstellung „Kompakt“ | niedrig | erledigt |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

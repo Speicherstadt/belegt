@@ -140,10 +140,13 @@ export function DocumentGrid({
   eintraege,
   auswahl,
   suche = "",
+  kompakt = false,
 }: {
   eintraege: Eintrag[];
   auswahl: Auswahl;
   suche?: string;
+  /** Kleine Karten: mehr auf einen Blick, ohne Knöpfe und Aufbewahrung */
+  kompakt?: boolean;
 }) {
   const [vorschau, setVorschau] = useState<Eintrag | null>(null);
   return (
@@ -155,7 +158,13 @@ export function DocumentGrid({
           {m.bulk_select_page()}
         </label>
       )}
-      <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3 p-0">
+      <ul
+        className={`m-0 grid list-none gap-3 p-0 ${
+          kompakt
+            ? "grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))]"
+            : "grid-cols-[repeat(auto-fill,minmax(12rem,1fr))]"
+        }`}
+      >
         {eintraege.map((d) => (
           <li
             key={d.id}
@@ -164,7 +173,7 @@ export function DocumentGrid({
             }`}
           >
             <div className="relative bg-subtle p-2">
-              <Thumbnail dokument={d} gross />
+              <Thumbnail dokument={d} gross kompakt={kompakt} />
               {auswahl.waehlbar && (
                 <input
                   type="checkbox"
@@ -176,10 +185,12 @@ export function DocumentGrid({
               )}
               {!!d.tags.length && (
                 <span className="absolute top-3 right-3 flex max-w-[70%] flex-col items-end gap-1">
-                  {d.tags.slice(0, 3).map((t) => (
+                  {d.tags.slice(0, kompakt ? 1 : 3).map((t) => (
                     <TagChip key={t.id} tag={t} />
                   ))}
-                  {d.tags.length > 3 && <span className="rounded-full bg-bg px-2 text-xs">+{d.tags.length - 3}</span>}
+                  {d.tags.length > (kompakt ? 1 : 3) && (
+                    <span className="rounded-full bg-bg px-2 text-xs">+{d.tags.length - (kompakt ? 1 : 3)}</span>
+                  )}
                 </span>
               )}
             </div>
@@ -197,9 +208,10 @@ export function DocumentGrid({
                 {m.col_asn()} {d.asn} · {zeitpunkt(d.eingegangenAm)}
                 {d.seiten ? ` · ${m.card_pages({ anzahl: String(d.seiten) })}` : ""}
               </span>
-              <span className="text-xs">{aufbewahrung(d)}</span>
+              {!kompakt && <span className="text-xs">{aufbewahrung(d)}</span>}
             </div>
             <div
+              hidden={kompakt}
               className={`grid border-border border-t text-xs ${hatVorschau(d.mimeType) ? "grid-cols-3" : "grid-cols-2"}`}
             >
               <Link

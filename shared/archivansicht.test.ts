@@ -117,3 +117,11 @@ describe("Tags ausschließen und ohne Tag", () => {
     expect(ansichtZuParametern(a)).toEqual({ tags: TAG_A, tagsNicht: TAG_B, ohneTags: "1" });
   });
 });
+
+describe("Darstellung", () => {
+  it("kennt Liste, Kacheln und kompakte Kacheln", () => {
+    expect(ansichtAus({ darstellung: "kompakt" }).darstellung).toBe("kompakt");
+    expect(ansichtZuParametern({ ...LEERE_ANSICHT, darstellung: "kompakt" })).toEqual({ darstellung: "kompakt" });
+    expect(ansichtAus({ darstellung: "riesig" }).darstellung).toBeNull();
+  });
+});
