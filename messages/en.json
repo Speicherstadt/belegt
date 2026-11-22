@@ -1277,5 +1277,13 @@
   "date_filter_last_year": "Last year",
   "date_filter_custom": "Custom period",
   "date_filter_created": "Created",
-  "date_filter_received": "Received"
+  "date_filter_received": "Received",
+  "workflow_step_when": "When",
+  "workflow_step_if": "If",
+  "workflow_step_then": "Then",
+  "workflow_add_condition": "Add condition",
+  "workflow_add_action": "Add action",
+  "workflow_remove_row": "Remove {name}",
+  "workflow_actions_empty": "No action yet. Choose below what should happen to the document.",
+  "workflow_cancel": "Cancel"
 }

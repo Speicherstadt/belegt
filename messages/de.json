@@ -1199,5 +1199,13 @@
   "date_filter_last_year": "Letztes Jahr",
   "date_filter_custom": "Eigener Zeitraum",
   "date_filter_created": "Entstanden",
-  "date_filter_received": "Eingegangen"
+  "date_filter_received": "Eingegangen",
+  "workflow_step_when": "Wann",
+  "workflow_step_if": "Wenn",
+  "workflow_step_then": "Dann",
+  "workflow_add_condition": "Bedingung hinzufügen",
+  "workflow_add_action": "Aktion hinzufügen",
+  "workflow_remove_row": "{name} entfernen",
+  "workflow_actions_empty": "Noch keine Aktion. Wähle unten, was mit dem Dokument passieren soll.",
+  "workflow_cancel": "Abbrechen"
 }

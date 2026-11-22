@@ -16,11 +16,20 @@ test("Workflow anlegen und seine Wirkung bei einem Upload sehen", async ({ page 
   await page.goto("/workflows");
   await expect(page.getByRole("heading", { level: 1, name: "Workflows" })).toBeVisible();
   const neu = page.getByRole("region", { name: "Neuer Workflow" });
+  await neu.getByRole("button", { name: "+ Neuer Workflow" }).click();
   await neu.getByLabel("Name", { exact: true }).fill(workflow);
   await neu.getByRole("checkbox", { name: "Hochgeladen" }).check();
-  await neu.getByLabel("Dateiname enthält").fill(kennung);
-  await neu.getByLabel("Tag hinzufügen").selectOption({ label: tag });
-  await neu.getByLabel("Notiz anlegen").fill("Vom Workflow getaggt");
+  await neu.getByRole("combobox", { name: "Bedingung hinzufügen" }).selectOption({ label: "Dateiname enthält" });
+  await neu.getByLabel("Dateiname enthält", { exact: true }).fill(kennung);
+  const aktion = neu.getByRole("combobox", { name: "Aktion hinzufügen" });
+  await aktion.selectOption({ label: "Tag hinzufügen" });
+  await neu.getByLabel("Tag hinzufügen", { exact: true }).selectOption({ label: tag });
+  await aktion.selectOption({ label: "Notiz anlegen" });
+  await neu.getByLabel("Notiz anlegen", { exact: true }).fill("Vom Workflow getaggt");
+  // Was man wieder entfernt, steht nicht mehr im Formular
+  await aktion.selectOption({ label: "Tag entfernen" });
+  await neu.getByRole("button", { name: "Tag entfernen entfernen" }).click();
+  await expect(neu.getByLabel("Tag entfernen", { exact: true })).toHaveCount(0);
   await neu.getByRole("button", { name: "Workflow anlegen" }).click();
   const eintrag = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: workflow }) });
   await expect(eintrag).toContainText("Dokument aufgenommen");
@@ -64,8 +73,10 @@ test("Original an Adresse senden: Aktion anlegen, das Ergebnis steht am Dokument
   const name = `${kennung}.pdf`;
   await page.goto("/workflows");
   const neu = page.getByRole("region", { name: "Neuer Workflow" });
+  await neu.getByRole("button", { name: "+ Neuer Workflow" }).click();
   await neu.getByLabel("Name", { exact: true }).fill(workflow);
-  await neu.getByLabel("Dateiname enthält").fill(kennung);
+  await neu.getByRole("combobox", { name: "Bedingung hinzufügen" }).selectOption({ label: "Dateiname enthält" });
+  await neu.getByLabel("Dateiname enthält", { exact: true }).fill(kennung);
   await neu.getByRole("checkbox", { name: "Original an Adresse senden" }).check();
   await neu.getByLabel("Adresse (https://…)").fill("https://buchhaltung.example/api/v1/belege");
   await expect(neu.getByLabel("Name des Dateifelds")).toHaveValue("datei");
@@ -79,7 +90,9 @@ test("Original an Adresse senden: Aktion anlegen, das Ergebnis steht am Dokument
   await neu.getByRole("button", { name: "Workflow anlegen" }).click();
   const eintrag = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: workflow }) });
   await expect(eintrag).toContainText("Original an buchhaltung.example senden");
-  // Das Formular ist danach leer, auch die Aktion senden
+  // Das Formular schließt sich; neu geöffnet ist es leer, auch die Aktion senden
+  await expect(neu.getByLabel("Name", { exact: true })).toHaveCount(0);
+  await neu.getByRole("button", { name: "+ Neuer Workflow" }).click();
   await expect(neu.getByLabel("Name", { exact: true })).toHaveValue("");
   await expect(neu.getByRole("checkbox", { name: "Original an Adresse senden" })).not.toBeChecked();
   await expect(neu.getByLabel("Adresse (https://…)")).toHaveCount(0);

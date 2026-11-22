@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { type Art, api, type WorkflowAktion, type WorkflowBedingungen, type WorkflowQuelle } from "../../lib/api.ts";
 import { m } from "../../paraglide/messages.js";
 import { ausEingabe, feldKlasse } from "../FieldInput.tsx";
@@ -30,8 +30,29 @@ function bedingungenAus(f: FormData): WorkflowBedingungen {
   return Object.fromEntries(Object.entries(b).filter(([, v]) => v !== undefined));
 }
 
-/** Formular für einen neuen Workflow; nur der Inhaber sieht es */
-export function WorkflowForm() {
+/** Ein Schritt des Editors: Nummer, Überschrift und Inhalt */
+function Schritt({ nummer, titel, children }: { nummer: number; titel: string; children: ReactNode }) {
+  return (
+    <fieldset className="m-0 flex flex-col gap-3 border-0 border-border border-t p-0 pt-4 first:border-t-0 first:pt-0">
+      <legend className="float-left mb-3 flex items-center gap-2 font-semibold text-base">
+        <span
+          aria-hidden="true"
+          className="flex size-6 items-center justify-center rounded-full bg-primary text-onprimary text-xs"
+        >
+          {nummer}
+        </span>
+        {titel}
+      </legend>
+      <div className="clear-left flex flex-col gap-3">{children}</div>
+    </fieldset>
+  );
+}
+
+/**
+ * Editor für einen neuen Workflow in drei Schritten: Wann (Name und Auslöser), Wenn (Bedingungen), Dann (Aktionen).
+ * Nur der Inhaber sieht ihn; nach dem Anlegen meldet onFertig, damit die Seite ihn schließt
+ */
+export function WorkflowForm({ onFertig, onAbbrechen }: { onFertig?: () => void; onAbbrechen?: () => void }) {
   const queryClient = useQueryClient();
   const tags = useQuery({ queryKey: ["tags"], queryFn: api.tags });
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
@@ -41,6 +62,8 @@ export function WorkflowForm() {
   const [einordnen, setEinordnen] = useState(false);
   const [senden, setSenden] = useState(false);
   const [art, setArt] = useState<Art>("beleg");
+  const [bedingungen, setBedingungen] = useState<string[]>([]);
+  const [aktionenGewaehlt, setAktionenGewaehlt] = useState<string[]>([]);
   const [hinweis, setHinweis] = useState<string | null>(null);
   const anlegen = useMutation({
     mutationFn: api.workflowAnlegen,
@@ -97,63 +120,85 @@ export function WorkflowForm() {
           setFeldId("");
           setEinordnen(false);
           setSenden(false);
+          setBedingungen([]);
+          setAktionenGewaehlt([]);
+          onFertig?.();
         },
       },
     );
   }
 
   return (
-    <form onSubmit={absenden} className="flex flex-col gap-4 text-sm">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className={feld}>
-          {m.workflow_name()}
-          <input name="name" required maxLength={100} className={feldKlasse} />
+    <form onSubmit={absenden} className="flex flex-col gap-5 rounded-lg border border-border p-4 text-sm sm:p-5">
+      <Schritt nummer={1} titel={m.workflow_step_when()}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className={feld}>
+            {m.workflow_name()}
+            <input name="name" required maxLength={100} className={feldKlasse} />
+          </label>
+          <label className={feld}>
+            {m.workflow_trigger()}
+            <select name="ausloeser" className={feldKlasse}>
+              <option value="eingang">{m.workflow_trigger_eingang()}</option>
+              <option value="eingeordnet">{m.workflow_trigger_eingeordnet()}</option>
+            </select>
+          </label>
+        </div>
+      </Schritt>
+      <Schritt nummer={2} titel={m.workflow_step_if()}>
+        <WorkflowConditions
+          tags={tags.data ?? []}
+          typen={typen.data ?? []}
+          korrespondenten={korrespondenten.data ?? []}
+          gewaehlt={bedingungen}
+          setGewaehlt={setBedingungen}
+        />
+      </Schritt>
+      <Schritt nummer={3} titel={m.workflow_step_then()}>
+        <WorkflowActions
+          tags={tags.data ?? []}
+          typen={typen.data ?? []}
+          korrespondenten={korrespondenten.data ?? []}
+          felder={felder.data ?? []}
+          feldId={feldId}
+          setFeldId={setFeldId}
+          einordnen={einordnen}
+          setEinordnen={setEinordnen}
+          senden={senden}
+          setSenden={setSenden}
+          art={art}
+          setArt={setArt}
+          gewaehlt={aktionenGewaehlt}
+          setGewaehlt={setAktionenGewaehlt}
+        />
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="anhalten" />
+          {m.workflow_stop()}
         </label>
-        <label className={feld}>
-          {m.workflow_trigger()}
-          <select name="ausloeser" className={feldKlasse}>
-            <option value="eingang">{m.workflow_trigger_eingang()}</option>
-            <option value="eingeordnet">{m.workflow_trigger_eingeordnet()}</option>
-          </select>
-        </label>
-      </div>
-
-      <WorkflowConditions
-        tags={tags.data ?? []}
-        typen={typen.data ?? []}
-        korrespondenten={korrespondenten.data ?? []}
-      />
-      <WorkflowActions
-        tags={tags.data ?? []}
-        typen={typen.data ?? []}
-        korrespondenten={korrespondenten.data ?? []}
-        felder={felder.data ?? []}
-        feldId={feldId}
-        setFeldId={setFeldId}
-        einordnen={einordnen}
-        setEinordnen={setEinordnen}
-        senden={senden}
-        setSenden={setSenden}
-        art={art}
-        setArt={setArt}
-      />
-
-      <label className="flex items-center gap-2">
-        <input type="checkbox" name="anhalten" className="size-4" />
-        {m.workflow_stop()}
-      </label>
-      <button
-        type="submit"
-        disabled={anlegen.isPending}
-        className="h-10 self-start rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
-      >
-        {m.workflow_create()}
-      </button>
+      </Schritt>
       {(hinweis || anlegen.error) && (
         <p role="alert" className="m-0 text-red-700 dark:text-red-400">
           {hinweis ?? anlegen.error?.message}
         </p>
       )}
+      <div className="flex flex-wrap gap-2 border-border border-t pt-4">
+        <button
+          type="submit"
+          disabled={anlegen.isPending}
+          className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
+        >
+          {m.workflow_create()}
+        </button>
+        {onAbbrechen && (
+          <button
+            type="button"
+            onClick={onAbbrechen}
+            className="h-9 rounded-md border border-border px-4 font-medium hover:bg-subtle"
+          >
+            {m.workflow_cancel()}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

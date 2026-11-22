@@ -18,6 +18,12 @@ Steuerberatung sieht sie, der Prüfer nicht.
 klickt; ein Workflow setzt Tags, Korrespondent, Dokumenttyp und Feldwerte sofort. Beides bleibt getrennt, damit klar ist, was nur ein
 Vorschlag ist und was Belegt selbst getan hat.
 
+## Anlegen
+
+„+ Neuer Workflow“ öffnet den Editor in drei Schritten: **Wann** (Name und Auslöser), **Wenn** (Quellen und
+Bedingungen) und **Dann** (Aktionen). Bedingungen und Aktionen fügst du einzeln über „+ Bedingung hinzufügen“ und
+„+ Aktion hinzufügen“ hinzu und mit × wieder weg; was nicht in der Liste steht, gilt nicht.
+
 ## Auslöser
 
 - **Dokument aufgenommen:** jedes neue Dokument, gleich woher (Hochladen, Mail, Eingangsordner, Schnittstelle,
