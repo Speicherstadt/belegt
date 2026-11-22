@@ -15,6 +15,7 @@ import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { Pagination } from "./Pagination.tsx";
 import { SelectionBar } from "./SelectionBar.tsx";
+import { PUNKT } from "./Symbole.tsx";
 import { UploadDuplicates } from "./UploadDuplicates.tsx";
 
 const FILTER: { gruppe: Gruppe; label: () => string }[] = [
@@ -263,8 +264,9 @@ export function DocumentList({
               type="button"
               aria-pressed={gruppe === f.gruppe}
               onClick={() => setAnsicht({ ...ansicht, gruppe: f.gruppe })}
-              className="h-8 rounded-full border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
+              className="inline-flex h-8 items-center gap-2 rounded-full border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
             >
+              {PUNKT[f.gruppe] && <span aria-hidden="true" className={`size-2 rounded-full ${PUNKT[f.gruppe]}`} />}
               {f.label()}
             </button>
           ))}
@@ -322,6 +324,7 @@ export function DocumentList({
       )}
       {leer0 && (
         <EmptyState
+          bereich={filterAktiv ? undefined : feste === "offen" ? "/eingang" : "/archiv"}
           title={
             !filterAktiv
               ? leer.title

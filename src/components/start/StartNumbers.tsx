@@ -2,25 +2,44 @@ import { Link } from "@tanstack/react-router";
 import type { Start } from "../../lib/api.ts";
 import { groesse, tag } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
+import { BereichSymbol } from "../Symbole.tsx";
 
 const kachel = "flex flex-col gap-1 rounded-lg border border-border p-4";
 
 /** Zahlen der Startseite als Beschreibungsliste: jede Zahl mit ihrer Beschriftung, für Screenreader zusammen gelesen */
 export function StartNumbers({ start }: { start: Start }) {
-  const zahlen: { label: string; wert: string; link?: { to: string; text: string }; hinweis?: string }[] = [
-    { label: m.start_inbox(), wert: String(start.eingang), link: { to: "/eingang", text: m.start_inbox_link() } },
-    { label: m.start_total(), wert: String(start.gesamt), link: { to: "/archiv", text: m.start_archive_link() } },
+  const zahlen: {
+    label: string;
+    wert: string;
+    link?: { to: string; text: string };
+    hinweis?: string;
+    bereich?: string;
+  }[] = [
+    {
+      label: m.start_inbox(),
+      bereich: "/eingang",
+      wert: String(start.eingang),
+      link: { to: "/eingang", text: m.start_inbox_link() },
+    },
+    {
+      label: m.start_total(),
+      bereich: "/archiv",
+      wert: String(start.gesamt),
+      link: { to: "/archiv", text: m.start_archive_link() },
+    },
     { label: m.start_this_year(), wert: String(start.diesesJahr) },
   ];
   if (start.loeschantraege !== undefined)
     zahlen.push({
       label: m.start_deletion_requests(),
+      bereich: "/fristen",
       wert: String(start.loeschantraege),
       link: { to: "/fristen", text: m.start_retention_link() },
     });
   if (start.sperren)
     zahlen.push({
       label: m.start_holds(),
+      bereich: "/pruefung",
       wert: String(start.sperren.aktiv),
       hinweis: m.start_holds_hint({ anzahl: String(start.sperren.dokumente) }),
     });
@@ -38,7 +57,10 @@ export function StartNumbers({ start }: { start: Start }) {
       <dl className="m-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
         {zahlen.map((z) => (
           <div key={z.label} className={kachel}>
-            <dt className="text-muted text-sm">{z.label}</dt>
+            <dt className="flex items-center gap-2 text-muted text-sm">
+              {z.bereich && <BereichSymbol bereich={z.bereich} />}
+              {z.label}
+            </dt>
             <dd className="m-0 font-semibold text-2xl tabular-nums">{z.wert}</dd>
             {z.hinweis && <dd className="m-0 text-muted text-xs">{z.hinweis}</dd>}
             {z.link && (
@@ -64,7 +86,8 @@ export function UpcomingRetention({ fristen }: { fristen: NonNullable<Start["fri
   };
   return (
     <section aria-labelledby="start-fristen" className={kachel}>
-      <h2 id="start-fristen" className="m-0 font-semibold text-lg">
+      <h2 id="start-fristen" className="m-0 flex items-center gap-2 font-semibold text-lg">
+        <BereichSymbol bereich="/fristen" className="size-4 text-muted" />
         {m.start_retention_title()}
       </h2>
       <p className="m-0 text-sm">
