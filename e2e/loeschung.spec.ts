@@ -121,6 +121,8 @@ test("nachträglich als frei eingeordnet: kein „Jetzt löschen“, sondern der
   await einordnung.getByLabel("Art").selectOption("beleg");
   await einordnung.getByLabel("Entstanden, empfangen oder abgesandt am").fill("2026-03-01");
   await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();
+  // Erst wenn die Einordnung gespeichert ist, steht das Formular neu da; ein früherer Klick ginge verloren
+  await expect(einordnung).toContainText("31.12.2034");
   await einordnung.getByRole("button", { name: "Einordnung ändern" }).click();
   await einordnung.getByRole("combobox", { name: "Art" }).selectOption("frei");
   await einordnung.getByRole("button", { name: "Einordnen", exact: true }).click();

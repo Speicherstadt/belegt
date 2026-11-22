@@ -7,8 +7,9 @@ test("Suche in der Kopfzeile: Vorschläge beim Tippen, Enter führt ins Archiv",
   await expect(page.getByRole("link", { name })).toBeVisible();
 
   await page.goto("/fristen");
-  await page.keyboard.press("/");
   const feld = page.getByRole("searchbox", { name: "Suche in allen Dokumenten" });
+  await expect(feld).toBeVisible();
+  await page.keyboard.press("/");
   await expect(feld).toBeFocused();
   await feld.fill(`kopfsuche-${info.project.name}`);
   const treffer = page.getByRole("list", { name: "Treffer" });

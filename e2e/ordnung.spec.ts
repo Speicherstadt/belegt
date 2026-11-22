@@ -82,6 +82,8 @@ test("Tag-Filter: alle gewählten oder mindestens einer", async ({ page }, info)
   await page.getByRole("button", { name: "mindestens einer" }).click();
   await expect(page.getByRole("link", { name: erstes })).toBeVisible();
   await expect(page.getByRole("link", { name: zweites })).toBeVisible();
+  // Die offene Liste liegt über der Tabelle; geprüft wird die Seite mit geschlossener Liste
+  await page.keyboard.press("Escape");
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
     expect((await axe(page)).violations, colorScheme).toEqual([]);

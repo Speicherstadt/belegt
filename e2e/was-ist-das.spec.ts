@@ -62,6 +62,8 @@ test("ASN und Art auf der Dokumentseite klappen auf, ohne die Begriffsspalte zu 
     ["Art", "Die Art sagt, wie lange ein Dokument bleiben muss"],
     ["Siegel", "Das Siegel ist ein Fingerabdruck"],
   ] as const) {
+    // Das Siegel steht im Reiter „Verlauf“
+    if (begriff === "Siegel") await page.getByRole("tab", { name: "Verlauf" }).click();
     const knopf = page.getByRole("button", { name: `Was ist „${begriff}“?` });
     await expect(knopf).toHaveAttribute("aria-expanded", "false");
     // Per Tastatur: Auf dem Handy ragt die Dokumentseite heute seitlich heraus und verdeckt Ziele für den Mauszeiger
@@ -69,8 +71,9 @@ test("ASN und Art auf der Dokumentseite klappen auf, ohne die Begriffsspalte zu 
     await page.keyboard.press("Enter");
     await expect(knopf).toHaveAttribute("aria-expanded", "true");
     await expect(page.getByText(satz)).toBeVisible();
+    // ASN und Art stehen im Reiter „Einordnung“: Die Spalte bleibt so breit wie vorher
+    if (begriff !== "Siegel") expect(await spalte()).toBe(breite);
   }
-  expect(await spalte()).toBe(breite);
 });
 
 test("der Satz schiebt Inhalt nach unten, aber nicht zur Seite, auch auf dem Handy", async ({ page }, info) => {
