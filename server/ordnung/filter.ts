@@ -26,6 +26,10 @@ export interface OrdnungFilter {
   /** ID eines Korrespondenten oder „ohne“ für Dokumente ohne */
   korrespondent?: string;
   felder?: FeldFilter[];
+  /** Dokumente mit diesen Tags fallen weg */
+  tagsNicht?: string[];
+  /** Nur Dokumente ohne jeden Tag */
+  ohneTags?: boolean;
   /** Tag der Entstehung (wie die Sortierung „entstanden“) und Tag des Eingangs in Berlin, je JJJJ-MM-TT, Grenzen eingeschlossen */
   entstandenVon?: string;
   entstandenBis?: string;
@@ -41,12 +45,17 @@ const Id = z.uuid();
  * Liest den Filter aus den Parametern einer Anfrage: tag (mehrfach), tagModus (alle oder einer), dokumenttyp,
  * korrespondent (ID oder „ohne“), feld.<id>=gesetzt,
  * feld.<id>.enthaelt, feld.<id>.von und feld.<id>.bis (Betrag in Cent oder „1.234,56“, Datum JJJJ-MM-TT, Zahl).
+ * tagNicht (mehrfach, schließt aus), ohneTags=1 (nur ohne Tag),
  * entstandenVon, entstandenBis, eingegangenVon und eingegangenBis (JJJJ-MM-TT; von nach bis ist ein Fehler).
  * Unbekannte Felder und unpassende Werte sind ein Fehler (null), kein stilles Ignorieren.
  */
 export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): OrdnungFilter | null {
   const tags = parameter.tag ?? [];
   if (!tags.every((t) => Id.safeParse(t).success)) return null;
+  const tagsNicht = parameter.tagNicht ?? [];
+  if (!tagsNicht.every((t) => Id.safeParse(t).success)) return null;
+  const ohneTags = parameter.ohneTags?.[0];
+  if (ohneTags !== undefined && ohneTags !== "1") return null;
   const tagModus = parameter.tagModus?.[0] ?? "alle";
   if (tagModus !== "alle" && tagModus !== "einer") return null;
   const typ = parameter.dokumenttyp?.[0];
@@ -88,6 +97,8 @@ export function filterAus(parameter: Record<string, string[]>, felder: Feld[]): 
   }
   return {
     ...(tags.length ? { tags: [...new Set(tags)], tagModus } : {}),
+    ...(tagsNicht.length ? { tagsNicht: [...new Set(tagsNicht)] } : {}),
+    ...(ohneTags ? { ohneTags: true } : {}),
     ...(typ ? { dokumenttyp: typ } : {}),
     ...(korrespondent ? { korrespondent } : {}),
     ...(jeFeld.size ? { felder: [...jeFeld.values()] } : {}),
@@ -112,6 +123,11 @@ export function filterBedingung(f: OrdnungFilter | undefined): SQL {
   );
   if (f?.tagModus === "einer" && tagBedingungen.length) teile.push(sql`(${sql.join(tagBedingungen, sql` or `)})`);
   else teile.push(...tagBedingungen);
+  for (const tag of f?.tagsNicht ?? [])
+    teile.push(
+      sql`not exists (select 1 from dokument_tags dt where dt.dokument_id = d.id and dt.tag_id = ${tag}::uuid)`,
+    );
+  if (f?.ohneTags) teile.push(sql`not exists (select 1 from dokument_tags dt where dt.dokument_id = d.id)`);
   if (f?.dokumenttyp === "ohne")
     teile.push(sql`not exists (select 1 from dokument_dokumenttypen dd where dd.dokument_id = d.id)`);
   else if (f?.dokumenttyp)

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { api, type ImportStatus, type Start } from "../../lib/api.ts";
 import { zeitpunkt } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
+import { SealBadge, VERALTET_STUNDEN } from "../SealBadge.tsx";
 import { Explain } from "../WasIstDas.tsx";
 
 const STATUS: Record<ImportStatus, () => string> = {
@@ -71,9 +72,6 @@ export function SourceStatus({ quellen }: { quellen: NonNullable<Start["quellen"
   );
 }
 
-/** Nach so vielen Stunden ohne Lauf weist die Startseite darauf hin (der Worker prüft alle 24 Stunden) */
-const VERALTET_STUNDEN = 48;
-
 /**
  * Der letzte gespeicherte Lauf der Prüfung von Hash-Kette, Kopf und Siegeln und der letzte Zeitstempel, aus /api/kette;
  * die Prüfung selbst läuft im Worker, auf Wunsch des Inhabers sofort
@@ -94,6 +92,7 @@ export function ChainStatus({ inhaber }: { inhaber: boolean }) {
         {m.start_chain()}
       </h2>
       {kette.error && <p className={fehler}>{kette.error.message}</p>}
+      <SealBadge gross />
       {kette.data && (
         <dl className="m-0 flex flex-col gap-1 text-sm">
           <Explain term="chain" row>

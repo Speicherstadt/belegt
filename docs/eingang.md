@@ -15,6 +15,12 @@ Oben auf jeder Seite steht eine Suche; „/“ springt hinein. Schon beim Tippen
 und Tags, Korrespondenten und Dokumenttypen. Ein Klick öffnet das Dokument oder das Archiv mit diesem Filter, Enter
 das Archiv mit der Suche.
 
+## Stand der Verarbeitung
+
+Nach dem Eingang liest der Worker den Text jedes Dokuments (bei Scans mit Texterkennung). Die Glocke oben neben der
+Suche zeigt, wie viele noch warten; bis dahin findet die Volltextsuche sie nur über Name und Ordnung. Ist alles
+gelesen, laden die Listen von selbst neu. Die Glocke sehen Inhaber und Steuerberatung.
+
 ## Ziehen und ablegen
 
 Dateien lassen sich auf jeder Seite ins Fenster ziehen. Belegt zeigt eine Fläche zum Ablegen, lädt die Dateien hoch

@@ -89,10 +89,7 @@ export function BulkEdit({
 
   const r = ausfuehren.data;
   return (
-    <section
-      aria-labelledby="sammel"
-      className="flex flex-col gap-3 rounded-lg border border-primary/40 bg-subtle p-3 text-sm"
-    >
+    <section aria-labelledby="sammel" className="flex flex-col gap-3 border-border border-t pt-3 text-sm">
       <h2 id="sammel" className="m-0 font-semibold text-base">
         {m.bulk_title({ anzahl: String(gewaehlt.length) })}
       </h2>

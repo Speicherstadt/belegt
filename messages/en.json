@@ -1337,5 +1337,87 @@
   "views_nav_count": "Results:",
   "filter_choice_clear": "Clear filter {name}",
   "filter_choice_search": "Search {name}",
-  "filter_choice_all": "All"
+  "filter_choice_all": "All",
+  "filter_tags_without": "No tag",
+  "filter_tags_hint": "Click to include, click again to exclude.",
+  "filter_tag_excluded": "excluded",
+  "quick_create": "New: {was}",
+  "quick_create_name": "Name for new: {was}",
+  "quick_create_submit": "Create and set",
+  "quick_create_tag": "Tag",
+  "bulk_selected": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document selected",
+        "anzahlPlural=other": "{anzahl} documents selected"
+      }
+    }
+  ],
+  "bulk_clear": "Clear selection",
+  "classify_template": "Template",
+  "classify_template_none": "Choose the end yourself",
+  "classify_template_option": "{name} ({monate} months)",
+  "templates_title": "Custom retention templates",
+  "templates_intro": "For documents without a legal duty that you still want to keep for a while, such as warranties. When classifying as “voluntary with period”, a template fills in the end date; legal periods stay as they are.",
+  "templates_none": "No templates yet.",
+  "templates_months": [
+    {
+      "declarations": ["input monate", "local monatePlural = monate: plural"],
+      "selectors": ["monatePlural"],
+      "match": {
+        "monatePlural=one": "{monate} month from creation",
+        "monatePlural=other": "{monate} months from creation"
+      }
+    }
+  ],
+  "templates_delete": "Delete template {name}",
+  "templates_create": "Create template",
+  "templates_name": "Name",
+  "templates_name_example": "e.g. warranty",
+  "templates_duration": "Duration in months",
+  "retention_legal": "Legal retention periods",
+  "due_title": "Due soon",
+  "due_all": "All by end of period",
+  "due_none": "No documents with a period.",
+  "due_until": "until {datum}",
+  "preview_title": "Preview: {name}",
+  "card_preview_short": "Preview",
+  "bell_idle": "Processing: all read",
+  "bell_idle_text": "All documents are read; full text and suggestions are up to date.",
+  "bell_busy": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Processing: {anzahl} document being read",
+        "anzahlPlural=other": "Processing: {anzahl} documents being read"
+      }
+    }
+  ],
+  "bell_busy_text": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} document is still waiting for its text. Until then, full-text search finds it only by name and classification.",
+        "anzahlPlural=other": "{anzahl} documents are still waiting for their text. Until then, full-text search finds them only by name and classification."
+      }
+    }
+  ],
+  "seal_ok": "Seals checked: nothing changed",
+  "seal_findings": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "Seals checked: {anzahl} finding",
+        "anzahlPlural=other": "Seals checked: {anzahl} findings"
+      }
+    }
+  ],
+  "seal_stale": "Seals: last check too old",
+  "seal_never": "Seals: not checked yet",
+  "seal_checked": "last {zeit}"
 }

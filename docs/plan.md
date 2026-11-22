@@ -113,7 +113,12 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Suche in der Kopfzeile mit Vorschlägen | mittel | erledigt |
 | Bedienung: Startseite mit Dokumenten aus gespeicherten Ansichten, Zahlen in der Seitenleiste | mittel | erledigt |
 | Bedienung: Korrespondent und Dokumenttyp als durchsuchbare Filterlisten mit Anzahl | mittel | erledigt |
-| Bedienung: Tags „nicht zugeordnet“ und ausschließen im Filter, Fristen-Seite mit eigenen Vorlagen, Anlegen direkt im Dokument, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
+| Bedienung: Tags ausschließen und „Ohne Tag“ im Filter | mittel | erledigt |
+| Bedienung: Tags, Korrespondent und Dokumenttyp direkt im Dokument anlegen | mittel | erledigt |
+| Bedienung: Auswahl als stehende Leiste mit Massenbearbeitung | mittel | erledigt |
+| Bedienung: Fristen-Seite mit „Demnächst fällig“ und eigenen Fristvorlagen | mittel | erledigt |
+| Bedienung: Treffer markieren, Vorschau aus der Kachel, Blatt mit Formatkürzel, Glocke mit Stand der Verarbeitung | mittel | erledigt |
+| Bedienung: Seitenzahl auf Kacheln, dritte Darstellung (kleine Karten) | niedrig | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

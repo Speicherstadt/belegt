@@ -107,6 +107,20 @@ export const listenParameter = [
     schema: { type: "string", enum: ["alle", "einer"], default: "alle" },
   },
   {
+    name: "tagNicht",
+    in: "query",
+    schema: { type: "array", items: uuid },
+    style: "form",
+    explode: true,
+    description: "Dokumente mit einem dieser Tags fallen weg",
+  },
+  {
+    name: "ohneTags",
+    in: "query",
+    schema: { type: "string", enum: ["1"] },
+    description: "Nur Dokumente ohne jeden Tag",
+  },
+  {
     name: "dokumenttyp",
     in: "query",
     schema: { type: "string" },
@@ -132,6 +146,17 @@ const liste = (summary: string) => ({
 });
 
 export const ordnungPfade = {
+  "/api/verarbeitung": liste("Wie viele Dokumente noch auf ihren Text warten (textOffen)"),
+  "/api/fristvorlagen": {
+    ...liste("Eigene Fristvorlagen: Name und Dauer in Monaten"),
+    post: {
+      summary: "Fristvorlage anlegen (name, monate 1–1200); nur der Inhaber",
+      responses: { "201": { description: "Angelegt" } },
+    },
+  },
+  "/api/fristvorlagen/{id}": {
+    delete: { summary: "Fristvorlage löschen; nur der Inhaber", responses: { "200": { description: "Gelöscht" } } },
+  },
   "/api/tags": liste("Tags mit Name, Farbe und Anzahl der Dokumente"),
   "/api/dokumenttypen": liste("Dokumenttypen mit Vorgabe-Art"),
   "/api/korrespondenten": liste("Korrespondenten mit Zuordnungsregel und Anzahl der Dokumente"),

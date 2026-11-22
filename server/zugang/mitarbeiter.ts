@@ -17,7 +17,7 @@ const LESEN = [
 ];
 
 /** Mit dem Recht bearbeiten: hochladen, einordnen, Ordnung setzen, Notizen; Vorschläge und Trennblatt dazu */
-const BEARBEITEN_LESEN = [/^\/api\/dokumente\/[^/]+\/vorschlag$/, /^\/api\/trennblatt\.pdf$/];
+const BEARBEITEN_LESEN = [/^\/api\/dokumente\/[^/]+\/vorschlag$/, /^\/api\/trennblatt\.pdf$/, /^\/api\/fristvorlagen$/];
 const BEARBEITEN = [
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/sammeln$/,

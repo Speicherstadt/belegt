@@ -15,7 +15,8 @@ import { Aenderung, ordnungZu, sammeln } from "../ordnung/zuordnung.ts";
 /**
  * Werkzeuge für KI-Assistenten (MCP). Sie rufen dieselben Module wie die HTTP-Schnittstelle und haben dieselben
  * Rechte wie das Token: lesen sucht und liest (auch Notizen), schreiben nimmt zusätzlich auf, ordnet ein, setzt Tags,
- * Dokumenttyp und Feldwerte und schreibt Notizen. Tags, Dokumenttypen und Felder anlegen kann ein Token nicht, löschen auch nicht.
+ * Dokumenttyp, Korrespondent und Feldwerte und schreibt Notizen. Tags, Dokumenttypen, Korrespondenten und Felder
+ * anlegen kann ein Token nicht, Notizen zurückziehen und Dokumente löschen auch nicht.
  */
 
 /** Fehler, den der Assistent sehen soll (isError im Ergebnis), statt eines Protokollfehlers */

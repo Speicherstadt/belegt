@@ -14,6 +14,7 @@ import { Notes } from "../components/Notes.tsx";
 import { OpenWith } from "../components/OpenWith.tsx";
 import { PageEditor } from "../components/PageEditor.tsx";
 import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
+import { SealBadge } from "../components/SealBadge.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
 import { ansichtUrl, api, archivfassungUrl, dateiUrl } from "../lib/api.ts";
@@ -170,6 +171,8 @@ export function DocumentPage() {
         )}
       </div>
       <PageHeader title={d.einordnung?.titel ?? d.dateiname ?? m.unnamed()} intro={m.doc_unchanged()} />
+      {/* Der Zustand der Siegel; Mitarbeiter fragen die Prüfung nicht ab (der Server lehnt sie ab) */}
+      {ich.data && ich.data.role !== "mitarbeiter" && <SealBadge />}
       {!geloescht && (
         <div className="flex flex-wrap items-start gap-3">
           <a href={dateiUrl(d.id)} className={knopf}>

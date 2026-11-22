@@ -5,6 +5,7 @@ import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
 import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
 import { GlobalSearch } from "./components/GlobalSearch.tsx";
+import { ProcessingBell } from "./components/ProcessingBell.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { ApiFehler, api } from "./lib/api.ts";
 import { eingebettet, stillAnmeldenErlaubt } from "./lib/einbetten.ts";
@@ -41,8 +42,9 @@ export function Shell({ children }: { children: ReactNode }) {
       <Sidebar ich={ich.data} eingebettet={imFrame} oidc={status.data?.oidc ?? null} version={status.data?.version} />
       <main id="inhalt" className="min-w-0 flex-[999_1_560px] px-4 py-6 sm:px-8">
         {!imFrame && !ich.data.zweiFaktorEinrichten && (
-          <div className="mb-6 flex justify-end">
+          <div className="mb-6 flex items-center justify-end gap-2">
             <GlobalSearch />
+            {(ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <ProcessingBell />}
           </div>
         )}
         {/* Pflicht zum zweiten Faktor: bis er eingerichtet ist, auf jeder Seite die Einrichtung (der Server sperrt alles

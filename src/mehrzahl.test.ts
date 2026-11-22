@@ -9,6 +9,30 @@ type Fall = [string, (n: string, locale: "de" | "en") => string, string, string,
 
 const FAELLE: Fall[] = [
   [
+    "seal_findings",
+    (n, locale) => m.seal_findings({ anzahl: n }, { locale }),
+    "Siegel geprüft: 1 Befund",
+    "Siegel geprüft: 2 Befunde",
+    "Seals checked: 1 finding",
+    "Seals checked: 2 findings",
+  ],
+  [
+    "templates_months",
+    (n, locale) => m.templates_months({ monate: n }, { locale }),
+    "1 Monat ab Entstehung",
+    "2 Monate ab Entstehung",
+    "1 month from creation",
+    "2 months from creation",
+  ],
+  [
+    "bulk_selected",
+    (n, locale) => m.bulk_selected({ anzahl: n }, { locale }),
+    "1 Dokument ausgewählt",
+    "2 Dokumente ausgewählt",
+    "1 document selected",
+    "2 documents selected",
+  ],
+  [
     "drop_done",
     (n, locale) => m.drop_done({ anzahl: n }, { locale }),
     "1 Dokument aufgenommen",

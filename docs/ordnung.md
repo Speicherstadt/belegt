@@ -108,9 +108,14 @@ Dokumenttyp. „Übernehmen“ auf der Seite des Dokuments setzt sie. Die Reihen
 [Eingang](eingang.md#vorschläge). Mit `EINGANG_ORDNER_TAGS=true` werden die Unterordner des
 [Eingangsordners](eingang.md#eingangsordner) zu Tags.
 
+## Direkt im Dokument anlegen
+
+Fehlt ein Tag, Korrespondent oder Dokumenttyp, legt „+ Neu“ unter der Auswahl im Dokument ihn an und setzt ihn gleich;
+die Seite Ordnung braucht es dafür nicht. Farbe und Zuordnungsregel lassen sich später dort ändern.
+
 ## Filter und Suche
 
-Im Archiv filterst du nach Tags (der Knopf „Tags“ öffnet eine durchsuchbare Liste mit der Zahl der Dokumente je Tag; das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach
+Im Archiv filterst du nach Tags (der Knopf „Tags“ öffnet eine durchsuchbare Liste mit der Zahl der Dokumente je Tag; ein zweiter Klick schließt einen Tag aus, „Ohne Tag“ zeigt nur Dokumente ohne Tag; das Dokument hat alle gewählten oder, umgeschaltet, mindestens einen davon), nach
 Korrespondent und Dokumenttyp (je ein Knopf mit durchsuchbarer Liste und der Zahl der Dokumente, auch „Ohne …“) und nach einem Feld: gesetzt, Text enthält, oder bei Betrag, Zahl und
 Datum von–bis. Dazu kommt ein Zeitraum nach dem Tag der Entstehung oder des Eingangs: letzte 7 oder 30 Tage,
 dieses oder letztes Jahr oder eigene Tage. Eine gespeicherte Ansicht mit „letzte 30 Tage“ meint immer die letzten 30
@@ -138,7 +143,8 @@ Einstellungen, keine Unterlagen: Löschen geht jederzeit, jede Änderung steht i
 
 Eingang und Archiv zeigen 50 Dokumente je Seite (im Archiv auch 25 oder 100), darunter „1–50 von 312“ und die Knöpfe zum Blättern. Du wählst
 Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der Seite; beim Blättern beginnt die
-Auswahl neu. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen oder
+Auswahl neu. Sobald etwas gewählt ist, steht oben eine Leiste, die beim Scrollen stehen bleibt: wie viele gewählt sind,
+„Auswahl aufheben“, ZIP und die Aktionen. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen oder
 einordnen. Einordnen geht wie bei einem einzelnen Dokument: Art, Tag der Entstehung (auf Wunsch der Tag des Eingangs
 jedes Dokuments), Titel und Korrespondent. Ohne „Auch schon eingeordnete neu einordnen“ ordnet Belegt nur Dokumente im
 Eingang ein und überspringt die übrigen; mit dem Häkchen kommt bei jedem eine neue Einordnung als Version dazu.

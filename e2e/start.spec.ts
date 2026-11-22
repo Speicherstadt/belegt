@@ -34,6 +34,8 @@ test("die Navigation führt zu jeder Seite und markiert sie", async ({ page }) =
 
 test("die Fristen nennen Jahre und Grundlage nach § 147 AO", async ({ page }) => {
   await page.goto("/fristen");
+  // Die gesetzlichen Fristen stehen zugeklappt unten
+  await page.getByText("Gesetzliche Fristen", { exact: true }).click();
   const beleg = page.getByRole("row", { name: /Buchungsbelege/ });
   await expect(beleg).toContainText("8 Jahre");
   await expect(beleg).toContainText("§ 147 Abs. 1 Nr. 4 AO");
@@ -61,6 +63,7 @@ test.describe("auf Englisch", () => {
   test("folgt der Sprache des Browsers", async ({ page }) => {
     await page.goto("/fristen");
     await expect(page.getByRole("heading", { level: 1, name: "Retention" })).toBeVisible();
+    await page.getByText("Legal retention periods", { exact: true }).click();
     const beleg = page.getByRole("row", { name: /Accounting receipts/ });
     await expect(beleg).toContainText("8 years");
     // Auch die Grundlage kommt aus Paraglide, zitiert wie in den übrigen englischen Texten

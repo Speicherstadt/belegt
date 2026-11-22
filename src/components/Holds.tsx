@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { tag, zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { Explain } from "./WasIstDas.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
@@ -17,6 +18,7 @@ export function Holds() {
   const anlegen = useMutation({ mutationFn: api.sperreAnlegen, onSuccess: neu });
   const aufheben = useMutation({ mutationFn: api.sperreAufheben, onSuccess: neu });
   const schreiben = darfSchreiben(ich.data?.role);
+  const [offen, setOffen] = useState(false);
 
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,12 +26,17 @@ export function Holds() {
     const f = new FormData(form);
     anlegen.mutate(
       { grund: String(f.get("grund")), von: String(f.get("von")), bis: String(f.get("bis")) },
-      { onSuccess: () => form.reset() },
+      {
+        onSuccess: () => {
+          form.reset();
+          setOffen(false);
+        },
+      },
     );
   }
 
   return (
-    <section aria-labelledby="sperren" className="flex flex-col gap-3">
+    <section aria-labelledby="sperren" className={verwaltungsKarte}>
       <Explain term="hold">
         {(knopf, satz) => (
           <>
@@ -71,27 +78,29 @@ export function Holds() {
         ))}
       </ul>
       {schreiben && (
-        <form onSubmit={absenden} className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-3">
-          <label className="flex min-w-48 flex-[2_1_200px] flex-col gap-1.5 font-medium text-sm">
-            {m.holds_reason()}
-            <input name="grund" required className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.holds_from()}
-            <input name="von" type="date" required className={feld} />
-          </label>
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.holds_to()}
-            <input name="bis" type="date" required className={feld} />
-          </label>
-          <button
-            type="submit"
-            disabled={anlegen.isPending}
-            className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
-          >
-            {m.holds_create()}
-          </button>
-        </form>
+        <Ausklappbar label={m.holds_create()} offen={offen} setOffen={setOffen}>
+          <form onSubmit={absenden} className="flex flex-wrap items-end gap-3">
+            <label className="flex min-w-48 flex-[2_1_200px] flex-col gap-1.5 font-medium text-sm">
+              {m.holds_reason()}
+              <input name="grund" required className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.holds_from()}
+              <input name="von" type="date" required className={feld} />
+            </label>
+            <label className="flex flex-col gap-1.5 font-medium text-sm">
+              {m.holds_to()}
+              <input name="bis" type="date" required className={feld} />
+            </label>
+            <button
+              type="submit"
+              disabled={anlegen.isPending}
+              className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary text-sm disabled:opacity-60"
+            >
+              {m.holds_create()}
+            </button>
+          </form>
+        </Ausklappbar>
       )}
       {(anlegen.error ?? aufheben.error) && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">

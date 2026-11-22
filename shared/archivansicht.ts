@@ -41,6 +41,10 @@ export interface ArchivAnsicht {
   gruppe: ListenGruppe;
   tags: string[];
   tagModus: "alle" | "einer";
+  /** Ausgeschlossene Tags: Dokumente mit einem davon fallen weg */
+  tagsNicht: string[];
+  /** Nur Dokumente ohne jeden Tag */
+  ohneTags: boolean;
   /** ID eines Dokumenttyps, „ohne“ oder leer für alle */
   dokumenttyp: string;
   /** ID eines Korrespondenten, „ohne“ oder leer für alle */
@@ -64,6 +68,8 @@ export const LEERE_ANSICHT: ArchivAnsicht = {
   gruppe: "alle",
   tags: [],
   tagModus: "alle",
+  tagsNicht: [],
+  ohneTags: false,
   dokumenttyp: "",
   korrespondent: "",
   feld: null,
@@ -93,6 +99,14 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
         .filter((t) => UUID.test(t)),
     ),
   ].slice(0, 50);
+  const tagsNicht = [
+    ...new Set(
+      (p.tagsNicht ?? "")
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter((t) => UUID.test(t) && !tags.includes(t)),
+    ),
+  ].slice(0, 50);
   const typ = p.dokumenttyp ?? "";
   const korrespondent = p.korrespondent ?? "";
   const feldId = (p.feld ?? "").toLowerCase();
@@ -103,6 +117,8 @@ export function ansichtAus(p: Record<string, string | undefined>): ArchivAnsicht
     gruppe: aus(GRUPPEN, p.gruppe, "alle"),
     tags,
     tagModus: tags.length > 1 ? aus(["alle", "einer"] as const, p.tagModus, "alle") : "alle",
+    tagsNicht,
+    ohneTags: p.ohneTags === "1",
     dokumenttyp: typ === "ohne" || UUID.test(typ) ? typ.toLowerCase() : "",
     korrespondent: korrespondent === "ohne" || UUID.test(korrespondent) ? korrespondent.toLowerCase() : "",
     feld: UUID.test(feldId)
@@ -131,6 +147,8 @@ export function ansichtZuParametern(a: ArchivAnsicht): Record<string, string> {
   if (a.gruppe !== "alle") p.gruppe = a.gruppe;
   if (a.tags.length) p.tags = a.tags.join(",");
   if (a.tags.length > 1 && a.tagModus === "einer") p.tagModus = "einer";
+  if (a.tagsNicht.length) p.tagsNicht = a.tagsNicht.join(",");
+  if (a.ohneTags) p.ohneTags = "1";
   if (a.dokumenttyp) p.dokumenttyp = a.dokumenttyp;
   if (a.korrespondent) p.korrespondent = a.korrespondent;
   if (a.feld) {

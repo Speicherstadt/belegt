@@ -55,6 +55,10 @@ Karten und Trennlinien behalten `--border`: Sie tragen keine Bedeutung, ein Bedi
 (siehe unten): ob es Tokens `--danger` und `--warn` werden. Farbe allein trägt nie die Bedeutung: Ein Fehler hat immer
 Text, ein Status ein Wort oder Symbol.
 
+**Zustand der Siegel.** Der Prüfstatus (`SealBadge.tsx`) hat drei Farben mit Symbol und Satz: grün mit ✓ (letzter Lauf
+frisch und ohne Befund), gelb mit ! (noch nicht geprüft oder älter als 48 Stunden), rot mit ✕ (Befund). Grün steht nur
+dort, wo Belegt etwas geprüft hat; ein bloßes „gespeichert“ ist kein Grün.
+
 ## Zielgrößen
 
 Heute sind Knöpfe und Felder meist `h-9` (36 px), an 41 Stellen `h-8` (32 px), Checkboxen `size-4` (16 px).
@@ -76,7 +80,7 @@ Vorschlag:
 ## Schrift
 
 Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 und 24 px (`text-xs`, `text-sm`, `text-base`,
-`text-lg`, `text-2xl`). Kein `text-[10px]` und kein `text-[15px]` (heute je einmal in `Thumbnail.tsx` und `Sidebar.tsx`).
+`text-lg`, `text-2xl`). Kein `text-[10px]` und kein `text-[15px]` (heute noch einmal in `Sidebar.tsx`).
 
 | Stufe | Wofür |
 | --- | --- |

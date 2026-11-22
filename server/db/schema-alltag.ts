@@ -144,3 +144,22 @@ export const einlieferungen = pgTable("einlieferungen", {
     .references(() => user.id),
   erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Eigene Fristvorlage (docs/fristen.md#eigene-vorlagen): ein Name und eine Dauer in Monaten. Beim Einordnen als
+ * „freiwillig mit Frist“ rechnet die Oberfläche daraus das Fristende; gesetzliche Fristen bleiben davon unberührt.
+ */
+export const fristvorlagen = pgTable(
+  "fristvorlagen",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    monate: integer("monate").notNull(),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("fristvorlagen_name").on(sql`lower(${t.name})`),
+    check("fristvorlagen_name_laenge", sql`length(trim(${t.name})) between 1 and 100`),
+    check("fristvorlagen_monate", sql`${t.monate} between 1 and 1200`),
+  ],
+);
