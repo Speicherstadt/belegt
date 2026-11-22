@@ -112,7 +112,8 @@ Stand nach den Etappen Scannen, Ordnung, Dokument, Unterwegs, Umzug, Alltag und 
 | Bedienung: Hochladen durch Ziehen und Ablegen auf jeder Seite, mit Stand | mittel | erledigt |
 | Bedienung: Suche in der Kopfzeile mit Vorschlägen | mittel | erledigt |
 | Bedienung: Startseite mit Dokumenten aus gespeicherten Ansichten, Zahlen in der Seitenleiste | mittel | erledigt |
-| Bedienung: Fristen-Seite mit eigenen Vorlagen, Anlegen direkt im Dokument, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
+| Bedienung: Korrespondent und Dokumenttyp als durchsuchbare Filterlisten mit Anzahl | mittel | erledigt |
+| Bedienung: Tags „nicht zugeordnet“ und ausschließen im Filter, Fristen-Seite mit eigenen Vorlagen, Anlegen direkt im Dokument, Massenbearbeitung als Leiste, Treffer hervorheben | mittel | offen |
 | Eigene Apps fürs Handy (heute installierbare Web-App) | niedrig | offen |
 | Prüfung der Kette auf der Startseite aus dem letzten Lauf statt bei jedem Aufruf ([Tägliche Prüfung](pruefung.md#taegliche-pruefung)) | niedrig | erledigt |
 

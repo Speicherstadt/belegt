@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, type ListenFilter } from "../lib/api.ts";
 import { feldFilterArten } from "../lib/ordnung.ts";
 import { m } from "../paraglide/messages.js";
+import { ChoiceFilter } from "./ChoiceFilter.tsx";
 import { feldLabel } from "./DocumentOrdnung.tsx";
 import { feldKlasse } from "./FieldInput.tsx";
 import { TagFilter } from "./TagFilter.tsx";
@@ -36,40 +37,22 @@ export function OrderFilter({ filter, onChange }: { filter: ListenFilter; onChan
       <div className="flex flex-wrap items-end gap-3 text-sm">
         {!!tags.data?.length && <TagFilter tags={tags.data} filter={filter} onChange={onChange} />}
         {(!!korrespondenten.data?.length || !!filter.korrespondent) && (
-          <label className="flex min-w-0 flex-col gap-1.5 font-medium">
-            {m.order_party()}
-            <select
-              value={filter.korrespondent}
-              onChange={(e) => onChange({ ...filter, korrespondent: e.target.value })}
-              className={feldKlasse}
-            >
-              <option value="">{m.filter_party_all()}</option>
-              <option value="ohne">{m.order_party_none()}</option>
-              {korrespondenten.data?.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ChoiceFilter
+            label={m.order_party()}
+            ohneLabel={m.order_party_none()}
+            eintraege={korrespondenten.data ?? []}
+            wert={filter.korrespondent}
+            onChange={(korrespondent) => onChange({ ...filter, korrespondent })}
+          />
         )}
         {!!typen.data?.length && (
-          <label className="flex flex-col gap-1.5 font-medium">
-            {m.order_doctype()}
-            <select
-              value={filter.dokumenttyp}
-              onChange={(e) => onChange({ ...filter, dokumenttyp: e.target.value })}
-              className={feldKlasse}
-            >
-              <option value="">{m.filter_doctype_all()}</option>
-              <option value="ohne">{m.order_doctype_none()}</option>
-              {typen.data.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ChoiceFilter
+            label={m.order_doctype()}
+            ohneLabel={m.order_doctype_none()}
+            eintraege={typen.data}
+            wert={filter.dokumenttyp}
+            onChange={(dokumenttyp) => onChange({ ...filter, dokumenttyp })}
+          />
         )}
         {!!felder.data?.length && (
           <label className="flex flex-col gap-1.5 font-medium">

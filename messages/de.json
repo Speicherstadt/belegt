@@ -445,7 +445,6 @@
   "filter_tags_mode": "Gewählte Tags",
   "filter_tags_all": "alle",
   "filter_tags_any": "mindestens einer",
-  "filter_doctype_all": "Alle Dokumenttypen",
   "filter_field": "Feld",
   "filter_field_none": "Kein Feld",
   "filter_field_condition": "Bedingung",
@@ -879,7 +878,6 @@
   "event_party_set": "Korrespondent gesetzt: {name}",
   "event_party_removed": "Korrespondent entfernt: {name}",
   "bulk_party": "Korrespondent setzen",
-  "filter_party_all": "Alle Korrespondenten",
   "match_legend": "Zuordnungsregel",
   "match_label": "Zuordnung",
   "match_none": "Keine",
@@ -1258,5 +1256,8 @@
   "global_search_doctypes": "Dokumenttypen",
   "global_search_none": "Nichts gefunden.",
   "global_search_all": "Alle Treffer für „{suche}“ im Archiv",
-  "views_nav_count": "Treffer:"
+  "views_nav_count": "Treffer:",
+  "filter_choice_clear": "Filter {name} aufheben",
+  "filter_choice_search": "{name} suchen",
+  "filter_choice_all": "Alle"
 }

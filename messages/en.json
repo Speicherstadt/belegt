@@ -481,7 +481,6 @@
   "filter_tags_mode": "Selected tags",
   "filter_tags_all": "all",
   "filter_tags_any": "at least one",
-  "filter_doctype_all": "All document types",
   "filter_field": "Field",
   "filter_field_none": "No field",
   "filter_field_condition": "Condition",
@@ -957,7 +956,6 @@
   "event_party_set": "Correspondent set: {name}",
   "event_party_removed": "Correspondent removed: {name}",
   "bulk_party": "Set correspondent",
-  "filter_party_all": "All correspondents",
   "match_legend": "Matching rule",
   "match_label": "Matching",
   "match_none": "None",
@@ -1336,5 +1334,8 @@
   "global_search_doctypes": "Document types",
   "global_search_none": "Nothing found.",
   "global_search_all": "All results for “{suche}” in the archive",
-  "views_nav_count": "Results:"
+  "views_nav_count": "Results:",
+  "filter_choice_clear": "Clear filter {name}",
+  "filter_choice_search": "Search {name}",
+  "filter_choice_all": "All"
 }

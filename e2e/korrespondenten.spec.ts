@@ -69,7 +69,8 @@ test("Korrespondent mit Zuordnungsregel anlegen, Dokument hochladen, Vorschlag √
     .click();
   await expect(page).toHaveURL(/korrespondent=/);
   await expect(page.getByRole("link", { name })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Korrespondent", exact: true })).toHaveValue(/[0-9a-f-]{36}/);
+  // Der Filter zeigt den gew√§hlten Korrespondenten
+  await expect(page.getByRole("button", { name: `Korrespondent: ${korrespondent}` })).toBeVisible();
   await barrierefrei(page);
 });
 
