@@ -76,7 +76,7 @@ Vorschlag:
 ## Schrift
 
 Schrift ist Geist (`--font-sans`). Vorschlag, Stufen nur diese: 12, 14, 16, 18 und 24 px (`text-xs`, `text-sm`, `text-base`,
-`text-lg`, `text-2xl`). Kein `text-[10px]` und kein `text-[15px]` (heute je einmal in `Thumbnail.tsx` und `Sidebar.tsx`).
+`text-lg`, `text-2xl`). Kein `text-[10px]` und kein `text-[15px]` (heute noch einmal in `Sidebar.tsx`).
 
 | Stufe | Wofür |
 | --- | --- |

@@ -38,12 +38,37 @@ export function Thumbnail({
         className={`${masse} rounded border border-border bg-white object-cover object-top`}
       />
     );
+  // Ohne Bild ein Blatt mit umgeknickter Ecke und dem Kürzel des Formats, damit Text und Mails nicht wie leer aussehen
+  const farbe = FARBE[kuerzel(dokument.mimeType)] ?? "bg-zinc-600";
   return (
-    <span
-      aria-hidden="true"
-      className={`${masse} flex items-center justify-center rounded border border-border bg-subtle font-semibold text-[10px] text-muted`}
-    >
-      {kuerzel(dokument.mimeType)}
+    <span aria-hidden="true" className={`${masse} relative flex items-center justify-center`}>
+      <span
+        className={`${gross ? "h-40 w-32" : "h-14 w-10"} relative flex flex-col items-center justify-center gap-1.5 border border-border bg-bg shadow-sm [clip-path:polygon(0_0,75%_0,100%_18%,100%_100%,0_100%)]`}
+      >
+        {gross && (
+          <span className="flex w-16 flex-col gap-1.5">
+            <span className="h-1 rounded bg-border" />
+            <span className="h-1 w-3/4 rounded bg-border" />
+            <span className="h-1 rounded bg-border" />
+          </span>
+        )}
+        <span
+          className={`${farbe} rounded px-1 font-semibold text-white ${gross ? "px-2 py-0.5 text-xs" : "text-xs leading-none"}`}
+        >
+          {kuerzel(dokument.mimeType)}
+        </span>
+      </span>
     </span>
   );
 }
+
+/** Farbe des Kürzels je Format; dunkel genug für weiße Schrift (WCAG AA) */
+const FARBE: Record<string, string> = {
+  EML: "bg-sky-700",
+  DOC: "bg-blue-700",
+  XLS: "bg-green-700",
+  PPT: "bg-orange-700",
+  TXT: "bg-zinc-600",
+  PDF: "bg-red-700",
+  XML: "bg-violet-700",
+};

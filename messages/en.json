@@ -1381,5 +1381,7 @@
   "due_title": "Due soon",
   "due_all": "All by end of period",
   "due_none": "No documents with a period.",
-  "due_until": "until {datum}"
+  "due_until": "until {datum}",
+  "preview_title": "Preview: {name}",
+  "card_preview_short": "Preview"
 }

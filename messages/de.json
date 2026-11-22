@@ -1303,5 +1303,7 @@
   "due_title": "Demnächst fällig",
   "due_all": "Alle nach Fristende",
   "due_none": "Keine Dokumente mit Frist.",
-  "due_until": "bis {datum}"
+  "due_until": "bis {datum}",
+  "preview_title": "Vorschau: {name}",
+  "card_preview_short": "Vorschau"
 }

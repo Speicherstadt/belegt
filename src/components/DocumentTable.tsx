@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { dateiUrl, type Eintrag } from "../lib/api.ts";
 import { artLabel } from "../lib/arten.ts";
 import { groesse, tag, zeitpunkt } from "../lib/format.ts";
+import { trefferTeile } from "../lib/treffer.ts";
 import { m } from "../paraglide/messages.js";
 import { PartyChip } from "./PartyChip.tsx";
+import { hatVorschau, PreviewDialog } from "./PreviewDialog.tsx";
 import { TagChip } from "./TagChip.tsx";
 import { Thumbnail } from "./Thumbnail.tsx";
 
@@ -22,6 +25,24 @@ export interface Auswahl {
   alleUmschalten: () => void;
 }
 
+/** Text mit markierten Suchtreffern */
+function Markiert({ text, suche }: { text: string; suche: string }) {
+  return (
+    <>
+      {trefferTeile(text, suche).map((t, i) =>
+        t.treffer ? (
+          // biome-ignore lint/suspicious/noArrayIndexKey: die Stücke eines Texts haben keine eigene ID, ihre Folge ist fest
+          <mark key={i} className="rounded bg-yellow-200 px-0.5 text-inherit dark:bg-yellow-700/60">
+            {t.text}
+          </mark>
+        ) : (
+          t.text
+        ),
+      )}
+    </>
+  );
+}
+
 export const name = (d: Eintrag) => d.titel ?? d.dateiname ?? m.unnamed();
 
 export function Ordnungszeile({ d }: { d: Eintrag }) {
@@ -38,7 +59,15 @@ export function Ordnungszeile({ d }: { d: Eintrag }) {
 }
 
 /** Die Liste als Tabelle, mit Vorschaubild vor dem Namen */
-export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; auswahl: Auswahl }) {
+export function DocumentTable({
+  eintraege,
+  auswahl,
+  suche = "",
+}: {
+  eintraege: Eintrag[];
+  auswahl: Auswahl;
+  suche?: string;
+}) {
   return (
     // biome-ignore lint/a11y/noNoninteractiveTabindex: ein scrollbarer Bereich muss per Tastatur erreichbar sein (axe: scrollable-region-focusable)
     <section aria-label={m.list_label()} tabIndex={0} className="overflow-x-auto rounded-lg border border-border">
@@ -87,7 +116,7 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
               </td>
               <td className="px-3 py-3 font-medium">
                 <Link to="/dokumente/$id" params={{ id: d.id }} className="underline-offset-2 hover:underline">
-                  {name(d)}
+                  <Markiert text={name(d)} suche={suche} />
                 </Link>
                 <Ordnungszeile d={d} />
               </td>
@@ -107,9 +136,19 @@ export function DocumentTable({ eintraege, auswahl }: { eintraege: Eintrag[]; au
  * Die Liste als Kacheln: großes Vorschaubild mit den Tags darauf, darunter Korrespondent und Titel, Typ, Eingang und
  * Aufbewahrung, unten Öffnen und Herunterladen
  */
-export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; auswahl: Auswahl }) {
+export function DocumentGrid({
+  eintraege,
+  auswahl,
+  suche = "",
+}: {
+  eintraege: Eintrag[];
+  auswahl: Auswahl;
+  suche?: string;
+}) {
+  const [vorschau, setVorschau] = useState<Eintrag | null>(null);
   return (
     <section aria-label={m.list_label()} className="flex flex-col gap-3">
+      {vorschau && <PreviewDialog dokument={vorschau} titel={name(vorschau)} onClose={() => setVorschau(null)} />}
       {auswahl.waehlbar && (
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={auswahl.alleGewaehlt} onChange={auswahl.alleUmschalten} className="size-4" />
@@ -151,7 +190,7 @@ export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; aus
                 params={{ id: d.id }}
                 className="break-words font-medium underline-offset-2 hover:underline"
               >
-                {name(d)}
+                <Markiert text={name(d)} suche={suche} />
               </Link>
               <span className="text-muted text-xs tabular-nums">
                 {d.dokumenttyp ? `${d.dokumenttyp.name} · ` : ""}
@@ -159,7 +198,9 @@ export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; aus
               </span>
               <span className="text-xs">{aufbewahrung(d)}</span>
             </div>
-            <div className="grid grid-cols-2 border-border border-t text-xs">
+            <div
+              className={`grid border-border border-t text-xs ${hatVorschau(d.mimeType) ? "grid-cols-3" : "grid-cols-2"}`}
+            >
               <Link
                 to="/dokumente/$id"
                 params={{ id: d.id }}
@@ -167,6 +208,15 @@ export function DocumentGrid({ eintraege, auswahl }: { eintraege: Eintrag[]; aus
               >
                 {m.card_open_short()}
               </Link>
+              {hatVorschau(d.mimeType) && (
+                <button
+                  type="button"
+                  onClick={() => setVorschau(d)}
+                  className="flex h-9 items-center justify-center border-border border-l font-medium hover:bg-subtle"
+                >
+                  {m.card_preview_short()}
+                </button>
+              )}
               <a
                 href={dateiUrl(d.id)}
                 className="flex h-9 items-center justify-center border-border border-l font-medium hover:bg-subtle"

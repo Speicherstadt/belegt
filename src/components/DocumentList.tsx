@@ -382,9 +382,9 @@ export function DocumentList({
       )}
       {!!liste.data?.length &&
         (darstellung === "kacheln" ? (
-          <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} />
+          <DocumentGrid eintraege={liste.data} auswahl={auswahlFuerListe} suche={suche} />
         ) : (
-          <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} />
+          <DocumentTable eintraege={liste.data} auswahl={auswahlFuerListe} suche={suche} />
         ))}
       <Pagination seite={seite} seiten={seiten} gesamt={gesamt} proSeite={proSeite} blaettern={blaettern} />
     </div>
