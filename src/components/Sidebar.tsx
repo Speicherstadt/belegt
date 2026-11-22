@@ -5,6 +5,7 @@ import { useAnsichtTreffer } from "../lib/ansichtTreffer.ts";
 import { api, type GespeicherteAnsicht, type Ich } from "../lib/api.ts";
 import { m } from "../paraglide/messages.js";
 import { Darstellung } from "./Darstellung.tsx";
+import { BereichSymbol } from "./Symbole.tsx";
 
 const ITEMS = [
   { to: "/", label: () => m.nav_start() },
@@ -19,7 +20,7 @@ const ITEMS = [
 ] as const;
 
 const eintrag =
-  "flex h-9 items-center rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
+  "flex h-9 items-center gap-2.5 rounded-md px-2.5 text-fg/80 text-sm hover:bg-subtle aria-[current=page]:bg-subtle aria-[current=page]:font-medium aria-[current=page]:text-fg";
 
 /** Zahl der Treffer einer gespeicherten Ansicht, aus derselben Abfrage wie die Kachel auf der Startseite */
 function Anzahl({ ansicht }: { ansicht: GespeicherteAnsicht }) {
@@ -110,6 +111,7 @@ export function Sidebar({
               activeOptions={{ exact: true, includeSearch: item.to === "/archiv" && !!offeneAnsicht }}
               className={eintrag}
             >
+              <BereichSymbol bereich={item.to} />
               {item.label()}
             </Link>
             {item.to === "/archiv" && !!ansichten.data?.length && (

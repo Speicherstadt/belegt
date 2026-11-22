@@ -4,6 +4,7 @@ import { api, type ImportStatus, type Start } from "../../lib/api.ts";
 import { zeitpunkt } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { SealBadge, VERALTET_STUNDEN } from "../SealBadge.tsx";
+import { BereichSymbol } from "../Symbole.tsx";
 import { Explain } from "../WasIstDas.tsx";
 
 const STATUS: Record<ImportStatus, () => string> = {
@@ -22,7 +23,8 @@ export function SourceStatus({ quellen }: { quellen: NonNullable<Start["quellen"
   const leer = !quellen.postfaecher.length && !quellen.ordner && !quellen.paperless;
   return (
     <section aria-labelledby="start-quellen" className={kachel}>
-      <h2 id="start-quellen" className="m-0 font-semibold text-lg">
+      <h2 id="start-quellen" className="m-0 flex items-center gap-2 font-semibold text-lg">
+        <BereichSymbol bereich="/quellen" className="size-4 text-muted" />
         {m.start_sources()}
       </h2>
       {leer && <p className="m-0 text-muted text-sm">{m.start_sources_none()}</p>}
@@ -88,7 +90,8 @@ export function ChainStatus({ inhaber }: { inhaber: boolean }) {
   const veraltet = !!lauf && Date.now() - new Date(lauf.geprueftAm).getTime() > VERALTET_STUNDEN * 3_600_000;
   return (
     <section aria-labelledby="start-kette" className={kachel}>
-      <h2 id="start-kette" className="m-0 font-semibold text-lg">
+      <h2 id="start-kette" className="m-0 flex items-center gap-2 font-semibold text-lg">
+        <BereichSymbol bereich="/pruefung" className="size-4 text-muted" />
         {m.start_chain()}
       </h2>
       {kette.error && <p className={fehler}>{kette.error.message}</p>}

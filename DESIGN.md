@@ -244,3 +244,13 @@ Das soll der Maintainer entscheiden:
 Die Leiste für Sammelaktionen schwebt unten über der Liste (`SelectionBar.tsx`, `fixed`), damit beim Anhaken nichts
 verrutscht. Unter einer Kachel stehen Öffnen, Vorschau und Herunterladen als Symbole; der Text steht in `aria-label`
 und `title`, weil er in die schmale Karte nicht passt.
+
+## Symbole
+
+Symbole kommen aus Lucide (`lucide-react`, ISC), 16 px mit Strich 2, nie selbst gezeichnet. Sie sind einfarbig: in der
+Textfarbe drumherum (Seitenleiste grau, aktiver Eintrag in `--fg`), in Beschriftungen `--muted`. Jeder Bereich hat ein
+festes Symbol (`src/components/Symbole.tsx`), dasselbe in Seitenleiste, Kacheln der Startseite und leeren Seiten
+(groß auf `--subtle` mit Rand). Symbole sind schmückend (`aria-hidden`); der Text daneben sagt es. Farbe gibt es nur
+mit Bedeutung: Siegel (`--ok`, `--warn`, `--danger`) und die Punkte der Aufbewahrung (Pflicht `--c-blue`, freiwillig
+mit Frist `--c-amber`, frei `--muted`). Keine Akzentfarbe: Hauptknopf und aktiver Filter bleiben `--primary`.
+

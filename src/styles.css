@@ -14,6 +14,8 @@
   --ok: #15803d;
   --warn: #b45309;
   --danger: #b91c1c;
+  --c-blue: #2563eb;
+  --c-amber: #b45309;
   color-scheme: light;
 }
 
@@ -41,6 +43,8 @@
   --ok: #4ade80;
   --warn: #fbbf24;
   --danger: #f87171;
+  --c-blue: #60a5fa;
+  --c-amber: #fbbf24;
   color-scheme: dark;
 }
 
@@ -57,6 +61,8 @@
     --ok: #4ade80;
     --warn: #fbbf24;
     --danger: #f87171;
+    --c-blue: #60a5fa;
+    --c-amber: #fbbf24;
     color-scheme: dark;
   }
 }
@@ -73,6 +79,8 @@
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
+  --color-c-blue: var(--c-blue);
+  --color-c-amber: var(--c-amber);
   --font-sans: "Geist Variable", system-ui, sans-serif;
 }
 
