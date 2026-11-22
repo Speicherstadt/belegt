@@ -36,6 +36,8 @@ async function bild(page: Page, name: string, oben?: string) {
         .locator(ziel)
         .first()
         .evaluate((e) => e.scrollIntoView({ block: "start" }));
+    // Sonst von oben: ein Klick vorher (etwa „Jetzt prüfen“ auf der Startseite) hat die Seite gescrollt
+    else await page.evaluate(() => window.scrollTo(0, 0));
     const png = await page.screenshot({ animations: "disabled", caret: "hide" });
     const pfad = `${ASSETS}/screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
     await writeFile(pfad, await mitRahmen(rahmenBrowser, png, modus === "Dunkel" ? "dunkel" : "hell", mobil ? 36 : 12));
