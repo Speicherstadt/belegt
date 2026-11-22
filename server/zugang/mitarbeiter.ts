@@ -12,7 +12,7 @@ const LESEN = [
   /^\/api\/ich$/,
   /^\/api\/start$/,
   /^\/api\/dokumente$/,
-  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|vorschaubild|ableitungen|aehnliche|notizen|seiten|seiten\/\d+))?$/,
+  /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|nachweis|nachweis\.pdf|vorschaubild|ableitungen|aehnliche|notizen|seiten|seiten\/\d+))?$/,
   /^\/api\/(tags|dokumenttypen|korrespondenten|felder)$/,
 ];
 

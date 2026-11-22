@@ -17,7 +17,7 @@ import { EmptyState, PageHeader } from "../components/PageHeader.tsx";
 import { SealBadge } from "../components/SealBadge.tsx";
 import { ShareLinks } from "../components/ShareLinks.tsx";
 import { Similar } from "../components/Similar.tsx";
-import { ansichtUrl, api, archivfassungUrl, dateiUrl } from "../lib/api.ts";
+import { ansichtUrl, api, archivfassungUrl, dateiUrl, nachweisUrl } from "../lib/api.ts";
 import { listeLesen, nachbarn } from "../lib/blaettern.ts";
 import { m } from "../paraglide/messages.js";
 
@@ -196,6 +196,9 @@ export function DocumentPage() {
               {m.doc_download_searchable()}
             </a>
           )}
+          <a href={nachweisUrl(d.id)} className={knopf} title={m.doc_proof_pdf_hint()}>
+            {m.doc_proof_pdf()}
+          </a>
           <OpenWith dokumentId={d.id} mimeType={d.mimeType} />
         </div>
       )}

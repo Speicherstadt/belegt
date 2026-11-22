@@ -312,4 +312,6 @@ export const seiteUrl = (id: string, nr: number) => `/api/dokumente/${id}/seiten
 export const vorschaubildUrl = (id: string) => `/api/dokumente/${id}/vorschaubild`;
 export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
 export const archivfassungUrl = (id: string) => `/api/dokumente/${id}/archivfassung`;
+/** Nachweis über das Original als PDF (Hash, Siegel, Zeitstempel, Prüfung, Verlauf) */
+export const nachweisUrl = (id: string) => `/api/dokumente/${id}/nachweis.pdf`;
 export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;

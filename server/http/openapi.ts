@@ -187,6 +187,21 @@ export const openapi = {
         responses: { "200": { description: "Dokument" }, "404": fehler },
       },
     },
+    "/api/dokumente/{id}/nachweis": {
+      get: {
+        summary:
+          "Nachweis über das Original: Hash, Archivnummer, Eingang (Nummer im Audit-Log), Siegel, Verlauf, der erste Zeitstempel nach dem Eingang und die letzte Prüfung der Kette",
+        parameters: [idParam],
+        responses: { "200": { description: "Nachweis als JSON" }, "404": fehler },
+      },
+    },
+    "/api/dokumente/{id}/nachweis.pdf": {
+      get: {
+        summary: "Derselbe Nachweis als PDF zum Weitergeben; der SHA-256 steht auch in den Stichwörtern",
+        parameters: [idParam],
+        responses: { "200": { description: "PDF", content: { "application/pdf": {} } }, "404": fehler },
+      },
+    },
     "/api/dokumente/{id}/datei": {
       get: {
         summary: "Das Original, geprüft gegen seinen Hash",

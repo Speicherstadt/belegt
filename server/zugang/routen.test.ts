@@ -36,6 +36,8 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/dokumente/:id/vorschaubild": "dokument",
   "GET /api/dokumente/:id/inhalt": "dokument",
   "GET /api/dokumente/:id/verlauf": "dokument",
+  "GET /api/dokumente/:id/nachweis": "dokument",
+  "GET /api/dokumente/:id/nachweis.pdf": "dokument",
   "GET /api/dokumente/:id/seiten": "dokument",
   "GET /api/dokumente/:id/seiten/:nr": "dokument",
   "POST /api/dokumente/:id/seiten": "dokument",

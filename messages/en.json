@@ -1435,5 +1435,7 @@
   "order_tabs_label": "Classification sections",
   "order_filter": "Filter by name",
   "quick_mode_start": "Quick classify",
-  "quick_mode_keys": "Quick mode: 1 to 7 picks the kind, Enter classifies and opens the next document, ← and → browse."
+  "quick_mode_keys": "Quick mode: 1 to 7 picks the kind, Enter classifies and opens the next document, ← and → browse.",
+  "doc_proof_pdf": "Proof (PDF)",
+  "doc_proof_pdf_hint": "Shows this original is unchanged: hash, seal, timestamp and history"
 }

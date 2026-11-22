@@ -1357,5 +1357,7 @@
   "order_tabs_label": "Bereiche der Ordnung",
   "order_filter": "Nach Namen filtern",
   "quick_mode_start": "Schnell einordnen",
-  "quick_mode_keys": "Schnellmodus: 1 bis 7 wählt die Art, Enter ordnet ein und öffnet das nächste Dokument, ← und → blättern."
+  "quick_mode_keys": "Schnellmodus: 1 bis 7 wählt die Art, Enter ordnet ein und öffnet das nächste Dokument, ← und → blättern.",
+  "doc_proof_pdf": "Nachweis (PDF)",
+  "doc_proof_pdf_hint": "Belegt, dass dieses Original unverändert vorliegt: Hash, Siegel, Zeitstempel und Verlauf"
 }
