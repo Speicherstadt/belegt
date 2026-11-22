@@ -4,6 +4,7 @@ import { BackupStatus } from "../components/BackupStatus.tsx";
 import { DatabaseAccess } from "../components/DatabaseAccess.tsx";
 import { Export } from "../components/Export.tsx";
 import { PageHeader } from "../components/PageHeader.tsx";
+import { SealStatus } from "../components/SealBadge.tsx";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
@@ -33,14 +34,21 @@ export function AuditPage() {
         >
           {m.audit_check_files()}
         </button>
-        {pruefung.data && (
-          <p role="status" className="m-0 font-medium text-sm">
-            {pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) })}
-            {pruefung.data.dateienGeprueft !== undefined &&
-              ` ${m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })}`}
-          </p>
-        )}
       </div>
+      {pruefung.data && (
+        <SealStatus
+          zustand={pruefung.data.ok ? "gut" : "befund"}
+          satz={pruefung.data.ok ? m.audit_ok() : m.audit_problems({ anzahl: String(pruefung.data.befunde.length) })}
+          detail={[
+            m.seal_checked({ zeit: zeitpunkt(pruefung.data.bericht.zeitpunkt) }),
+            pruefung.data.dateienGeprueft !== undefined
+              ? m.audit_files_checked({ anzahl: String(pruefung.data.dateienGeprueft) })
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        />
+      )}
       {pruefung.data && (
         <section aria-labelledby="bericht" className="flex flex-col gap-2 rounded-lg border border-border p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">

@@ -55,9 +55,12 @@ Karten und Trennlinien behalten `--border`: Sie tragen keine Bedeutung, ein Bedi
 (siehe unten): ob es Tokens `--danger` und `--warn` werden. Farbe allein trägt nie die Bedeutung: Ein Fehler hat immer
 Text, ein Status ein Wort oder Symbol.
 
-**Zustand der Siegel.** Der Prüfstatus (`SealBadge.tsx`) hat drei Farben mit Symbol und Satz: grün mit ✓ (letzter Lauf
-frisch und ohne Befund), gelb mit ! (noch nicht geprüft oder älter als 48 Stunden), rot mit ✕ (Befund). Grün steht nur
-dort, wo Belegt etwas geprüft hat; ein bloßes „gespeichert“ ist kein Grün.
+**Zustand der Siegel.** Der Prüfstatus (`SealBadge.tsx`) ist eine schlichte Zeile auf `--subtle` mit Schild-Symbol:
+Haken in `--ok` (letzter Lauf frisch und ohne Befund), ! in `--warn` (noch nicht geprüft oder älter als 48 Stunden),
+✕ in `--danger` (Befund). Nur das Symbol ist farbig, Satz und Fläche bleiben neutral; im Kopf eines Dokuments als
+Etikett mit `--border`. Startseite und Prüfung zeigen dieselbe Zeile. Grün steht nur dort, wo Belegt etwas geprüft
+hat; ein bloßes „gespeichert“ ist kein Grün. Tokens: `--ok` `#15803d` / `#4ade80`, `--warn` `#b45309` / `#fbbf24`,
+`--danger` `#b91c1c` / `#f87171` (hell / dunkel).
 
 ## Zielgrößen
 

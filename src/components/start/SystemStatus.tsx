@@ -4,7 +4,6 @@ import { api, type ImportStatus, type Start } from "../../lib/api.ts";
 import { zeitpunkt } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { SealBadge, VERALTET_STUNDEN } from "../SealBadge.tsx";
-import { Explain } from "../WasIstDas.tsx";
 
 const STATUS: Record<ImportStatus, () => string> = {
   wartet: () => m.paperless_status_wartet(),
@@ -95,24 +94,6 @@ export function ChainStatus({ inhaber }: { inhaber: boolean }) {
       <SealBadge gross />
       {kette.data && (
         <dl className="m-0 flex flex-col gap-1 text-sm">
-          <Explain term="chain" row>
-            {(knopf, satz) => (
-              <>
-                <dt className="flex items-center text-muted">
-                  {m.start_chain_result()}
-                  {knopf}
-                </dt>
-                {lauf ? (
-                  <dd className={lauf.ok ? "m-0 font-medium" : `${fehler} font-medium`}>
-                    {lauf.ok ? m.start_chain_ok() : m.start_chain_findings({ anzahl: String(lauf.befunde) })}
-                  </dd>
-                ) : (
-                  <dd className="m-0">{m.start_chain_never()}</dd>
-                )}
-                {satz}
-              </>
-            )}
-          </Explain>
           {lauf && (
             <>
               <dt className="text-muted">{m.start_chain_checked()}</dt>

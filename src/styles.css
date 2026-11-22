@@ -11,6 +11,9 @@
   --border: #e4e4e7;
   --primary: #18181b;
   --onprimary: #fafafa;
+  --ok: #15803d;
+  --warn: #b45309;
+  --danger: #b91c1c;
   color-scheme: light;
 }
 
@@ -35,6 +38,9 @@
   --border: #27272a;
   --primary: #fafafa;
   --onprimary: #18181b;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --danger: #f87171;
   color-scheme: dark;
 }
 
@@ -48,6 +54,9 @@
     --border: #27272a;
     --primary: #fafafa;
     --onprimary: #18181b;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --danger: #f87171;
     color-scheme: dark;
   }
 }
@@ -61,6 +70,9 @@
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-onprimary: var(--onprimary);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
   --font-sans: "Geist Variable", system-ui, sans-serif;
 }
 
