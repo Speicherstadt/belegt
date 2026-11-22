@@ -19,6 +19,11 @@ Rolle:
 Bei jedem Konto außer dem Inhaber steht **Entziehen**: Seine Sitzungen enden, anmelden kann er sich nicht mehr, im
 Protokoll und in der [Verfahrensdokumentation](verfahrensdoku.md) bleibt er mit dem Tag des Entzugs stehen.
 
+
+Die Sicht ist eine Bedingung in derselben Datenbankabfrage wie die Liste, keine Auswertung je Dokument danach. Ein
+Mitarbeiter wartet deshalb auf seine Liste kaum länger als der Inhaber; `server/zugang/sicht-leistung.test.ts` misst
+das bei einigen hundert Dokumenten.
+
 ## Zwei-Faktor { #zwei-faktor }
 
 Unter **Konto** (unten in der Seitenleiste) richtet jede Person ihren zweiten Faktor selbst ein:
