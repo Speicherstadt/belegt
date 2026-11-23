@@ -280,3 +280,9 @@ Rechts in der Leiste darf ein kurzer Zustand stehen (etwa „Alle Angaben sind g
 (Postfächer, Scannen, Umzug, Schnittstelle), Fristen (Übersicht, Sperren, Vorlagen und Fristen) und Verfahrensdoku
 (Angaben, Dokument). Die Hauptaktion einer Seite steht oben rechts neben der Erklärung, ohne Einträge in der Mitte
 des leeren Zustands, nie doppelt.
+
+## Tags
+
+Ein Tag ist eine Badge mit Rand wie die Outline-Badge von shadcn/ui (`TagChip`): 24 px hoch, `rounded-md`, Rand
+`--border`, Name in `--fg`. Die Farbe des Tags steht nur als Punkt davor (hell in der dunklen, dunkel in der hellen
+Farbe der Palette), nie als Fläche: So bleibt die Liste ruhig, und die Farbe hilft trotzdem beim Wiederfinden.
