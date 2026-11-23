@@ -244,8 +244,10 @@ Das soll der Maintainer entscheiden:
 Die Leiste für Sammelaktionen ist eine Zeile (48 px), die mittig über dem Inhalt schwebt (`SelectionBar.tsx`, `fixed`),
 damit beim Anhaken nichts verrutscht: links die Zahl und ×, nach einem Strich die Aktionen als graues Lucide-Symbol mit
 kurzem Wort (unter `lg` nur das Symbol, der Name in `aria-label`). Nie ein Formular in der Leiste und nie ein Kasten in
-der Seite: Jede Aktion öffnet ihr Formular im selben Panel direkt über der Leiste (Escape oder × schließt), auch die
-Reihenfolge beim Zusammenfügen; keine Aktion weicht davon ab. Das Ergebnis steht danach in derselben Form an
+der Seite. Tags, Korrespondent und Typ öffnen eine durchsuchbare Liste direkt über ihrem Knopf (`AuswahlListe.tsx`):
+ein Klick setzt sofort; bei Tags zeigt das Kästchen alle (✓), manche (–) oder keine, ein neuer Name legt den Tag an.
+Feld, Einordnen und Zusammenfügen öffnen ein Panel genau so breit wie die Leiste und bündig darüber: oben der Titel und
+×, dann der Hinweis, die Felder, unten rechts die Knöpfe. Escape oder ein Klick daneben schließt. Das Ergebnis steht danach in derselben Form an
 derselben Stelle (`AuswahlMeldung`). Unter einer Kachel stehen Öffnen, Vorschau und Herunterladen als Symbole; der Text steht in `aria-label`
 und `title`, weil er in die schmale Karte nicht passt.
 

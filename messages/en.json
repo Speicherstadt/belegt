@@ -553,8 +553,6 @@
   "order_field_delete_confirm": "Delete {name} and all values",
   "order_failed": "Not saved: {meldung}",
   "suggest_doctype": "Document type “{typ}” suggests: {art}",
-  "bulk_tags_add": "Add tag",
-  "bulk_tags_remove": "Remove tag",
   "bulk_doctype": "Set document type",
   "bulk_field": "Set field value",
   "bulk_classify": "Classify",
@@ -1467,5 +1465,10 @@
   "bulk_short_field": "Field",
   "bulk_short_zip": "ZIP",
   "bulk_panel_close": "Close",
-  "merge_short": "Merge"
+  "merge_short": "Merge",
+  "bulk_search_tags": "Search or create tag …",
+  "bulk_search_party": "Search correspondent …",
+  "bulk_search_doctype": "Search document type …",
+  "bulk_tag_create": "Create “{name}” and add",
+  "bulk_nothing_found": "Nothing found"
 }

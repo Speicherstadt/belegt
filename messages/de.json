@@ -517,8 +517,6 @@
   "order_field_delete_confirm": "{name} und alle Werte löschen",
   "order_failed": "Nicht gespeichert: {meldung}",
   "suggest_doctype": "Dokumenttyp „{typ}“ schlägt vor: {art}",
-  "bulk_tags_add": "Tag hinzufügen",
-  "bulk_tags_remove": "Tag entfernen",
   "bulk_doctype": "Dokumenttyp setzen",
   "bulk_field": "Feldwert setzen",
   "bulk_classify": "Einordnen",
@@ -1389,5 +1387,10 @@
   "bulk_short_field": "Feld",
   "bulk_short_zip": "ZIP",
   "bulk_panel_close": "Schließen",
-  "merge_short": "Zusammenfügen"
+  "merge_short": "Zusammenfügen",
+  "bulk_search_tags": "Tag suchen oder anlegen …",
+  "bulk_search_party": "Korrespondent suchen …",
+  "bulk_search_doctype": "Dokumenttyp suchen …",
+  "bulk_tag_create": "„{name}“ anlegen und hinzufügen",
+  "bulk_nothing_found": "Nichts gefunden"
 }

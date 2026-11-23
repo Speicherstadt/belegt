@@ -1,9 +1,10 @@
 import { Check, Combine, Download, FileType, FolderCheck, Tag, TextCursorInput, UserRound, X } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import type { Eintrag } from "../lib/api.ts";
 import { zipUrl } from "../lib/api.ts";
 import { groesse } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { AuswahlListe, type ListenArt } from "./AuswahlListe.tsx";
 import { type Aktion, BulkEdit } from "./BulkEdit.tsx";
 import { leistenKnopf } from "./leiste.ts";
 import { MergePdfs } from "./MergePdfs.tsx";
@@ -14,8 +15,15 @@ const ZIP_MAX_BYTES = 2 * 1024 ** 3;
 const symbol = "size-4 shrink-0 text-muted";
 const wort = "hidden lg:inline";
 
-/** Was ein Panel über der Leiste öffnet: die Sammelbearbeitung (BulkEdit) oder das Zusammenfügen */
-type Panel = Aktion | "zusammenfuegen";
+/**
+ * Was über der Leiste aufgeht: Tags, Korrespondent und Typ als Liste direkt über ihrem Knopf (AuswahlListe), Feld,
+ * Einordnen und Zusammenfügen als Panel so breit wie die Leiste
+ */
+type Panel = ListenArt | Aktion | "zusammenfuegen";
+const LISTEN: Panel[] = ["tags", "korrespondent", "dokumenttyp"];
+const istListe = (p: Panel): p is ListenArt => LISTEN.includes(p);
+/** Breite der Liste über dem Knopf (w-72) */
+const LISTE_BREITE = 288;
 type Knopf = { aktion: Panel; kurz: () => string; titel: () => string; Bild: typeof Tag };
 
 const AKTIONEN: Knopf[] = [
@@ -32,7 +40,8 @@ const ZUSAMMENFUEGEN: Knopf = {
   Bild: Combine,
 };
 
-/** Schwebt mittig über dem Inhalt (rechts der Seitenleiste), damit nichts in der Seite verrutscht */
+/** Schwebt mittig über dem Inhalt (rechts der Seitenleiste), damit nichts in der Seite verrutscht; die Leiste gibt die
+ * Breite vor, ein Panel darüber streckt sich auf sie */
 function Schwebend({ children, leiste }: { children: ReactNode; leiste?: React.Ref<HTMLDivElement> }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-64 print:hidden">
@@ -68,6 +77,15 @@ export function SelectionBar({
 }) {
   const leiste = useRef<HTMLDivElement>(null);
   const [offen, setOffen] = useState<Panel | null>(null);
+  // Wo der Knopf der offenen Liste in der Leiste steht, damit sie genau darüber aufgeht
+  const [anker, setAnker] = useState(0);
+  const umschalten = (aktion: Panel, e: MouseEvent<HTMLButtonElement>) => {
+    const rahmen = leiste.current?.getBoundingClientRect();
+    const breite = rahmen?.width ?? 0;
+    const links = e.currentTarget.getBoundingClientRect().left - (rahmen?.left ?? 0);
+    setAnker(Math.max(0, Math.min(links, breite - LISTE_BREITE)));
+    setOffen(offen === aktion ? null : aktion);
+  };
   // Was ins Bild gescrollt wird (Blättern, Fokus), soll nicht unter der Leiste landen
   useEffect(() => {
     const wurzel = document.documentElement;
@@ -85,12 +103,19 @@ export function SelectionBar({
       wurzel.style.removeProperty("--auswahl-platz");
     };
   }, []);
-  // Escape schließt das Panel
+  // Escape oder ein Klick daneben schließt, was offen ist
   useEffect(() => {
     if (!offen) return;
     const taste = (e: KeyboardEvent) => e.key === "Escape" && setOffen(null);
+    const klick = (e: PointerEvent) => {
+      if (leiste.current && !leiste.current.contains(e.target as Node)) setOffen(null);
+    };
     window.addEventListener("keydown", taste);
-    return () => window.removeEventListener("keydown", taste);
+    document.addEventListener("pointerdown", klick);
+    return () => {
+      window.removeEventListener("keydown", taste);
+      document.removeEventListener("pointerdown", klick);
+    };
   }, [offen]);
   const summe = gewaehlteEintraege.reduce((s, d) => s + d.groesse, 0);
   const zip = m.zip_download({ anzahl: String(gewaehlt.length), groesse: groesse(summe) });
@@ -102,16 +127,27 @@ export function SelectionBar({
 
   return (
     <Schwebend leiste={leiste}>
-      {aktiv && (
+      {aktiv && istListe(aktiv.aktion) && (
         <section
           aria-label={aktiv.titel()}
-          className="mb-2 flex w-[min(34rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl border border-border bg-bg p-4 shadow-lg"
+          style={{ left: anker }}
+          className="absolute bottom-full mb-2 w-72 rounded-xl border border-border bg-bg p-2 shadow-lg"
+        >
+          <AuswahlListe
+            key={aktiv.aktion}
+            art={aktiv.aktion}
+            gewaehlt={gewaehlteEintraege}
+            schliessen={() => setOffen(null)}
+          />
+        </section>
+      )}
+      {aktiv && !istListe(aktiv.aktion) && (
+        <section
+          aria-label={aktiv.titel()}
+          className="mb-2 flex w-0 min-w-full flex-col gap-3 rounded-xl border border-border bg-bg p-4 shadow-lg"
         >
           <div className="flex items-center justify-between gap-3">
-            <h2 className="m-0 font-semibold text-sm">
-              {aktiv.titel()}
-              <span className="font-normal text-muted"> · {m.bulk_selected({ anzahl: String(gewaehlt.length) })}</span>
-            </h2>
+            <h2 className="m-0 font-semibold text-sm">{aktiv.titel()}</h2>
             <button
               type="button"
               onClick={() => setOffen(null)}
@@ -160,7 +196,7 @@ export function SelectionBar({
               aria-expanded={offen === aktion}
               aria-label={titel()}
               title={titel()}
-              onClick={() => setOffen(offen === aktion ? null : aktion)}
+              onClick={(e) => umschalten(aktion, e)}
               className={leistenKnopf}
             >
               <Bild aria-hidden="true" className={symbol} />
