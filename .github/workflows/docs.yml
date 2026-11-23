@@ -12,6 +12,13 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths: ["docs/**", "overrides/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
   workflow_dispatch:
+  # Nach „Screenshots erneuern“: dessen Commit mit dem GITHUB_TOKEN startet kein on: push, darum ruft er die Docs auf
+  workflow_call:
+    inputs:
+      ref:
+        description: Stand, der gebaut wird (leer: der auslösende Commit)
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -28,6 +35,8 @@ jobs:
       pages: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
       - uses: actions/setup-python@v7
         with:
           python-version: "3.15"

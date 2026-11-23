@@ -147,4 +147,5 @@ im Bild, `e2e/bildrahmen.ts`). Danach rendert `bun run docs:social-preview` das 
 (`bunx playwright install chromium`), weil die Headless Shell keine PDFs zeigt. Jedes Bild vor dem Commit ansehen.
 
 In der CI geht das per Knopf: **Actions → Screenshots erneuern → Run workflow** nimmt die Bilder im Playwright-Image
-auf und committet die geänderten auf den Branch, auf dem der Lauf startet.
+auf und committet die geänderten auf den Branch, auf dem der Lauf startet. Danach baut er die Dokumentation neu und
+veröffentlicht sie, denn sein Commit startet als Commit des Workflows kein `on: push`.

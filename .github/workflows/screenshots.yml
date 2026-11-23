@@ -31,3 +31,15 @@ jobs:
       commit-message: Screenshots erneuert
     permissions:
       contents: write
+
+  # Der Commit mit den Bildern kommt vom GITHUB_TOKEN und startet deshalb kein on: push; die Docs mit den neuen Bildern
+  # hier bauen und veröffentlichen, vom neuesten Stand des Branches
+  docs:
+    needs: screenshots
+    uses: ./.github/workflows/docs.yml
+    with:
+      ref: ${{ github.ref_name }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
