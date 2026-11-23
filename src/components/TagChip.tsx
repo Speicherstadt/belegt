@@ -22,7 +22,7 @@ export function TagChip({ tag, onEntfernen }: { tag: TagKurz; onEntfernen?: () =
           type="button"
           onClick={onEntfernen}
           aria-label={m.tag_remove({ name: tag.name })}
-          className="-mr-1 flex size-5 items-center justify-center rounded-sm hover:bg-subtle"
+          className="-mr-1.5 flex size-6 items-center justify-center rounded-sm hover:bg-subtle"
         >
           <span aria-hidden="true">×</span>
         </button>
