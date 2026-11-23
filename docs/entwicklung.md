@@ -19,6 +19,7 @@ bun run lint         # Biome und checks; bun run format behebt Formatfehler
 bun run test         # Vitest
 bun run e2e          # Playwright mit axe gegen echten Server (Port 3185) und Vite (5185), braucht E2E_DATABASE_URL
 bun run build
+bun run build:demo   # die Demo ohne Server nach dist-demo (unten)
 ```
 
 `bun run lint` prüft mit [`checks`](https://github.com/firsttris/workflows#checks) auch, dass keine Datei über 400 Zeilen
@@ -149,3 +150,20 @@ im Bild, `e2e/bildrahmen.ts`). Danach rendert `bun run docs:social-preview` das 
 In der CI geht das per Knopf: **Actions → Screenshots erneuern → Run workflow** nimmt die Bilder im Playwright-Image
 auf und committet die geänderten auf den Branch, auf dem der Lauf startet. Danach baut er die Dokumentation neu und
 veröffentlicht sie, denn sein Commit startet als Commit des Workflows kein `on: push`.
+
+## Die Demo
+
+Die [Demo](https://belegt.store/demo/) ist dieselbe App ohne Server, auf GitHub Pages unter `/demo/`. Im Vite-Modus
+`demo` (`bun run build:demo`, zum Ausprobieren `bunx vite --mode demo`) importiert `src/main.tsx` vor dem Start
+`src/demo/einbauen.ts`: Es lenkt die Anfragen der App an `/api` auf einen Server in der Seite (`src/demo/antworten.ts`)
+und die Bilder, Vorschauen und Downloads auf aufgenommene Dateien (`src/lib/adresse.ts`). Oben steht ein Hinweis, dass
+die Demo Testdaten zeigt; was schreibt, beantwortet sie mit „In der Demo nicht möglich“.
+
+Die Antworten sind echt: `e2e/demo-aufnahme.ts` nimmt sie am Ende von „Screenshots erneuern“ mit denselben erfundenen
+Daten auf (`demo/aufnahme.json`, Dateien in `demo/dateien/`). Dabei besucht es jede Seite, jeden Reiter und jedes
+Dokument; die Liste der Dokumente holt es je Gruppe ganz, Suche, Filter, Sortierung und Seiten rechnet die Demo selbst.
+Was die Aufnahme nicht kennt, ist in der Demo 404. Nach einer Änderung an der Oberfläche deshalb „Screenshots erneuern“
+starten, dann passen Bilder und Demo wieder zusammen. Die Docs bauen die Demo bei jeder Änderung an der App neu.
+
+Die Sicherungen der GoBD (Sperren, Hash-Kette, Siegel) liegen in Postgres und laufen in der Demo nicht; sie zeigt nur,
+wie die App ihr Ergebnis anzeigt. `e2e/demo.spec.ts` prüft die Demo mit dem Vite-Server im Modus `demo`.

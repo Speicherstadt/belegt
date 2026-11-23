@@ -1,4 +1,5 @@
-# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://belegt.store/
+# Baut docs/ mit Zensical und die Demo (bun run build:demo, src/demo/) und veröffentlicht beides auf GitHub Pages:
+# https://belegt.store/ und …/demo/
 # In Pull Requests nur bauen (ein kaputter Link oder eine fehlende Seite fällt vor dem Merge auf), auf main
 # veröffentlichen. Voraussetzung einmalig, von Hand: Settings → Pages → Source „GitHub Actions“. Anlegen kann die
 # Seite der Token des Workflows nicht (Resource not accessible by integration).
@@ -7,10 +8,38 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**", "overrides/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
+    paths:
+      - "docs/**"
+      - "overrides/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - ".github/workflows/docs.yml"
+      # Die Demo ist die App: jede Änderung an ihr ändert die Demo
+      - "src/**"
+      - "shared/**"
+      - "messages/**"
+      - "demo/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "package.json"
+      - "bun.lock"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths: ["docs/**", "overrides/**", "mkdocs.yml", "requirements-docs.txt", ".github/workflows/docs.yml"]
+    paths:
+      - "docs/**"
+      - "overrides/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - ".github/workflows/docs.yml"
+      # Die Demo ist die App: jede Änderung an ihr ändert die Demo
+      - "src/**"
+      - "shared/**"
+      - "messages/**"
+      - "demo/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "package.json"
+      - "bun.lock"
   workflow_dispatch:
   # Nach „Screenshots erneuern“: dessen Commit mit dem GITHUB_TOKEN startet kein on: push, darum ruft er die Docs auf
   workflow_call:
@@ -46,6 +75,11 @@ jobs:
       - run: zensical build --strict
       # Jede Seite mit eigener Beschreibung (Suchmaschinen, Vorschau beim Teilen)
       - run: test -z "$(grep -L '^description:' docs/*.md)"
+      # Die Demo unter /demo/, mit der Aufnahme aus „Screenshots erneuern“ (demo/aufnahme.json)
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile && bun run build:demo && cp -r dist-demo site/demo
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v5

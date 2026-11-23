@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/*.md", "!src/paraglide", "!overrides"]
+    "includes": ["**", "!**/*.md", "!src/paraglide", "!overrides", "!demo"]
   },
   "formatter": {
     "indentStyle": "space",

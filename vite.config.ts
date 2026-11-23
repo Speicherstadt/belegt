@@ -8,7 +8,13 @@ import { pwaPlugin } from "./src/pwa/plugin.ts";
 /** Der Server von Belegt; im Betrieb liefert er die App selbst aus */
 const server = process.env.BELEGT_SERVER ?? "http://127.0.0.1:3000";
 
-export default defineConfig({
+/*
+ * Die Demo (bun run build:demo, docs/entwicklung.md): dieselbe App unter /demo/, ohne Server und ohne Service Worker;
+ * src/demo/ beantwortet /api aus der Aufnahme
+ */
+export default defineConfig(({ mode }) => ({
+  base: mode === "demo" ? "/demo/" : "/",
+  build: mode === "demo" ? { outDir: "dist-demo", assetsInlineLimit: 0 } : undefined,
   plugins: [
     // Sprache des Browsers, sonst Deutsch
     paraglideVitePlugin({
@@ -24,7 +30,7 @@ export default defineConfig({
       transformIndexHtml: () => [{ tag: "script", children: DARSTELLUNG_SKRIPT, injectTo: "head-prepend" }],
     },
     // Manifest, Service Worker und Seite ohne Verbindung (src/pwa/)
-    pwaPlugin(),
+    mode === "demo" ? null : pwaPlugin(),
   ],
   server: { proxy: { "/api": { target: server }, "/healthz": { target: server } } },
-});
+}));

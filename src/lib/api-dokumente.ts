@@ -1,4 +1,5 @@
 import type { Sortierung } from "../../shared/archivansicht.ts";
+import { apiAdresse } from "./adresse.ts";
 import { ApiFehler, antwort, aufruf, json } from "./api-aufruf.ts";
 import type { Ordnung, OrdnungsVorschlag, TagKurz } from "./api-ordnung.ts";
 
@@ -305,13 +306,14 @@ export const exportUrl = (von: string, bis: string) =>
   `/api/export?von=${encodeURIComponent(von)}&bis=${encodeURIComponent(bis)}`;
 
 /** Mehrere Originale als ZIP (GET /api/dokumente/zip) */
-export const zipUrl = (ids: string[]) => `/api/dokumente/zip?ids=${ids.join(",")}`;
+export const zipUrl = (ids: string[]) => apiAdresse(`/api/dokumente/zip?ids=${ids.join(",")}`);
 
 export const trennblattUrl = "/api/trennblatt.pdf";
-export const seiteUrl = (id: string, nr: number) => `/api/dokumente/${id}/seiten/${nr}`;
-export const vorschaubildUrl = (id: string) => `/api/dokumente/${id}/vorschaubild`;
-export const ansichtUrl = (id: string) => `/api/dokumente/${id}/ansicht`;
-export const archivfassungUrl = (id: string) => `/api/dokumente/${id}/archivfassung`;
+export const seiteUrl = (id: string, nr: number) => apiAdresse(`/api/dokumente/${id}/seiten/${nr}`);
+export const vorschaubildUrl = (id: string) => apiAdresse(`/api/dokumente/${id}/vorschaubild`);
+export const ansichtUrl = (id: string) => apiAdresse(`/api/dokumente/${id}/ansicht`);
+export const archivfassungUrl = (id: string) => apiAdresse(`/api/dokumente/${id}/archivfassung`);
 /** Nachweis über das Original als PDF (Hash, Siegel, Zeitstempel, Prüfung, Verlauf) */
-export const nachweisUrl = (id: string) => `/api/dokumente/${id}/nachweis.pdf`;
-export const dateiUrl = (id: string, ansicht = false) => `/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`;
+export const nachweisUrl = (id: string) => apiAdresse(`/api/dokumente/${id}/nachweis.pdf`);
+export const dateiUrl = (id: string, ansicht = false) =>
+  apiAdresse(`/api/dokumente/${id}/datei${ansicht ? "?ansicht=1" : ""}`);
