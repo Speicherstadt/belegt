@@ -1456,5 +1456,9 @@
   "procedure_tabs_label": "Parts of the procedure documentation",
   "procedure_tab_settings": "Details",
   "procedure_tab_document": "Document",
-  "workflows_empty_text": "A workflow acts on its own when a document arrives or is filed."
+  "workflows_empty_text": "A workflow acts on its own when a document arrives or is filed.",
+  "demo_title": "Demo with test data",
+  "demo_text": "Everything runs in the browser; the GoBD safeguards only work on a real server, and nothing can be changed here.",
+  "demo_install": "Install Belegt",
+  "demo_not_possible": "Not possible in the demo, it changes nothing."
 }

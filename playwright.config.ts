@@ -7,6 +7,10 @@ import { defineConfig, devices } from "@playwright/test";
 const DOKU = Boolean(process.env.DOKU_SCREENSHOTS);
 const APP_PORT = DOKU ? 5195 : 5185;
 const SERVER_PORT = DOKU ? 3195 : 3185;
+const DEMO_PORT = DOKU ? 5198 : 5186;
+
+/** Die Demo (bun run build:demo) mit dem Vite-Server im Modus demo, ohne Server von Belegt (e2e/demo.spec.ts) */
+export const DEMO_URL = `http://localhost:${DEMO_PORT}/demo/`;
 
 /** Sitzung des Inhabers aus e2e/einrichten.setup.ts */
 export const INHABER = "e2e/.auth/inhaber.json";
@@ -77,6 +81,11 @@ export default defineConfig({
       command: `bunx vite --port ${APP_PORT} --strictPort`,
       url: `http://localhost:${APP_PORT}`,
       env: { BELEGT_SERVER: `http://127.0.0.1:${SERVER_PORT}` },
+      reuseExistingServer: false,
+    },
+    {
+      command: `bunx vite --mode demo --port ${DEMO_PORT} --strictPort`,
+      url: DEMO_URL,
       reuseExistingServer: false,
     },
   ],

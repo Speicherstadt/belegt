@@ -1378,5 +1378,9 @@
   "procedure_tabs_label": "Teile der Verfahrensdokumentation",
   "procedure_tab_settings": "Angaben",
   "procedure_tab_document": "Dokument",
-  "workflows_empty_text": "Ein Workflow handelt von selbst, wenn ein Dokument ankommt oder eingeordnet wird."
+  "workflows_empty_text": "Ein Workflow handelt von selbst, wenn ein Dokument ankommt oder eingeordnet wird.",
+  "demo_title": "Demo mit Testdaten",
+  "demo_text": "Alles läuft im Browser; die GoBD-Sicherungen wirken nur auf einem echten Server, ändern geht hier nicht.",
+  "demo_install": "Belegt installieren",
+  "demo_not_possible": "In der Demo nicht möglich, sie ändert nichts."
 }

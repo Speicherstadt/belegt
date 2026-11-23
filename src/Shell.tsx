@@ -8,6 +8,7 @@ import { GlobalSearch } from "./components/GlobalSearch.tsx";
 import { KOPFZEILE_ID } from "./components/Kopfzeile.tsx";
 import { ProcessingBell } from "./components/ProcessingBell.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
+import { DemoHinweis } from "./demo/DemoHinweis.tsx";
 import { ApiFehler, api } from "./lib/api.ts";
 import { eingebettet, stillAnmeldenErlaubt } from "./lib/einbetten.ts";
 import { AccountPage } from "./pages/AccountPage.tsx";
@@ -65,6 +66,7 @@ export function Shell({ children }: { children: ReactNode }) {
         onNavigiert={() => setMenue(false)}
       />
       <main id="inhalt" className="min-w-0 flex-1">
+        {import.meta.env.MODE === "demo" && <DemoHinweis />}
         {/* Kopfleiste über dem Inhalt: links der Titel der Seite (InKopfzeile), rechts Suche und Verarbeitung; bleibt
             beim Scrollen stehen */}
         {!imFrame && !ich.data.zweiFaktorEinrichten && (

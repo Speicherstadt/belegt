@@ -56,7 +56,7 @@ export function DocumentPage() {
   const liste = listeLesen();
   const { vorher, weiter, stelle, anzahl } = nachbarn(liste, id);
   // Zurück in die Liste, aus der man kam; sonst ins Archiv
-  const zurueck = anzahl && liste ? liste.zurueck : "/archiv";
+  const zurueck = anzahl && liste ? liste.zurueck : `${import.meta.env.BASE_URL}archiv`;
   // Was beim Blättern in der Adresse bleibt: der Reiter und der Schnellmodus
   const folge = useMemo(
     () => ({ ...(reiter === "einordnung" ? {} : { reiter }), ...(schnell ? { schnell: "1" } : {}) }),

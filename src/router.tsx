@@ -84,6 +84,8 @@ const stringifySearch = (werte: Record<string, unknown>) => {
 };
 
 export const router = createRouter({
+  // Unter /demo/ in der Demo (vite.config.ts), sonst an der Wurzel
+  basepath: import.meta.env.BASE_URL,
   routeTree: root.addChildren([anmelden, einladung, app.addChildren(seiten)]),
   parseSearch,
   stringifySearch,

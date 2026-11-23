@@ -13,6 +13,7 @@
     "test": "vitest run",
     "dev:app": "vite",
     "build": "vite build",
+    "build:demo": "vite build --mode demo && cp dist-demo/index.html dist-demo/404.html",
     "e2e": "playwright test",
     "docs:screenshots": "LANG=de_DE.UTF-8 LANGUAGE=de DOKU_SCREENSHOTS=1 playwright test --project screenshots && bun run docs:social-preview",
     "docs:social-preview": "bun scripts/social-preview/render.ts",

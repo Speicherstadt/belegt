@@ -1,6 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { type Browser, expect, type Page, test } from "@playwright/test";
 import { mitRahmen } from "./bildrahmen.ts";
+import { demoAufnehmen } from "./demo-aufnahme.ts";
 import { vorbereiten } from "./screenshot-daten.ts";
 
 /*
@@ -46,7 +47,7 @@ async function bild(page: Page, name: string, oben?: string) {
 }
 
 test("Bilder für README und Doku", async ({ page, browser }) => {
-  test.setTimeout(240_000);
+  test.setTimeout(480_000);
   rahmenBrowser = browser;
   const { holz, steuer, material, rechnung, betrag } = await vorbereiten(page);
 
@@ -128,4 +129,8 @@ test("Bilder für README und Doku", async ({ page, browser }) => {
   await page.getByRole("button", { name: "Kacheln" }).click();
   await page.waitForTimeout(500);
   await bild(page, "mobil");
+
+  // Mit denselben Daten die Antworten für die Demo (demo/aufnahme.json)
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await demoAufnehmen(page);
 });

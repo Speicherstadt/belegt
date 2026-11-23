@@ -22,7 +22,7 @@ hide:
 Server. Was aufbewahrt werden muss, bleibt im GoBD-Modus bis zum Ende der Frist unverändert, und danach löschst du es
 nachweisbar.</p>
 
-[Rundgang starten](#rundgang){ .md-button .md-button--primary } [Installieren](betrieb.md){ .md-button } [Alle Funktionen im Detail](ueberblick.md){ .md-button }
+<a href="demo/" class="md-button md-button--primary">Demo ausprobieren</a> [Rundgang starten](#rundgang){ .md-button } [Installieren](betrieb.md){ .md-button } [Alle Funktionen im Detail](ueberblick.md){ .md-button }
 
 <p class="showcase-hinweis">Belegt ist noch in der Beta: vor jedem Update <a href="betrieb.html#sichern">sichern</a>.</p>
 
