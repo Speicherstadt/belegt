@@ -9,7 +9,7 @@ describe("FirstSteps", () => {
     expect([...html.matchAll(/<a href="([^"]+)"/g)].map((a) => a[1])).toEqual([
       "/eingang",
       "/quellen",
-      "/quellen",
+      "/quellen?bereich=umzug",
       "/eingang#unterwegs",
     ]);
     expect(html).toContain("Aus Paperless-ngx übernehmen");

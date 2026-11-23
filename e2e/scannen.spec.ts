@@ -39,7 +39,7 @@ test("jedes Dokument hat eine Archivnummer, sichtbar in Liste und Dokument und a
 });
 
 test("unter Quellen gibt es ein Trennblatt zum Herunterladen", async ({ page }) => {
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=scannen");
   await expect(page.getByRole("heading", { name: "Scannen" })).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Trennblatt herunterladen (PDF)" }).click();

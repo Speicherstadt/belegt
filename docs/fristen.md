@@ -48,7 +48,7 @@ ihr Formular erst auf Klick.
 ## Eigene Vorlagen { #eigene-vorlagen }
 
 Für Dokumente ohne gesetzliche Pflicht, die du trotzdem eine Weile behalten willst (Garantie, Mietvertrag), legst du
-unter Fristen eine Vorlage mit Namen und Dauer in Monaten an. Beim Einordnen als „Freiwillig mit Frist“ wählst du sie
+unter Fristen › Vorlagen und Fristen eine Vorlage mit Namen und Dauer in Monaten an. Beim Einordnen als „Freiwillig mit Frist“ wählst du sie
 aus, und Belegt trägt das Fristende ein: Entstehung plus so viele Monate (gibt es den Tag im Zielmonat nicht, der
 letzte Tag des Monats). Das Ende lässt sich danach noch ändern. Vorlagen gelten nur für „freiwillig“; die Frist der
 übrigen Arten bleibt die gesetzliche. Anlegen und löschen darf der Inhaber, jede Änderung steht im Audit-Log.
@@ -63,7 +63,7 @@ gesperrt ist und was gelöscht werden dürfte.
 ## Löschen
 
 Ist die Frist abgelaufen und liegt keine Sperre über dem Dokument, beantragt der Inhaber auf der Seite des Dokuments
-die Löschung. Eine zweite Person (die Steuerberatung) bestätigt sie unter Fristen › Offene Löschungen; wer beantragt
+die Löschung. Eine zweite Person (die Steuerberatung) bestätigt sie unter Fristen › Übersicht › Offene Löschungen; wer beantragt
 hat, kann nicht selbst bestätigen. Wer allein arbeitet, lädt dafür unter Zugänge die Steuerberatung ein. Vor dem
 endgültigen Schritt fragt Belegt nach (bei „Löschung bestätigen“ mit Häkchen). Frei Abgelegtes löscht der Inhaber mit
 „Jetzt löschen“ nach einer Rückfrage sofort; war es je anders eingeordnet, gilt der normale Antrag mit zweiter Person.

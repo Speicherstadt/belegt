@@ -44,7 +44,7 @@ function exportZip(projekt: string): Buffer {
 
 test("Paperless-ngx über die API und aus einem Export übernehmen", async ({ page }, info) => {
   const projekt = info.project.name;
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=umzug");
   const umzug = page.locator("section", { has: page.getByRole("heading", { name: "Umzug aus Paperless-ngx" }) });
 
   await umzug.getByLabel("Aus Paperless-ngx").selectOption("tag");

@@ -41,7 +41,7 @@ test("die Navigation führt zu jeder Seite und markiert sie", async ({ page }) =
 });
 
 test("die Fristen nennen Jahre und Grundlage nach § 147 AO", async ({ page }) => {
-  await page.goto("/fristen");
+  await page.goto("/fristen?bereich=vorlagen");
   // Die gesetzlichen Fristen stehen zugeklappt unten
   await page.getByText("Gesetzliche Fristen", { exact: true }).click();
   const beleg = page.getByRole("row", { name: /Buchungsbelege/ });

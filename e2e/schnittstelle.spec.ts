@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist", async ({ page, browser }, info) => {
   const name = `Scanner ${info.project.name}`;
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const bereich = page.getByRole("region", { name: "API-Tokens" });
   await bereich.getByLabel("Name").fill(name);
   await bereich.getByLabel("Recht").selectOption("schreiben");
@@ -25,7 +25,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
     await page.goto("/eingang");
     await expect(page.getByRole("link", { name: datei })).toBeVisible();
 
-    await page.goto("/quellen");
+    await page.goto("/quellen?bereich=schnittstelle");
     await bereich.getByRole("listitem").filter({ hasText: name }).getByRole("button", { name: "Widerrufen" }).click();
     await expect(bereich.getByRole("listitem").filter({ hasText: name })).toContainText("widerrufen");
     const danach = await programm.request.get("/api/dokumente", { headers: { authorization: `Bearer ${token}` } });
@@ -37,7 +37,7 @@ test("ein API-Token nimmt ohne Anmeldung ein Dokument auf, bis es widerrufen ist
 
 test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abschalten", async ({ page }, info) => {
   const name = `Buchhaltung ${info.project.name}`;
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const bereich = page.getByRole("region", { name: "Webhooks" });
   await bereich.getByRole("button", { name: "+ Webhook anlegen" }).click();
   await bereich.getByLabel("Name").fill(name);
@@ -55,7 +55,7 @@ test("ein Webhook wird angelegt, zeigt sein Geheimnis einmal und lässt sich abs
 
 test("ein widerrufenes neues Token verschwindet von der Seite", async ({ page }, info) => {
   const name = `Widerruf ${info.project.name}`;
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const bereich = page.getByRole("region", { name: "API-Tokens" });
   await bereich.getByLabel("Name").fill(name);
   await bereich.getByRole("button", { name: "Token anlegen" }).click();

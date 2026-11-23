@@ -20,7 +20,7 @@ Vorschlag ist und was Belegt selbst getan hat.
 
 ## Anlegen
 
-„+ Neuer Workflow“ öffnet den Editor in drei Schritten: **Wann** (Name und Auslöser), **Wenn** (Quellen und
+„+ Neuer Workflow“ oben rechts (ohne Workflows in der Mitte der leeren Seite) öffnet den Editor in drei Schritten: **Wann** (Name und Auslöser), **Wenn** (Quellen und
 Bedingungen) und **Dann** (Aktionen). Bedingungen und Aktionen fügst du einzeln über „+ Bedingung hinzufügen“ und
 „+ Aktion hinzufügen“ hinzu und mit × wieder weg; was nicht in der Liste steht, gilt nicht.
 

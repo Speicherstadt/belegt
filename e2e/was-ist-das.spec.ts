@@ -16,7 +16,7 @@ async function eingeordnetesDokument(page: Page, name: string) {
 }
 
 test("„Was ist das?“ bei der Sperre öffnet und schließt per Tastatur und zeigt den Fokus", async ({ page }) => {
-  await page.goto("/fristen");
+  await page.goto("/fristen?bereich=sperren");
   const knopf = page.getByRole("button", { name: "Was ist „Sperre“?" });
   const satz = page.getByText("Eine Sperre hält die Dokumente eines Zeitraums fest");
   await expect(knopf).toHaveAttribute("aria-expanded", "false");

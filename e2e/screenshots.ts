@@ -99,12 +99,8 @@ test("Bilder für README und Doku", async ({ page, browser }) => {
   await expect(page.getByRole("region", { name: "Prüfbericht" })).toBeVisible();
   await bild(page, "pruefung");
 
-  await page.goto("/verfahrensdoku");
+  await page.goto("/verfahrensdoku?bereich=dokument");
   await expect(page.getByRole("status")).toBeVisible();
-  // Die erzeugte Dokumentation steht unter dem Formular „Angaben zum Betrieb“; das Bild zeigt sie ohne das Formular
-  await page
-    .getByRole("region", { name: "Angaben zum Betrieb" })
-    .evaluate((e: HTMLElement) => e.style.setProperty("display", "none"));
   await bild(page, "verfahrensdoku");
 
   await page.goto("/workflows");

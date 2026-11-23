@@ -17,7 +17,10 @@ Eingangsordner, Regeln, [Zuordnungsregeln und gelernte Vorschläge](ordnung.md#z
 letzten Lernens, aktive [Workflows](workflows.md) mit Auslöser, Bedingungen und Aktionen (beim [Senden des Originals](workflows.md#original-an-adresse-senden) mit Ziel und Dateifeld, nie dem Wert der Kopfzeile), Sperren, die [tägliche Prüfung der Kette](pruefung.md#taegliche-pruefung) mit ihrem letzten Lauf, Zugänge (Mitarbeiter mit Recht und [Sichtbereich](zugaenge.md#mitarbeiter), je Zugang der [zweite Faktor](zugaenge.md#zwei-faktor), dazu für welche Rollen er Pflicht ist) und API-Tokens stehen darin, wie sie gerade eingerichtet sind, ebenso der [Download als ZIP](ordnung.md#zip) mit seinen Grenzen und jeder
 [Import aus Paperless-ngx](umzug.md) mit Zeitpunkt, Quelle, Zahlen und dem Abgleich der Prüfsummen.
 
-Was nur du wissen kannst, trägst du unter **Angaben zum Betrieb** ein (nur der Inhaber; die Steuerberatung liest):
+Die Seite hat zwei Reiter: **Angaben** (das Formular) und **Dokument** (die fertige Fassung). Sie öffnet die
+Angaben, solange etwas fehlt, sonst das Dokument.
+
+Was nur du wissen kannst, trägst du unter **Angaben** ein (nur der Inhaber; die Steuerberatung liest):
 Name, Rechtsform, Anschrift, wer verantwortlich ist und wer vertritt, Ort der Aufbewahrung, Betrieb des Servers,
 Datensicherung, Ablage von Schlüsseln und Passwörtern (nur der Ort), Papierbelege und Scannen, dazu Ergänzungen. Fehlt
 davon etwas, steht im Dokument „Fehlt: …“. Jede Änderung steht im Protokoll.
@@ -26,7 +29,7 @@ davon etwas, steht im Dokument „Fehlt: …“. Jede Änderung steht im Protoko
 10 Jahre (Art. 97 § 19a Abs. 3 EGAO), für Einordnungen ab dann; frühere behalten ihre Frist. Name und Anschrift stehen
 auch als Datenlieferant in der `index.xml` des Z3-Exports.
 
-Zum Weitergeben druckst du die Seite oder sicherst sie als PDF; Navigation und Formular erscheinen dabei nicht. **Als
+Zum Weitergeben druckst du im Reiter **Dokument** die Seite oder sicherst sie als PDF; Navigation und Formular erscheinen dabei nicht. **Als
 Markdown** lädt dieselbe Fassung als Textdatei herunter, mit Stand (Tag, Programm und Version) und jeder offenen Lücke.
 
 Gliederung, Angaben zum Betrieb, die Texte zu Sperren, Audit-Log, Hash-Kette, Siegeln, Prüfung, Prüfwert, Dateispeicher

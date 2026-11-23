@@ -8,7 +8,7 @@ export function FirstSteps() {
   const schritte = [
     { titel: m.first_upload(), text: m.first_upload_text(), href: "/eingang" },
     { titel: m.first_mailbox(), text: m.first_mailbox_text(), href: "/quellen" },
-    { titel: m.first_paperless(), text: m.first_paperless_text(), href: "/quellen" },
+    { titel: m.first_paperless(), text: m.first_paperless_text(), href: "/quellen?bereich=umzug" },
     { titel: m.first_app(), text: m.first_app_text(), href: "/eingang#unterwegs" },
   ];
   return (

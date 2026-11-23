@@ -271,3 +271,12 @@ untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so ho
 Über dem Inhalt jeder Seite eine Kopfleiste (56 px, Linie unten, bleibt beim Scrollen stehen): links der Titel der Seite
 (`PageHeader` stellt ihn mit `InKopfzeile` hinein, die Erklärung steht klein am Anfang des Inhalts), rechts die Suche (höchstens `max-w-md`) und die Glocke.
 
+## Reiter
+
+Eine Seite mit Bereichen, die nicht zusammen gebraucht werden, teilt sie in Reiter (`Reiterleiste` in
+`src/components/Reiter.tsx`): Text in `--muted`, der aktive in `--fg` mit 2 px Linie unten auf der Linie der Leiste. Der
+Reiter steht in der Adresse (`?bereich=`), damit Links und Zurück funktionieren; der vorgegebene Reiter braucht keinen.
+Rechts in der Leiste darf ein kurzer Zustand stehen (etwa „Alle Angaben sind gemacht.“). So geteilt: Ordnung, Quellen
+(Postfächer, Scannen, Umzug, Schnittstelle), Fristen (Übersicht, Sperren, Vorlagen und Fristen) und Verfahrensdoku
+(Angaben, Dokument). Die Hauptaktion einer Seite steht oben rechts neben der Erklärung, ohne Einträge in der Mitte
+des leeren Zustands, nie doppelt.
