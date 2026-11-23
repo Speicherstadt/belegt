@@ -92,6 +92,13 @@ test("Seite drehen legt ein neues Dokument mit Verweis auf das Original an", asy
   await expect(page.getByRole("region", { name: "Ableitungen" })).toContainText("Daraus abgeleitet");
 });
 
+/** Am Handy stehen nur drei Aktionen in der Leiste, der Rest unter „Weitere Aktionen“ (SelectionBar) */
+async function weitereAktionen(page: Page, handy: boolean) {
+  if (!handy) return page.getByRole("toolbar", { name: "Auswahl" });
+  await page.getByRole("toolbar", { name: "Auswahl" }).getByRole("button", { name: "Weitere Aktionen" }).click();
+  return page.getByRole("region", { name: "Weitere Aktionen" });
+}
+
 test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", async ({ page }, info) => {
   const erstes = `teil-a-${info.project.name}.pdf`;
   const zweites = `teil-b-${info.project.name}.pdf`;
@@ -99,12 +106,19 @@ test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", asyn
   await hochladen(page, zweites, await pdf("B", 2));
   await page.getByRole("checkbox", { name: `${erstes} auswählen` }).check();
   await page.getByRole("checkbox", { name: `${zweites} auswählen` }).check();
+  // Anhaken schiebt nichts in die Seite: der Knopf steht in der schwebenden Leiste, die Reihenfolge im Panel darüber
+  await expect(page.getByRole("region", { name: "Zusammenfügen" })).toHaveCount(0);
+  const handy = info.project.name === "handy";
+  await (await weitereAktionen(page, handy)).getByRole("button", { name: "Zusammenfügen" }).click();
   const bereich = page.getByRole("region", { name: "Zusammenfügen" });
+  // Zuerst in der Reihenfolge der Klicks
+  await expect(bereich.getByRole("listitem")).toHaveText([erstes, zweites].map((n) => new RegExp(n)));
+  await bereich.getByRole("button", { name: `${zweites} nach oben` }).click();
   await expect(bereich.getByRole("listitem")).toHaveText([zweites, erstes].map((n) => new RegExp(n)));
   await bereich.getByRole("button", { name: `${erstes} nach oben` }).click();
   await expect(bereich.getByRole("listitem")).toHaveText([erstes, zweites].map((n) => new RegExp(n)));
   await axeHellUndDunkel(page);
-  await bereich.getByRole("button", { name: "2 PDFs zusammenfügen" }).click();
+  await bereich.getByRole("button", { name: "2 PDFs zusammenfügen", exact: true }).click();
   const neu = `teil-a-${info.project.name} (zusammengefügt).pdf`;
   await expect(page.getByRole("status").filter({ hasText: neu })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("link", { name: neu }).click();
@@ -122,7 +136,9 @@ test("Mehrere Dokumente als ZIP herunterladen", async ({ page }, info) => {
   await hochladen(page, zweites, await pdf("ZIP B"));
   await page.getByRole("checkbox", { name: `${erstes} auswählen` }).check();
   await page.getByRole("checkbox", { name: `${zweites} auswählen` }).check();
-  const link = page.getByRole("link", { name: /^2 als ZIP herunterladen/ });
+  const link = (await weitereAktionen(page, info.project.name === "handy")).getByRole("link", {
+    name: /^2 als ZIP herunterladen/,
+  });
   await axeHellUndDunkel(page);
   const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
   expect(download.suggestedFilename()).toMatch(/^belegt-\d{4}-\d{2}-\d{2}\.zip$/);

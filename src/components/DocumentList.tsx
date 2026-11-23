@@ -10,11 +10,10 @@ import { CameraButton } from "./CameraButton.tsx";
 import { DateFilter } from "./DateFilter.tsx";
 import { type Auswahl, DocumentGrid, DocumentTable } from "./DocumentTable.tsx";
 import { ListOptions } from "./ListOptions.tsx";
-import { MergePdfs } from "./MergePdfs.tsx";
 import { OrderFilter } from "./OrderFilter.tsx";
 import { EmptyState } from "./PageHeader.tsx";
 import { Pagination } from "./Pagination.tsx";
-import { SelectionBar } from "./SelectionBar.tsx";
+import { AuswahlMeldung, SelectionBar } from "./SelectionBar.tsx";
 import { PUNKT } from "./Symbole.tsx";
 import { UploadDuplicates } from "./UploadDuplicates.tsx";
 
@@ -301,6 +300,9 @@ export function DocumentList({
           gewaehlt={ausgewaehlt}
           gewaehlteEintraege={gewaehlteEintraege}
           eintraege={bearbeiten ? liste.data : undefined}
+          zusammenfuegen={
+            schreiben ? [...auswahl].flatMap((id) => gewaehlteEintraege.filter((d) => d.id === id)) : undefined
+          }
           aufheben={() => setAuswahl(new Set())}
           fertig={(meldung) => {
             setAuswahl(new Set());
@@ -308,19 +310,8 @@ export function DocumentList({
           }}
         />
       )}
-      {schreiben && liste.data && (
-        <MergePdfs
-          gewaehlt={gewaehlteEintraege}
-          fertig={(meldung) => {
-            setAuswahl(new Set());
-            setSammelMeldung(meldung);
-          }}
-        />
-      )}
-      {sammelMeldung && (
-        <p role="status" className="m-0 text-sm">
-          {sammelMeldung}
-        </p>
+      {sammelMeldung && !ausgewaehlt.length && (
+        <AuswahlMeldung meldung={sammelMeldung} schliessen={() => setSammelMeldung(null)} />
       )}
       {leer0 && (
         <EmptyState

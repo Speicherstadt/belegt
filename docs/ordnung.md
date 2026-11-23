@@ -147,8 +147,9 @@ Einstellungen, keine Unterlagen: Löschen geht jederzeit, jede Änderung steht i
 
 Eingang und Archiv zeigen 50 Dokumente je Seite (im Archiv auch 25 oder 100), darunter „1–50 von 312“ und die Knöpfe zum Blättern. Du wählst
 Dokumente mit den Kästchen aus, mit dem Kästchen im Kopf der Tabelle alle auf der Seite; beim Blättern beginnt die
-Auswahl neu. Sobald etwas gewählt ist, steht oben eine Leiste, die beim Scrollen stehen bleibt: wie viele gewählt sind,
-„Auswahl aufheben“, ZIP und die Aktionen. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen oder
+Auswahl neu. Sobald etwas gewählt ist, schwebt unten eine Leiste über der Liste: wie viele gewählt sind,
+die Zahl, × zum Aufheben und die Aktionen (Tags, Korrespondent, Typ, Feld, Einordnen, bei PDFs Zusammenfügen, ZIP); Tags, Korrespondent und Typ wählst du in einer durchsuchbaren Liste über dem Knopf, ein Klick setzt sie sofort für alle (bei Tags: ✓ alle, – manche; ein neuer Name legt den Tag an); Feld, Einordnen und Zusammenfügen öffnen ein Formular darüber. Das Ergebnis steht danach an
+derselben Stelle, bis du es schließt. Dann wendest du eine Aktion auf alle an: Tag hinzufügen oder entfernen, Korrespondent oder Dokumenttyp setzen, Feldwert setzen oder
 einordnen. Einordnen geht wie bei einem einzelnen Dokument: Art, Tag der Entstehung (auf Wunsch der Tag des Eingangs
 jedes Dokuments), Titel und Korrespondent. Ohne „Auch schon eingeordnete neu einordnen“ ordnet Belegt nur Dokumente im
 Eingang ein und überspringt die übrigen; mit dem Häkchen kommt bei jedem eine neue Einordnung als Version dazu.

@@ -147,16 +147,23 @@ test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag
   await expect(page.getByRole("link", { name: `${praefix}-1.pdf` })).toBeVisible();
   await expect(page.getByRole("link", { name: `${praefix}-2.pdf` })).toBeVisible();
   await page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" }).check();
-  const sammel = page.locator("section", { has: page.getByRole("heading", { name: "2 gewählt" }) });
-  await sammel.getByRole("combobox", { name: "Aktion" }).selectOption("tagsHinzu");
-  await sammel.getByRole("combobox", { name: "Tag" }).selectOption({ label: tag });
+  // Eine Zeile mit den Aktionen; „Tags“ öffnet darüber eine durchsuchbare Liste, ein Klick gibt den Tag allen
+  const leiste = page.getByRole("toolbar", { name: "Auswahl" });
+  await expect(leiste).toContainText("2 Dokumente ausgewählt");
+  await leiste.getByRole("button", { name: "Tags" }).click();
+  await expect(leiste.getByRole("button", { name: "Tags" })).toHaveAttribute("aria-expanded", "true");
+  const liste = page.getByRole("region", { name: "Tags" });
+  await liste.getByRole("searchbox").fill(tag);
+  const eintrag = liste.getByRole("button", { name: tag, exact: true });
+  await expect(eintrag).toHaveAttribute("aria-pressed", "false");
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
     expect((await axe(page)).violations, colorScheme).toEqual([]);
   }
-  await sammel.getByRole("button", { name: "Auf 2 anwenden" }).click();
-  await expect(page.getByRole("status")).toContainText("2 Dokumente geändert");
-  await expect(page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" })).not.toBeChecked();
+  await eintrag.click();
+  // Die Auswahl bleibt, damit man weitere Tags setzen kann; das Häkchen zeigt, dass alle ihn haben
+  await expect(eintrag).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" })).toBeChecked();
   for (const n of [1, 2])
     await expect(page.getByRole("row", { name: new RegExp(`${praefix}-${n}`) })).toContainText(tag);
 });
