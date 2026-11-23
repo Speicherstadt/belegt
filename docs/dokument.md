@@ -49,7 +49,7 @@ versucht es nicht noch einmal. Ein Scan, an dem Tesseract länger als zehn Minut
 
 Auf der Seite eines PDFs zeigt der Bereich **Seiten** jede Seite als kleines Bild. Dort drehst du einzelne Seiten,
 entfernst ausgewählte oder teilst das PDF nach einer Seite in zwei. Mehrere PDFs fügst du über die Mehrfachauswahl in
-Eingang oder Archiv zusammen: „PDFs zusammenfügen …“ in der Leiste öffnet einen Dialog, darin stehen sie in der
+Eingang oder Archiv zusammen: „Zusammenfügen“ in der Leiste öffnet darüber ein Panel, darin stehen sie in der
 Reihenfolge deiner Klicks, die du mit den Pfeilen änderst.
 
 Das Original bleibt dabei Byte für Byte, wie es ist. Jede Änderung legt ein **neues Dokument** an, mit eigener

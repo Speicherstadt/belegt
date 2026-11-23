@@ -1,4 +1,4 @@
-import { Check, Download, FileType, FolderCheck, Tag, TextCursorInput, UserRound, X } from "lucide-react";
+import { Check, Combine, Download, FileType, FolderCheck, Tag, TextCursorInput, UserRound, X } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Eintrag } from "../lib/api.ts";
 import { zipUrl } from "../lib/api.ts";
@@ -14,13 +14,23 @@ const ZIP_MAX_BYTES = 2 * 1024 ** 3;
 const symbol = "size-4 shrink-0 text-muted";
 const wort = "hidden lg:inline";
 
-const AKTIONEN: { aktion: Aktion; kurz: () => string; titel: () => string; Bild: typeof Tag }[] = [
+/** Was ein Panel über der Leiste öffnet: die Sammelbearbeitung (BulkEdit) oder das Zusammenfügen */
+type Panel = Aktion | "zusammenfuegen";
+type Knopf = { aktion: Panel; kurz: () => string; titel: () => string; Bild: typeof Tag };
+
+const AKTIONEN: Knopf[] = [
   { aktion: "tags", kurz: () => m.bulk_short_tags(), titel: () => m.bulk_short_tags(), Bild: Tag },
   { aktion: "korrespondent", kurz: () => m.bulk_short_party(), titel: () => m.bulk_party(), Bild: UserRound },
   { aktion: "dokumenttyp", kurz: () => m.bulk_short_doctype(), titel: () => m.bulk_doctype(), Bild: FileType },
   { aktion: "feld", kurz: () => m.bulk_short_field(), titel: () => m.bulk_field(), Bild: TextCursorInput },
   { aktion: "einordnen", kurz: () => m.bulk_classify(), titel: () => m.bulk_classify(), Bild: FolderCheck },
 ];
+const ZUSAMMENFUEGEN: Knopf = {
+  aktion: "zusammenfuegen",
+  kurz: () => m.merge_short(),
+  titel: () => m.merge_title(),
+  Bild: Combine,
+};
 
 /** Schwebt mittig über dem Inhalt (rechts der Seitenleiste), damit nichts in der Seite verrutscht */
 function Schwebend({ children, leiste }: { children: ReactNode; leiste?: React.Ref<HTMLDivElement> }) {
@@ -37,8 +47,8 @@ const zeile = "flex min-h-12 max-w-full items-center gap-1 rounded-xl border bor
 
 /**
  * Die Auswahl als eine Zeile, die unten über der Liste schwebt (DESIGN.md, Auswahl und Kacheln): links wie viele und ×,
- * rechts die Aktionen als Symbol mit Wort. Eine Aktion öffnet ihr Formular in einem Panel über der Leiste; das
- * Zusammenfügen von PDFs (nur der Inhaber, in Reihenfolge der Klicks) öffnet einen Dialog. Nichts davon steht in der
+ * rechts die Aktionen als Symbol mit Wort. Jede Aktion öffnet ihr Formular im selben Panel über der Leiste, auch
+ * das Zusammenfügen von PDFs (nur der Inhaber, in Reihenfolge der Klicks). Nichts davon steht in der
  * Seite, darum springt beim Anhaken nichts.
  */
 export function SelectionBar({
@@ -57,7 +67,7 @@ export function SelectionBar({
   fertig: (meldung: string) => void;
 }) {
   const leiste = useRef<HTMLDivElement>(null);
-  const [offen, setOffen] = useState<Aktion | null>(null);
+  const [offen, setOffen] = useState<Panel | null>(null);
   // Was ins Bild gescrollt wird (Blättern, Fokus), soll nicht unter der Leiste landen
   useEffect(() => {
     const wurzel = document.documentElement;
@@ -84,14 +94,18 @@ export function SelectionBar({
   }, [offen]);
   const summe = gewaehlteEintraege.reduce((s, d) => s + d.groesse, 0);
   const zip = m.zip_download({ anzahl: String(gewaehlt.length), groesse: groesse(summe) });
-  const aktiv = AKTIONEN.find((a) => a.aktion === offen);
+  // Sammelbearbeitung nur, wer bearbeiten darf; Zusammenfügen nur bei zwei oder mehr PDFs (zusammenfuegen gesetzt)
+  const pdfs =
+    !!zusammenfuegen && zusammenfuegen.length >= 2 && zusammenfuegen.every((d) => d.mimeType === "application/pdf");
+  const knoepfe = [...(eintraege ? AKTIONEN : []), ...(pdfs ? [ZUSAMMENFUEGEN] : [])];
+  const aktiv = knoepfe.find((a) => a.aktion === offen);
 
   return (
     <Schwebend leiste={leiste}>
-      {aktiv && eintraege && (
+      {aktiv && (
         <section
           aria-label={aktiv.titel()}
-          className="mb-2 flex w-max min-w-72 max-w-[min(40rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl border border-border bg-bg p-4 shadow-lg"
+          className="mb-2 flex w-[min(34rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl border border-border bg-bg p-4 shadow-lg"
         >
           <div className="flex items-center justify-between gap-3">
             <h2 className="m-0 font-semibold text-sm">
@@ -107,13 +121,17 @@ export function SelectionBar({
               <X aria-hidden="true" className="size-4" />
             </button>
           </div>
-          <BulkEdit
-            key={aktiv.aktion}
-            aktion={aktiv.aktion}
-            gewaehlt={gewaehlt}
-            eintraege={eintraege}
-            fertig={fertig}
-          />
+          {aktiv.aktion === "zusammenfuegen"
+            ? zusammenfuegen && <MergePdfs gewaehlt={zusammenfuegen} fertig={fertig} />
+            : eintraege && (
+                <BulkEdit
+                  key={aktiv.aktion}
+                  aktion={aktiv.aktion}
+                  gewaehlt={gewaehlt}
+                  eintraege={eintraege}
+                  fertig={fertig}
+                />
+              )}
         </section>
       )}
       <div role="toolbar" aria-label={m.bulk_toolbar()} className={zeile}>
@@ -135,22 +153,20 @@ export function SelectionBar({
         </button>
         <span aria-hidden="true" className="mx-1 h-5 w-px shrink-0 bg-border" />
         <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
-          {eintraege &&
-            AKTIONEN.map(({ aktion, kurz, titel, Bild }) => (
-              <button
-                key={aktion}
-                type="button"
-                aria-expanded={offen === aktion}
-                aria-label={titel()}
-                title={titel()}
-                onClick={() => setOffen(offen === aktion ? null : aktion)}
-                className={leistenKnopf}
-              >
-                <Bild aria-hidden="true" className={symbol} />
-                <span className={wort}>{kurz()}</span>
-              </button>
-            ))}
-          {zusammenfuegen && <MergePdfs gewaehlt={zusammenfuegen} fertig={fertig} />}
+          {knoepfe.map(({ aktion, kurz, titel, Bild }) => (
+            <button
+              key={aktion}
+              type="button"
+              aria-expanded={offen === aktion}
+              aria-label={titel()}
+              title={titel()}
+              onClick={() => setOffen(offen === aktion ? null : aktion)}
+              className={leistenKnopf}
+            >
+              <Bild aria-hidden="true" className={symbol} />
+              <span className={wort}>{kurz()}</span>
+            </button>
+          ))}
           {summe > ZIP_MAX_BYTES ? (
             <span title={m.zip_too_large({ groesse: groesse(summe) })} className={`${leistenKnopf} text-muted`}>
               <Download aria-hidden="true" className={symbol} />

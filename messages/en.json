@@ -1459,7 +1459,6 @@
   "demo_text": "Everything runs in the browser; the GoBD safeguards only work on a real server, and nothing can be changed here.",
   "demo_install": "Install Belegt",
   "demo_not_possible": "Not possible in the demo, it changes nothing.",
-  "merge_open": "Merge {anzahl} PDFs …",
   "bulk_message_close": "Close message",
   "bulk_toolbar": "Selection",
   "bulk_short_tags": "Tags",

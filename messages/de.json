@@ -1381,7 +1381,6 @@
   "demo_text": "Alles läuft im Browser; die GoBD-Sicherungen wirken nur auf einem echten Server, ändern geht hier nicht.",
   "demo_install": "Belegt installieren",
   "demo_not_possible": "In der Demo nicht möglich, sie ändert nichts.",
-  "merge_open": "{anzahl} PDFs zusammenfügen …",
   "bulk_message_close": "Meldung schließen",
   "bulk_toolbar": "Auswahl",
   "bulk_short_tags": "Tags",

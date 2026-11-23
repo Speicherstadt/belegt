@@ -85,146 +85,151 @@ export function BulkEdit({
   const r = ausfuehren.data;
   return (
     <div className="flex flex-col gap-3 text-sm">
-      <form onSubmit={absenden} className="flex flex-wrap items-end gap-3">
-        {aktion === "tags" &&
-          (tags.data?.length ? (
+      <form onSubmit={absenden} className="flex flex-col gap-3">
+        {aktion === "einordnen" && <p className="m-0 text-muted">{m.bulk_classify_hint()}</p>}
+        {/* Oben die Felder, unten rechts die Knöpfe: in jedem Panel der Leiste gleich (DESIGN.md, Auswahl und Kacheln) */}
+        <div className="grid items-end gap-3 sm:grid-cols-2">
+          {aktion === "tags" &&
+            (tags.data?.length ? (
+              <label className={label}>
+                {m.order_tag_add_label()}
+                <select name="tag" required className={feldKlasse}>
+                  {tags.data.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <p className="m-0 text-muted">{m.order_tags_none()}</p>
+            ))}
+          {aktion === "korrespondent" && (
             <label className={label}>
-              {m.order_tag_add_label()}
-              <select name="tag" required className={feldKlasse}>
-                {tags.data.map((t) => (
+              {m.order_party()}
+              <select name="korrespondent" className={feldKlasse}>
+                <option value="">{m.order_party_none()}</option>
+                {korrespondenten.data?.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {aktion === "dokumenttyp" && (
+            <label className={label}>
+              {m.order_doctype()}
+              <select name="dokumenttyp" className={feldKlasse}>
+                <option value="">{m.order_doctype_none()}</option>
+                {typen.data?.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.name}
                   </option>
                 ))}
               </select>
             </label>
-          ) : (
-            <p className="m-0 text-muted">{m.order_tags_none()}</p>
-          ))}
-        {aktion === "korrespondent" && (
-          <label className={label}>
-            {m.order_party()}
-            <select name="korrespondent" className={feldKlasse}>
-              <option value="">{m.order_party_none()}</option>
-              {korrespondenten.data?.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {aktion === "dokumenttyp" && (
-          <label className={label}>
-            {m.order_doctype()}
-            <select name="dokumenttyp" className={feldKlasse}>
-              <option value="">{m.order_doctype_none()}</option>
-              {typen.data?.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {aktion === "feld" &&
-          (feld ? (
+          )}
+          {aktion === "feld" &&
+            (feld ? (
+              <>
+                <label className={label}>
+                  {m.filter_field()}
+                  <select value={feld.id} onChange={(e) => setFeldId(e.target.value)} className={feldKlasse}>
+                    {felder.data?.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {feldLabel(f)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label htmlFor="sammel-wert" className={label}>
+                  {m.bulk_value()}
+                  <FieldInput key={feld.id} id="sammel-wert" feld={feld} name="wert" />
+                </label>
+              </>
+            ) : (
+              <p className="m-0 text-muted">{m.order_fields_none()}</p>
+            ))}
+          {aktion === "einordnen" && (
             <>
               <label className={label}>
-                {m.filter_field()}
-                <select value={feld.id} onChange={(e) => setFeldId(e.target.value)} className={feldKlasse}>
-                  {felder.data?.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {feldLabel(f)}
+                {m.classify_kind()}
+                <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feldKlasse}>
+                  {ARTEN.map((a) => (
+                    <option key={a.art} value={a.art}>
+                      {a.label()}
                     </option>
                   ))}
                 </select>
               </label>
-              <label htmlFor="sammel-wert" className={label}>
-                {m.bulk_value()}
-                <FieldInput key={feld.id} id="sammel-wert" feld={feld} name="wert" />
+              <label className="flex h-9 items-center gap-2 font-medium">
+                <input
+                  type="checkbox"
+                  checked={eingangstag}
+                  onChange={(e) => setEingangstag(e.target.checked)}
+                  className="size-4"
+                />
+                {m.bulk_created_received()}
+              </label>
+              {!eingangstag && (
+                <label className={label}>
+                  {m.classify_created()}
+                  <input name="entstanden" type="date" required className={feldKlasse} />
+                </label>
+              )}
+              {art === "freiwillig" && (
+                <label className={label}>
+                  {m.classify_voluntary_until()}
+                  <input name="freiwilligBis" type="date" required className={feldKlasse} />
+                </label>
+              )}
+              <label className={label}>
+                {m.classify_label()}
+                <input name="titel" className={feldKlasse} />
+              </label>
+              <label className={label}>
+                {m.classify_party()}
+                <input name="korrespondent" className={feldKlasse} />
+              </label>
+              <label className="flex h-9 items-center gap-2 font-medium sm:col-span-2">
+                <input name="alle" type="checkbox" className="size-4" />
+                {m.bulk_reclassify()}
               </label>
             </>
+          )}
+        </div>
+        <div className="flex flex-wrap justify-end gap-2">
+          {aktion === "tags" ? (
+            <>
+              <button
+                type="submit"
+                value="weg"
+                disabled={ausfuehren.isPending}
+                className="h-9 rounded-md border border-border px-4 font-medium hover:bg-subtle disabled:opacity-60"
+              >
+                {m.bulk_tags_remove()}
+              </button>
+              <button
+                type="submit"
+                value="hinzu"
+                disabled={ausfuehren.isPending}
+                className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
+              >
+                {m.bulk_tags_add()}
+              </button>
+            </>
           ) : (
-            <p className="m-0 text-muted">{m.order_fields_none()}</p>
-          ))}
-        {aktion === "einordnen" && (
-          <>
-            <label className={label}>
-              {m.classify_kind()}
-              <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feldKlasse}>
-                {ARTEN.map((a) => (
-                  <option key={a.art} value={a.art}>
-                    {a.label()}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex h-9 items-center gap-2 font-medium">
-              <input
-                type="checkbox"
-                checked={eingangstag}
-                onChange={(e) => setEingangstag(e.target.checked)}
-                className="size-4"
-              />
-              {m.bulk_created_received()}
-            </label>
-            {!eingangstag && (
-              <label className={label}>
-                {m.classify_created()}
-                <input name="entstanden" type="date" required className={feldKlasse} />
-              </label>
-            )}
-            {art === "freiwillig" && (
-              <label className={label}>
-                {m.classify_voluntary_until()}
-                <input name="freiwilligBis" type="date" required className={feldKlasse} />
-              </label>
-            )}
-            <label className={label}>
-              {m.classify_label()}
-              <input name="titel" className={feldKlasse} />
-            </label>
-            <label className={label}>
-              {m.classify_party()}
-              <input name="korrespondent" className={feldKlasse} />
-            </label>
-            <label className="flex h-9 items-center gap-2 font-medium">
-              <input name="alle" type="checkbox" className="size-4" />
-              {m.bulk_reclassify()}
-            </label>
-          </>
-        )}
-        {aktion === "tags" ? (
-          <>
             <button
               type="submit"
-              value="hinzu"
               disabled={ausfuehren.isPending}
               className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
             >
-              {m.bulk_tags_add()}
+              {m.bulk_apply({ anzahl: String(gewaehlt.length) })}
             </button>
-            <button
-              type="submit"
-              value="weg"
-              disabled={ausfuehren.isPending}
-              className="h-9 rounded-md border border-border px-4 font-medium hover:bg-subtle disabled:opacity-60"
-            >
-              {m.bulk_tags_remove()}
-            </button>
-          </>
-        ) : (
-          <button
-            type="submit"
-            disabled={ausfuehren.isPending}
-            className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
-          >
-            {m.bulk_apply({ anzahl: String(gewaehlt.length) })}
-          </button>
-        )}
+          )}
+        </div>
       </form>
-      {aktion === "einordnen" && <p className="m-0 text-muted text-xs">{m.bulk_classify_hint()}</p>}
       {ungueltig && (
         <p role="alert" className="m-0 text-red-700 dark:text-red-400">
           {feld?.typ === "betrag" ? m.order_field_invalid_amount() : m.order_field_invalid()}
