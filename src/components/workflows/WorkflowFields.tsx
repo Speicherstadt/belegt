@@ -108,7 +108,7 @@ export function WorkflowConditions({
         {QUELLEN.map((q) => (
           <label
             key={q}
-            className="flex h-8 cursor-pointer items-center gap-2 rounded-full border border-border px-3 hover:bg-subtle has-checked:border-primary has-checked:bg-subtle"
+            className="flex h-8 cursor-pointer items-center gap-2 rounded-md border border-border px-3 hover:bg-subtle has-checked:border-primary has-checked:bg-subtle"
           >
             <input type="checkbox" name="quellen" value={q} />
             {QUELLE_LABEL[q]()}

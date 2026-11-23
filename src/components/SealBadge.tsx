@@ -100,7 +100,7 @@ export function SealBadge({ gross = false }: { gross?: boolean }) {
   return (
     <Link
       to="/pruefung"
-      className="inline-flex h-7 items-center gap-1.5 self-start rounded-full border border-border px-2.5 font-medium text-xs hover:bg-subtle"
+      className="inline-flex h-7 items-center gap-1.5 self-start rounded-md border border-border px-2.5 font-medium text-xs hover:bg-subtle"
     >
       <Schild zustand={zustand} klein />
       {satz}

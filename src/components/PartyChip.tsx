@@ -12,7 +12,7 @@ export function PartyChip({ korrespondent }: { korrespondent: { id: string; name
       to="/archiv"
       search={archivSuche(korrespondent.id)}
       aria-label={m.party_show_all({ name: korrespondent.name })}
-      className="inline-flex h-6 max-w-full items-center rounded-full border border-border px-2 font-medium text-xs underline-offset-2 hover:underline"
+      className="inline-flex h-6 max-w-full items-center rounded-md border border-border px-2 font-medium text-xs underline-offset-2 hover:underline"
     >
       <span className="truncate">{korrespondent.name}</span>
     </Link>

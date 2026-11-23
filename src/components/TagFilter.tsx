@@ -82,7 +82,7 @@ export function TagFilter({
           type="button"
           onClick={() => loesen(t.id)}
           aria-label={m.filter_tag_remove({ name: t.name })}
-          className="flex h-8 items-center gap-2 rounded-full border border-border px-3 hover:bg-subtle"
+          className="flex h-8 items-center gap-2 rounded-md border border-border px-3 hover:bg-subtle"
         >
           {punkt(t)}
           {filter.tagsNicht.includes(t.id) ? <s>{t.name}</s> : t.name}
@@ -94,7 +94,7 @@ export function TagFilter({
           type="button"
           onClick={() => onChange({ ...filter, ohneTags: false })}
           aria-label={m.filter_tag_remove({ name: m.filter_tags_without() })}
-          className="flex h-8 items-center gap-2 rounded-full border border-border px-3 italic hover:bg-subtle"
+          className="flex h-8 items-center gap-2 rounded-md border border-border px-3 italic hover:bg-subtle"
         >
           {m.filter_tags_without()}
           <span aria-hidden="true">×</span>

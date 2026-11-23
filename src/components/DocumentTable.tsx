@@ -277,7 +277,7 @@ export function DocumentGrid({
                     <TagChip key={t.id} tag={t} />
                   ))}
                   {d.tags.length > (kompakt ? 1 : 3) && (
-                    <span className="rounded-full bg-bg px-2 text-xs">+{d.tags.length - (kompakt ? 1 : 3)}</span>
+                    <span className="rounded-md border border-border bg-bg px-1.5 text-xs">+{d.tags.length - (kompakt ? 1 : 3)}</span>
                   )}
                 </span>
               )}

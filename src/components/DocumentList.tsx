@@ -263,7 +263,7 @@ export function DocumentList({
               type="button"
               aria-pressed={gruppe === f.gruppe}
               onClick={() => setAnsicht({ ...ansicht, gruppe: f.gruppe })}
-              className="inline-flex h-8 items-center gap-2 rounded-full border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
+              className="inline-flex h-8 items-center gap-2 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-onprimary"
             >
               {PUNKT[f.gruppe] && <span aria-hidden="true" className={`size-2 rounded-full ${PUNKT[f.gruppe]}`} />}
               {f.label()}
