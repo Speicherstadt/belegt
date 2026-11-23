@@ -1470,5 +1470,6 @@
   "bulk_search_party": "Search correspondent …",
   "bulk_search_doctype": "Search document type …",
   "bulk_tag_create": "Create “{name}” and add",
-  "bulk_nothing_found": "Nothing found"
+  "bulk_nothing_found": "Nothing found",
+  "bulk_more": "More actions"
 }

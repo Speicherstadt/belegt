@@ -116,7 +116,7 @@ Eine globale Regel in `styles.css`:
   Abstand (`outline-offset: 0`) und der Rand färbt sich in `--fg`, so entsteht kein Doppelrahmen. Die globale Regel
   in `styles.css` tut genau das; die Randfarbe steht dort ungeschichtet, sonst verlöre sie gegen `border-border`.
 - Nie `outline-none` ohne Ersatz. Das Suchfeld des Archivs (`DocumentList.tsx`) hat den Ersatz: `focus-within:border-fg`
-  am umgebenden Label. Dazu `outline-hidden` statt `outline-none` am Feld: Bei erzwungenen Farben (Kontrastmodus) zeigt
+  am umgebenden Label; das Suchfeld der Listen an der Auswahlleiste (`AuswahlListe.tsx`) ebenso mit `focus:border-fg`. Dazu `outline-hidden` statt `outline-none` am Feld: Bei erzwungenen Farben (Kontrastmodus) zeigt
   ein Farbwechsel des Rands nichts, der Ring dann schon.
 - Nach einem Seitenwechsel steht der Fokus auf der Überschrift (offen, siehe unten).
 
@@ -247,7 +247,7 @@ kurzem Wort (unter `lg` nur das Symbol, der Name in `aria-label`). Nie ein Formu
 der Seite. Tags, Korrespondent und Typ öffnen eine durchsuchbare Liste direkt über ihrem Knopf (`AuswahlListe.tsx`):
 ein Klick setzt sofort; bei Tags zeigt das Kästchen alle (✓), manche (–) oder keine, ein neuer Name legt den Tag an.
 Feld, Einordnen und Zusammenfügen öffnen ein Panel genau so breit wie die Leiste und bündig darüber: oben der Titel und
-×, dann der Hinweis, die Felder, unten rechts die Knöpfe. Escape oder ein Klick daneben schließt. Das Ergebnis steht danach in derselben Form an
+×, dann der Hinweis, die Felder, unten rechts die Knöpfe. Escape oder ein Klick daneben schließt. Am Handy stehen nur Tags, Korrespondent und Typ als Symbol in der Zeile, der Rest unter „…“ (Weitere Aktionen), das genauso über seinem Knopf aufgeht. Das Ergebnis steht danach in derselben Form an
 derselben Stelle (`AuswahlMeldung`). Unter einer Kachel stehen Öffnen, Vorschau und Herunterladen als Symbole; der Text steht in `aria-label`
 und `title`, weil er in die schmale Karte nicht passt.
 

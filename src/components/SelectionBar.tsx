@@ -1,4 +1,15 @@
-import { Check, Combine, Download, FileType, FolderCheck, Tag, TextCursorInput, UserRound, X } from "lucide-react";
+import {
+  Check,
+  Combine,
+  Download,
+  Ellipsis,
+  FileType,
+  FolderCheck,
+  Tag,
+  TextCursorInput,
+  UserRound,
+  X,
+} from "lucide-react";
 import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import type { Eintrag } from "../lib/api.ts";
 import { zipUrl } from "../lib/api.ts";
@@ -19,12 +30,14 @@ const wort = "hidden lg:inline";
  * Was über der Leiste aufgeht: Tags, Korrespondent und Typ als Liste direkt über ihrem Knopf (AuswahlListe), Feld,
  * Einordnen und Zusammenfügen als Panel so breit wie die Leiste
  */
-type Panel = ListenArt | Aktion | "zusammenfuegen";
+type Panel = ListenArt | Aktion | "zusammenfuegen" | "mehr";
 const LISTEN: Panel[] = ["tags", "korrespondent", "dokumenttyp"];
 const istListe = (p: Panel): p is ListenArt => LISTEN.includes(p);
+/** Am Handy stehen nur so viele Aktionen in der Zeile, der Rest unter „Mehr“ */
+const AM_HANDY = 3;
 /** Breite der Liste über dem Knopf (w-72) */
 const LISTE_BREITE = 288;
-type Knopf = { aktion: Panel; kurz: () => string; titel: () => string; Bild: typeof Tag };
+type Knopf = { aktion: Exclude<Panel, "mehr">; kurz: () => string; titel: () => string; Bild: typeof Tag };
 
 const AKTIONEN: Knopf[] = [
   { aktion: "tags", kurz: () => m.bulk_short_tags(), titel: () => m.bulk_short_tags(), Bild: Tag },
@@ -52,6 +65,8 @@ function Schwebend({ children, leiste }: { children: ReactNode; leiste?: React.R
   );
 }
 
+const mehrZeile =
+  "flex w-full items-center gap-2 rounded-md px-2 py-2 text-left font-medium text-sm hover:bg-subtle focus-visible:bg-subtle";
 const zeile = "flex min-h-12 max-w-full items-center gap-1 rounded-xl border border-border bg-bg px-2 py-2 shadow-lg";
 
 /**
@@ -124,9 +139,36 @@ export function SelectionBar({
     !!zusammenfuegen && zusammenfuegen.length >= 2 && zusammenfuegen.every((d) => d.mimeType === "application/pdf");
   const knoepfe = [...(eintraege ? AKTIONEN : []), ...(pdfs ? [ZUSAMMENFUEGEN] : [])];
   const aktiv = knoepfe.find((a) => a.aktion === offen);
+  const zipLink = summe > ZIP_MAX_BYTES ? null : zipUrl(gewaehlteEintraege.map((d) => d.id));
 
   return (
     <Schwebend leiste={leiste}>
+      {offen === "mehr" && (
+        <section
+          aria-label={m.bulk_more()}
+          style={{ left: anker }}
+          className="absolute bottom-full mb-2 w-72 rounded-xl border border-border bg-bg p-2 shadow-lg"
+        >
+          <ul className="m-0 flex list-none flex-col p-0">
+            {knoepfe.slice(AM_HANDY).map(({ aktion, titel, Bild }) => (
+              <li key={aktion}>
+                <button type="button" onClick={() => setOffen(aktion)} className={mehrZeile}>
+                  <Bild aria-hidden="true" className={symbol} />
+                  {titel()}
+                </button>
+              </li>
+            ))}
+            {zipLink && (
+              <li>
+                <a href={zipLink} download className={mehrZeile}>
+                  <Download aria-hidden="true" className={symbol} />
+                  {zip}
+                </a>
+              </li>
+            )}
+          </ul>
+        </section>
+      )}
       {aktiv && istListe(aktiv.aktion) && (
         <section
           aria-label={aktiv.titel()}
@@ -189,7 +231,7 @@ export function SelectionBar({
         </button>
         <span aria-hidden="true" className="mx-1 h-5 w-px shrink-0 bg-border" />
         <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
-          {knoepfe.map(({ aktion, kurz, titel, Bild }) => (
+          {knoepfe.map(({ aktion, kurz, titel, Bild }, i) => (
             <button
               key={aktion}
               type="button"
@@ -197,14 +239,17 @@ export function SelectionBar({
               aria-label={titel()}
               title={titel()}
               onClick={(e) => umschalten(aktion, e)}
-              className={leistenKnopf}
+              className={`${leistenKnopf} ${i >= AM_HANDY ? "max-sm:hidden" : ""}`}
             >
               <Bild aria-hidden="true" className={symbol} />
               <span className={wort}>{kurz()}</span>
             </button>
           ))}
           {summe > ZIP_MAX_BYTES ? (
-            <span title={m.zip_too_large({ groesse: groesse(summe) })} className={`${leistenKnopf} text-muted`}>
+            <span
+              title={m.zip_too_large({ groesse: groesse(summe) })}
+              className={`${leistenKnopf} text-muted max-sm:hidden`}
+            >
               <Download aria-hidden="true" className={symbol} />
               <span className={wort}>{m.bulk_short_zip()}</span>
             </span>
@@ -214,12 +259,22 @@ export function SelectionBar({
               download
               aria-label={zip}
               title={zip}
-              className={leistenKnopf}
+              className={`${leistenKnopf} max-sm:hidden`}
             >
               <Download aria-hidden="true" className={symbol} />
               <span className={wort}>{m.bulk_short_zip()}</span>
             </a>
           )}
+          <button
+            type="button"
+            aria-expanded={offen === "mehr"}
+            aria-label={m.bulk_more()}
+            title={m.bulk_more()}
+            onClick={(e) => umschalten("mehr", e)}
+            className={`${leistenKnopf} sm:hidden`}
+          >
+            <Ellipsis aria-hidden="true" className={symbol} />
+          </button>
         </div>
       </div>
     </Schwebend>

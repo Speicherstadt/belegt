@@ -1392,5 +1392,6 @@
   "bulk_search_party": "Korrespondent suchen …",
   "bulk_search_doctype": "Dokumenttyp suchen …",
   "bulk_tag_create": "„{name}“ anlegen und hinzufügen",
-  "bulk_nothing_found": "Nichts gefunden"
+  "bulk_nothing_found": "Nichts gefunden",
+  "bulk_more": "Weitere Aktionen"
 }

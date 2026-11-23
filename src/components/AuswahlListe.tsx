@@ -125,7 +125,8 @@ export function AuswahlListe({
         }}
         placeholder={platzhalter}
         aria-label={platzhalter}
-        className="h-9 w-full rounded-md border border-border bg-bg px-3 text-sm"
+        // Ersatz für den Ring wie beim Suchfeld des Archivs (DESIGN.md, Fokus): der Rand färbt sich
+        className="h-9 w-full rounded-md border border-border bg-bg px-3 text-sm outline-hidden focus:border-fg"
       />
       <ul className="m-0 flex max-h-64 list-none flex-col overflow-y-auto p-0 pt-1">
         {art !== "tags" && !text && eintrag(null, keiner)}
