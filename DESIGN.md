@@ -256,7 +256,8 @@ mit Frist `--c-amber`, frei `--muted`). Keine Akzentfarbe: Hauptknopf und aktive
 
 ## Startseite
 
-Oben vier Kennzahl-Kacheln gleicher Bauart (`src/components/start/Ueberblick.tsx`): Beschriftung mit Symbol rechts,
+Ohne sichtbaren Seitenkopf: „Start“ steht nur als `h1` für Screenreader und im Tab (`PageHeader versteckt`), die
+Überschrift „Überblick“ steht oben in der Kopfleiste (`InKopfzeile`), auf einer Linie mit Suche und Glocke. Oben vier Kennzahl-Kacheln gleicher Bauart (`src/components/start/Ueberblick.tsx`): Beschriftung mit Symbol rechts,
 Wert (proportionale Ziffern, keine `tabular-nums`), ein kleines Diagramm, eine Zeile darunter. Die vier Zeilen liegen
 in einem Subgrid, damit sie über alle Kacheln auf einer Linie stehen. Jede Kachel hat ihre eigene Art Diagramm, alle 32 px hoch:
 Archiv den Verlauf der letzten zwölf Monate als Balken (Vergangenheit `--muted`, laufender Monat `--fg`, Tooltip je
@@ -264,3 +265,9 @@ Monat), Eingang einen kleinen Ring für den eingeordneten Anteil mit der Prozent
 Datenträgers als Segmente wie eine Festplattenanzeige (Originale `--fg`, übrig belegt `--muted`, frei nur Rand) mit
 Legende darunter. Darunter links breit die gespeicherten Ansichten, rechts
 untereinander Unveränderbarkeit, Fristen, Quellen und Betrieb, jede Karte so hoch wie ihr Inhalt.
+
+## Kopfleiste
+
+Über dem Inhalt jeder Seite eine Kopfleiste (56 px, Linie unten, bleibt beim Scrollen stehen): links der Titel der Seite
+(`PageHeader` stellt ihn mit `InKopfzeile` hinein, die Erklärung steht klein am Anfang des Inhalts), rechts die Suche (höchstens `max-w-md`) und die Glocke.
+

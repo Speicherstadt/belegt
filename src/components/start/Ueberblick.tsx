@@ -5,6 +5,7 @@ import type { Start } from "../../lib/api.ts";
 import { groesse } from "../../lib/format.ts";
 import { m } from "../../paraglide/messages.js";
 import { getLocale } from "../../paraglide/runtime.js";
+import { InKopfzeile } from "../Kopfzeile.tsx";
 import { BereichSymbol } from "../Symbole.tsx";
 import { Belegung, Ring, Verlauf } from "./Diagramme.tsx";
 
@@ -155,9 +156,12 @@ function Pflege({ start }: { start: Start }) {
 export function Ueberblick({ start }: { start: Start }) {
   return (
     <section aria-labelledby="start-zahlen" className="flex flex-col gap-3">
-      <h2 id="start-zahlen" className="m-0 font-semibold text-lg">
-        {m.start_numbers()}
-      </h2>
+      {/* Die Überschrift steht oben in der Kopfleiste, auf einer Linie mit Suche und Glocke */}
+      <InKopfzeile>
+        <h2 id="start-zahlen" className="m-0 font-semibold text-lg">
+          {m.start_numbers()}
+        </h2>
+      </InKopfzeile>
       <dl className="m-0 grid gap-x-3 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
         <Archiv start={start} />
         <Eingang start={start} />

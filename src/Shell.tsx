@@ -5,6 +5,7 @@ import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
 import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
 import { GlobalSearch } from "./components/GlobalSearch.tsx";
+import { KOPFZEILE_ID } from "./components/Kopfzeile.tsx";
 import { ProcessingBell } from "./components/ProcessingBell.tsx";
 import { Sidebar } from "./components/Sidebar.tsx";
 import { ApiFehler, api } from "./lib/api.ts";
@@ -63,16 +64,23 @@ export function Shell({ children }: { children: ReactNode }) {
         offen={menue}
         onNavigiert={() => setMenue(false)}
       />
-      <main id="inhalt" className="min-w-0 flex-1 px-4 py-6 sm:px-8">
+      <main id="inhalt" className="min-w-0 flex-1">
+        {/* Kopfleiste über dem Inhalt: links der Titel der Seite (InKopfzeile), rechts Suche und Verarbeitung; bleibt
+            beim Scrollen stehen */}
         {!imFrame && !ich.data.zweiFaktorEinrichten && (
-          <div className="mb-6 flex items-center justify-end gap-2">
-            <GlobalSearch />
-            {(ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <ProcessingBell />}
+          <div className="sticky top-0 z-20 flex h-14 items-center gap-3 border-border border-b bg-bg/85 px-4 backdrop-blur sm:px-8 print:hidden">
+            <div id={KOPFZEILE_ID} className="flex max-w-[50%] shrink-0 items-center" />
+            <div className="ml-auto flex min-w-0 max-w-md flex-1 items-center justify-end gap-2">
+              <GlobalSearch />
+              {(ich.data.role === "inhaber" || ich.data.role === "steuerberatung") && <ProcessingBell />}
+            </div>
           </div>
         )}
-        {/* Pflicht zum zweiten Faktor: bis er eingerichtet ist, auf jeder Seite die Einrichtung (der Server sperrt alles
-            andere) */}
-        {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}
+        <div className="px-4 py-6 sm:px-8">
+          {/* Pflicht zum zweiten Faktor: bis er eingerichtet ist, auf jeder Seite die Einrichtung (der Server sperrt
+              alles andere) */}
+          {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}
+        </div>
       </main>
       {!ich.data.zweiFaktorEinrichten && darfBearbeiten(ich.data) && <DropUpload />}
     </div>

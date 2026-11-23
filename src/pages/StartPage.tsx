@@ -18,7 +18,8 @@ export function StartPage() {
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title={m.start_title()} intro={m.start_intro()} />
+      {/* Überschrift nur für Screenreader und den Tab: „Überblick“ darunter sagt, was die Seite zeigt */}
+      <PageHeader title={m.start_title()} versteckt />
       {start.error && (
         <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
           {start.error.message}
