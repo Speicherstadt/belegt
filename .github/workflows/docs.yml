@@ -16,7 +16,7 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: Stand, der gebaut wird (leer: der auslösende Commit)
+        description: "Stand, der gebaut wird (leer: der auslösende Commit)"
         type: string
         default: ""
 
