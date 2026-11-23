@@ -4,9 +4,13 @@ import { expect, test } from "@playwright/test";
 test("Angaben zum Betrieb füllen die Verfahrensdokumentation, die sich als Markdown sichern lässt", async ({
   page,
 }) => {
-  await page.goto("/verfahrensdoku");
+  await page.goto("/verfahrensdoku?bereich=dokument");
   await expect(page.getByRole("heading", { level: 1, name: "Verfahrensdokumentation" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "4. Unveränderbarkeit und Nachvollziehbarkeit" })).toBeVisible();
+
+  // Formular und fertiges Dokument stehen in eigenen Reitern
+  await page.getByRole("tab", { name: "Angaben" }).click();
+  await expect(page.getByRole("tab", { name: "Angaben", selected: true })).toBeVisible();
 
   await page.getByLabel("Name des Betriebs").fill("Muster Werkstatt");
   await page.getByLabel(/^Rechtsform/).fill("Einzelunternehmen");
@@ -19,6 +23,9 @@ test("Angaben zum Betrieb füllen die Verfahrensdokumentation, die sich als Mark
   await page.getByLabel(/^Papierbelege und Scannen/).fill("Es wird nicht gescannt.");
   await page.getByRole("button", { name: "Speichern" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Gespeichert." })).toBeVisible();
+  // Speichern wechselt den Reiter nicht; das Dokument zeigt die Angaben
+  await expect(page.getByRole("tab", { name: "Angaben", selected: true })).toBeVisible();
+  await page.getByRole("tab", { name: "Dokument" }).click();
 
   await expect(page.getByText("Muster Werkstatt archiviert steuerlich relevante Unterlagen")).toBeVisible();
   await expect(page.getByText("Nachts auf ein zweites Gerät", { exact: false }).last()).toBeVisible();

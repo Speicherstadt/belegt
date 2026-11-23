@@ -135,7 +135,7 @@ ohne Bedeutung.
 ## Trennblätter
 
 Damit du einen ganzen Stapel Belege in einem Rutsch scannen kannst, legst du zwischen zwei Belege ein Trennblatt. Es
-liegt unter Quellen → Scannen zum Ausdrucken bereit (`/api/trennblatt.pdf`) und trägt einen QR-Code und einen Code 128
+liegt unter Quellen › Scannen zum Ausdrucken bereit (`/api/trennblatt.pdf`) und trägt einen QR-Code und einen Code 128
 mit dem Inhalt `BELEGT-TRENNER` (anders mit `TRENNBLATT_CODE`). Ein PDF aus dem Eingangsordner teilt Belegt an jedem
 Trennblatt; aus `stapel.pdf` werden `stapel-1.pdf`, `stapel-2.pdf` … Jedes Teil ist ein eigenes Dokument mit eigener
 Archivnummer; die Trennblätter und der Stapel selbst kommen nicht ins Archiv, der Stapel ist nur das Transportmittel.
@@ -161,7 +161,7 @@ Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 
 ## Postfächer
 
-Unter Quellen trägst du Postfächer ein (IMAP: Server, Port, TLS, Benutzer, Passwort, Ordner). Der Worker
+Unter Quellen › Postfächer trägst du Postfächer ein (IMAP: Server, Port, TLS, Benutzer, Passwort, Ordner). Der Worker
 (`bun server/worker.ts`, eigener Prozess) holt alle `ABRUF_MINUTEN` neue Mails ab, nur lesend; im Postfach ändert
 Belegt nur, was du als [Aktion nach dem Abholen](#nach-dem-abholen) einstellst. Er merkt sich je Postfach die letzte UID; nummeriert der Server das Postfach neu
 (UIDVALIDITY), beginnt er von vorn, und doppelte Mails erkennt der Import. „Jetzt abrufen“ startet einen Abruf sofort.

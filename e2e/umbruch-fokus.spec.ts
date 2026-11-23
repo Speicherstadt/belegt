@@ -23,7 +23,7 @@ test.describe("bei 390 px Breite", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("Verfahrensdokumentation scrollt nicht seitwärts", async ({ page }) => {
-    await page.goto("/verfahrensdoku");
+    await page.goto("/verfahrensdoku?bereich=dokument");
     await expect(page.getByRole("heading", { level: 1, name: "Verfahrensdokumentation" })).toBeVisible();
     await expect(page.getByText(/^Stand .* · Belegt /)).toBeVisible();
     expect(await breiteUeberschuss(page)).toBeLessThanOrEqual(0);

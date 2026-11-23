@@ -8,7 +8,7 @@ description: >-
 
 Belegt übernimmt Dokumente aus Paperless-ngx mit Tags, Dokumenttyp, eigenen Feldern und Notizen, auf zwei Wegen:
 über die API, solange Paperless-ngx noch läuft, oder aus einem Export. Beide bilden gleich ab. Beides steht unter
-**Quellen → Umzug aus Paperless-ngx** und ist Sache des Inhabers.
+**Quellen › Umzug** und ist Sache des Inhabers.
 
 Übernommen wird immer das Original, nie die Archivversion (das PDF/A, das Paperless-ngx aus Scans erzeugt). Vor der
 Aufnahme prüft Belegt die Prüfsumme aus Paperless-ngx gegen das Original, das ankommt (SHA-256, bei älteren Versionen

@@ -48,8 +48,8 @@ test("ein Dokument aus dem Eingang einordnen: Frist nach § 147 AO, danach im Ar
 
 test("Sperren anlegen und aufheben", async ({ page }, info) => {
   const grund = `Betriebsprüfung ${info.project.name}`;
-  await page.goto("/fristen");
-  await expect(page.getByText("Im Archiv", { exact: true })).toBeVisible();
+  await page.goto("/fristen?bereich=sperren");
+  await expect(page.getByRole("tab", { name: "Sperren", selected: true })).toBeVisible();
   const sperren = page.locator("section", { has: page.getByRole("heading", { name: "Sperren" }) });
   await sperren.getByRole("button", { name: "+ Sperre anlegen" }).click();
   await sperren.getByLabel("Grund").fill(grund);

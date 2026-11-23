@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("eigene Fristvorlage anlegen und beim Einordnen als „freiwillig mit Frist“ nutzen", async ({ page }, info) => {
   const p = info.project.name;
   const vorlage = `Garantie ${p}`;
-  await page.goto("/fristen");
+  await page.goto("/fristen?bereich=vorlagen");
   const karte = page.getByRole("region", { name: "Eigene Fristvorlagen" });
   await karte.getByRole("button", { name: "+ Vorlage anlegen" }).click();
   await karte.getByLabel("Name").fill(vorlage);

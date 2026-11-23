@@ -69,7 +69,7 @@
   "scan_intro": "Put a separator sheet between the documents of a stack and scan everything into one PDF. From the inbox folder (or when uploading through the API with trennen=1) Belegt splits the stack at each separator sheet; every part becomes its own document, the separator sheet itself does not.",
   "scan_separator_download": "Download separator sheet (PDF)",
   "procedure_title": "Procedure documentation",
-  "procedure_intro": "Belegt describes how it captures, retains, protects and deletes records. Enter below what only you can know.",
+  "procedure_intro": "Belegt describes how it captures, retains, protects and deletes records. Enter what only you can know under “Details”.",
   "login_title": "Sign in",
   "login_setup_title": "Set up Belegt",
   "login_setup_intro": "The first account is the owner. Further access comes later by invitation.",
@@ -1443,5 +1443,18 @@
   "start_legend_originals": "Originals",
   "start_chart_label": "Documents received in the last twelve months",
   "start_care_waiting": "awaiting approval",
-  "start_state": "Status"
+  "start_state": "Status",
+  "sources_tabs_label": "Source sections",
+  "sources_tab_mail": "Mailboxes",
+  "sources_tab_scan": "Scanning",
+  "sources_tab_move": "Migration",
+  "sources_tab_api": "API",
+  "retention_tabs_label": "Retention sections",
+  "retention_tab_overview": "Overview",
+  "retention_tab_holds": "Holds",
+  "retention_tab_rules": "Templates and periods",
+  "procedure_tabs_label": "Parts of the procedure documentation",
+  "procedure_tab_settings": "Details",
+  "procedure_tab_document": "Document",
+  "workflows_empty_text": "A workflow acts on its own when a document arrives or is filed."
 }

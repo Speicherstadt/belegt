@@ -6,7 +6,7 @@ test("ein neues Token erscheint einmal, lässt sich kopieren und läuft auf dem 
   context,
 }, info) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const bereich = page.getByRole("region", { name: "API-Tokens" });
   await bereich.getByLabel("Name").fill(`Kopieren ${info.project.name}`);
   await bereich.getByRole("button", { name: "Token anlegen" }).click();
@@ -38,7 +38,7 @@ test("ohne Zwischenablage bleibt der Wert da und die Meldung sagt, dass Kopieren
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
   });
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const bereich = page.getByRole("region", { name: "API-Tokens" });
   await bereich.getByLabel("Name").fill(`Ohne Zwischenablage ${info.project.name}`);
   await bereich.getByRole("button", { name: "Token anlegen" }).click();
@@ -60,7 +60,7 @@ test("lehnt die Zwischenablage ab, sagt die Meldung es, und der Wert bleibt", as
   await page.addInitScript(() => {
     navigator.clipboard.writeText = () => Promise.reject(new DOMException("abgelehnt", "NotAllowedError"));
   });
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const wert = await tokenAnlegen(page, `Abgelehnt ${info.project.name}`);
   await wert.getByRole("button", { name: "Kopieren" }).click();
   await expect(wert.getByRole("status")).toHaveText("Kopieren nicht möglich, bitte den Wert markieren.");
@@ -69,7 +69,7 @@ test("lehnt die Zwischenablage ab, sagt die Meldung es, und der Wert bleibt", as
 
 test("ein neuer Wert beginnt ohne Rückmeldung des alten", async ({ page, context }, info) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const wert = await tokenAnlegen(page, `Erstes ${info.project.name}`);
   await wert.getByRole("button", { name: "Kopieren" }).click();
   await expect(wert.getByRole("status")).toHaveText("Kopiert.");
@@ -80,7 +80,7 @@ test("ein neuer Wert beginnt ohne Rückmeldung des alten", async ({ page, contex
 });
 
 test("per Tastatur erreichbar: der Fokus auf dem Wert markiert ihn ganz", async ({ page }, info) => {
-  await page.goto("/quellen");
+  await page.goto("/quellen?bereich=schnittstelle");
   const wert = await tokenAnlegen(page, `Tastatur ${info.project.name}`);
   const token = (await wert.locator("code").textContent())!;
   await wert.getByRole("button", { name: "Kopieren" }).focus();
@@ -97,7 +97,7 @@ for (const fall of ["Erfolg", "Fehler"] as const) {
         Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
       });
     }
-    await page.goto("/quellen");
+    await page.goto("/quellen?bereich=schnittstelle");
     const wert = await tokenAnlegen(page, `Höhe ${fall} ${info.project.name}`);
     const vorher = (await wert.boundingBox())!.height;
     await wert.getByRole("button", { name: "Kopieren" }).click();

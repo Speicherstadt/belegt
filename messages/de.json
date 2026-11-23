@@ -69,7 +69,7 @@
   "scan_intro": "Lege ein Trennblatt zwischen die Belege eines Stapels und scanne alles in eine PDF. Aus dem Eingangsordner (oder beim Hochladen über die Schnittstelle mit trennen=1) teilt Belegt den Stapel an jedem Trennblatt; jedes Teil wird ein eigenes Dokument, das Trennblatt selbst nicht.",
   "scan_separator_download": "Trennblatt herunterladen (PDF)",
   "procedure_title": "Verfahrensdokumentation",
-  "procedure_intro": "Belegt beschreibt, wie es Unterlagen erfasst, aufbewahrt, schützt und löscht. Was nur du wissen kannst, trägst du unten ein.",
+  "procedure_intro": "Belegt beschreibt, wie es Unterlagen erfasst, aufbewahrt, schützt und löscht. Was nur du wissen kannst, trägst du unter „Angaben“ ein.",
   "login_title": "Anmelden",
   "login_setup_title": "Belegt einrichten",
   "login_setup_intro": "Das erste Konto ist der Inhaber. Weitere Zugänge kommen später per Einladung.",
@@ -1365,5 +1365,18 @@
   "start_legend_originals": "Originale",
   "start_chart_label": "Eingänge der letzten zwölf Monate",
   "start_care_waiting": "wartet auf Freigabe",
-  "start_state": "Zustand"
+  "start_state": "Zustand",
+  "sources_tabs_label": "Bereiche der Quellen",
+  "sources_tab_mail": "Postfächer",
+  "sources_tab_scan": "Scannen",
+  "sources_tab_move": "Umzug",
+  "sources_tab_api": "Schnittstelle",
+  "retention_tabs_label": "Bereiche der Fristen",
+  "retention_tab_overview": "Übersicht",
+  "retention_tab_holds": "Sperren",
+  "retention_tab_rules": "Vorlagen und Fristen",
+  "procedure_tabs_label": "Teile der Verfahrensdokumentation",
+  "procedure_tab_settings": "Angaben",
+  "procedure_tab_document": "Dokument",
+  "workflows_empty_text": "Ein Workflow handelt von selbst, wenn ein Dokument ankommt oder eingeordnet wird."
 }
