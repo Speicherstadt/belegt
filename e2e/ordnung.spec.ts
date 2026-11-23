@@ -147,14 +147,18 @@ test("Mehrfachauswahl: alle auf der Seite wählen und in einem Schritt einen Tag
   await expect(page.getByRole("link", { name: `${praefix}-1.pdf` })).toBeVisible();
   await expect(page.getByRole("link", { name: `${praefix}-2.pdf` })).toBeVisible();
   await page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" }).check();
-  const sammel = page.locator("section", { has: page.getByRole("heading", { name: "2 gewählt" }) });
-  await sammel.getByRole("combobox", { name: "Aktion" }).selectOption("tagsHinzu");
+  // Eine Zeile mit den Aktionen; „Tags“ öffnet sein Formular im Panel darüber
+  const leiste = page.getByRole("toolbar", { name: "Auswahl" });
+  await expect(leiste).toContainText("2 Dokumente ausgewählt");
+  await leiste.getByRole("button", { name: "Tags" }).click();
+  await expect(leiste.getByRole("button", { name: "Tags" })).toHaveAttribute("aria-expanded", "true");
+  const sammel = page.getByRole("region", { name: "Tags" });
   await sammel.getByRole("combobox", { name: "Tag" }).selectOption({ label: tag });
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
     expect((await axe(page)).violations, colorScheme).toEqual([]);
   }
-  await sammel.getByRole("button", { name: "Auf 2 anwenden" }).click();
+  await sammel.getByRole("button", { name: "Tag hinzufügen" }).click();
   await expect(page.getByRole("status")).toContainText("2 Dokumente geändert");
   await expect(page.getByRole("checkbox", { name: "Alle auf dieser Seite auswählen" })).not.toBeChecked();
   for (const n of [1, 2])

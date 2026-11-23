@@ -99,12 +99,19 @@ test("Zusammenfügen über die Mehrfachauswahl, in gewählter Reihenfolge", asyn
   await hochladen(page, zweites, await pdf("B", 2));
   await page.getByRole("checkbox", { name: `${erstes} auswählen` }).check();
   await page.getByRole("checkbox", { name: `${zweites} auswählen` }).check();
-  const bereich = page.getByRole("region", { name: "Zusammenfügen" });
+  // Anhaken schiebt nichts in die Seite: der Knopf steht in der schwebenden Leiste, die Reihenfolge in einem Dialog
+  await expect(page.getByRole("region", { name: "Zusammenfügen" })).toHaveCount(0);
+  await page.getByRole("button", { name: "2 PDFs zusammenfügen …" }).click();
+  const bereich = page.getByRole("dialog", { name: "Zusammenfügen" });
+  // Zuerst in der Reihenfolge der Klicks
+  await expect(bereich.getByRole("listitem")).toHaveText([erstes, zweites].map((n) => new RegExp(n)));
+  await bereich.getByRole("button", { name: `${zweites} nach oben` }).click();
   await expect(bereich.getByRole("listitem")).toHaveText([zweites, erstes].map((n) => new RegExp(n)));
   await bereich.getByRole("button", { name: `${erstes} nach oben` }).click();
   await expect(bereich.getByRole("listitem")).toHaveText([erstes, zweites].map((n) => new RegExp(n)));
   await axeHellUndDunkel(page);
-  await bereich.getByRole("button", { name: "2 PDFs zusammenfügen" }).click();
+  await bereich.getByRole("button", { name: "2 PDFs zusammenfügen", exact: true }).click();
+  await expect(bereich).toBeHidden();
   const neu = `teil-a-${info.project.name} (zusammengefügt).pdf`;
   await expect(page.getByRole("status").filter({ hasText: neu })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("link", { name: neu }).click();

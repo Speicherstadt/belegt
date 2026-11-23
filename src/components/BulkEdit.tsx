@@ -6,28 +6,22 @@ import { m } from "../paraglide/messages.js";
 import { feldLabel } from "./DocumentOrdnung.tsx";
 import { ausEingabe, FieldInput, feldKlasse } from "./FieldInput.tsx";
 
-type Aktion = "tagsHinzu" | "tagsWeg" | "korrespondent" | "dokumenttyp" | "feld" | "einordnen";
-
-const AKTIONEN: { aktion: Aktion; label: () => string }[] = [
-  { aktion: "tagsHinzu", label: () => m.bulk_tags_add() },
-  { aktion: "tagsWeg", label: () => m.bulk_tags_remove() },
-  { aktion: "korrespondent", label: () => m.bulk_party() },
-  { aktion: "dokumenttyp", label: () => m.bulk_doctype() },
-  { aktion: "feld", label: () => m.bulk_field() },
-  { aktion: "einordnen", label: () => m.bulk_classify() },
-];
+/** Was die Leiste der Auswahl (SelectionBar) anbietet; Tags fügt hinzu oder entfernt, je nach Knopf */
+export type Aktion = "tags" | "korrespondent" | "dokumenttyp" | "feld" | "einordnen";
 
 const label = "flex min-w-0 flex-col gap-1.5 font-medium";
 
 /**
- * Sammelbearbeitung der gewählten Dokumente: eine Aktion für alle, in einer Transaktion. Scheitert eines, gilt für
- * keines etwas, und die Liste nennt, woran es lag.
+ * Sammelbearbeitung der gewählten Dokumente im Panel über der Leiste: eine Aktion für alle, in einer Transaktion.
+ * Scheitert eines, gilt für keines etwas, und das Panel nennt, woran es lag.
  */
 export function BulkEdit({
+  aktion,
   gewaehlt,
   eintraege,
   fertig,
 }: {
+  aktion: Aktion;
   gewaehlt: string[];
   eintraege: Eintrag[];
   /** Nach Erfolg, mit der Meldung für die Liste */
@@ -38,7 +32,6 @@ export function BulkEdit({
   const typen = useQuery({ queryKey: ["dokumenttypen"], queryFn: api.dokumenttypen });
   const korrespondenten = useQuery({ queryKey: ["korrespondenten"], queryFn: api.korrespondenten });
   const felder = useQuery({ queryKey: ["felder"], queryFn: api.felder });
-  const [aktion, setAktion] = useState<Aktion>("tagsHinzu");
   const [feldId, setFeldId] = useState("");
   const [art, setArt] = useState<Art>("beleg");
   const [eingangstag, setEingangstag] = useState(true);
@@ -67,8 +60,10 @@ export function BulkEdit({
     const f = new FormData(e.currentTarget);
     const text = (k: string) => String(f.get(k) ?? "").trim();
     setUngueltig(false);
-    if (aktion === "tagsHinzu" || aktion === "tagsWeg") ausfuehren.mutate({ [aktion]: [text("tag")] });
-    else if (aktion === "dokumenttyp") ausfuehren.mutate({ dokumenttyp: text("dokumenttyp") || null });
+    if (aktion === "tags") {
+      const weg = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "weg";
+      ausfuehren.mutate({ [weg ? "tagsWeg" : "tagsHinzu"]: [text("tag")] });
+    } else if (aktion === "dokumenttyp") ausfuehren.mutate({ dokumenttyp: text("dokumenttyp") || null });
     else if (aktion === "korrespondent") ausfuehren.mutate({ korrespondent: text("korrespondent") || null });
     else if (aktion === "feld" && feld) {
       const wert = ausEingabe(feld, text("wert"));
@@ -89,22 +84,9 @@ export function BulkEdit({
 
   const r = ausfuehren.data;
   return (
-    <section aria-labelledby="sammel" className="flex flex-col gap-3 border-border border-t pt-3 text-sm">
-      <h2 id="sammel" className="m-0 font-semibold text-base">
-        {m.bulk_title({ anzahl: String(gewaehlt.length) })}
-      </h2>
+    <div className="flex flex-col gap-3 text-sm">
       <form onSubmit={absenden} className="flex flex-wrap items-end gap-3">
-        <label className={label}>
-          {m.bulk_action()}
-          <select value={aktion} onChange={(e) => setAktion(e.target.value as Aktion)} className={feldKlasse}>
-            {AKTIONEN.map((a) => (
-              <option key={a.aktion} value={a.aktion}>
-                {a.label()}
-              </option>
-            ))}
-          </select>
-        </label>
-        {(aktion === "tagsHinzu" || aktion === "tagsWeg") &&
+        {aktion === "tags" &&
           (tags.data?.length ? (
             <label className={label}>
               {m.order_tag_add_label()}
@@ -213,13 +195,34 @@ export function BulkEdit({
             </label>
           </>
         )}
-        <button
-          type="submit"
-          disabled={ausfuehren.isPending}
-          className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
-        >
-          {m.bulk_apply({ anzahl: String(gewaehlt.length) })}
-        </button>
+        {aktion === "tags" ? (
+          <>
+            <button
+              type="submit"
+              value="hinzu"
+              disabled={ausfuehren.isPending}
+              className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
+            >
+              {m.bulk_tags_add()}
+            </button>
+            <button
+              type="submit"
+              value="weg"
+              disabled={ausfuehren.isPending}
+              className="h-9 rounded-md border border-border px-4 font-medium hover:bg-subtle disabled:opacity-60"
+            >
+              {m.bulk_tags_remove()}
+            </button>
+          </>
+        ) : (
+          <button
+            type="submit"
+            disabled={ausfuehren.isPending}
+            className="h-9 rounded-md bg-primary px-4 font-medium text-onprimary disabled:opacity-60"
+          >
+            {m.bulk_apply({ anzahl: String(gewaehlt.length) })}
+          </button>
+        )}
       </form>
       {aktion === "einordnen" && <p className="m-0 text-muted text-xs">{m.bulk_classify_hint()}</p>}
       {ungueltig && (
@@ -242,6 +245,6 @@ export function BulkEdit({
           {m.order_failed({ meldung: ausfuehren.error.message })}
         </p>
       )}
-    </section>
+    </div>
   );
 }

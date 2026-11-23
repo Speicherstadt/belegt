@@ -553,8 +553,6 @@
   "order_field_delete_confirm": "Delete {name} and all values",
   "order_failed": "Not saved: {meldung}",
   "suggest_doctype": "Document type “{typ}” suggests: {art}",
-  "bulk_title": "{anzahl} selected",
-  "bulk_action": "Action",
   "bulk_tags_add": "Add tag",
   "bulk_tags_remove": "Remove tag",
   "bulk_doctype": "Set document type",
@@ -1460,5 +1458,15 @@
   "demo_title": "Demo with test data",
   "demo_text": "Everything runs in the browser; the GoBD safeguards only work on a real server, and nothing can be changed here.",
   "demo_install": "Install Belegt",
-  "demo_not_possible": "Not possible in the demo, it changes nothing."
+  "demo_not_possible": "Not possible in the demo, it changes nothing.",
+  "merge_open": "Merge {anzahl} PDFs …",
+  "bulk_message_close": "Close message",
+  "bulk_toolbar": "Selection",
+  "bulk_short_tags": "Tags",
+  "bulk_short_party": "Correspondent",
+  "bulk_short_doctype": "Type",
+  "bulk_short_field": "Field",
+  "bulk_short_zip": "ZIP",
+  "bulk_panel_close": "Close",
+  "merge_short": "Merge"
 }

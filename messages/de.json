@@ -517,8 +517,6 @@
   "order_field_delete_confirm": "{name} und alle Werte löschen",
   "order_failed": "Nicht gespeichert: {meldung}",
   "suggest_doctype": "Dokumenttyp „{typ}“ schlägt vor: {art}",
-  "bulk_title": "{anzahl} gewählt",
-  "bulk_action": "Aktion",
   "bulk_tags_add": "Tag hinzufügen",
   "bulk_tags_remove": "Tag entfernen",
   "bulk_doctype": "Dokumenttyp setzen",
@@ -1382,5 +1380,15 @@
   "demo_title": "Demo mit Testdaten",
   "demo_text": "Alles läuft im Browser; die GoBD-Sicherungen wirken nur auf einem echten Server, ändern geht hier nicht.",
   "demo_install": "Belegt installieren",
-  "demo_not_possible": "In der Demo nicht möglich, sie ändert nichts."
+  "demo_not_possible": "In der Demo nicht möglich, sie ändert nichts.",
+  "merge_open": "{anzahl} PDFs zusammenfügen …",
+  "bulk_message_close": "Meldung schließen",
+  "bulk_toolbar": "Auswahl",
+  "bulk_short_tags": "Tags",
+  "bulk_short_party": "Korrespondent",
+  "bulk_short_doctype": "Typ",
+  "bulk_short_field": "Feld",
+  "bulk_short_zip": "ZIP",
+  "bulk_panel_close": "Schließen",
+  "merge_short": "Zusammenfügen"
 }
