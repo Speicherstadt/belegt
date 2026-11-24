@@ -26,6 +26,10 @@ export const WebhookEingabe = z.object({
   arten: z.array(z.enum(EREIGNISSE)).min(1),
 });
 
+export const WebhookAenderung = WebhookEingabe.partial()
+  .strict()
+  .refine((e) => Object.keys(e).length > 0, { message: "Nichts zu ändern" });
+
 export type Webhook = Omit<typeof webhooks.$inferSelect, "ciphertext">;
 const ohneGeheimnis = ({ ciphertext: _, ...w }: typeof webhooks.$inferSelect): Webhook => w;
 
@@ -58,6 +62,36 @@ export async function aktivSetzen(db: Datenbank, id: string, aktiv: boolean, akt
     tx.update(webhooks).set({ aktiv }).where(eq(webhooks.id, id)).returning(),
   );
   return w ? ohneGeheimnis(w) : null;
+}
+
+/** Ändert Name, Adresse und Arten; das Geheimnis bleibt */
+export async function aendern(db: Datenbank, id: string, eingabe: z.infer<typeof WebhookAenderung>, akteur: string) {
+  const [w] = await mitAkteur(db, akteur, (tx) =>
+    tx
+      .update(webhooks)
+      .set({ ...eingabe, ...(eingabe.arten ? { arten: [...new Set(eingabe.arten)] } : {}) })
+      .where(eq(webhooks.id, id))
+      .returning(),
+  );
+  return w ? ohneGeheimnis(w) : null;
+}
+
+/** Entfernt einen Webhook; "protokoll", wenn schon Zustellungen festgehalten sind (webhook_zustellungen) */
+export async function entfernen(
+  db: Datenbank,
+  id: string,
+  akteur: string,
+): Promise<"entfernt" | "unbekannt" | "protokoll"> {
+  try {
+    const [w] = await mitAkteur(db, akteur, (tx) =>
+      tx.delete(webhooks).where(eq(webhooks.id, id)).returning({ id: webhooks.id }),
+    );
+    return w ? "entfernt" : "unbekannt";
+  } catch (err) {
+    const e = err as { code?: string; cause?: { code?: string } };
+    if ((e.code ?? e.cause?.code) === "23503") return "protokoll";
+    throw err;
+  }
 }
 
 export const signatur = (geheimnis: string, rumpf: string) =>
@@ -140,7 +174,14 @@ export async function zustellen(
         fehler = err instanceof Error ? err.message.slice(0, 500) : "Zustellung fehlgeschlagen";
         break;
       }
-      await db.insert(webhookZustellungen).values({ webhookId: w.id, ereignisId: Number(e.id) });
+      try {
+        await db.insert(webhookZustellungen).values({ webhookId: w.id, ereignisId: Number(e.id) });
+      } catch (err) {
+        const c = err as { code?: string; cause?: { code?: string } };
+        // Der Webhook wurde währenddessen entfernt: nichts mehr zuzustellen, kein Fehler
+        if ((c.code ?? c.cause?.code) === "23503") break;
+        throw err;
+      }
       zugestellt++;
     }
     await vermerken(db, w, zugestellt, fehler);

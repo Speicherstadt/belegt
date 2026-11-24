@@ -10,3 +10,4 @@ e2e/.auth/
 site/
 .cache/
 dist-demo/
+.claude/agent-memory/

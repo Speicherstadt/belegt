@@ -17,6 +17,7 @@ import { openapi } from "./http/openapi.ts";
 import { ordnungRouten } from "./http/ordnung.ts";
 import { EXPORT_PFAD, paperlessRouten } from "./http/paperless.ts";
 import { pruefungRouten } from "./http/pruefung.ts";
+import { quellenRouten } from "./http/quellen.ts";
 import { schnittstelleRouten } from "./http/schnittstelle.ts";
 import { seitenRouten } from "./http/seiten.ts";
 import { startRouten } from "./http/start.ts";
@@ -87,6 +88,7 @@ export function createApp(umgebung?: AppUmgebung) {
     freigabeRouten(app, umgebung);
     teilenRouten(app, umgebung);
     mailRouten(app, umgebung);
+    quellenRouten(app, umgebung);
     pruefungRouten(app, umgebung);
     betriebRouten(app, umgebung);
     benachrichtigungenRouten(app, umgebung);

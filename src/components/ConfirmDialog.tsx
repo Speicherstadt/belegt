@@ -71,10 +71,10 @@ export function ConfirmDialog({
       className="m-auto w-[min(28rem,calc(100%-2rem))] rounded-lg border border-border bg-bg p-5 text-fg backdrop:bg-black/50"
     >
       <div className="flex flex-col gap-3">
-        <h2 id={`${id}-titel`} className="m-0 font-semibold text-lg">
+        <h2 id={`${id}-titel`} className="m-0 font-semibold text-lg [overflow-wrap:anywhere]">
           {titel}
         </h2>
-        <p id={`${id}-folge`} className="m-0 text-sm">
+        <p id={`${id}-folge`} className="m-0 text-sm [overflow-wrap:anywhere]">
           {folge}
         </p>
         {haken && (

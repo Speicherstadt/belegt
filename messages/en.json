@@ -1471,5 +1471,22 @@
   "bulk_search_doctype": "Search document type …",
   "bulk_tag_create": "Create “{name}” and add",
   "bulk_nothing_found": "Nothing found",
-  "bulk_more": "More actions"
+  "bulk_more": "More actions",
+  "mailboxes_edit": "Edit",
+  "mailboxes_edit_named": "Edit mailbox “{name}”",
+  "mailboxes_password_keep": "Leave empty to keep it.",
+  "mailboxes_password_required": "Server, port or user changed: enter the password again so it does not go to a different server.",
+  "mailboxes_oauth_note": "This mailbox is connected through {anbieter}. Server, user and password change there; here you can change the name and the folder.",
+  "mailboxes_remove": "Remove",
+  "mailboxes_remove_named": "Remove mailbox “{name}”",
+  "mailboxes_remove_title": "Remove mailbox “{name}”?",
+  "mailboxes_remove_follow": "Belegt will no longer fetch anything from this mailbox. Mails already archived stay in the archive. This cannot be undone.",
+  "mailboxes_remove_blocked": "{meldung} You can deactivate it instead.",
+  "webhooks_edit": "Edit",
+  "webhooks_edit_named": "Edit webhook “{name}”",
+  "webhooks_remove": "Remove",
+  "webhooks_remove_named": "Remove webhook “{name}”",
+  "webhooks_remove_title": "Remove webhook “{name}”?",
+  "webhooks_remove_follow": "Belegt will no longer deliver anything to this address. The secret becomes invalid. This cannot be undone.",
+  "webhooks_remove_blocked": "{meldung} You can deactivate it instead."
 }

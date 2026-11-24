@@ -80,6 +80,9 @@ zurück; ein Ereignis kommt also nicht doppelt und nicht außer der Reihe, solan
 es verarbeitet zu haben. Den letzten Fehler zeigt die Liste. Zugestellt wird vom Worker, das Geheimnis liegt
 verschlüsselt (braucht `BELEGT_SCHLUESSEL`).
 
+Name, Adresse und Arten lassen sich ändern; das Geheimnis bleibt dabei gleich. Ändert sich Adresse oder Art, stellt Belegt der neuen Adresse auch Ereignisse zu, die dem Webhook noch fehlen (seit dem Anlegen), bewusst so; was schon zugestellt ist, kommt nicht noch einmal. Entfernen geht nur, solange noch nichts
+zugestellt wurde: Die Zustellungen sind ein Protokoll, das sich nicht löschen lässt. Danach hilft nur Deaktivieren.
+
 Signatur prüfen, etwa in TypeScript:
 
 ```ts

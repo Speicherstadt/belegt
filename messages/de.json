@@ -1393,5 +1393,22 @@
   "bulk_search_doctype": "Dokumenttyp suchen …",
   "bulk_tag_create": "„{name}“ anlegen und hinzufügen",
   "bulk_nothing_found": "Nichts gefunden",
-  "bulk_more": "Weitere Aktionen"
+  "bulk_more": "Weitere Aktionen",
+  "mailboxes_edit": "Ändern",
+  "mailboxes_edit_named": "Postfach „{name}“ ändern",
+  "mailboxes_password_keep": "Leer lassen, um es zu behalten.",
+  "mailboxes_password_required": "Server, Port oder Benutzer sind geändert: Gib das Passwort neu ein, damit es nicht an einen anderen Server geht.",
+  "mailboxes_oauth_note": "Dieses Postfach ist über {anbieter} verbunden. Server, Benutzer und Passwort ändern sich dort; hier lassen sich Name und Ordner ändern.",
+  "mailboxes_remove": "Entfernen",
+  "mailboxes_remove_named": "Postfach „{name}“ entfernen",
+  "mailboxes_remove_title": "Postfach „{name}“ entfernen?",
+  "mailboxes_remove_follow": "Belegt holt aus diesem Postfach nichts mehr ab. Bereits archivierte Mails bleiben im Archiv. Das lässt sich nicht rückgängig machen.",
+  "mailboxes_remove_blocked": "{meldung} Stattdessen lässt es sich deaktivieren.",
+  "webhooks_edit": "Ändern",
+  "webhooks_edit_named": "Webhook „{name}“ ändern",
+  "webhooks_remove": "Entfernen",
+  "webhooks_remove_named": "Webhook „{name}“ entfernen",
+  "webhooks_remove_title": "Webhook „{name}“ entfernen?",
+  "webhooks_remove_follow": "Belegt stellt nichts mehr an diese Adresse zu. Das Geheimnis wird ungültig. Das lässt sich nicht rückgängig machen.",
+  "webhooks_remove_blocked": "{meldung} Stattdessen lässt er sich deaktivieren."
 }

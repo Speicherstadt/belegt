@@ -23,11 +23,13 @@ export type {
   Fristvorlage,
   PostfachAktion,
   Quelle,
+  QuelleAenderung,
   Regel,
   Sperre,
   Uebersicht,
   Verfahrensdoku,
   Webhook,
+  WebhookAenderung,
 } from "./api-betrieb.ts";
 export { EREIGNISSE } from "./api-betrieb.ts";
 export type {
