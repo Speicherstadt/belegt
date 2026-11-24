@@ -407,6 +407,13 @@
       "when": 1795365613730,
       "tag": "0057_siegel_aus_der_kette",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1795514183447,
+      "tag": "0058_passwort_links",
+      "breakpoints": true
     }
   ]
 }

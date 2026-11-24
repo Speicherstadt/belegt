@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { m } from "../paraglide/messages.js";
 
 /**
@@ -37,7 +37,7 @@ export function ConfirmDialog({
   verb: string;
   haken?: string;
   pending?: boolean;
-  fehler?: string;
+  fehler?: ReactNode;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -89,9 +89,9 @@ export function ConfirmDialog({
           </label>
         )}
         {fehler && (
-          <p role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
+          <div role="alert" className="m-0 text-red-700 text-sm dark:text-red-400">
             {fehler}
-          </p>
+          </div>
         )}
         <div className="flex flex-wrap justify-end gap-2">
           <button

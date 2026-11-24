@@ -46,6 +46,7 @@ export function zugangRouten(app: App, umgebung: AppUmgebung) {
       c.req.path === "/api/status" ||
       c.req.path === "/api/openapi.json" ||
       c.req.path.startsWith("/api/einladung/") ||
+      c.req.path.startsWith("/api/passwort/") ||
       // Der Link selbst ist die Berechtigung („Öffnen mit …“ und Teilen per Link, server/freigabe/)
       c.req.path.startsWith("/api/freigabe/") ||
       c.req.path.startsWith("/api/geteilt/")

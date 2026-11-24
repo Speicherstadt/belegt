@@ -3,7 +3,7 @@ import { and, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import type { Recht, Sichtbereich } from "../../shared/rollen.ts";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { einladungen, session, user } from "../db/schema.ts";
+import { einladungen, passwortLinks, session, user } from "../db/schema.ts";
 
 /** Kopfzeile, mit der die Registrierung das Token einer Einladung mitschickt */
 export const EINLADUNG_HEADER = "x-belegt-einladung";
@@ -137,6 +137,8 @@ export async function listen(db: Datenbank) {
       sichtbereich: user.sichtbereich,
       entzogenAm: user.entzogenAm,
       erstelltAm: user.createdAt,
+      // Ob es ein Passwort zurückzusetzen gibt (nicht bei Konten nur über den OIDC-Anbieter)
+      passwort: sql<boolean>`exists (select 1 from account a where a.user_id = "user"."id" and a.provider_id = 'credential' and a.password is not null)`,
     })
     .from(user)
     .orderBy(user.createdAt);
@@ -173,6 +175,7 @@ export async function entziehen(db: Datenbank, id: string, akteur: string): Prom
       .returning({ id: user.id });
     if (!zeilen.length) return false;
     await tx.delete(session).where(eq(session.userId, id));
+    await tx.delete(passwortLinks).where(eq(passwortLinks.userId, id));
     return true;
   });
 }
