@@ -18,7 +18,7 @@ Betrieb.
 ## Partnerprogramm
 
 IT-Dienstleister und Hoster, die Belegt für ihre Kunden einrichten und betreuen wollen, werden Partner, siehe
-[Partnerprogramm](https://speicherstadt.app/partner/).
+[Partnerprogramm](https://speicherstadt.org/partner/).
 
 ## Fragen
 
