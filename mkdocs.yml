@@ -13,7 +13,7 @@ edit_uri: edit/main/docs/
 copyright: >-
   Lizenz AGPL-3.0 · Keine Steuer- oder Rechtsberatung ·
   <a href="https://teufel-it.de/de/impressum/">Impressum</a> ·
-  <a href="https://speicherstadt.app/datenschutz/">Datenschutz</a>
+  <a href="https://speicherstadt.org/datenschutz/">Datenschutz</a>
 
 docs_dir: docs
 # Seiten als betrieb.html statt betrieb/: so stimmen relative Bildpfade auch auf GitHub
