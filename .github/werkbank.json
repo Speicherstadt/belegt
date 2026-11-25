@@ -6,6 +6,10 @@
   "konventionen": "AGENTS.md, Arbeitsweise",
   "code": ["^(src|server|shared)/.*\\.tsx?$"],
   "funktionen": ["^(src|server|shared|scripts)/.*\\.tsx?$"],
-  "heikel": ["^drizzle/", "^server/(db|loeschung|nachweis|zeitstempel|pruefung|archivfassung|verfahrensdoku|speicher)/", "^server/crypto\\.ts$"],
+  "heikel": [
+    "^drizzle/",
+    "^server/(db|loeschung|nachweis|zeitstempel|pruefung|archivfassung|verfahrensdoku|speicher)/",
+    "^server/crypto\\.ts$"
+  ],
   "grosseDateien": ".checks/large-files.txt"
 }
