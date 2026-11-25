@@ -2,6 +2,7 @@ import { and, asc, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 import { account, passkey } from "../db/schema.ts";
 import { codeSchreiben } from "../trennen/barcode.ts";
+import { linkAusstellen, PASSWORT_MAX, PASSWORT_MIN, passwortSetzen } from "../zugang/passwort.ts";
 import { PflichtEingabe, pflichtLaden, pflichtSetzen, stand, zuruecksetzen } from "../zugang/zwei-faktor.ts";
 import { type App, type AppUmgebung, akteur } from "./gemeinsam.ts";
 
@@ -10,6 +11,8 @@ import { type App, type AppUmgebung, akteur } from "./gemeinsam.ts";
  * Plugins von Better Auth unter /api/auth/two-factor/ und /api/auth/passkey/; hier stehen der Stand fürs eigene Konto,
  * der QR-Code (lokal erzeugt, kein Dienst draußen) und, nur für den Inhaber, Pflicht und Zurücksetzen.
  */
+
+const PasswortEingabe = z.object({ passwort: z.string().min(PASSWORT_MIN).max(PASSWORT_MAX) });
 
 const QrEingabe = z.object({ text: z.string().startsWith("otpauth://totp/").max(1000) });
 
@@ -86,5 +89,30 @@ export function kontoRouten(app: App, umgebung: AppUmgebung) {
       return c.json({ fehler: "Den eigenen zweiten Faktor setzt du mit einem Backup-Code zurück." }, 400);
     const ok = await zuruecksetzen(db, id, akteur(nutzer));
     return ok ? c.json({ ok: true }) : c.json({ fehler: "Kein Zugang mit dieser ID" }, 404);
+  });
+
+  /**
+   * Passwort eines anderen Zugangs zurücksetzen: stellt einen Link aus (24 Stunden, einmal), den die Antwort einmal
+   * nennt; nie das eigene (dafür server/zugang/notfall-passwort.ts). Der zweite Faktor bleibt.
+   */
+  app.post("/api/zugaenge/:id/passwort-zuruecksetzen", async (c) => {
+    const nutzer = c.get("nutzer");
+    if (nutzer.role !== "inhaber" || nutzer.token) return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    const id = c.req.param("id");
+    if (id === nutzer.id)
+      return c.json(
+        { fehler: "Dein eigenes Passwort setzt du im Notfall auf dem Server zurück (docs/zugaenge.md)." },
+        400,
+      );
+    const pfad = await linkAusstellen(db, id, akteur(nutzer));
+    return pfad ? c.json({ pfad }) : c.json({ fehler: "Kein Zugang mit Passwort mit dieser ID" }, 404);
+  });
+
+  /** Öffentlich: der Link ist die Berechtigung; setzt das neue Passwort und beendet alle Sitzungen des Zugangs */
+  app.post("/api/passwort/:token", async (c) => {
+    const eingabe = PasswortEingabe.safeParse(await c.req.json().catch(() => null));
+    if (!eingabe.success) return c.json({ fehler: `passwort: ${PASSWORT_MIN} bis ${PASSWORT_MAX} Zeichen` }, 400);
+    const ok = await passwortSetzen(db, c.req.param("token"), eingabe.data.passwort);
+    return ok ? c.json({ ok: true }) : c.json({ fehler: "Der Link ist ungültig, abgelaufen oder schon benutzt." }, 404);
   });
 }

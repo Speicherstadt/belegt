@@ -4,6 +4,7 @@ import { api, type Zugaenge } from "../lib/api.ts";
 import { tag } from "../lib/format.ts";
 import { rolleLabel } from "../lib/rollen.ts";
 import { m } from "../paraglide/messages.js";
+import { PasswordReset } from "./PasswordReset.tsx";
 import { LEERER_SICHTBEREICH, type MitarbeiterWahl, ScopeEditor, sichtbereichText, useNamen } from "./ScopeEditor.tsx";
 
 type Konto = Zugaenge["zugaenge"][number];
@@ -41,7 +42,7 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-border p-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-medium">{z.email}</span>
+        <span className="font-medium [overflow-wrap:anywhere]">{z.email}</span>
         <span className="text-muted">
           {rolleLabel(z.rolle)}
           {z.zeitraumVon &&
@@ -85,6 +86,7 @@ function KontoZeile({ z, name }: { z: Konto; name: Map<string, string> }) {
                 {m.access_2fa_reset()}
               </button>
             ))}
+          {z.passwort && <PasswordReset id={z.id} email={z.email} knopf={knopf} />}
           {entziehen ? (
             <button
               type="button"

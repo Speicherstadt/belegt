@@ -21,6 +21,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "GET /api/openapi.json": "offen",
   "GET /api/status": "offen",
   "GET /api/einladung/:token": "offen",
+  "POST /api/passwort/:token": "offen",
   "GET /api/freigabe/:token": "offen",
   "GET /api/geteilt/:token": "offen",
   // Die Oberfläche (statisch.ts): Dateien aus dist, keine Dokumente; /api reicht sie an die Routen oben weiter
@@ -83,6 +84,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "PATCH /api/zugaenge/:id": "verboten",
   "POST /api/zugaenge/:id/entziehen": "verboten",
   "POST /api/zugaenge/:id/zwei-faktor-zuruecksetzen": "verboten",
+  "POST /api/zugaenge/:id/passwort-zuruecksetzen": "verboten",
   "GET /api/zwei-faktor": "verboten",
   "PUT /api/zwei-faktor": "verboten",
   "GET /api/tokens": "verboten",

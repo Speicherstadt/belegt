@@ -35,6 +35,8 @@ export interface Zugaenge {
     entzogenAm: string | null;
     erstelltAm: string;
     zweiFaktor: { totp: boolean; passkeys: number };
+    /** Das Konto hat ein Passwort; sonst gibt es keins zurückzusetzen */
+    passwort: boolean;
   }[];
   einladungen: {
     id: string;
@@ -112,6 +114,11 @@ export const zugangApi = {
   mitarbeiterAendern: (id: string, recht: Recht, sichtbereich: Sichtbereich) =>
     aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}`, { ...json({ recht, sichtbereich }), method: "PATCH" }),
   entziehen: (id: string) => aufruf<unknown>(`/api/zugaenge/${encodeURIComponent(id)}/entziehen`, { method: "POST" }),
+  /** Die Antwort nennt den Pfad des Links einmal */
+  passwortZuruecksetzen: (id: string) =>
+    aufruf<{ pfad: string }>(`/api/zugaenge/${encodeURIComponent(id)}/passwort-zuruecksetzen`, { method: "POST" }),
+  passwortSetzen: (token: string, passwort: string) =>
+    aufruf<unknown>(`/api/passwort/${encodeURIComponent(token)}`, json({ passwort })),
   zurueckziehen: (id: string) => aufruf<unknown>(`/api/einladungen/${id}/zurueckziehen`, { method: "POST" }),
   /** Mit zweitem Faktor kommt statt der Sitzung { twoFactorRedirect: true } */
   anmelden: (email: string, passwort: string) =>
