@@ -109,3 +109,15 @@ jobs:
     permissions:
       contents: write
       packages: write
+
+  # Eine fertige Version schließt die Issues, die seit der vorigen mit `Umgesetzt #…` gemergt wurden (Werkbank)
+  issues-schliessen:
+    needs: docker
+    if: ${{ !cancelled() && needs.docker.result == 'success' }}
+    uses: Speicherstadt/werkbank/.github/workflows/issues-schliessen.yml@main
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    with:
+      tag: ${{ github.ref_name }}

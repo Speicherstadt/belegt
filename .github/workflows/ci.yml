@@ -42,9 +42,6 @@ jobs:
       VALIDATOR_TEST_URL: http://localhost:8081
     steps:
       - uses: actions/checkout@v7
-        with:
-          # ganze Historie: `checks pr` vergleicht den Branch mit seiner Basis
-          fetch-depth: 0
       # KoSIT-Validator aus deploy/validator für die Prüfung von E-Rechnungen; ohne VALIDATOR_TEST_URL würde der Test
       # dazu übersprungen. Als eigener Schritt, weil ein Dienst der CI ein fertiges Image bräuchte
       - name: Validator für E-Rechnungen
@@ -63,9 +60,6 @@ jobs:
       - run: bun audit
       - run: bun run typecheck
       - run: bun run lint
-      # Hinweise auf neue lange Funktionen, gewachsene große Dateien, Code ohne Doku, Fix ohne Test; hält nie an
-      - if: github.event_name == 'pull_request'
-        run: bun checks pr
       - run: bun run test
       - run: bun run build
 

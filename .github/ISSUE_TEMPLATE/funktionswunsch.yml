@@ -1,6 +1,6 @@
 name: Funktionswunsch
 description: Etwas fehlt in Belegt.
-labels: ["funktionswunsch"]
+labels: ["wunsch"]
 body:
   - type: textarea
     id: anlass
