@@ -16,7 +16,7 @@ Vor jedem Push dieselben Prüfungen wie in der CI; die Befehle stehen im Skill [
 - **Tests für das, was sich ändert.** Ein Bugfix beginnt mit einem Test, der fehlschlägt.
 - **Die Doku in `docs/`**, die das Verhalten beschreibt, im selben Pull Request, kurz und für Menschen; Schritte für Agenten gehören in einen Skill, Interna eines Skripts in seine Kommentare. Das README nur, wenn ein Bereich dazukommt oder wegfällt.
 - **Änderungen am Aussehen** mit Screenshots vorher und nachher in der Beschreibung; die Bilder für „vorher“ entstehen vor der ersten Änderung.
-- **GoBD:** Was Siegel, Hash-Kette, Fristen oder Löschung betrifft, wird immer gegen Postgres getestet; Unveränderbarkeit gehört in die Datenbank, nicht nur in den Code. Keine bestehende Migration ändern; neue mit `bun --bun drizzle-kit generate --name <name>`.
+- **GoBD:** Was Siegel, Hash-Kette, Fristen oder Löschung betrifft, wird immer gegen Postgres getestet; Unveränderbarkeit gehört in die Datenbank, nicht nur in den Code. Keine bestehende Migration ändern; neue nach [Migrationen](entwicklung.md#migrationen).
 - **Oberfläche:** Texte über Paraglide, Deutsch und Englisch; Gestaltung nach [`DESIGN.md`](https://github.com/Speicherstadt/belegt/blob/main/DESIGN.md).
 - **Keine echten Daten:** keine echten Dokumente, Mails, Adressen oder Zugangsdaten in Issues, Screenshots oder Logs.
 
