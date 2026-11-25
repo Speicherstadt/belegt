@@ -1,0 +1,11 @@
+{
+  "$kommentar": "Einstellungen für die Werkbank (https://github.com/Speicherstadt/werkbank); Standards in werkzeug/konfiguration.ts",
+  "board": { "owner": "Speicherstadt", "nummer": 0 },
+  "anleitung": "https://belegt.store/mitwirken.html#wenn-eine-pruefung-anschlaegt",
+  "uebernehmen": "https://belegt.store/mitwirken.html#etwas-uebernehmen",
+  "konventionen": "AGENTS.md, Arbeitsweise",
+  "code": ["^(src|server|shared)/.*\\.tsx?$"],
+  "funktionen": ["^(src|server|shared|scripts)/.*\\.tsx?$"],
+  "heikel": ["^drizzle/", "^server/(db|loeschung|nachweis|zeitstempel|pruefung|archivfassung|verfahrensdoku|speicher)/", "^server/crypto\\.ts$"],
+  "grosseDateien": ".checks/large-files.txt"
+}
