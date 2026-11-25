@@ -11,6 +11,7 @@ import { InvitePage } from "./pages/InvitePage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { NotificationsPage } from "./pages/NotificationsPage.tsx";
 import { OrderPage } from "./pages/OrderPage.tsx";
+import { PasswordResetPage } from "./pages/PasswordResetPage.tsx";
 import { ProcedurePage } from "./pages/ProcedurePage.tsx";
 import { RetentionPage } from "./pages/RetentionPage.tsx";
 import { SharePage } from "./pages/SharePage.tsx";
@@ -37,6 +38,7 @@ const root = createRootRoute({
 
 const anmelden = createRoute({ getParentRoute: () => root, path: "/anmelden", component: LoginPage });
 const einladung = createRoute({ getParentRoute: () => root, path: "/einladung/$token", component: InvitePage });
+const passwort = createRoute({ getParentRoute: () => root, path: "/passwort/$token", component: PasswordResetPage });
 
 /** Alles hinter der Anmeldung: Seitenleiste und Prüfung der Sitzung in Shell */
 const app = createRoute({
@@ -86,7 +88,7 @@ const stringifySearch = (werte: Record<string, unknown>) => {
 export const router = createRouter({
   // Unter /demo/ in der Demo (vite.config.ts), sonst an der Wurzel
   basepath: import.meta.env.BASE_URL,
-  routeTree: root.addChildren([anmelden, einladung, app.addChildren(seiten)]),
+  routeTree: root.addChildren([anmelden, einladung, passwort, app.addChildren(seiten)]),
   parseSearch,
   stringifySearch,
   defaultNotFoundComponent: NichtGefunden,

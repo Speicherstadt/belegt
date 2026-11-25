@@ -14,7 +14,7 @@ import { zugangPerAdresse, zuruecksetzen } from "./zwei-faktor.ts";
  */
 
 /** Ob die Verbindung als Eigentümer der Tabellen arbeitet (wie der Migrationsschritt) */
-async function istEigentuemer(sql: postgres.Sql): Promise<boolean> {
+export async function istEigentuemer(sql: postgres.Sql): Promise<boolean> {
   const [z] = await sql<
     { ok: boolean }[]
   >`select coalesce(bool_and(pg_has_role(current_user, c.relowner, 'USAGE')), false)

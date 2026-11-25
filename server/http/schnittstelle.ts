@@ -1,7 +1,15 @@
 import { bodyLimit } from "hono/body-limit";
 import { beantworten } from "../mcp/protokoll.ts";
-import { aktivSetzen, anlegen, listen, WebhookEingabe } from "../webhooks/webhooks.ts";
-import { type App, type AppUmgebung, akteur, Id, MAX_UPLOAD } from "./gemeinsam.ts";
+import {
+  aendern,
+  aktivSetzen,
+  anlegen,
+  entfernen,
+  listen,
+  WebhookAenderung,
+  WebhookEingabe,
+} from "../webhooks/webhooks.ts";
+import { type App, type AppUmgebung, akteur, Id, MAX_UPLOAD, nurInhaber } from "./gemeinsam.ts";
 
 /** Webhooks verwaltet nur der Inhaber; das Geheimnis gibt es einmal beim Anlegen */
 export function schnittstelleRouten(app: App, umgebung: AppUmgebung) {
@@ -26,8 +34,7 @@ export function schnittstelleRouten(app: App, umgebung: AppUmgebung) {
   );
 
   app.get("/api/webhooks", async (c) => {
-    if (c.get("nutzer").role !== "inhaber" || c.get("nutzer").token)
-      return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    if (!nurInhaber(c.get("nutzer"))) return c.json({ fehler: "Nur für den Inhaber" }, 403);
     return c.json(await listen(umgebung.db));
   });
 
@@ -42,6 +49,34 @@ export function schnittstelleRouten(app: App, umgebung: AppUmgebung) {
       akteur(c.get("nutzer")),
     );
     return c.json({ ...webhook, geheimnis }, 201);
+  });
+
+  // Ändern und Entfernen wie die Aktionen im Postfach: nur der Inhaber mit Sitzung; das Geheimnis bleibt
+  app.patch("/api/webhooks/:id", async (c) => {
+    if (!nurInhaber(c.get("nutzer"))) return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    const id = Id.safeParse(c.req.param("id"));
+    if (!id.success) return c.json({ fehler: "Nicht gefunden" }, 404);
+    const eingabe = WebhookAenderung.safeParse(await c.req.json().catch(() => null));
+    if (!eingabe.success)
+      return c.json({ fehler: "name, url (http oder https) und arten angeben, mindestens eines" }, 400);
+    const w = await aendern(umgebung.db, id.data, eingabe.data, akteur(c.get("nutzer")));
+    return w ? c.json(w) : c.json({ fehler: "Nicht gefunden" }, 404);
+  });
+
+  app.delete("/api/webhooks/:id", async (c) => {
+    if (!nurInhaber(c.get("nutzer"))) return c.json({ fehler: "Nur für den Inhaber" }, 403);
+    const id = Id.safeParse(c.req.param("id"));
+    const r = id.success ? await entfernen(umgebung.db, id.data, akteur(c.get("nutzer"))) : "unbekannt";
+    if (r === "unbekannt") return c.json({ fehler: "Nicht gefunden" }, 404);
+    if (r === "protokoll")
+      return c.json(
+        {
+          fehler:
+            "Dieser Webhook hat schon Zustellungen im Protokoll, das sich nicht löschen lässt. Deaktivieren statt Entfernen.",
+        },
+        409,
+      );
+    return c.body(null, 204);
   });
 
   for (const [pfad, aktiv] of [

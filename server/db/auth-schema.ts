@@ -144,6 +144,25 @@ export const einladungen = pgTable(
 );
 
 /**
+ * Link, mit dem ein Zugang sein Passwort neu setzt (Inhaber oder Notfall-Skript stellen ihn aus). Gespeichert ist nur
+ * der SHA-256 des Tokens; einmal einlösbar, nur bis gueltig_bis, ein neuer Link macht offene andere ungültig.
+ */
+export const passwortLinks = pgTable(
+  "passwort_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    erstelltAm: timestamp("erstellt_am", { withTimezone: true }).notNull().defaultNow(),
+    gueltigBis: timestamp("gueltig_bis", { withTimezone: true }).notNull(),
+    eingeloestAm: timestamp("eingeloest_am", { withTimezone: true }),
+  },
+  (t) => [index("passwort_links_user_id_idx").on(t.userId)],
+);
+
+/**
  * TOTP und Backup-Codes eines Zugangs (Plugin twoFactor von Better Auth, Modell twoFactor). Geheimnis und Backup-Codes
  * verschlüsselt Better Auth mit BETTER_AUTH_SECRET; beide stehen nicht im Audit-Log.
  */

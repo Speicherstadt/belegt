@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { darfSchreiben } from "../../shared/rollen.ts";
 import { api } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { MailboxAction } from "./MailboxAction.tsx";
+import { MailboxEdit } from "./MailboxEdit.tsx";
 
 const feld = "h-9 rounded-md border border-border bg-bg px-3 font-normal";
 
@@ -14,6 +15,7 @@ const OAUTH = { microsoft: "Microsoft 365", google: "Google" } as const;
 
 export function Mailboxes() {
   const queryClient = useQueryClient();
+  const titel = useRef<HTMLHeadingElement>(null);
   const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const liste = useQuery({ queryKey: ["quellen"], queryFn: api.quellen });
   const neu = () => queryClient.invalidateQueries();
@@ -52,7 +54,7 @@ export function Mailboxes() {
 
   return (
     <section aria-labelledby="postfaecher" className={verwaltungsKarte}>
-      <h2 id="postfaecher" className="m-0 font-semibold text-base">
+      <h2 id="postfaecher" ref={titel} tabIndex={-1} className="m-0 font-semibold text-base">
         {m.mailboxes_title()}
       </h2>
       <p className="m-0 text-muted text-sm">{m.mailboxes_intro()}</p>
@@ -64,7 +66,7 @@ export function Mailboxes() {
             className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm"
           >
             <span className="flex flex-col">
-              <span className="font-medium">
+              <span className="font-medium [overflow-wrap:anywhere]">
                 {q.name} · {q.art === "jmap" ? "JMAP" : q.oauth ? `IMAP (${OAUTH[q.oauth]})` : "IMAP"} · {q.benutzer}@
                 {q.host}:{q.port}/{q.ordner}
               </span>
@@ -87,6 +89,11 @@ export function Mailboxes() {
                 {m.mailboxes_fetch()}
               </button>
             )}
+            <MailboxEdit
+              quelle={q}
+              inhaber={ich.data?.role === "inhaber"}
+              nachEntfernen={() => titel.current?.focus()}
+            />
             <MailboxAction quelle={q} inhaber={ich.data?.role === "inhaber"} />
           </li>
         ))}

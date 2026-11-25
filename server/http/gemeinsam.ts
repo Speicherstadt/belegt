@@ -57,6 +57,9 @@ export const ANSICHT = new Set(["application/pdf", "image/jpeg", "image/png", "i
 
 export const Id = z.uuid();
 
+/** Nur der Inhaber mit Sitzung, kein Programm mit Token (Aktionen im Postfach, Webhooks) */
+export const nurInhaber = (n: Angemeldet) => n.role === "inhaber" && !n.token;
+
 export const Zeitraum = z.object({ von: z.iso.date(), bis: z.iso.date() });
 /** Sichtbereich eines Mitarbeiters (shared/rollen.ts); fehlende Listen sind leer */
 const Ids = z.array(z.uuid()).max(200).default([]);

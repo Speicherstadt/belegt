@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { begrenzt } from "./begrenzt.ts";
 import { menueOeffnen } from "./menue.ts";
 
 test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoch", async ({ page, browser }, info) => {
@@ -19,7 +20,9 @@ test("der Inhaber lädt die Steuerberatung ein; sie liest, lädt aber nichts hoc
     await expect(kanzlei.getByText("Du wurdest als Steuerberatung eingeladen")).toBeVisible();
     await kanzlei.getByLabel("E-Mail-Adresse").fill(`kanzlei-${info.project.name}@example.org`);
     await kanzlei.getByLabel("Passwort").fill("ein-langes-kanzlei-passwort");
-    await kanzlei.getByRole("button", { name: "Konto anlegen" }).click();
+    await begrenzt(kanzlei, "/api/auth/sign-up/email", () =>
+      kanzlei.getByRole("button", { name: "Konto anlegen" }).click(),
+    );
     await expect(kanzlei.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
     // Die Steuerberatung sieht die Startseite mit Löschanträgen und Quellen, lädt aber nichts hoch
     await expect(kanzlei.getByText("Offene Löschanträge")).toBeVisible();
@@ -60,7 +63,9 @@ test("ein Prüfer sieht nur Archiv und Prüfung und nur Dokumente seines Zeitrau
     await expect(pruefer.getByText("Freigegeben ist der Zeitraum 01.01.2001 bis 31.12.2001")).toBeVisible();
     await pruefer.getByLabel("E-Mail-Adresse").fill(`pruefer-${info.project.name}@example.org`);
     await pruefer.getByLabel("Passwort").fill("ein-langes-pruefer-passwort");
-    await pruefer.getByRole("button", { name: "Konto anlegen" }).click();
+    await begrenzt(pruefer, "/api/auth/sign-up/email", () =>
+      pruefer.getByRole("button", { name: "Konto anlegen" }).click(),
+    );
     await expect(pruefer.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
     // Auf der Startseite nur Zahlen seines Zeitraums und die Kette, nichts zu Löschanträgen, Sperren und Quellen
     const ueberblick = pruefer.getByRole("region", { name: "Überblick" });
@@ -130,7 +135,9 @@ test("ein Mitarbeiter sieht nur die Dokumente seines Sichtbereichs und bearbeite
     await expect(kollege.getByText("Du wurdest als Mitarbeiter eingeladen")).toBeVisible();
     await kollege.getByLabel("E-Mail-Adresse").fill(`mitarbeiter-${info.project.name}@example.org`);
     await kollege.getByLabel("Passwort").fill("ein-langes-mitarbeiter-passwort");
-    await kollege.getByRole("button", { name: "Konto anlegen" }).click();
+    await begrenzt(kollege, "/api/auth/sign-up/email", () =>
+      kollege.getByRole("button", { name: "Konto anlegen" }).click(),
+    );
     await expect(kollege.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
     await expect(kollege.getByText("Offene Löschanträge")).toHaveCount(0);
     // Nichts, was er nicht abrufen darf, und darum keine Fehlermeldung
@@ -186,4 +193,59 @@ test("eine zurückgezogene neue Einladung verschwindet von der Seite", async ({ 
   // Die neueste Einladung steht zuerst in der Liste
   await page.getByRole("button", { name: "Zurückziehen" }).first().click();
   await expect(page.getByTestId("einmalwert")).toHaveCount(0);
+});
+
+test("der Inhaber setzt ein Passwort zurück; die Person setzt mit dem Link ein neues und meldet sich an", async ({
+  page,
+  browser,
+}, info) => {
+  const email = `vergessen-${info.project.name}@example.org`;
+  const { pfad } = await (await page.request.post("/api/einladungen", { data: { rolle: "steuerberatung" } })).json();
+  const fremd = await browser.newContext({ storageState: { cookies: [], origins: [] }, locale: "de-DE" });
+  const person = await fremd.newPage();
+  try {
+    await person.goto(pfad);
+    await person.getByLabel("E-Mail-Adresse").fill(email);
+    await person.getByLabel("Passwort").fill("ein-altes-passwort-1");
+    await begrenzt(person, "/api/auth/sign-up/email", () =>
+      person.getByRole("button", { name: "Konto anlegen" }).click(),
+    );
+    await expect(person.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
+
+    await page.goto("/zugaenge");
+    await page.getByRole("button", { name: `Passwort zurücksetzen: ${email}` }).click();
+    const dialog = page.getByRole("dialog", { name: `Passwort für ${email} zurücksetzen?` });
+    await expect(dialog.getByText("Der zweite Faktor bleibt.")).toBeVisible();
+    await dialog.getByRole("button", { name: "Link erstellen" }).click();
+    await expect(page.getByText(`Link für ${email} erstellt`)).toBeVisible();
+    const link = await page.getByTestId("einmalwert").locator("code").textContent();
+    expect(link).toMatch(/\/passwort\/[A-Za-z0-9_-]{40,}$/);
+    const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(axe.violations).toEqual([]);
+
+    // Die Sitzung der Person endet; mit dem Link setzt sie ihr Passwort selbst
+    const neu = await fremd.newPage();
+    await neu.goto(link!);
+    await neu.getByRole("button", { name: "Passwort speichern" }).click();
+    await expect(neu.getByRole("alert")).toContainText("12 bis 128 Zeichen");
+    await neu.getByLabel("Passwort").fill("ein-neues-passwort-2");
+    await neu.getByRole("button", { name: "Passwort speichern" }).click();
+    await expect(neu.getByRole("heading", { level: 1, name: "Passwort gespeichert" })).toBeFocused();
+    await neu.getByRole("link", { name: "Zur Anmeldung" }).click();
+
+    await neu.getByLabel("E-Mail-Adresse").fill(email);
+    await neu.getByLabel("Passwort").fill("ein-neues-passwort-2");
+    await begrenzt(neu, "/api/auth/sign-in/email", () =>
+      neu.getByRole("button", { name: "Anmelden", exact: true }).click(),
+    );
+    await expect(neu.getByRole("heading", { level: 1, name: "Start" })).toBeVisible();
+
+    // Zweimal geht der Link nicht
+    await neu.goto(link!);
+    await neu.getByLabel("Passwort").fill("noch-ein-passwort-3");
+    await neu.getByRole("button", { name: "Passwort speichern" }).click();
+    await expect(neu.getByRole("heading", { level: 1, name: "Das Passwort wurde nicht geändert." })).toBeVisible();
+  } finally {
+    await fremd.close();
+  }
 });

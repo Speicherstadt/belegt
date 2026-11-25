@@ -1,6 +1,6 @@
 import type { AngabenZumBetrieb, Verfahrensdoku } from "@firsttris/gobd-kern/verfahrensdoku";
 import type { Feldwert } from "../../shared/ordnung.ts";
-import { aufruf, json } from "./api-aufruf.ts";
+import { antwort, aufruf, json } from "./api-aufruf.ts";
 import type { Art } from "./api-dokumente.ts";
 import type { OrdnungsVorschlag } from "./api-ordnung.ts";
 
@@ -86,6 +86,11 @@ export const EREIGNISSE = [
 ] as const;
 export type Ereignisart = (typeof EREIGNISSE)[number];
 
+/** Nur die geänderten Felder; `passwort` nur, wenn es neu gesetzt wird (leer = bleibt) */
+export type QuelleAenderung = Partial<
+  Pick<Quelle, "name" | "host" | "port" | "tls" | "benutzer" | "ordner"> & { passwort: string }
+>;
+
 export interface Webhook {
   id: string;
   name: string;
@@ -95,6 +100,8 @@ export interface Webhook {
   letzteZustellung: string | null;
   letzterFehler: string | null;
 }
+
+export type WebhookAenderung = Partial<Pick<Webhook, "name" | "url" | "arten">>;
 
 /** Eigene Fristvorlage: Name und Dauer in Monaten (server/fristvorlagen/) */
 export interface Fristvorlage {
@@ -179,6 +186,9 @@ export const betriebApi = {
     ordner: string;
     art: "imap" | "jmap";
   }) => aufruf<Quelle>("/api/quellen", json(q)),
+  quelleAendern: (id: string, e: QuelleAenderung) =>
+    aufruf<Quelle>(`/api/quellen/${id}`, { ...json(e), method: "PATCH" }),
+  quelleEntfernen: (id: string) => antwort(`/api/quellen/${id}`, { method: "DELETE" }),
   quelleAbrufen: (id: string) =>
     aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
   quelleAktion: ({ id, ...e }: AktionEingabe & { id: string }) => aufruf<Quelle>(`/api/quellen/${id}/aktion`, json(e)),
@@ -188,6 +198,9 @@ export const betriebApi = {
   webhooks: () => aufruf<Webhook[]>("/api/webhooks"),
   webhookAnlegen: (w: { name: string; url: string; arten: Ereignisart[] }) =>
     aufruf<Webhook & { geheimnis: string }>("/api/webhooks", json(w)),
+  webhookAendern: (id: string, w: WebhookAenderung) =>
+    aufruf<Webhook>(`/api/webhooks/${id}`, { ...json(w), method: "PATCH" }),
+  webhookEntfernen: (id: string) => antwort(`/api/webhooks/${id}`, { method: "DELETE" }),
   webhookSchalten: (id: string, aktiv: boolean) =>
     aufruf<Webhook>(`/api/webhooks/${id}/${aktiv ? "aktivieren" : "deaktivieren"}`, { method: "POST" }),
   einstellungen: () => aufruf<Einstellungen>("/api/einstellungen"),

@@ -63,3 +63,28 @@ test("ein widerrufenes neues Token verschwindet von der Seite", async ({ page },
   await bereich.getByRole("listitem").filter({ hasText: name }).getByRole("button", { name: "Widerrufen" }).click();
   await expect(bereich.getByTestId("einmalwert")).toHaveCount(0);
 });
+
+test("ein Webhook lässt sich ändern und nach Rückfrage entfernen", async ({ page }, info) => {
+  const name = `Ändern ${info.project.name}`;
+  await page.goto("/quellen?bereich=schnittstelle");
+  const bereich = page.getByRole("region", { name: "Webhooks" });
+  await bereich.getByRole("button", { name: "+ Webhook anlegen" }).click();
+  await bereich.getByLabel("Name").fill(name);
+  await bereich.getByLabel("Adresse (https://…)").fill("https://alt.example/belegt");
+  await bereich.getByRole("button", { name: "Webhook anlegen" }).click();
+
+  const eintrag = bereich.getByRole("listitem").filter({ hasText: name });
+  await eintrag.getByRole("button", { name: `Webhook „${name}“ ändern` }).click();
+  await eintrag.getByLabel("Adresse (https://…)").fill("https://neu.example/belegt");
+  await eintrag.getByRole("button", { name: "Speichern" }).click();
+  await expect(eintrag).toContainText("https://neu.example/belegt");
+
+  // Abbrechen im Dialog lässt den Webhook stehen, Bestätigen entfernt ihn
+  await eintrag.getByRole("button", { name: `Webhook „${name}“ entfernen` }).click();
+  const dialog = page.getByRole("dialog", { name: `Webhook „${name}“ entfernen?` });
+  await dialog.getByRole("button", { name: "Abbrechen" }).click();
+  await expect(eintrag).toBeVisible();
+  await eintrag.getByRole("button", { name: `Webhook „${name}“ entfernen` }).click();
+  await dialog.getByRole("button", { name: "Entfernen" }).click();
+  await expect(eintrag).toHaveCount(0);
+});

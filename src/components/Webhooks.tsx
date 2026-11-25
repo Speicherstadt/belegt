@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useId, useState } from "react";
+import { type FormEvent, useId, useRef, useState } from "react";
 import { api, EREIGNISSE, type Ereignisart } from "../lib/api.ts";
 import { zeitpunkt } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
 import { Ausklappbar, verwaltungsKarte } from "./Ausklappbar.tsx";
 import { Einmalwert } from "./Einmalwert.tsx";
+import { WebhookEdit } from "./WebhookEdit.tsx";
 
 const ART: Record<Ereignisart, () => string> = {
   "dokument.aufgenommen": () => m.event_dokument_aufgenommen(),
@@ -17,6 +18,8 @@ const ART: Record<Ereignisart, () => string> = {
 export function Webhooks() {
   const id = useId();
   const queryClient = useQueryClient();
+  const titel = useRef<HTMLHeadingElement>(null);
+  const ich = useQuery({ queryKey: ["ich"], queryFn: api.ich });
   const liste = useQuery({ queryKey: ["webhooks"], queryFn: api.webhooks });
   const [geheimnis, setGeheimnis] = useState<string | null>(null);
   const [offen, setOffen] = useState(false);
@@ -46,7 +49,7 @@ export function Webhooks() {
 
   return (
     <section aria-labelledby={`${id}-titel`} className={verwaltungsKarte}>
-      <h2 id={`${id}-titel`} className="m-0 font-semibold text-base">
+      <h2 id={`${id}-titel`} ref={titel} tabIndex={-1} className="m-0 font-semibold text-base">
         {m.webhooks_title()}
       </h2>
       <p className="m-0 text-muted text-sm">{m.webhooks_intro()}</p>
@@ -58,7 +61,8 @@ export function Webhooks() {
           >
             <span className="flex min-w-0 flex-col">
               <span>
-                <span className="font-medium">{w.name}</span> · <span className="break-all text-muted">{w.url}</span>
+                <span className="font-medium [overflow-wrap:anywhere]">{w.name}</span> ·{" "}
+                <span className="break-all text-muted">{w.url}</span>
               </span>
               <span className="text-muted text-xs">
                 {w.arten.map((a) => ART[a]()).join(", ")}
@@ -78,6 +82,11 @@ export function Webhooks() {
             >
               {w.aktiv ? m.webhooks_off() : m.webhooks_on()}
             </button>
+            <WebhookEdit
+              webhook={w}
+              inhaber={ich.data?.role === "inhaber"}
+              nachEntfernen={() => titel.current?.focus()}
+            />
           </li>
         ))}
       </ul>

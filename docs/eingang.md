@@ -168,6 +168,15 @@ Belegt nur, was du als [Aktion nach dem Abholen](#nach-dem-abholen) einstellst. 
 Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
 `BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
 
+Name, Server, Port, TLS, Benutzer, Ordner und Passwort lassen sich ändern (ohne neues Passwort bleibt das alte). Server,
+Port, Benutzer oder das Abschalten von TLS eines Passwort-Postfachs gehen nur zusammen mit einem neuen Passwort, damit
+das gespeicherte nicht an einen anderen Server oder unverschlüsselt geht. Ändert sich Server, Port, Benutzer oder Ordner,
+beginnt der Abruf von vorn; bei einem anderen Server, Port oder Benutzer entfallen zudem die noch vorgemerkten Aktionen
+(im Protokoll als entfallen), weil ihre UIDs zum alten Postfach gehörten. Bei einem Postfach
+über Microsoft oder Google gehen nur Name und Ordner; Passwort, Server, Port, TLS und Benutzer bleiben. Entfernen geht,
+solange keine [Aktion nach dem Abholen](#nach-dem-abholen) vorgemerkt oder protokolliert wurde; danach nur Deaktivieren,
+weil das Protokoll der Aktionen unveränderbar ist.
+
 Mit der Art **JMAP** (etwa bei Stalwart) holt Belegt die Sitzung unter `https://<Server>:<Port>/.well-known/jmap` und
 meldet sich mit Benutzer und Passwort an. Zeigt die Sitzung für API oder Download auf einen anderen Host oder Port,
 bricht der Abruf ab, damit die Zugangsdaten nur an diesen Server gehen. Der Ordner ist sein Name oder seine Rolle (`INBOX` für den Posteingang).

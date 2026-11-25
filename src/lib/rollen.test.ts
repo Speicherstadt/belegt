@@ -23,6 +23,7 @@ describe("ausgeschlossenBei", () => {
       entzogenAm,
       erstelltAm: "2026-01-01",
       zweiFaktor: { totp: false, passkeys: 0 },
+      passwort: true,
     });
     const einladung = (
       sichtbereich: ReturnType<typeof bereich>,
@@ -63,6 +64,7 @@ describe("alleinInhaber", () => {
     entzogenAm,
     erstelltAm: "2026-01-01",
     zweiFaktor: { totp: false, passkeys: 0 },
+    passwort: true,
   });
   const liste = (...zugaenge: ReturnType<typeof konto>[]): Zugaenge => ({ zugaenge, einladungen: [] });
 

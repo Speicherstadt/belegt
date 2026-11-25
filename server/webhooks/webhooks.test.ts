@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { verschluesseln } from "../crypto.ts";
+import { entschluesseln, verschluesseln } from "../crypto.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { signatur, zustellen } from "./webhooks.ts";
@@ -160,5 +160,130 @@ describe.skipIf(!testDatenbankUrl)("Webhooks gegen Postgres", () => {
         )
       ).status,
     ).toBe(403);
+  });
+
+  const anfrageMit = (methode: string, pfad: string, body?: unknown, cookie = inhaber) =>
+    als(cookie)(
+      pfad,
+      body === undefined
+        ? { method: methode }
+        : { method: methode, headers: { "content-type": "application/json" }, body: JSON.stringify(body) },
+    );
+  const chiffrat = async (id: string) =>
+    ((await t.sql`select ciphertext from webhooks where id = ${id}`)[0] as { ciphertext: Buffer }).ciphertext;
+
+  it("ändert Name, Adresse und Arten, das Geheimnis bleibt und erscheint nicht wieder", async () => {
+    const { id, geheimnis } = await webhook("aendern", ["dokument.aufgenommen"]);
+    const vorher = await chiffrat(id);
+    const res = await anfrageMit("PATCH", `/api/webhooks/${id}`, {
+      name: "geaendert",
+      url: "https://neu.example/hook",
+      arten: ["dokument.geloescht", "dokument.geloescht", "dokument.eingeordnet"],
+    });
+    expect(res.status).toBe(200);
+    const w = await res.json();
+    expect(w).toMatchObject({
+      id,
+      name: "geaendert",
+      url: "https://neu.example/hook",
+      arten: ["dokument.geloescht", "dokument.eingeordnet"],
+    });
+    expect(JSON.stringify(w)).not.toMatch(/ciphertext|geheimnis|whsec_/);
+    expect((await chiffrat(id)).equals(vorher)).toBe(true);
+    expect(entschluesseln(t.schluessel, await chiffrat(id)).toString()).toBe(geheimnis);
+    // Auch nur ein Feld lässt sich ändern
+    expect((await anfrageMit("PATCH", `/api/webhooks/${id}`, { name: "nur-name" })).status).toBe(200);
+    const [e] = await t.sql`select actor, old_value, new_value from audit_log
+      where table_name = 'webhooks' and action = 'UPDATE' and row_id = ${id} order by seq desc limit 1`;
+    expect(e!.actor).toBe("nutzer:anna@example.org");
+    expect(JSON.stringify(e)).not.toMatch(/ciphertext|whsec_/);
+    await anfrageMit("POST", `/api/webhooks/${id}/deaktivieren`);
+  });
+
+  it("stellt nach dem Ändern der Adresse der neuen auch zu, was der alten noch fehlte, aber nichts doppelt", async () => {
+    const { id } = await webhook("umzug", ["dokument.aufgenommen"]);
+    await hochladen("umzug-1");
+    expect((await zustellen(t.db, t.schluessel, empfaenger().senden)).umzug).toEqual({ zugestellt: 1, fehler: null });
+    const zweites = await hochladen("umzug-2");
+    expect((await anfrageMit("PATCH", `/api/webhooks/${id}`, { url: "https://neu.example/umzug" })).status).toBe(200);
+    const neu = empfaenger();
+    expect((await zustellen(t.db, t.schluessel, neu.senden)).umzug).toEqual({ zugestellt: 1, fehler: null });
+    expect(neu.empfangen.map((e) => [e.url, JSON.parse(e.rumpf).dokumentId])).toEqual([
+      ["https://neu.example/umzug", zweites.id],
+    ]);
+    await anfrageMit("POST", `/api/webhooks/${id}/deaktivieren`);
+  });
+
+  it("beendet einen Webhook still, der während der Zustellung entfernt wird", async () => {
+    const { id } = await webhook("verschwindet", ["dokument.aufgenommen"]);
+    await hochladen("verschwindet");
+    const senden = async () => {
+      expect((await anfrageMit("DELETE", `/api/webhooks/${id}`)).status).toBe(204);
+      return new Response(null, { status: 200 });
+    };
+    expect((await zustellen(t.db, t.schluessel, senden)).verschwindet).toEqual({ zugestellt: 0, fehler: null });
+  });
+
+  it("lehnt Ändern mit unbekannter Nummer oder ungültiger Eingabe ab", async () => {
+    const { id } = await webhook("ungueltig", ["dokument.aufgenommen"]);
+    const unbekannt = "00000000-0000-4000-8000-000000000000";
+    expect((await anfrageMit("PATCH", `/api/webhooks/${unbekannt}`, { name: "x" })).status).toBe(404);
+    expect((await anfrageMit("PATCH", "/api/webhooks/keine-id", { name: "x" })).status).toBe(404);
+    for (const body of [
+      {},
+      { url: "ftp://x.example/" },
+      { arten: [] },
+      { arten: ["unbekannt"] },
+      { name: " " },
+      { geheimnis: "whsec_selbst" },
+    ])
+      expect((await anfrageMit("PATCH", `/api/webhooks/${id}`, body)).status, JSON.stringify(body)).toBe(400);
+    await anfrageMit("POST", `/api/webhooks/${id}/deaktivieren`);
+  });
+
+  it("entfernt einen Webhook ohne Zustellungen, ohne Chiffrat im Audit-Log", async () => {
+    const { id } = await webhook("weg", ["dokument.geloescht"]);
+    expect((await anfrageMit("DELETE", `/api/webhooks/${id}`)).status).toBe(204);
+    expect(((await (await als(inhaber)("/api/webhooks")).json()) as { id: string }[]).some((w) => w.id === id)).toBe(
+      false,
+    );
+    expect((await anfrageMit("DELETE", `/api/webhooks/${id}`)).status).toBe(404);
+    expect((await anfrageMit("DELETE", "/api/webhooks/keine-id")).status).toBe(404);
+    const [e] = await t.sql`select actor, old_value from audit_log
+      where table_name = 'webhooks' and action = 'DELETE' and row_id = ${id}`;
+    expect(e!.actor).toBe("nutzer:anna@example.org");
+    expect(JSON.stringify(e)).not.toMatch(/ciphertext/);
+  });
+
+  it("entfernt keinen Webhook mit Zustellungen: 409, Deaktivieren statt Entfernen", async () => {
+    const { id } = await webhook("zugestellt", ["dokument.aufgenommen"]);
+    await hochladen("fuer-zugestellt");
+    const r = empfaenger();
+    expect((await zustellen(t.db, t.schluessel, r.senden)).zugestellt).toEqual({ zugestellt: 1, fehler: null });
+    const res = await anfrageMit("DELETE", `/api/webhooks/${id}`);
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as { fehler: string }).fehler).toMatch(/Deaktivieren statt Entfernen/);
+    expect(await t.sql`select 1 from webhooks where id = ${id}`).toHaveLength(1);
+    expect((await anfrageMit("POST", `/api/webhooks/${id}/deaktivieren`)).status).toBe(200);
+  });
+
+  it("lässt Ändern und Entfernen nur den Inhaber mit Sitzung, nicht Steuerberatung oder Token", async () => {
+    const { id } = await webhook("geschuetzt", ["dokument.geloescht"]);
+    const { pfad } = await (await als(inhaber)("/api/einladungen", json({ rolle: "steuerberatung" }))).json();
+    const kanzlei = (
+      await t.registrieren("kanzlei2@example.org", "ein-langes-passwort", {
+        "x-belegt-einladung": pfad.split("/").pop(),
+      })
+    ).cookie;
+    const { klartext } = await (await als(inhaber)("/api/tokens", json({ name: "t", recht: "schreiben" }))).json();
+    const token = { headers: { authorization: `Bearer ${klartext}`, "content-type": "application/json" } };
+    expect((await anfrageMit("PATCH", `/api/webhooks/${id}`, { name: "x" }, kanzlei)).status).toBe(403);
+    expect((await anfrageMit("DELETE", `/api/webhooks/${id}`, undefined, kanzlei)).status).toBe(403);
+    expect((await t.anfrage(`/api/webhooks/${id}`, { method: "PATCH", body: '{"name":"x"}', ...token })).status).toBe(
+      403,
+    );
+    expect((await t.anfrage(`/api/webhooks/${id}`, { method: "DELETE", ...token })).status).toBe(403);
+    expect(await t.sql`select 1 from webhooks where id = ${id} and name = 'geschuetzt'`).toHaveLength(1);
+    await anfrageMit("POST", `/api/webhooks/${id}/deaktivieren`);
   });
 });

@@ -55,6 +55,26 @@ als `system:notfall` im Protokoll. TOTP-Geheimnis und Backup-Codes speichert Bel
 `BETTER_AUTH_SECRET` und nie im Protokoll; von einem Passkey nur den öffentlichen Schlüssel. Die
 [Verfahrensdokumentation](verfahrensdoku.md) nennt je Zugang den zweiten Faktor und die Pflicht.
 
+## Passwort vergessen { #passwort-vergessen }
+
+Belegt schickt den Link nicht selbst; das Passwort einer Person setzt der Inhaber zurück. Unter **Zugänge** steht bei
+jedem anderen Konto **Passwort zurücksetzen**. Nach der Rückfrage zeigt Belegt einen Link einmal an, den du der Person
+auf einem Weg deiner Wahl schickst. Er gilt 24 Stunden und einmal; ein neuer Link macht offene alte ungültig. Mit dem
+Link wählt die Person ihr neues Passwort selbst (mindestens 12 Zeichen). Danach enden alle ihre Sitzungen, das alte
+Passwort gilt nicht mehr, und ihr zweiter Faktor bleibt, wie er ist. Im Protokoll steht, wer den Link ausgestellt hat;
+gespeichert ist nur der Hash des Tokens. Für entzogene Zugänge und Konten ohne Passwort (nur über den OIDC-Anbieter)
+gibt es keinen Link.
+
+Das eigene Passwort setzt der Inhaber nicht in der Oberfläche zurück, sondern mit dem Eigentümerzugang der Datenbank
+auf dem Server:
+
+```sh
+docker compose exec server bun server/zugang/notfall-passwort.ts inhaber@firma.de
+```
+
+Das Skript läuft nur mit `MIGRATION_DATABASE_URL` ([getrennte Rollen](betrieb.md#getrennte-datenbankrollen)), baut den
+Link aus `BETTER_AUTH_URL`, gibt ihn einmal auf der Konsole aus und steht als `system:notfall` im Protokoll.
+
 ## Mitarbeiter { #mitarbeiter }
 
 Für Mitarbeiter wählst du beim Einladen ein Recht und einen Sichtbereich; beides lässt sich später mit

@@ -1,7 +1,7 @@
 import { sha256Of } from "@firsttris/gobd-kern/dateispeicher";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { mitAkteur } from "../db/akteur.ts";
+import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { dokumente, postfachAktionen, postfachMails, quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
@@ -71,34 +71,29 @@ export async function aktionEinstellen(
 export type Adresse = { ordner: string } & ({ uidValidity: number; uid: number } | { jmapId: string });
 
 /**
- * Merkt eine Mail für die Aktion vor. Aufgerufen erst, wenn die Aufnahme festgeschrieben ist; ein Trigger prüft
+ * Merkt eine Mail für die Aktion vor, innerhalb der Transaktion des Aufrufers (der den Akteur setzt). Aufgerufen erst,
+ * wenn die Aufnahme festgeschrieben ist; ein Trigger prüft
  * zusätzlich, dass das Dokument als Mail mit diesem Hash im Archiv liegt. Eine schon vorgemerkte Mail bleibt, wie sie
  * ist (zweiter Abruf, neuer Abruf nach UIDVALIDITY-Wechsel mit derselben UID).
  */
-export async function vormerken(
-  db: Datenbank,
-  akteur: string,
-  m: { quelleId: string; dokumentId: string; roh: Uint8Array } & Adresse,
-) {
-  const [d] = await db
+export async function vormerken(tx: Tx, m: { quelleId: string; dokumentId: string; roh: Uint8Array } & Adresse) {
+  const [d] = await tx
     .select({ eingegangenAm: dokumente.eingegangenAm })
     .from(dokumente)
     .where(eq(dokumente.id, m.dokumentId));
   if (!d) throw new Error("Mail nicht im Archiv");
-  await mitAkteur(db, akteur, (tx) =>
-    tx
-      .insert(postfachMails)
-      .values({
-        quelleId: m.quelleId,
-        dokumentId: m.dokumentId,
-        sha256: sha256Of(m.roh),
-        ordner: m.ordner,
-        ...("jmapId" in m ? { jmapId: m.jmapId } : { uidValidity: m.uidValidity, uid: m.uid }),
-        // Ein doppeltes Dokument lag schon vorher im Archiv; die Wartezeit zählt ab dem ersten Eingang
-        archiviertAm: d.eingegangenAm,
-      })
-      .onConflictDoNothing(),
-  );
+  await tx
+    .insert(postfachMails)
+    .values({
+      quelleId: m.quelleId,
+      dokumentId: m.dokumentId,
+      sha256: sha256Of(m.roh),
+      ordner: m.ordner,
+      ...("jmapId" in m ? { jmapId: m.jmapId } : { uidValidity: m.uidValidity, uid: m.uid }),
+      // Ein doppeltes Dokument lag schon vorher im Archiv; die Wartezeit zählt ab dem ersten Eingang
+      archiviertAm: d.eingegangenAm,
+    })
+    .onConflictDoNothing();
 }
 
 /** Ordner des Kontos für die Wahl des Zielordners; wirft, wenn das Postfach nicht erreichbar ist */
