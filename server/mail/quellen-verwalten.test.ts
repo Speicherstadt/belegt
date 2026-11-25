@@ -318,3 +318,30 @@ describe.skipIf(!testDatenbankUrl)("Postfächer ändern und entfernen", () => {
     expect(await zeile(id)).toMatchObject({ name: "geschuetzt@example.org" });
   });
 });
+
+describe.skipIf(!testDatenbankUrl)("Postfach ändern ohne BELEGT_SCHLUESSEL", () => {
+  let t: Awaited<ReturnType<typeof testApp>>;
+  let inhaber: string;
+  beforeAll(async () => {
+    t = await testApp({ ohneSchluessel: true });
+    inhaber = (await t.registrieren("anna@example.org")).cookie;
+  });
+  afterAll(() => t?.aufraeumen());
+
+  it("lehnt ein neues Passwort mit 503 ab, ändert ohne Passwort aber weiter", async () => {
+    const id = (
+      await t.sql<{ id: string }[]>`insert into quellen (name, host, benutzer, ciphertext)
+      values ('ohne', 'imap.example.org', 'ohne@example.org', '\\x00') returning id`
+    )[0]!.id;
+    const aendern = (body: unknown) =>
+      t.anfrage(
+        `/api/quellen/${id}`,
+        { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) },
+        inhaber,
+      );
+    const res = await aendern({ host: "neu.example.org", passwort: "neues-passwort-1" });
+    expect(res.status).toBe(503);
+    expect((await t.sql`select host from quellen where id = ${id}`)[0]).toEqual({ host: "imap.example.org" });
+    expect((await aendern({ name: "Umbenannt" })).status).toBe(200);
+  });
+});

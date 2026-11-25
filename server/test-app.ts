@@ -26,6 +26,7 @@ export async function testApp({
   objektsperre,
   clientIp,
   mail,
+  ohneSchluessel = false,
 }: Pick<
   AppUmgebung,
   | "oeffnen"
@@ -40,6 +41,8 @@ export async function testApp({
 > & {
   begrenzen?: boolean;
   oidc?: OidcKonfig;
+  /** Wie ein Server ohne BELEGT_SCHLUESSEL */
+  ohneSchluessel?: boolean;
 } = {}) {
   const sql: postgres.Sql = await testDatenbank();
   const verzeichnis = await mkdtemp(join(tmpdir(), "belegt-test-"));
@@ -58,7 +61,7 @@ export async function testApp({
     db,
     speicher,
     auth,
-    schluessel,
+    schluessel: ohneSchluessel ? undefined : schluessel,
     oeffnen,
     oeffnenMit,
     oauth,
