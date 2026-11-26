@@ -34,7 +34,7 @@ jobs:
           --health-cmd "pg_isready -U belegt -d belegt_test" --health-interval 5s --health-timeout 5s --health-retries 10
       # Vorschau-Dienst für die Ansicht von Office-Dateien; ohne VORSCHAU_TEST_URL würde der Test dazu übersprungen
       gotenberg:
-        image: gotenberg/gotenberg:8
+        image: gotenberg/gotenberg:9
         ports: ["3001:3000"]
     env:
       TEST_DATABASE_URL: postgres://belegt:belegt@localhost:5432/belegt_test

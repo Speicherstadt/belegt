@@ -248,7 +248,7 @@ services:
   # Ansichten als PDF für Office-Dateien, nur mit: docker compose --profile vorschau up -d;
   # VORSCHAU_URL=http://gotenberg:3000 in .env. Im eigenen Netz ohne Internet, denn LibreOffice öffnet fremde Dateien
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8
+    image: docker.io/gotenberg/gotenberg:9
     profiles: [vorschau]
     restart: unless-stopped
     command: ["gotenberg", "--chromium-disable-routes=true"]
