@@ -55,6 +55,7 @@ const app = createApp({
   oidcName: oidc?.name,
   embedOrigin: env.BELEGT_EMBED_ORIGIN,
   objektsperre: !!sperrbar,
+  s3Verschluesselt: !!(sperrbar && env.S3_SCHLUESSEL),
   eingangsordner: !!env.EINGANG_ORDNER,
   speicherOrdner: env.S3_ENDPUNKT ? undefined : env.DOCUMENTS_DIR,
   erechnungPruefung: !!env.VALIDATOR_URL,

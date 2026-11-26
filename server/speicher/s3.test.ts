@@ -96,15 +96,7 @@ describe("S3 mit Object Lock", () => {
   let k: S3Konfig;
   beforeAll(async () => {
     s = await s3Server();
-    k = {
-      endpunkt: s.endpunkt,
-      bucket: "archiv",
-      region: "eu-central-1",
-      zugangId: "schluessel",
-      zugangGeheimnis: "geheim",
-      pfadStil: true,
-      sperreTage: 30,
-    };
+    k = konfig(s.endpunkt);
   });
   afterAll(() => new Promise<void>((ok) => s.server.close(() => ok())));
 
@@ -173,6 +165,80 @@ describe("S3 mit Object Lock", () => {
   });
 });
 
+describe("S3 mit clientseitiger Verschlüsselung", () => {
+  let s: Awaited<ReturnType<typeof s3Server>>;
+  const k1 = Buffer.alloc(32, 0x11);
+  const k2 = Buffer.alloc(32, 0x22);
+
+  beforeAll(async () => {
+    s = await s3Server();
+  });
+  afterAll(() => new Promise<void>((ok) => s.server.close(() => ok())));
+
+  it("lädt verschlüsselt mit Object Lock und Chiffretext-Prüfsumme hoch und liest/prüft gegen den Klartext-Hash", async () => {
+    const speicher = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k1] });
+    const klar = new TextEncoder().encode("%PDF-1.7\n% Patientenakte vertraulich\n");
+    const sha = await speicher.speichern(klar);
+    expect(sha).toBe(createHash("sha256").update(klar).digest("hex"));
+
+    const gespeichert = s.objekte.get(schluessel(sha))!.at(-1)!.bytes;
+    expect(gespeichert.includes(Buffer.from("Patientenakte"))).toBe(false);
+    expect(gespeichert.subarray(0, 5).equals(Buffer.from([0x42, 0x4c, 0x47, 0x54, 0x01]))).toBe(true);
+
+    const put = s.anfragen.findLast((a) => a.methode === "PUT" && !a.pfad.includes("?retention"))!;
+    expect(put.kopf["x-amz-object-lock-mode"]).toBe("COMPLIANCE");
+    expect(put.kopf["x-amz-checksum-sha256"]).toBe(createHash("sha256").update(gespeichert).digest("base64"));
+
+    expect(new TextDecoder().decode(await speicher.laden(sha))).toBe("%PDF-1.7\n% Patientenakte vertraulich\n");
+    expect(await speicher.pruefen(sha)).toBe("ok");
+
+    // Manipulierter Chiffretext wird beim Laden und Prüfen erkannt
+    gespeichert[gespeichert.length - 1] = (gespeichert[gespeichert.length - 1] ?? 0) ^ 0x01;
+    expect(await speicher.pruefen(sha)).toBe("beschädigt");
+    await expect(speicher.laden(sha)).rejects.toThrow("beschädigt");
+  });
+
+  it("unterstützt Schlüsselrotation und meldet fehlenden Schlüssel als nicht lesbar", async () => {
+    const alt = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k1], sperreTage: 0 });
+    const shaAlt = await alt.speichern(new TextEncoder().encode("Unter Schlüssel 1 gespeichert"));
+
+    const rotiert = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k2, k1], sperreTage: 0 });
+    const shaNeu = await rotiert.speichern(new TextEncoder().encode("Unter Schlüssel 2 gespeichert"));
+    expect(new TextDecoder().decode(await rotiert.laden(shaAlt))).toBe("Unter Schlüssel 1 gespeichert");
+    expect(new TextDecoder().decode(await rotiert.laden(shaNeu))).toBe("Unter Schlüssel 2 gespeichert");
+    expect(await rotiert.pruefenAlle([shaAlt, shaNeu])).toEqual({ dateien: 2, befundAnzahl: 0, befunde: [] });
+
+    const nurNeu = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k2], sperreTage: 0 });
+    const ergebnis = await nurNeu.pruefenAlle([shaAlt, shaNeu]);
+    expect(ergebnis.befundAnzahl).toBe(1);
+    expect(ergebnis.befunde[0]).toMatchObject({ sha256: shaAlt, befund: "nicht lesbar" });
+  });
+
+  it("nutzt mit pfadHmac stabile HMAC-Objektnamen für Speichern, Sperren, Rotation und Löschen", async () => {
+    expect(() => s3Speicher({ ...konfig(s.endpunkt), pfadHmac: true })).toThrow("S3_PFAD_HMAC erfordert S3_SCHLUESSEL");
+
+    const speicher = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k1], pfadHmac: true, sperreTage: 0 });
+    const sha = await speicher.speichern(new TextEncoder().encode("Verdeckter Objektname"));
+    expect(s.objekte.has(schluessel(sha))).toBe(false);
+    const hmacKey = speicher.pfad(sha).replace("s3://archiv/", "");
+    expect(hmacKey).not.toBe(schluessel(sha));
+    expect(s.objekte.has(hmacKey)).toBe(true);
+
+    // Sperren und Lesen über rotierten Schlüssel nutzen denselben HMAC-Pfad
+    await speicher.sperren(sha, new Date(Date.now() + 86_400_000));
+    const rotiert = s3Speicher({ ...konfig(s.endpunkt), schluessel: [k2, k1], pfadHmac: true, sperreTage: 0 });
+    expect(rotiert.pfad(sha)).toBe(speicher.pfad(sha));
+    expect(await rotiert.pruefen(sha)).toBe("ok");
+
+    // Nach Fristende vollständig entfernbar
+    s.objekte.get(hmacKey)!.forEach((v) => {
+      v.sperre = Date.now() - 1000;
+    });
+    await rotiert.entfernen(sha);
+    expect(s.objekte.get(hmacKey)).toEqual([]);
+  });
+});
+
 describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", () => {
   let s: Awaited<ReturnType<typeof s3Server>>;
   let k: S3Konfig;
@@ -232,5 +298,22 @@ describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", ()
     const vorher = s.anfragen.length;
     expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 0, fehler: null });
     expect(s.anfragen.slice(vorher).filter((a) => a.pfad.includes("?retention"))).toEqual([]);
+  });
+
+  it("gleicht Sperren auch für verschlüsselte Originale mit HMAC-Objektnamen gegen Postgres ab", async () => {
+    const speicher = s3Speicher({ ...k, sperreTage: 0, schluessel: [Buffer.alloc(32, 0x33)], pfadHmac: true });
+    const bytes = new TextEncoder().encode("%PDF-1.7\n% Vertraulicher Beleg 2026\n");
+    await speicher.speichern(bytes);
+    const form = new FormData();
+    form.append("datei", new File([bytes], "vertraulich.pdf"));
+    const d = await (await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie)).json();
+    await t.anfrage(
+      `/api/dokumente/${d.id}/einordnung`,
+      json({ art: "geschaeftsbrief", entstanden: "2026-04-01" }),
+      cookie,
+    );
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
+    const hmacKey = speicher.pfad(d.sha256).replace("s3://archiv/", "");
+    expect(s.objekte.get(hmacKey)!.at(-1)!.sperre).toBe(Date.parse("2032-12-31T23:00:00Z"));
   });
 });

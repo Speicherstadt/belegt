@@ -25,6 +25,8 @@ x-umgebung: &umgebung # Getrennte Rollen (docs/betrieb.md): App-Anmeldung aus .e
   S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
   S3_PFAD_STIL: ${S3_PFAD_STIL:-}
   S3_SPERRE_TAGE: ${S3_SPERRE_TAGE:-}
+  S3_SCHLUESSEL: ${S3_SCHLUESSEL:-}
+  S3_PFAD_HMAC: ${S3_PFAD_HMAC:-}
   TSA_URL: ${TSA_URL:-}
   KI_URL: ${KI_URL:-}
   KI_MODELL: ${KI_MODELL:-}
@@ -71,6 +73,8 @@ x-backup: &backup
     S3_ZUGANG_ID: ${S3_ZUGANG_ID:-}
     S3_ZUGANG_GEHEIMNIS: ${S3_ZUGANG_GEHEIMNIS:-}
     S3_PFAD_STIL: ${S3_PFAD_STIL:-}
+    S3_SCHLUESSEL: ${S3_SCHLUESSEL:-}
+    S3_PFAD_HMAC: ${S3_PFAD_HMAC:-}
 
 services:
   postgres:
