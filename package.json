@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "AGPL-3.0-only",
-  "packageManager": "bun@1.4.4",
+  "packageManager": "bun@1.4.5",
   "scripts": {
     "dev:server": "bun --watch server/index.ts",
     "typecheck": "bun run postinstall && tsc -p .",
@@ -20,15 +20,15 @@
     "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy preferredLanguage baseLocale"
   },
   "dependencies": {
-    "@better-auth/passkey": "1.7.25",
+    "@better-auth/passkey": "1.7.27",
     "@firsttris/gobd-kern": "https://github.com/Speicherstadt/haben/releases/download/gobd-kern-v0.2.1/firsttris-gobd-kern-0.2.1.tgz",
     "@simplewebauthn/browser": "14.0.0",
     "@tanstack/react-query": "^5.107.1",
     "@tanstack/react-router": "^1.170.46",
     "aws4fetch": "^1.0.20",
-    "better-auth": "1.7.25",
+    "better-auth": "1.7.27",
     "client-zip": "2",
-    "lucide-react": "1.70.0",
+    "lucide-react": "1.78.0",
     "drizzle-orm": "^0.45.4",
     "fast-xml-parser": "^5.12.1",
     "fflate": "0.8",
