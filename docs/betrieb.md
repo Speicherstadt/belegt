@@ -117,14 +117,15 @@ bleibt die Datei bis zum Ende ihrer Sperre liegen; Belegt liefert sie nicht mehr
 Entfernen stündlich wieder.
 
 **Clientseitig verschlüsseln:** Liegt der Bucket bei einem externen Anbieter (etwa wegen Gesundheitsdaten nach Art. 9
-DSGVO oder Berufsgeheimnissen), setzt du `S3_SCHLUESSEL` (32 Bytes base64 aus `openssl rand -base64 32`, getrennt von
-`BELEGT_SCHLUESSEL`). Belegt verschlüsselt dann jedes Original vor dem Hochladen mit AES-256-GCM und einem eigenen
-Datenschlüssel je Objekt; der Klartext-SHA-256 bleibt die Kennung in Datenbank, Siegeln und Prüfung, die S3-Prüfsumme
-sichert den Chiffretext. Object Lock, Prüfung und Test-Restore arbeiten weiter wie gewohnt. Für einen neuen Schlüssel
-stellst du ihn mit Komma vor die bisherigen (`S3_SCHLUESSEL=<neu>,<alt>`): neue Objekte werden mit dem ersten
-verschlüsselt, bestehende mit dem passenden alten gelesen, bis deren Sperre abläuft. Mit `S3_PFAD_HMAC=true` nutzt
-Belegt zusätzlich HMAC-SHA256 statt des Klartext-Hashs als Objektnamen im Bucket, sodass sich bekannte Dateien dort
-nicht nachweisen lassen (diese Einstellung gilt fest ab leerem Bucket).
+DSGVO oder Berufsgeheimnissen), setzt du ab leerem Bucket `S3_SCHLUESSEL` (32 Bytes base64 aus `openssl rand -base64 32`,
+getrennt von `BELEGT_SCHLUESSEL`). Belegt verschlüsselt dann jedes Original vor dem Hochladen mit AES-256-GCM und einem
+eigenen Datenschlüssel je Objekt; der Klartext-SHA-256 bleibt die Kennung in Datenbank, Siegeln und Prüfung, die
+S3-Prüfsumme sichert den Chiffretext. Object Lock, Prüfung und Test-Restore arbeiten unverändert weiter. Für einen neuen
+Schlüssel stellst du ihn mit Komma vor die bisherigen (`S3_SCHLUESSEL=<neu>,<alt>`): neue Objekte werden mit dem ersten
+verschlüsselt, bestehende mit dem passenden alten gelesen, bis deren Sperre abläuft. Mit `S3_PFAD_HMAC=true` (ebenfalls
+fest ab leerem Bucket) nutzt Belegt zusätzlich HMAC-SHA256 statt des Klartext-Hashs als Objektnamen im Bucket, sodass
+sich bekannte Dateien dort nicht nachweisen lassen; dabei muss der älteste (letzte) Schlüssel dauerhaft am Ende von
+`S3_SCHLUESSEL` bleiben, weil alle Objektnamen aus ihm abgeleitet werden.
 
 Wichtig: `S3_SCHLUESSEL` schützt die Originale im S3-Bucket; Metadaten und erkannter Text liegen weiter in PostgreSQL
 auf dem eigenen Server. Geht `S3_SCHLUESSEL` verloren, sind die verschlüsselten Originale im Bucket unwiederbringlich

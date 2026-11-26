@@ -31,6 +31,16 @@ describe("S3-Verschlüsselung (Envelope Encryption)", () => {
     expect(() => s3SchluesselAus(randomBytes(16).toString("base64"))).toThrow("32 Bytes");
   });
 
+  it("lehnt ungültiges base64 und falsch getrennte Schlüssel bei Rotation ab", () => {
+    const b1 = k1.toString("base64");
+    const b2 = k2.toString("base64");
+    expect(() => s3SchluesselAus(`${b2} ${b1}`)).toThrow("32 Bytes");
+    expect(() => s3SchluesselAus(`${b2};${b1}`)).toThrow("32 Bytes");
+    expect(() => s3SchluesselAus(`${b2}${b1}`)).toThrow("32 Bytes");
+    expect(() => s3SchluesselAus(`${b1.slice(0, 10)}!${b1.slice(10)}`)).toThrow("32 Bytes");
+    expect(() => s3SchluesselAus(`${b1}extra`)).toThrow("32 Bytes");
+  });
+
   it("verschlüsselt und entschlüsselt mit eigenem Datenschlüssel je Aufruf, auch leer", () => {
     for (const klar of [Buffer.alloc(0), Buffer.from("Geheimer Arztbrief § 203 StGB"), randomBytes(200_000)]) {
       const a = s3Verschluesseln(k1, klar);
@@ -66,6 +76,10 @@ describe("S3-Verschlüsselung (Envelope Encryption)", () => {
     for (const groesse of [1, 7, 16, 85, 1024]) {
       expect(await s3PruefenStream([k2, k1], streamAus(versiegelt, groesse), sha)).toBe("ok");
     }
+    // Leerer Klartext (exakt 85 + 16 = 101 Bytes)
+    const leer = s3Verschluesseln(k1, Buffer.alloc(0));
+    expect(leer).toHaveLength(101);
+    expect(await s3PruefenStream([k1], streamAus(leer, 17), sha256Of(Buffer.alloc(0)))).toBe("ok");
     // Falscher erwarteter Klartext-Hash (z. B. vertauschte Objekte)
     expect(await s3PruefenStream([k1], streamAus(versiegelt, 13), "0".repeat(64))).toBe("beschädigt");
     // Manipulierter Tag

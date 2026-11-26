@@ -9,7 +9,8 @@ import {
 } from "node:crypto";
 
 /*
- * Clientseitige Verschlüsselung für Originale in S3 (Envelope Encryption mit AES-256-GCM):
+ * Clientseitige Verschlüsselung für Originale in S3 (Envelope Encryption mit AES-256-GCM nach NIST SP 800-38D,
+ * Pfad-Ableitung mit HKDF-SHA256 nach RFC 5869 und HMAC-SHA256 nach RFC 2104):
  *   Kopf (85 Bytes): Magie "BLGT\x01" (5) | Key-ID (8) | Wrap-IV (12) | Wrap-Tag (16) | Wrapped-DEK (32) | Daten-IV (12)
  *   danach:          Chiffretext (N Bytes) | Daten-Tag (16 Bytes)
  *
@@ -30,6 +31,8 @@ const fehlerMitCode = (nachricht: string, code: "S3_BESCHAEDIGT" | "S3_KEY_UNKNO
 
 const schluesselId = (kek: Buffer) => createHash("sha256").update(kek).digest().subarray(0, KEY_ID_LAENGE);
 
+const BASE64_32 = /^[A-Za-z0-9+/]{43}=?$/;
+
 /** Liest einen oder mehrere (mit Komma getrennte) 32-Byte-Schlüssel aus base64; der erste schreibt, alle lesen */
 export function s3SchluesselAus(text: string): Buffer[] {
   const teile = text
@@ -41,8 +44,8 @@ export function s3SchluesselAus(text: string): Buffer[] {
       "S3_SCHLUESSEL muss mindestens einen 32-Byte-Schlüssel (base64) enthalten, etwa aus openssl rand -base64 32",
     );
   return teile.map((b64) => {
-    const k = Buffer.from(b64, "base64");
-    if (k.length !== DEK_LAENGE)
+    const k = BASE64_32.test(b64) ? Buffer.from(b64, "base64") : null;
+    if (!k || k.length !== DEK_LAENGE || k.toString("base64").replace(/=+$/, "") !== b64.replace(/=+$/, ""))
       throw new Error(
         "Jeder Schlüssel in S3_SCHLUESSEL muss 32 Bytes lang sein (base64), etwa aus openssl rand -base64 32",
       );

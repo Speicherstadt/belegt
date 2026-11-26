@@ -299,4 +299,21 @@ describe.skipIf(!testDatenbankUrl)("Abgleich mit den Fristen gegen Postgres", ()
     expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 0, fehler: null });
     expect(s.anfragen.slice(vorher).filter((a) => a.pfad.includes("?retention"))).toEqual([]);
   });
+
+  it("gleicht Sperren auch für verschlüsselte Originale mit HMAC-Objektnamen gegen Postgres ab", async () => {
+    const speicher = s3Speicher({ ...k, sperreTage: 0, schluessel: [Buffer.alloc(32, 0x33)], pfadHmac: true });
+    const bytes = new TextEncoder().encode("%PDF-1.7\n% Vertraulicher Beleg 2026\n");
+    await speicher.speichern(bytes);
+    const form = new FormData();
+    form.append("datei", new File([bytes], "vertraulich.pdf"));
+    const d = await (await t.anfrage("/api/dokumente", { method: "POST", body: form }, cookie)).json();
+    await t.anfrage(
+      `/api/dokumente/${d.id}/einordnung`,
+      json({ art: "geschaeftsbrief", entstanden: "2026-04-01" }),
+      cookie,
+    );
+    expect(await sperrenAbgleichen(t.db, speicher)).toEqual({ gesetzt: 1, fehler: null });
+    const hmacKey = speicher.pfad(d.sha256).replace("s3://archiv/", "");
+    expect(s.objekte.get(hmacKey)!.at(-1)!.sperre).toBe(Date.parse("2032-12-31T23:00:00Z"));
+  });
 });
