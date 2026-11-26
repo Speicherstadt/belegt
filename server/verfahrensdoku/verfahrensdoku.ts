@@ -87,6 +87,32 @@ async function zahlen(db: Datenbank) {
   };
 }
 
+export interface VerfahrensdokuOptionen {
+  abrufMinuten: number;
+  version: string;
+  jetzt?: Date;
+  objektsperre?: boolean;
+  /** Originale im S3-Bucket sind clientseitig verschlüsselt (S3_SCHLUESSEL) */
+  s3Verschluesselt?: boolean;
+  kiModell?: { modell: string; host: string };
+  /** Der Worker überwacht einen Eingangsordner (EINGANG_ORDNER) */
+  eingangsordner?: boolean;
+  /** Inhalt des Codes auf Trennblättern (TRENNBLATT_CODE) */
+  trennblattCode?: string;
+  /** E-Rechnungen werden mit dem KoSIT-Validator geprüft (VALIDATOR_URL) */
+  erechnungPruefung?: boolean;
+  /** Benachrichtigungen per Mail sind eingerichtet (MAIL_SMTP_URL) */
+  mail?: boolean;
+}
+
+const ABSCHNITT_LOESCHUNG = {
+  titel: "5. Löschung",
+  absaetze: [
+    "Gelöscht wird nur auf Antrag und nur, was eingeordnet ist, dessen Frist abgelaufen ist und das keine Sperre betrifft. Wegen möglicher Ablaufhemmung bestätigt eine zweite Person jede Löschung; nur frei Abgelegtes, das nie anders eingeordnet war, wird sofort gelöscht. Die Datenbank prüft diese Regeln selbst.",
+    "Nach der Löschung bleibt der Nachweis: Hash, Einordnung, Antrag und Bestätigung mit Personen und Zeitpunkten. Nur die Datei wird entfernt.",
+  ],
+};
+
 export async function verfahrensdoku(
   db: Datenbank,
   {
@@ -94,26 +120,13 @@ export async function verfahrensdoku(
     version,
     jetzt = new Date(),
     objektsperre = false,
+    s3Verschluesselt = false,
     kiModell,
     eingangsordner = false,
     trennblattCode = "BELEGT-TRENNER",
     erechnungPruefung = false,
     mail = false,
-  }: {
-    abrufMinuten: number;
-    version: string;
-    jetzt?: Date;
-    objektsperre?: boolean;
-    kiModell?: { modell: string; host: string };
-    /** Der Worker überwacht einen Eingangsordner (EINGANG_ORDNER) */
-    eingangsordner?: boolean;
-    /** Inhalt des Codes auf Trennblättern (TRENNBLATT_CODE) */
-    trennblattCode?: string;
-    /** E-Rechnungen werden mit dem KoSIT-Validator geprüft (VALIDATOR_URL) */
-    erechnungPruefung?: boolean;
-    /** Benachrichtigungen per Mail sind eingerichtet (MAIL_SMTP_URL) */
-    mail?: boolean;
-  },
+  }: VerfahrensdokuOptionen,
 ): Promise<Verfahrensdoku> {
   const [
     e,
@@ -238,17 +251,12 @@ export async function verfahrensdoku(
       rechte,
       pruefwert: z.pruefwert,
       objektsperre,
+      s3Verschluesselt,
       stempel: stempel[0],
       befunde: befunde.length,
       letzterLauf,
     }),
-    {
-      titel: "5. Löschung",
-      absaetze: [
-        "Gelöscht wird nur auf Antrag und nur, was eingeordnet ist, dessen Frist abgelaufen ist und das keine Sperre betrifft. Wegen möglicher Ablaufhemmung bestätigt eine zweite Person jede Löschung; nur frei Abgelegtes, das nie anders eingeordnet war, wird sofort gelöscht. Die Datenbank prüft diese Regeln selbst.",
-        "Nach der Löschung bleibt der Nachweis: Hash, Einordnung, Antrag und Bestätigung mit Personen und Zeitpunkten. Nur die Datei wird entfernt.",
-      ],
-    },
+    ABSCHNITT_LOESCHUNG,
     {
       titel: "6. Zugriff",
       absaetze: [

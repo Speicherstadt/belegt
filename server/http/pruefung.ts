@@ -29,6 +29,7 @@ export function pruefungRouten(app: App, umgebung: AppUmgebung) {
         abrufMinuten: umgebung.abrufMinuten ?? 5,
         version: VERSION,
         objektsperre: umgebung.objektsperre ?? false,
+        s3Verschluesselt: umgebung.s3Verschluesselt ?? false,
         kiModell: umgebung.kiModell,
         eingangsordner: umgebung.eingangsordner ?? false,
         trennblattCode: umgebung.trennblattCode,

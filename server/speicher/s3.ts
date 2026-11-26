@@ -3,12 +3,14 @@ import type { Dateispeicher, PruefenAlleErgebnis } from "@firsttris/gobd-kern/da
 import { sha256Of } from "@firsttris/gobd-kern/dateispeicher";
 import { AwsClient } from "aws4fetch";
 import { XMLParser } from "fast-xml-parser";
+import { s3Entschluesseln, s3PfadHash, s3PruefenStream, s3Verschluesseln } from "./s3-krypto.ts";
 
 /**
  * Dateien in einem S3-Bucket mit Object Lock (AWS S3, Ceph, Garage, MinIO …): Schlüssel wie im Dateisystem
- * (ab/abcdef…), Prüfsumme SHA-256 beim Hochladen, die Datei beim Lesen gegen ihren Hash geprüft. Eine Sperre im Modus
- * COMPLIANCE kann niemand verkürzen oder aufheben, auch nicht mit dem Schlüssel des Kontos; Belegt verlängert sie bis
- * zum Fristende (objektsperren.ts). Der Bucket muss mit Object Lock angelegt sein.
+ * (ab/abcdef… oder mit pfadHmac als HMAC-SHA256), Prüfsumme SHA-256 beim Hochladen, die Datei beim Lesen gegen ihren
+ * Klartext-Hash geprüft. Optional verschlüsselt Belegt jedes Original vor dem Hochladen clientseitig (s3-krypto.ts).
+ * Eine Sperre im Modus COMPLIANCE kann niemand verkürzen oder aufheben, auch nicht mit dem Schlüssel des Kontos;
+ * Belegt verlängert sie bis zum Fristende (objektsperren.ts). Der Bucket muss mit Object Lock angelegt sein.
  */
 
 export interface S3Konfig {
@@ -22,6 +24,10 @@ export interface S3Konfig {
   pfadStil: boolean;
   /** Sperre ab dem Hochladen in Tagen, bevor ein Dokument eingeordnet ist; 0: erst mit der Einordnung */
   sperreTage: number;
+  /** Optional: 32-Byte-Hauptschlüssel für clientseitige Verschlüsselung (erster schreibt, alle lesen) */
+  schluessel?: Buffer[];
+  /** Optional: Objektnamen als HMAC-SHA256 statt Klartext-Hash (erfordert schluessel) */
+  pfadHmac?: boolean;
 }
 
 export interface SperrbarerSpeicher extends Dateispeicher {
@@ -38,7 +44,32 @@ const md5 = (b: Uint8Array | string) => createHash("md5").update(b).digest("base
 /** Fehler wie vom Dateisystem, damit die Prüfung „Datei fehlt“ meldet (dateienPruefen) */
 const fehlt = () => Object.assign(new Error("Datei fehlt"), { code: "ENOENT" });
 
+function objektSchluessel(k: S3Konfig, sha256: string): string {
+  if (!/^[0-9a-f]{64}$/.test(sha256)) throw new Error("Ungültiger Hash");
+  const name = k.pfadHmac && k.schluessel ? s3PfadHash(k.schluessel, sha256) : sha256;
+  return `${name.slice(0, 2)}/${name}`;
+}
+
+function hochladenDaten(k: S3Konfig, bytes: Uint8Array, sha256: string) {
+  const aktiv = k.schluessel?.[0];
+  const nutzlast = aktiv ? s3Verschluesseln(aktiv, bytes) : bytes;
+  const pruefsumme = aktiv ? sha256Of(nutzlast) : sha256;
+  const kopf: Record<string, string> = {
+    "content-type": "application/octet-stream",
+    // Der Server prüft den Inhalt selbst; Object Lock verlangt eine Prüfsumme
+    "content-md5": md5(nutzlast),
+    "x-amz-sdk-checksum-algorithm": "SHA256",
+    "x-amz-checksum-sha256": Buffer.from(pruefsumme, "hex").toString("base64"),
+  };
+  if (k.sperreTage > 0) {
+    kopf["x-amz-object-lock-mode"] = "COMPLIANCE";
+    kopf["x-amz-object-lock-retain-until-date"] = new Date(Date.now() + k.sperreTage * 86_400_000).toISOString();
+  }
+  return { kopf, body: new Uint8Array(nutzlast) };
+}
+
 export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerSpeicher {
+  if (k.pfadHmac && !k.schluessel?.length) throw new Error("S3_PFAD_HMAC erfordert S3_SCHLUESSEL");
   const aws = new AwsClient({
     accessKeyId: k.zugangId,
     secretAccessKey: k.zugangGeheimnis,
@@ -46,10 +77,7 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
     service: "s3",
   });
   const basis = new URL(k.endpunkt);
-  const schluessel = (sha256: string) => {
-    if (!/^[0-9a-f]{64}$/.test(sha256)) throw new Error("Ungültiger Hash");
-    return `${sha256.slice(0, 2)}/${sha256}`;
-  };
+  const schluessel = (sha256: string) => objektSchluessel(k, sha256);
   const adresse = (key: string, abfrage = "") => {
     const u = k.pfadStil
       ? new URL(`/${k.bucket}/${key}`, basis)
@@ -71,7 +99,7 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
     throw new Error(`S3 ${was}: ${res.status}${code ? ` ${code}` : ""}`);
   };
 
-  /** Liest die Datei gestreamt und vergleicht ihren Hash; andere Fehler als eine fehlende Datei wirft sie */
+  /** Liest die Datei gestreamt (bei Verschlüsselung entschlüsselt) und vergleicht ihren Klartext-Hash */
   async function dateiPruefen(sha256: string): Promise<"ok" | "fehlt" | "beschädigt"> {
     const res = await senden(adresse(schluessel(sha256)));
     if (res.status === 404) {
@@ -79,6 +107,7 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
       return "fehlt";
     }
     await pruefen(res, "Lesen");
+    if (k.schluessel?.length) return s3PruefenStream(k.schluessel, res.body, sha256);
     const hash = createHash("sha256");
     if (res.body) for await (const teil of res.body) hash.update(teil);
     return hash.digest("hex") === sha256 ? "ok" : "beschädigt";
@@ -108,23 +137,9 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
     async speichern(bytes) {
       const sha256 = sha256Of(bytes);
       const key = schluessel(sha256);
-      const da = await senden(adresse(key), { method: "HEAD" });
-      if (da.ok) return sha256;
-      const kopf: Record<string, string> = {
-        "content-type": "application/octet-stream",
-        // Der Server prüft den Inhalt selbst; Object Lock verlangt eine Prüfsumme
-        "content-md5": md5(bytes),
-        "x-amz-sdk-checksum-algorithm": "SHA256",
-        "x-amz-checksum-sha256": Buffer.from(sha256, "hex").toString("base64"),
-      };
-      if (k.sperreTage > 0) {
-        kopf["x-amz-object-lock-mode"] = "COMPLIANCE";
-        kopf["x-amz-object-lock-retain-until-date"] = new Date(Date.now() + k.sperreTage * 86_400_000).toISOString();
-      }
-      await pruefen(
-        await senden(adresse(key), { method: "PUT", headers: kopf, body: new Uint8Array(bytes) }),
-        "Hochladen",
-      );
+      if ((await senden(adresse(key), { method: "HEAD" })).ok) return sha256;
+      const { kopf, body } = hochladenDaten(k, bytes, sha256);
+      await pruefen(await senden(adresse(key), { method: "PUT", headers: kopf, body }), "Hochladen");
       return sha256;
     },
 
@@ -132,7 +147,8 @@ export function s3Speicher(k: S3Konfig, abfragen: Abfragen = fetch): SperrbarerS
       const res = await senden(adresse(schluessel(sha256)));
       if (res.status === 404) throw fehlt();
       await pruefen(res, "Lesen");
-      const bytes = Buffer.from(await res.arrayBuffer());
+      const roh = Buffer.from(await res.arrayBuffer());
+      const bytes = k.schluessel?.length ? s3Entschluesseln(k.schluessel, roh) : roh;
       if (sha256Of(bytes) !== sha256) throw new Error("Datei passt nicht zu ihrem Hash");
       return bytes;
     },

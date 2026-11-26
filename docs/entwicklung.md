@@ -96,6 +96,7 @@ löschen sie wieder.
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_NAME` | Anmelden über einen OpenID-Connect-Anbieter (docs/einbetten.md) | –, Name `Firmenkonto` |
 | `BELEGT_EMBED_ORIGIN` | Die eine Seite, die Belegt in einem Frame zeigen darf | – |
 | `S3_ENDPUNKT`, `S3_BUCKET`, `S3_REGION`, `S3_ZUGANG_ID`, `S3_ZUGANG_GEHEIMNIS`, `S3_PFAD_STIL`, `S3_SPERRE_TAGE` | Dateien in S3 mit Object Lock statt `DOCUMENTS_DIR` (docs/betrieb.md) | –, `us-east-1`, `true`, `0` |
+| `S3_SCHLUESSEL`, `S3_PFAD_HMAC` | Optionale clientseitige Verschlüsselung der S3-Originale (32 Bytes base64, mit Komma für Rotation) und HMAC-Objektnamen (docs/betrieb.md) | –, `false` |
 | `TSA_URL` | Zeitstempeldienst nach RFC 3161 für den täglichen Zeitstempel über die Kette (docs/pruefung.md) | – |
 | `KI_URL`, `KI_MODELL` | Sprachmodell (Ollama) für Vorschläge zur Einordnung, auf eigenem Server (docs/eingang.md) | – |
 | `OEFFNEN_MIT_NAME`, `OEFFNEN_MIT_URL` | Knopf „Öffnen mit …“ für eine andere App, Adresse mit `{url}` und `{name}` (docs/schnittstelle.md) | – |

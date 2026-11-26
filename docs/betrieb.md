@@ -116,11 +116,25 @@ sich dann erst danach aus dem Bucket entfernen. Lehnt der Bucket das Entfernen n
 bleibt die Datei bis zum Ende ihrer Sperre liegen; Belegt liefert sie nicht mehr aus, und der Worker versucht das
 Entfernen stündlich wieder.
 
+**Clientseitig verschlüsseln:** Liegt der Bucket bei einem externen Anbieter (etwa wegen Gesundheitsdaten nach Art. 9
+DSGVO oder Berufsgeheimnissen), setzt du `S3_SCHLUESSEL` (32 Bytes base64 aus `openssl rand -base64 32`, getrennt von
+`BELEGT_SCHLUESSEL`). Belegt verschlüsselt dann jedes Original vor dem Hochladen mit AES-256-GCM und einem eigenen
+Datenschlüssel je Objekt; der Klartext-SHA-256 bleibt die Kennung in Datenbank, Siegeln und Prüfung, die S3-Prüfsumme
+sichert den Chiffretext. Object Lock, Prüfung und Test-Restore arbeiten weiter wie gewohnt. Für einen neuen Schlüssel
+stellst du ihn mit Komma vor die bisherigen (`S3_SCHLUESSEL=<neu>,<alt>`): neue Objekte werden mit dem ersten
+verschlüsselt, bestehende mit dem passenden alten gelesen, bis deren Sperre abläuft. Mit `S3_PFAD_HMAC=true` nutzt
+Belegt zusätzlich HMAC-SHA256 statt des Klartext-Hashs als Objektnamen im Bucket, sodass sich bekannte Dateien dort
+nicht nachweisen lassen (diese Einstellung gilt fest ab leerem Bucket).
+
+Wichtig: `S3_SCHLUESSEL` schützt die Originale im S3-Bucket; Metadaten und erkannter Text liegen weiter in PostgreSQL
+auf dem eigenen Server. Geht `S3_SCHLUESSEL` verloren, sind die verschlüsselten Originale im Bucket unwiederbringlich
+unlesbar — bewahre ihn getrennt vom Bucket sicher auf (mindestens so lange wie die längste Aufbewahrungsfrist).
+
 ## Sichern
 
 Zu sichern sind die Datenbank und das Volume `dokumente` (die Originale unter ihrem SHA-256; mit S3 der Bucket, etwa
 mit Replikation in einen zweiten), dazu `.env`: Ohne `BELEGT_SCHLUESSEL` lassen sich Postfach-Passwörter und
-Webhook-Geheimnisse nicht mehr entschlüsseln.
+Webhook-Geheimnisse, ohne `S3_SCHLUESSEL` verschlüsselte Originale im S3-Bucket nicht mehr entschlüsseln.
 
 Das übernimmt der Backup-Container (`tristanteu/belegt-backup`, aus `deploy/backup`): `RESTIC_PASSWORD` in `.env`
 setzen (`openssl rand -base64 32`, an einem zweiten Ort aufbewahren), dann

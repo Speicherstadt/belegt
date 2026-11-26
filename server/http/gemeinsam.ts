@@ -25,6 +25,8 @@ export type AppUmgebung = Umgebung & {
   oidcName?: string;
   /** Die Dateien liegen in einem S3-Bucket mit Object Lock (für die Verfahrensdokumentation) */
   objektsperre?: boolean;
+  /** Originale im S3-Bucket sind clientseitig verschlüsselt (S3_SCHLUESSEL; für die Verfahrensdokumentation) */
+  s3Verschluesselt?: boolean;
   /** Sprachmodell für Vorschläge, wenn eingerichtet (für die Verfahrensdokumentation) */
   kiModell?: { modell: string; host: string };
   /** E-Rechnungen werden mit dem Validator der KoSIT geprüft (VALIDATOR_URL; Filter und Verfahrensdokumentation) */

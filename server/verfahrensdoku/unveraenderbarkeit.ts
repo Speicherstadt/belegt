@@ -33,6 +33,7 @@ export function unveraenderbarkeit({
   rechte,
   pruefwert,
   objektsperre,
+  s3Verschluesselt = false,
   stempel,
   befunde,
   letzterLauf,
@@ -40,6 +41,7 @@ export function unveraenderbarkeit({
   rechte: { absatz: string; liste: string[] };
   pruefwert: { seq: number; hash: string } | null;
   objektsperre: boolean;
+  s3Verschluesselt?: boolean;
   stempel?: { dienst: string; zeit: Date; seq: number };
   /** Befunde der Prüfung von Kette, Kopf und Siegeln, gerechnet bei Erstellung des Dokuments */
   befunde: number;
@@ -52,7 +54,11 @@ export function unveraenderbarkeit({
     dateien: true,
   });
   const speicher = objektsperre
-    ? "Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos."
+    ? `Die Dateien liegen in einem S3-Bucket mit Object Lock im Modus COMPLIANCE: Bis zum Ende der längsten Frist ihrer Dokumente kann sie niemand ändern oder löschen, auch nicht mit dem Schlüssel des Kontos.${
+        s3Verschluesselt
+          ? " Vor dem Hochladen verschlüsselt Belegt jedes Original clientseitig mit AES-256-GCM (eigener Datenschlüssel je Objekt, geschützt mit dem konfigurierten S3-Schlüssel); beim Lesen und Prüfen wird entschlüsselt und gegen den Klartext-Hash verglichen."
+          : ""
+      }`
     : "Die Dateien liegen im Dateisystem des Servers.";
   const pruefung = [
     "Aufrufen lässt sie sich unter „Prüfung“; dort vergleicht sie auf Wunsch auch jede Datei mit ihrem Hash.",

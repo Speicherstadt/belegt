@@ -45,6 +45,13 @@ const Schema = z.object({
     .default("true")
     .transform((v) => v === "true"),
   S3_SPERRE_TAGE: z.coerce.number().int().min(0).max(36500).default(0),
+  /** Optional: clientseitige Verschlüsselung der S3-Originale (32 Bytes base64, mit Komma getrennt für Rotation) */
+  S3_SCHLUESSEL: z.string().min(40).optional(),
+  /** Optional: S3-Objektnamen als HMAC-SHA256 statt Klartext-Hash (erfordert S3_SCHLUESSEL) */
+  S3_PFAD_HMAC: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   /** Zeitstempeldienst nach RFC 3161, etwa https://freetsa.org/tsr; einmal am Tag ein Zeitstempel über die Kette */
   TSA_URL: z.string().url().optional(),
   /** Sprachmodell für Vorschläge zur Einordnung, auf eigenem Server (Ollama), etwa http://ollama:11434 */
