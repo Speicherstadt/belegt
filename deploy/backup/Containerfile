@@ -3,7 +3,7 @@
 # Version passen:  docker build -t belegt-backup -f deploy/backup/Containerfile .
 # backup.sh nimmt das pg_dump der Major-Version, in der die Datenbank läuft; eingebaut sind die Versionen ab
 # PG_AB, damit auch eine Datenbank auf postgres:16 oder 17 gesichert werden kann.
-FROM docker.io/oven/bun:1.4.4-slim AS app
+FROM docker.io/oven/bun:1.4.5-slim AS app
 WORKDIR /app
 COPY bun.lock package.json ./
 RUN bun install --frozen-lockfile --production --ignore-scripts \

@@ -1,6 +1,6 @@
 # Belegt – ein Image für Server und Worker. Der Server wendet beim Start die Migrationen an (mit MIGRATION_DATABASE_URL
 # als eigener Schritt davor, server/start.sh) und liefert die gebaute Oberfläche aus; der Worker (bun server/worker.ts) ruft Postfächer ab, stellt Webhooks zu und liest Text.
-FROM docker.io/oven/bun:1.4.4-slim AS build
+FROM docker.io/oven/bun:1.4.5-slim AS build
 WORKDIR /app
 COPY bun.lock package.json ./
 COPY project.inlang project.inlang
@@ -14,7 +14,7 @@ RUN bun run build \
  # Beispieldaten von pst-extractor (fast 50 MB) gehören nicht ins Image
  && rm -rf node_modules/pst-extractor/example
 
-FROM docker.io/oven/bun:1.4.4-slim
+FROM docker.io/oven/bun:1.4.5-slim
 # tesseract-ocr mit Deutsch und Englisch: Texterkennung und durchsuchbare PDFs für Scans; poppler-utils: pdftoppm rastert gescannte PDFs für
 # die Texterkennung, die Suche nach Trennblättern und Vorschaubilder, pdfinfo zählt Seiten. Alles läuft als eigener
 # Prozess mit Zeitlimit (server/inhalt/ocr.ts).

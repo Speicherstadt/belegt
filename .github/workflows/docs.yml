@@ -78,7 +78,7 @@ jobs:
       # Die Demo unter /demo/, mit der Aufnahme aus „Screenshots erneuern“ (demo/aufnahme.json)
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4
+          bun-version: 1.4.5
       - run: bun install --frozen-lockfile && bun run build:demo && cp -r dist-demo site/demo
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request'
