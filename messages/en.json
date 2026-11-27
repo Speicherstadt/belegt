@@ -262,6 +262,7 @@
   "mailboxes_never": "Not fetched yet",
   "mailboxes_error": "Error: {meldung}",
   "mailboxes_result": "{neu} new, {doppelt} already there",
+  "mailboxes_running": "This mailbox is being fetched right now. The result appears in the list.",
   "mailboxes_failed": "Mailbox failed: {meldung}",
   "audit_check_files": "Also check all files",
   "audit_files_checked": [

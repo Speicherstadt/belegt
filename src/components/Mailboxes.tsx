@@ -213,7 +213,9 @@ function Postfachliste({
       </ul>
       {abrufen.data && !abrufen.data.fehler && (
         <p role="status" className="m-0 text-sm">
-          {m.mailboxes_result({ neu: String(abrufen.data.neu), doppelt: String(abrufen.data.doppelt) })}
+          {abrufen.data.laeuft
+            ? m.mailboxes_running()
+            : m.mailboxes_result({ neu: String(abrufen.data.neu), doppelt: String(abrufen.data.doppelt) })}
         </p>
       )}
       {abrufen.error && (

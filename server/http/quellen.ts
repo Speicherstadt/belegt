@@ -1,9 +1,7 @@
 import {
   abrufen,
   type Ordner,
-  QuelleAenderung,
   QuelleEingabe,
-  aendern as quelleAendern,
   anlegen as quelleAnlegen,
   entfernen as quelleEntfernen,
   listen as quellenListen,
@@ -11,6 +9,7 @@ import {
 } from "../mail/abruf.ts";
 import { AktionEingabe, aktionEinstellen, ordnerListen, protokoll } from "../mail/aktionen.ts";
 import { fehlerGrund, GRUND_MELDUNG, verbindungPruefen } from "../mail/pruefen.ts";
+import { QuelleAenderung, aendern as quelleAendern } from "../mail/quelle-aendern.ts";
 import { type App, type AppUmgebung, akteur, Id, nurInhaber } from "./gemeinsam.ts";
 
 /** Startet den ersten Abruf einer neuen Quelle, ohne auf ihn zu warten; ein Fehler steht danach in letzter_fehler */

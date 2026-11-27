@@ -262,6 +262,7 @@
   "mailboxes_never": "Noch nicht abgerufen",
   "mailboxes_error": "Fehler: {meldung}",
   "mailboxes_result": "{neu} neu, {doppelt} schon vorhanden",
+  "mailboxes_running": "Dieses Postfach wird gerade abgerufen. Das Ergebnis erscheint in der Liste.",
   "mailboxes_failed": "Postfach fehlgeschlagen: {meldung}",
   "audit_check_files": "Auch alle Dateien prüfen",
   "audit_files_checked": [

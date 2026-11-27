@@ -1,10 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { entschluesseln, verschluesseln } from "../crypto.ts";
 import { mitAkteur } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
-import { postfachAktionen, postfachMails, quellen } from "../db/schema.ts";
+import { quellen } from "../db/schema.ts";
 import type { Umgebung } from "../dokumente/dokumente.ts";
+import { freigeben, herzschlag, sperren, TAKT_MS } from "./abruf-sperre.ts";
 import { type Adresse, vormerken } from "./aktionen.ts";
 import { type AktionenErgebnis, aktionenAusfuehren } from "./aktionen-ausfuehren.ts";
 import { mailAufnehmen } from "./import.ts";
@@ -79,24 +80,9 @@ export const QuelleEingabe = z.object({
   art: z.enum(["imap", "jmap"]).default("imap"),
 });
 
-/** Ändern: alles optional, art und Zustand nicht; das Passwort nur, wenn es neu gesetzt wird */
-export const QuelleAenderung = z
-  .object({
-    name: QuelleEingabe.shape.name,
-    host: QuelleEingabe.shape.host,
-    port: QuelleEingabe.shape.port.removeDefault(),
-    tls: QuelleEingabe.shape.tls.removeDefault(),
-    benutzer: QuelleEingabe.shape.benutzer,
-    passwort: QuelleEingabe.shape.passwort,
-    ordner: QuelleEingabe.shape.ordner.removeDefault(),
-  })
-  .partial()
-  .strict()
-  .refine((e) => Object.keys(e).length > 0, { message: "Nichts zu ändern" });
-
 /** Quelle ohne Chiffrat, für Antworten an die Oberfläche */
 export type QuelleOhneGeheimnis = Omit<typeof quellen.$inferSelect, "ciphertext">;
-const ohneGeheimnis = ({ ciphertext: _, ...q }: typeof quellen.$inferSelect): QuelleOhneGeheimnis => q;
+export const ohneGeheimnis = ({ ciphertext: _, ...q }: typeof quellen.$inferSelect): QuelleOhneGeheimnis => q;
 
 export async function anlegen(
   db: Datenbank,
@@ -151,80 +137,6 @@ export async function listen(db: Datenbank): Promise<QuelleOhneGeheimnis[]> {
   return (await db.select().from(quellen).orderBy(quellen.erstelltAm)).map(ohneGeheimnis);
 }
 
-/**
- * Ändert ein Postfach. Das Chiffrat bleibt, außer es kommt ein Passwort. Ändert sich, woher abgeholt wird, beginnt der
- * Abruf von vorn (der Import erkennt Doppelte). null: gibt es nicht; fehler: bei OAuth nicht änderbar.
- */
-export async function aendern(
-  db: Datenbank,
-  schluessel: Buffer,
-  id: string,
-  eingabe: z.infer<typeof QuelleAenderung>,
-  akteur: string,
-): Promise<QuelleOhneGeheimnis | { fehler: string } | null> {
-  const { passwort, ...felder } = eingabe;
-  return mitAkteur(db, akteur, async (tx) => {
-    const [alt] = await tx.select().from(quellen).where(eq(quellen.id, id)).for("update");
-    if (!alt) return null;
-    const andererServer = (["host", "port", "benutzer"] as const).some(
-      (k) => felder[k] !== undefined && felder[k] !== alt[k],
-    );
-    // Beim Refresh-Token hängt die Anmeldung am Konto; Anbieter, Benutzer und Passwort bleiben, wie sie sind
-    if (alt.oauth && (passwort !== undefined || andererServer || (felder.tls ?? alt.tls) !== alt.tls))
-      return {
-        fehler:
-          "Passwort, Server, Port, Verschlüsselung und Benutzer eines Postfachs mit Microsoft- oder Google-Anmeldung lassen sich nicht ändern",
-      };
-    // Sonst ginge das gespeicherte Passwort an einen anderen Server oder Benutzer, oder unverschlüsselt ins Netz
-    if ((andererServer || (alt.tls && felder.tls === false)) && passwort === undefined)
-      return {
-        fehler:
-          "Server, Port, Benutzer oder das Abschalten von TLS lassen sich nur mit neuem Passwort ändern: Das Passwort muss neu eingegeben werden, damit es nicht an einen anderen Server oder unverschlüsselt geht",
-      };
-    const andereAdresse = (["host", "port", "benutzer", "ordner"] as const).some(
-      (k) => felder[k] !== undefined && felder[k] !== alt[k],
-    );
-    const [neu] = await tx
-      .update(quellen)
-      .set({
-        ...felder,
-        ...(passwort === undefined ? {} : { ciphertext: verschluesseln(schluessel, Buffer.from(passwort)) }),
-        ...(andereAdresse ? { letzteUid: 0, uidValidity: null, jmapStand: null, letzterFehler: null } : {}),
-      })
-      .where(eq(quellen.id, id))
-      .returning();
-    // Vorgemerkte Aktionen gelten dem alten Postfach (UID, Benutzer); im neuen träfen sie fremde Mails
-    if (andererServer) {
-      const offen = await tx
-        .select()
-        .from(postfachMails)
-        .where(and(eq(postfachMails.quelleId, id), eq(postfachMails.status, "offen")));
-      if (offen.length) {
-        await tx.insert(postfachAktionen).values(
-          offen.map((e) => ({
-            postfachMailId: e.id,
-            quelleId: id,
-            dokumentId: e.dokumentId,
-            aktion: alt.aktion,
-            ziel: alt.aktion === "verschieben" ? (alt.aktionZielPfad ?? alt.aktionZiel) : null,
-            ordner: e.ordner,
-            uidValidity: e.uidValidity,
-            uid: e.uid,
-            jmapId: e.jmapId,
-            ergebnis: "entfallen" as const,
-            meldung: "Das Postfach wurde auf einen anderen Server, Port oder Benutzer umgestellt",
-          })),
-        );
-        await tx
-          .update(postfachMails)
-          .set({ status: "entfallen" })
-          .where(and(eq(postfachMails.quelleId, id), eq(postfachMails.status, "offen")));
-      }
-    }
-    return ohneGeheimnis(neu!);
-  });
-}
-
 /** Entfernt ein Postfach; "protokoll", wenn Aktionen im Postfach vorgemerkt oder protokolliert sind (append-only) */
 export async function entfernen(
   db: Datenbank,
@@ -256,6 +168,8 @@ export interface AbrufErgebnis {
   /** Anhänge neuer Mails, die schon als Dokument im Archiv lagen (server/dokumente/doppelt.ts) */
   anhaengeVorhanden: number;
   fehler: string | null;
+  /** Für dieses Postfach lief schon ein Abruf (Worker, „Jetzt abrufen“, erster Abruf): dieser Aufruf hat nichts getan */
+  laeuft?: true;
 }
 
 type QuelleZeile = typeof quellen.$inferSelect;
@@ -291,9 +205,8 @@ export async function zugangZu(
 export const quellenAkteur = (q: Pick<QuelleZeile, "art" | "name">) => `system:${q.art}:${q.name}`;
 
 /**
- * Holt neue Mails einer Quelle: jede für sich aufgenommen, letzte_uid nach jeder Mail fortgeschrieben, damit ein Abbruch
- * nichts doppelt holt und nichts auslässt. Ein Fehler steht in letzter_fehler; das Passwort steht nirgends im Klartext.
- * Ist eine Aktion eingestellt, kommt jede Mail erst nach ihrer Aufnahme in die Warteschlange (vormerken).
+ * Holt neue Mails einer Quelle, höchstens einen Abruf je Quelle über alle Prozesse (abruf-sperre.ts): Läuft schon einer,
+ * tut dieser Aufruf nichts und meldet laeuft. Die Sperre wird auch nach einem Fehler freigegeben.
  */
 export async function abrufen(
   umgebung: Umgebung,
@@ -303,12 +216,46 @@ export async function abrufen(
   optionen: AbrufOptionen = {},
 ): Promise<AbrufErgebnis> {
   const { db } = umgebung;
+  const stand = await sperren(db, quelleId);
+  if (stand.art === "unbekannt") throw new Error("Quelle nicht gefunden");
+  if (stand.art === "laeuft") return { neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: null, laeuft: true };
+  const { inhaber } = stand;
+  // Auch ein Lauf, der nur wartet (Öffnen, Token, leere JMAP-Seite), hält die Sperre
+  const takt = setInterval(() => void herzschlag(db, quelleId, inhaber).catch(() => {}), TAKT_MS);
+  takt.unref();
+  try {
+    return await abrufDurchfuehren(umgebung, schluessel, quelleId, oeffnen, optionen, inhaber);
+  } finally {
+    clearInterval(takt);
+    // Scheitert das Freigeben, räumt die Frist der Sperre auf; das Ergebnis des Abrufs bleibt
+    await freigeben(db, quelleId, inhaber).catch(() => {
+      console.error(`Abruf der Quelle ${quelleId}: Die Sperre ließ sich nicht freigeben, die Frist räumt sie auf`);
+    });
+  }
+}
+
+/**
+ * Holt neue Mails einer Quelle: jede für sich aufgenommen, letzte_uid nach jeder Mail fortgeschrieben, damit ein Abbruch
+ * nichts doppelt holt und nichts auslässt. Ein Fehler steht in letzter_fehler; das Passwort steht nirgends im Klartext.
+ * Ist eine Aktion eingestellt, kommt jede Mail erst nach ihrer Aufnahme in die Warteschlange (vormerken).
+ */
+async function abrufDurchfuehren(
+  umgebung: Umgebung,
+  schluessel: Buffer,
+  quelleId: string,
+  oeffnen: Oeffnen,
+  optionen: AbrufOptionen,
+  inhaber: string,
+): Promise<AbrufErgebnis> {
+  const { db } = umgebung;
   const [q] = await db.select().from(quellen).where(eq(quellen.id, quelleId));
   if (!q) throw new Error("Quelle nicht gefunden");
   const akteur = quellenAkteur(q);
   const ergebnis: AbrufErgebnis = { neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: null };
   // Stand nur fortschreiben, solange das Postfach noch dort liegt, wo der Abruf begann (sonst hat ein Ändern ihn zurückgesetzt)
+  // und dieser Lauf die Sperre hält (sonst schreibt ein verdrängter Lauf über den Stand des anderen)
   const unveraendert = and(
+    sql`exists (select 1 from abruf_sperren where quelle_id = ${q.id} and inhaber = ${inhaber})`,
     eq(quellen.id, q.id),
     eq(quellen.host, q.host),
     eq(quellen.port, q.port),
@@ -317,6 +264,12 @@ export async function abrufen(
   );
   // Erst nach der Aufnahme (Transaktion festgeschrieben) vorgemerkt; scheitert die Aufnahme, gibt es keine Aktion
   const aufnehmen = async (roh: Uint8Array, adresse: Adresse) => {
+    // Hat ein anderer Abruf die Sperre übernommen, nimmt dieser nichts mehr auf
+    // Ein Datenbankfehler hier trägt die Anweisung samt Parametern: nur ein fester Satz geht ins Ergebnis und ins Audit-Log
+    const gehalten = await herzschlag(db, q.id, inhaber).catch(() => {
+      throw new Error("Die Sperre des Abrufs ließ sich nicht prüfen");
+    });
+    if (!gehalten) throw new Error("Ein anderer Abruf hat das Postfach übernommen");
     const { id, neu, anhaengeVorhanden } = await mailAufnehmen(umgebung, roh, "mail", akteur);
     ergebnis.anhaengeVorhanden += anhaengeVorhanden;
     if (neu) ergebnis.neu++;

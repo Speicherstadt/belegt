@@ -105,8 +105,14 @@ export function bereinigen(err: unknown, geheimnisse: string[]): string {
   return varianten(geheimnisse).some((v) => klein.includes(v.toLowerCase())) ? GEHEIMNIS_MELDUNG : roh.slice(0, 500);
 }
 
+/** Fester Satz für einen Fehler der eigenen Datenbank: Drizzle hängt Anweisung und Parameter (Token, Host, Benutzer, Hashes) an */
+export const DATENBANK_MELDUNG = "Der Abruf ist an der Datenbank gescheitert";
+
 /** Was am Postfach steht: bei erkanntem Grund nur der feste Satz, sonst nur err.message (nie die Rohantwort des Servers) */
 export function abrufFehler(err: unknown, geheimnisse: string[]): string {
+  const e = err as { message?: unknown; query?: unknown; params?: unknown } | null;
+  if (String(e?.message).startsWith("Failed query") || (e?.query !== undefined && e?.params !== undefined))
+    return DATENBANK_MELDUNG;
   const grund = fehlerGrund(err);
   if (grund !== "unbekannt") return GRUND_MELDUNG[grund];
   return bereinigen({ message: (err as Fehlerform | null)?.message ?? err }, geheimnisse);

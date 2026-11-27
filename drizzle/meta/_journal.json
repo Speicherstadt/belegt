@@ -414,6 +414,13 @@
       "when": 1795514183447,
       "tag": "0058_passwort_links",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1795808658879,
+      "tag": "0059_abruf_sperren",
+      "breakpoints": true
     }
   ]
 }
