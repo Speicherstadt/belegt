@@ -73,6 +73,12 @@ jobs:
           cache-dependency-path: requirements-docs.txt
       - run: pip install -r requirements-docs.txt
       - run: zensical build --strict
+      # Start page as https://belegt.store/, not index.html: canonical, og:url and sitemap. With
+      # use_directory_urls: false Zensical writes index.html, Google then reports it as a duplicate
+      - run: |
+          sed -i 's#"https://belegt.store/index.html"#"https://belegt.store/"#g' site/index.html
+          sed -i 's#<loc>https://belegt.store/index.html</loc>#<loc>https://belegt.store/</loc>#' site/sitemap.xml
+          grep -q '<link rel="canonical" href="https://belegt.store/"' site/index.html
       # Jede Seite mit eigener Beschreibung (Suchmaschinen, Vorschau beim Teilen)
       - run: test -z "$(grep -L '^description:' docs/*.md)"
       # Die Demo unter /demo/, mit der Aufnahme aus „Screenshots erneuern“ (demo/aufnahme.json)
