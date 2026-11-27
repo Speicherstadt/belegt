@@ -36,8 +36,10 @@ Quellen: [§ 147 AO](https://www.gesetze-im-internet.de/ao_1977/__147.html),
 ## Einordnen
 
 Ein neues Dokument liegt im Eingang, bis es eingeordnet ist. Auf seiner Seite wählst du die Art und den Tag, an dem es
-entstanden, empfangen oder abgesandt wurde; Belegt rechnet daraus die Frist und speichert sie mit. Jede Einordnung
-ist versiegelt. Eine Änderung kommt als neue Version dazu, die alte bleibt im Verlauf; es gilt die neueste.
+entstanden, empfangen oder abgesandt wurde; Belegt rechnet daraus die Frist und speichert sie mit. Vor dem Speichern
+zeigt das Formular, bis wann das Dokument aufbewahrt wird und ob eine Sperre greift; der Server rechnet mit denselben
+Regeln wie beim Speichern, und Mitarbeiter bekommen keinen Sperr-Hinweis. Jede Einordnung ist versiegelt. Eine Änderung kommt als neue Version dazu, die alte
+bleibt im Verlauf; es gilt die neueste.
 
 ## Die Seite Fristen
 

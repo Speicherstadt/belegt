@@ -54,6 +54,15 @@ describe("fristende (§ 147 Abs. 4 AO: ab Schluss des Kalenderjahres)", () => {
   it("lehnt Tage ab, die es nicht gibt", () => {
     expect(() => fristende("freiwillig", "2026-11-11", { freiwilligBis: "2026-13-99" })).toThrow(/gibt es nicht/);
     expect(() => fristende("beleg", "2026-02-30")).toThrow(/gibt es nicht/);
+    expect(() => fristende("beleg", "0000-01-01")).toThrow(/zu früh/);
+    expect(() => fristende("beleg", "0001-01-01")).toThrow(/zu früh/);
+    expect(() => fristende("frei", "0999-12-31")).toThrow(/zu früh/);
+    expect(() => fristende("freiwillig", "2026-11-11", { freiwilligBis: "0500-01-01" })).toThrow(/zu früh/);
+    expect(() => loeschbar({ bis: null, grund: "keine" }, "0001-01-01")).toThrow(/zu früh/);
+    expect(fristende("beleg", "1000-01-01").bis).toBe("1008-12-31");
+    expect(() => fristende("beleg", "9995-03-12", { aufsicht: true })).toThrow(/zu weit in der Zukunft/);
+    expect(() => fristende("buecher", "9999-06-01")).toThrow(/zu weit in der Zukunft/);
+    expect(fristende("beleg", "9991-03-12").bis).toBe("9999-12-31");
     expect(fristende("beleg", "2028-02-29").bis).toBe("2036-12-31");
   });
 });

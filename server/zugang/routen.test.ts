@@ -101,6 +101,7 @@ const ROUTEN: Record<string, "offen" | "dokument" | "sicht" | "verboten"> = {
   "POST /api/sperren": "verboten",
   "POST /api/sperren/:id/aufheben": "verboten",
   "GET /api/fristen/uebersicht": "verboten",
+  "GET /api/fristen/vorschau": "sicht",
   "GET /api/workflows": "verboten",
   "GET /api/workflows/laeufe": "verboten",
   "POST /api/workflows": "verboten",

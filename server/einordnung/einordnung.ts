@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { ARTEN, type Aufbewahrungsart, fristende } from "../../shared/fristen.ts";
+import { ARTEN, type Aufbewahrungsart, type Frist, fristende, gesetzlicheJahre } from "../../shared/fristen.ts";
 import { mitAkteur, type Tx } from "../db/akteur.ts";
 import type { Datenbank } from "../db/client.ts";
 import { einordnungen, sperren } from "../db/schema.ts";
@@ -21,6 +21,10 @@ export const EinordnungEingabe = z.object({
   korrespondent: z.string().trim().max(300).optional(),
 });
 export type EinordnungEingabe = z.infer<typeof EinordnungEingabe>;
+
+/** Was die Fristvorschau braucht: dieselben Felder und Regeln wie die Einordnung */
+export const FristVorschauEingabe = EinordnungEingabe.pick({ art: true, entstanden: true, freiwilligBis: true });
+export type FristVorschauEingabe = z.infer<typeof FristVorschauEingabe>;
 
 export type Einordnung = typeof einordnungen.$inferSelect;
 
@@ -82,6 +86,29 @@ export async function einordnenIn(
     .returning();
   if (korrespondent) await korrespondentSetzen(tx, dokumentId, korrespondent.id);
   return neu!;
+}
+
+export type FristVorschau = Frist & { jahre: number | null; gesperrt?: boolean };
+
+/**
+ * Was beim Einordnen herauskäme, ohne etwas zu speichern: Frist, Jahre und, wenn `sperrenPruefen`, ob `entstanden`
+ * in einer offenen Sperre liegt (Mitarbeiter sehen nie Sperren, docs/zugaenge.md). `aufsicht` liest der Server wie
+ * beim Einordnen aus den Einstellungen.
+ */
+export async function fristVorschau(
+  db: Datenbank,
+  eingabe: FristVorschauEingabe,
+  { sperrenPruefen }: { sperrenPruefen: boolean },
+): Promise<FristVorschau> {
+  const [betrieb] = await db.execute<{ aufsicht: boolean }>(sql`select aufsicht from einstellungen where id = 1`);
+  const aufsicht = betrieb?.aufsicht ?? false;
+  const frist = fristende(eingabe.art, eingabe.entstanden, { freiwilligBis: eingabe.freiwilligBis, aufsicht });
+  const jahre = gesetzlicheJahre(eingabe.art, { aufsicht });
+  if (!sperrenPruefen) return { ...frist, jahre };
+  const [zeile] = await db.execute<{ gesperrt: boolean }>(
+    sql`select exists (select 1 from sperren s where s.aufgehoben_am is null and ${eingabe.entstanden}::date between s.von and s.bis) as gesperrt`,
+  );
+  return { ...frist, jahre, gesperrt: zeile?.gesperrt ?? false };
 }
 
 export async function aktuelle(db: Datenbank | Tx, dokumentId: string): Promise<Einordnung | null> {

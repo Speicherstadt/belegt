@@ -61,6 +61,7 @@ const LESEN = [
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/[^/]+(\/(datei|ansicht|archivfassung|inhalt|mail|verlauf|vorschaubild|ableitungen|aehnliche|notizen))?$/,
   /^\/api\/(tags|dokumenttypen|korrespondenten|felder)$/,
+  /^\/api\/fristen\/vorschau$/,
 ];
 const SCHREIBEN = [
   /^\/api\/dokumente$/,
