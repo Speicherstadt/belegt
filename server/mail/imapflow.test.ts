@@ -8,6 +8,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const client = {
   capabilities: new Map<string, boolean | number>(),
   aufrufe: [] as string[],
+  /** Der Ordner lässt sich nicht öffnen (etwa NONEXISTENT) */
+  oeffnenFehler: false,
 };
 
 vi.mock("imapflow", () => ({
@@ -19,7 +21,11 @@ vi.mock("imapflow", () => ({
       },
       connect: async () => {},
       logout: async () => {},
-      mailboxOpen: async () => ({ uidValidity: 7n }),
+      close: () => client.aufrufe.push("close"),
+      mailboxOpen: async () => {
+        if (client.oeffnenFehler) throw new Error("Command failed");
+        return { uidValidity: 7n };
+      },
       messageDelete: async (range: string) => {
         client.aufrufe.push(`delete ${range}`);
         return true;
@@ -79,6 +85,13 @@ describe("imapflow: Löschen und Verschieben nur über die UID", () => {
     client.capabilities = new Map([["MOVE", true]]);
     await postfach.bearbeiten!.verschieben(7, "Archiv");
     expect(client.aufrufe).toEqual(["delete 5", "move 6 Archiv", "move 7 Archiv"]);
+  });
+
+  it("schließt die Verbindung, wenn sich der Ordner nicht öffnen lässt", async () => {
+    client.oeffnenFehler = true;
+    await expect(imapOeffnen(zugang)).rejects.toThrow("Command failed");
+    client.oeffnenFehler = false;
+    expect(client.aufrufe).toEqual(["close"]);
   });
 
   it("erkennt den Papierkorb an SPECIAL-USE \\Trash (RFC 6154) und an gängigen Namen", async () => {

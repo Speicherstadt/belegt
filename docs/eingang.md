@@ -159,14 +159,16 @@ schon im Archiv, verweist die Mail auf das vorhandene Dokument ([Doppelte Dateie
 denselben Rohdaten nimmt Belegt nicht zweimal auf, ein wiederholter Import desselben Archivs ist also harmlos. Auf der
 Seite einer Mail stehen Kopf, Text, Anhänge und die Unterhaltung.
 
-## Postfächer
+## Postfächer { #postfaecher }
 
-Unter Quellen › Postfächer trägst du Postfächer ein (IMAP: Server, Port, TLS, Benutzer, Passwort, Ordner). Der Worker
+Unter Quellen › Postfächer legst du über „Postfach hinzufügen“ ein Postfach an: entweder mit deinem Konto bei Google oder Microsoft 365 (Ordner vorgewählt INBOX, mit „Ändern“ wählbar) oder mit Zugangsdaten (Name, Server, Benutzer, Passwort, Ordner; Art, Port und TLS stehen unter „Erweitert“). Der Worker
 (`bun server/worker.ts`, eigener Prozess) holt alle `ABRUF_MINUTEN` neue Mails ab, nur lesend; im Postfach ändert
 Belegt nur, was du als [Aktion nach dem Abholen](#nach-dem-abholen) einstellst. Er merkt sich je Postfach die letzte UID; nummeriert der Server das Postfach neu
 (UIDVALIDITY), beginnt er von vorn, und doppelte Mails erkennt der Import. „Jetzt abrufen“ startet einen Abruf sofort.
-Fehler stehen am Postfach. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
-`BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log.
+Fehler stehen am Postfach. Beim Anlegen prüft Belegt zuerst die Verbindung (anmelden, Ordner öffnen, Ordnerliste;
+bei JMAP Sitzung und Ordner) und bricht nach 15 Sekunden ab. Schlägt die Prüfung fehl, speichert Belegt nichts und
+nennt den Grund (Anmeldung, Server, Ordner, Zeit); deine Eingaben bleiben stehen. Steht die Verbindung, startet der erste Abruf von selbst, und die Meldung verlinkt den Eingang. Das Passwort liegt verschlüsselt in der Datenbank (AES-256-GCM, Schlüssel
+`BELEGT_SCHLUESSEL`) und erscheint weder in der Oberfläche noch im Audit-Log. Am Postfach steht bei erkanntem Grund nur ein fester Satz (etwa „Die Anmeldung beim Postfach ist fehlgeschlagen“), sonst die kurze Fehlermeldung ohne die Antwort des Servers und mit ersetzten Zugangsdaten; nur die Antwort auf das Anlegen zeigt dem Inhaber den Text des Servers, und enthält er Passwort oder Token (auch kodiert, ohne Beachtung der Groß-/Kleinschreibung), ersetzt Belegt ihn durch einen festen Satz. Anlegen darf nur der Inhaber: Die Prüfung verbindet sich mit jedem Host, den der Server erreicht. Bei IMAP läuft eine abgebrochene Prüfung bis zum Zeitlimit von imapflow im Hintergrund weiter, bei JMAP endet sie mit der Frist.
 
 Name, Server, Port, TLS, Benutzer, Ordner und Passwort lassen sich ändern (ohne neues Passwort bleibt das alte). Server,
 Port, Benutzer oder das Abschalten von TLS eines Passwort-Postfachs gehen nur zusammen mit einem neuen Passwort, damit

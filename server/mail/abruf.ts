@@ -10,6 +10,7 @@ import { type AktionenErgebnis, aktionenAusfuehren } from "./aktionen-ausfuehren
 import { mailAufnehmen } from "./import.ts";
 import { type Abfragen, jmapHolen } from "./jmap.ts";
 import { accessToken, type OAuthKonfig } from "./oauth.ts";
+import { abrufFehler } from "./pruefen.ts";
 
 /** Ein geöffnetes Postfach; die Umsetzung mit imapflow steht in imapflow.ts, Tests nehmen eine eigene */
 export interface Postfach {
@@ -52,6 +53,8 @@ export interface Zugang {
   ordner: string;
   /** IMAP mit OAuth (XOAUTH2) statt Passwort */
   accessToken?: string;
+  /** Neues Refresh-Token, das zugangZu gespeichert hat; nur, damit es nie in einer Fehlermeldung landet */
+  refreshToken?: string;
   /** Ordner zum Schreiben öffnen (Aktionen nach dem Abholen); sonst nur lesend */
   schreiben?: boolean;
 }
@@ -281,7 +284,7 @@ export async function zugangZu(
         .set({ ciphertext: verschluesseln(schluessel, Buffer.from(t.refreshToken!)) })
         .where(eq(quellen.id, q.id)),
     );
-  return { ...zugang, passwort: "", accessToken: t.accessToken };
+  return { ...zugang, passwort: "", accessToken: t.accessToken, refreshToken: t.refreshToken ?? undefined };
 }
 
 /** Akteur im Audit-Log für Abruf und Aktionen einer Quelle */
@@ -327,8 +330,12 @@ export async function abrufen(
     });
   };
   let postfach: Postfach | null = null;
+  let geheimnisse: string[] = [];
   try {
+    // Das gespeicherte Geheimnis (Passwort oder Refresh-Token) gilt auch, wenn schon zugangZu scheitert
+    geheimnisse = [entschluesseln(schluessel, q.ciphertext).toString()];
     const zugang = await zugangZu(db, schluessel, q, akteur, optionen);
+    geheimnisse.push(zugang.passwort, zugang.accessToken ?? "", zugang.refreshToken ?? "");
     if (q.art === "jmap") {
       const stand = await jmapHolen(
         zugang,
@@ -351,8 +358,8 @@ export async function abrufen(
       await mitAkteur(db, akteur, (tx) => tx.update(quellen).set({ letzteUid: seit }).where(unveraendert));
     }
   } catch (err) {
-    // Nur die Meldung, nie das Objekt: es könnte Zugangsdaten enthalten
-    ergebnis.fehler = (err instanceof Error ? err.message : String(err)).slice(0, 500);
+    // Nie das Objekt, nie die Rohantwort des Servers: bei erkanntem Grund ein fester Satz
+    ergebnis.fehler = abrufFehler(err, geheimnisse);
   } finally {
     await postfach?.schliessen().catch(() => {});
     await mitAkteur(db, akteur, (tx) =>

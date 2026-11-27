@@ -31,6 +31,10 @@ describe("Meldung in drei Teilen", () => {
     expect(html).not.toContain("<details open");
   });
 
+  it("macht „Details“ mindestens 40 px (am Touch-Gerät 44 px) hoch", () => {
+    expect(zeigen("boom")).toMatch(/<summary[^>]*min-h-10 pointer-coarse:min-h-11[^>]*>Details/);
+  });
+
   it("lässt die Details weg, wenn es keinen Rohtext gibt", () => {
     expect(zeigen(undefined)).not.toContain("<details");
   });

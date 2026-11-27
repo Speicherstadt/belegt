@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { POSTFACH_HOST, postfachAusfuellen } from "./postfach-zugang.ts";
 
 const axe = (page: import("@playwright/test").Page) =>
   new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
@@ -8,16 +9,10 @@ test("ein Postfach lässt sich ändern und nach Rückfrage entfernen", async ({ 
   const name = `aendern-${info.project.name}`;
   await page.goto("/quellen");
   const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
-  await postfaecher.getByRole("button", { name: "+ Postfach hinzufügen" }).click();
-  await postfaecher.getByLabel("Name").fill(name);
-  await postfaecher.getByLabel("Server").fill("alt.example.org");
-  await postfaecher.getByLabel("Port").fill("1");
-  await postfaecher.getByLabel("Benutzer").fill("aendern@example.org");
-  await postfaecher.getByLabel("Passwort").fill("geheim-im-test");
-  await postfaecher.getByLabel("TLS").uncheck();
-  await postfaecher.getByRole("button", { name: "Postfach hinzufügen" }).click();
+  await postfachAusfuellen(postfaecher, { name, benutzer: "aendern@example.org" });
+  await postfaecher.getByRole("button", { name: "Postfach anlegen" }).click();
   const eintrag = postfaecher.getByRole("listitem").filter({ hasText: name });
-  await expect(eintrag).toContainText("aendern@example.org@alt.example.org:1/INBOX");
+  await expect(eintrag).toContainText(`aendern@example.org@${POSTFACH_HOST}:1/INBOX`);
 
   // Ein anderer Server verlangt das Passwort neu; ohne lässt sich nicht speichern
   await eintrag.getByRole("button", { name: `Postfach „${name}“ ändern` }).click();

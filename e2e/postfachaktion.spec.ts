@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { POSTFACH_UNTERBROCHEN, postfachAusfuellen } from "./postfach-zugang.ts";
 
 const axe = (page: import("@playwright/test").Page) =>
   new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
@@ -8,21 +9,18 @@ test("Aktion nach dem Abholen einstellen, Löschen nur mit Bestätigung", async 
   const name = `aktion-${info.project.name}`;
   await page.goto("/quellen");
   const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
-  await postfaecher.getByRole("button", { name: "+ Postfach hinzufügen" }).click();
-  await postfaecher.getByLabel("Name").fill(name);
-  await postfaecher.getByLabel("Server").fill("127.0.0.1");
-  await postfaecher.getByLabel("Port").fill("1");
-  await postfaecher.getByLabel("Benutzer").fill("aktion@example.org");
-  await postfaecher.getByLabel("Passwort").fill("geheim-im-test");
-  await postfaecher.getByLabel("TLS").uncheck();
-  await postfaecher.getByRole("button", { name: "Postfach hinzufügen" }).click();
+  await postfachAusfuellen(postfaecher, {
+    name,
+    benutzer: `${POSTFACH_UNTERBROCHEN}-aktion-${info.project.name}@example.org`,
+  });
+  await postfaecher.getByRole("button", { name: "Postfach anlegen" }).click();
   const eintrag = postfaecher.getByRole("listitem").filter({ hasText: name });
   await expect(eintrag).toContainText("Nach dem Abholen: keine Aktion");
 
   // Verschieben wählt aus den Ordnern des Postfachs; der Server ist nicht erreichbar, also gibt es keinen zur Wahl
   await eintrag.getByRole("button", { name: "Aktion ändern" }).click();
   await eintrag.getByLabel("Aktion nach dem Abholen").selectOption("verschieben");
-  await expect(eintrag.getByLabel("Zielordner")).toHaveAccessibleDescription(/Postfach nicht erreichbar/);
+  await expect(eintrag.getByLabel("Zielordner")).toHaveAccessibleDescription(/Der Server ist nicht erreichbar/);
 
   // Löschen: Hinweis, Wartezeit, und ohne Bestätigung lässt sich nicht speichern
   await eintrag.getByLabel("Aktion nach dem Abholen").selectOption("loeschen");

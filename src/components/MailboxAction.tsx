@@ -140,7 +140,7 @@ export function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => voi
             ))}
           </select>
           {ordner.error && (
-            <span id={`${id}-ordner-fehler`} className="font-normal text-red-700 dark:text-red-400">
+            <span id={`${id}-ordner-fehler`} className="font-normal text-danger">
               {ordner.error.message}
             </span>
           )}
@@ -190,7 +190,7 @@ export function Formular({ quelle, fertig }: { quelle: Quelle; fertig: () => voi
         </button>
       </div>
       {speichern.error && (
-        <p role="alert" className="m-0 text-red-700 dark:text-red-400">
+        <p role="alert" className="m-0 text-danger">
           {speichern.error.message}
         </p>
       )}
@@ -217,7 +217,7 @@ export function MailboxAction({ quelle, inhaber }: { quelle: Quelle; inhaber: bo
           <button
             type="button"
             onClick={() => setBearbeiten(true)}
-            className="h-8 rounded-md border border-border px-3 font-medium hover:bg-subtle"
+            className="h-10 pointer-coarse:h-11 rounded-md border border-border px-3 font-medium hover:bg-subtle"
           >
             {m.mailbox_action_change()}
           </button>

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { dateispeicher } from "@firsttris/gobd-kern/dateispeicher";
 import { drizzle } from "drizzle-orm/postgres-js";
 import type postgres from "postgres";
+import { expect, vi } from "vitest";
 import { createApp } from "./app.ts";
 import { createAuth, type OidcKonfig } from "./auth.ts";
 import type { AppUmgebung } from "./http/gemeinsam.ts";
@@ -17,6 +18,7 @@ export const EINRICHTUNGSCODE = "test-einrichtungscode";
 export async function testApp({
   begrenzen = false,
   oeffnen,
+  pruefZeitMs,
   oauth,
   abfragen,
   oidc,
@@ -30,6 +32,7 @@ export async function testApp({
 }: Pick<
   AppUmgebung,
   | "oeffnen"
+  | "pruefZeitMs"
   | "oauth"
   | "abfragen"
   | "embedOrigin"
@@ -63,6 +66,7 @@ export async function testApp({
     auth,
     schluessel: ohneSchluessel ? undefined : schluessel,
     oeffnen,
+    pruefZeitMs,
     oeffnenMit,
     oauth,
     abfragen,
@@ -104,10 +108,20 @@ export async function testApp({
     return { res, cookie };
   }
 
+  /** Wartet, bis der erste Abruf eines Postfachs (ohne id: aller) durch ist; er startet beim Anlegen von selbst */
+  const abrufeAbwarten = (id?: string) =>
+    vi.waitFor(async () =>
+      expect(
+        (
+          await sql`select count(*)::int as n from quellen where letzter_abruf is null and (${id ?? null}::uuid is null or id = ${id ?? null})`
+        )[0]!.n,
+      ).toBe(0),
+    );
+
   async function aufraeumen() {
     await sql.end();
     await rm(verzeichnis, { recursive: true, force: true });
   }
 
-  return { sql, db, speicher, schluessel, app, anfrage, registrieren, aufraeumen };
+  return { sql, db, speicher, schluessel, app, anfrage, registrieren, abrufeAbwarten, aufraeumen };
 }
