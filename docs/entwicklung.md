@@ -144,9 +144,8 @@ E2E_DATABASE_URL=postgres://belegt:belegt@localhost:5432/belegt_bilder bun run d
 
 `e2e/screenshots.ts` startet Belegt wie die E2E-Tests mit frischer Datenbank (sie wird gelöscht und neu angelegt), aber
 auf eigenen Ports (App 5195, Server 3195), legt erfundene Firmen, Dokumente, Mails und Workflows an und nimmt jede
-Seite hell und dunkel auf (`docs/assets/screenshot-<name>.png` und `-dunkel.png`, 1440 × 900 mit Rahmen und Schatten
-im Bild, `e2e/bildrahmen.ts`). Dasselbe Bild ohne Rahmen liegt in `docs/assets/ohne-rahmen/`: Webseiten mit eigenem
-CSS (speicherstadt.org, teufel-it.de) nehmen diese, denn dort würde der transparente Rand beim Umwandeln weiß. Danach rendert `bun run docs:social-preview` das Vorschaubild für Links
+Seite hell und dunkel auf (`docs/assets/screenshot-<name>.png` und `-dunkel.png`, 1440 × 900 ohne Rahmen im Bild: Kante und Schatten setzt
+die Doku per CSS, und Webseiten mit eigenem CSS (speicherstadt.org, teufel-it.de) nehmen die Bilder, wie sie sind). Danach rendert `bun run docs:social-preview` das Vorschaubild für Links
 (`docs/social-preview.png`, 1280 × 640) aus `scripts/social-preview/`. Die Aufnahmen laufen im vollen Chromium von Playwright
 (`bunx playwright install chromium`), weil die Headless Shell keine PDFs zeigt. Jedes Bild vor dem Commit ansehen.
 
