@@ -21,7 +21,7 @@ jobs:
       # Dieselbe Version wie packageManager in package.json
       bun-version: 1.4.4
       install: bun install --frozen-lockfile
-      postgres: postgres:18
+      postgres: postgres:19
       postgres-db: belegt_bilder
       # Vorschaubilder rendert pdftoppm, durchsuchbare PDFs Tesseract; das Image bringt beide nicht mit
       command: >-

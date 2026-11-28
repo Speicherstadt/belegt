@@ -14,7 +14,7 @@ COPY shared shared
 
 FROM ghcr.io/restic/restic:0.20.0 AS restic
 
-FROM docker.io/library/postgres:18
+FROM docker.io/library/postgres:19
 ARG PG_AB=16
 # ca-certificates für Ziele über HTTPS (s3:, rest:), openssh-client für sftp:
 RUN set -eux; \

@@ -3,7 +3,7 @@
 Backup für [Belegt](https://github.com/Speicherstadt/belegt), das selbst gehostete Dokumentenarchiv: ein Dump der Datenbank
 (`pg_dump`, custom format, mit Prüfsumme) und die Originale, verschlüsselt mit [restic](https://restic.net). Der
 Test-Restore spielt eine Sicherung in eine Wegwerf-Datenbank ein und prüft sie mit der Prüfung von Belegt: Hash-Kette,
-Kopf, Siegel und jedes Original gegen seinen Hash. Basis ist `postgres:18` mit den Programmen ab Version 16.
+Kopf, Siegel und jedes Original gegen seinen Hash. Basis ist `postgres:19` mit den Programmen ab Version 16.
 
 - Compose: Profil `backup` in [`deploy/compose.yml`](https://github.com/Speicherstadt/belegt/blob/main/deploy/compose.yml), sichert täglich um `BACKUP_TIME` (Standard 03:15).
 - Aufbewahrung: 14 tägliche, 24 monatliche und 11 jährliche Stände (10 Jahre für Bücher und Aufzeichnungen, § 147 Abs. 3 AO).
