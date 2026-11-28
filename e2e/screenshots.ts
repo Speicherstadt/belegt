@@ -44,7 +44,7 @@ async function bild(page: Page, name: string, oben?: string) {
   await darstellung(page, "Hell");
 }
 
-test("Bilder für README und Doku", async ({ page, browser }) => {
+test("Bilder für README und Doku", async ({ page }) => {
   test.setTimeout(480_000);
   const { holz, steuer, material, rechnung, betrag } = await vorbereiten(page);
 
