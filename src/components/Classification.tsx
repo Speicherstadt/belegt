@@ -132,7 +132,7 @@ export function Classification({
       ) : (
         <p className="m-0 text-muted text-sm">{m.classify_none()}</p>
       )}
-      {darfBearbeiten(ich.data) && !offen && (
+      {darfBearbeiten(ich.data) && einordnung && !offen && (
         <button
           type="button"
           onClick={() => setOffen(true)}
