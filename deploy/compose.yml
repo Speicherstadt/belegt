@@ -76,7 +76,7 @@ x-backup: &backup
 
 services:
   postgres:
-    image: docker.io/library/postgres:18
+    image: docker.io/library/postgres:19
     restart: unless-stopped
     environment:
       POSTGRES_USER: belegt

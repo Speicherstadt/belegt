@@ -241,6 +241,12 @@ steht unten in der Navigation und in `/api/status`.
 
 Die Migrationen laufen beim Start des Servers; der Worker startet erst, wenn der Server bereit ist.
 
+**Neue PostgreSQL-Hauptversion** (etwa `postgres:18` auf `postgres:19`): Das neue Image legt im Volume ein eigenes
+Datenverzeichnis an und liest die Daten der Vorgängerversion nicht direkt. Vor dem Wechsel eine Sicherung erstellen
+([Sichern](#sichern)), Belegt stoppen, das Postgres-Image umstellen, die Datenbank neu starten und die Sicherung mit
+`restore` (oder `pg_restore`) einspielen. Wer nicht sofort umsteigen will, lässt in `compose.yml` vorerst die bisherige
+Postgres-Version stehen.
+
 ## Ansicht für Office-Dateien
 
 ```bash

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18
+        image: postgres:19
         env:
           POSTGRES_USER: belegt
           POSTGRES_PASSWORD: belegt
@@ -53,8 +53,12 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      # Texterkennung: ohne Tesseract und pdftoppm würden die Tests dazu übersprungen
-      - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils
+      # Texterkennung und Postgres-19-Client (für deploy/backup/backup.test.ts gegen postgres:19)
+      - run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-19
       - run: bun install --frozen-lockfile
       # Bekannte Sicherheitslücken in Abhängigkeiten
       - run: bun audit
@@ -76,7 +80,7 @@ jobs:
         teil: [1, 2]
     services:
       postgres:
-        image: postgres:18
+        image: postgres:19
         env:
           POSTGRES_USER: belegt
           POSTGRES_PASSWORD: belegt
