@@ -9,7 +9,7 @@
   "nav_retention": "Fristen",
   "nav_audit": "Prüfung",
   "nav_sources": "Quellen",
-  "nav_procedure": "Verfahrensdoku",
+  "nav_procedure": "Verfahrensdokumentation",
   "inbox_title": "Eingang",
   "inbox_intro": "Alles ist schon unverändert gesichert. Hier legst du fest, was es ist und wie lange es bleibt.",
   "inbox_empty_title": "Eingang ist leer",
@@ -63,7 +63,7 @@
   "retention_hold": "Die Frist läuft nicht ab, solange die Unterlagen für eine Steuer mit offener Festsetzungsfrist von Bedeutung sind (§ 147 Abs. 3 Satz 5 AO). Gelöscht wird deshalb erst nach deiner Bestätigung.",
   "audit_title": "Prüfung",
   "audit_intro": "Zugang für die Betriebsprüfung, Datenträger nach dem Beschreibungsstandard, Prüfbericht und Verfahrensdokumentation.",
-  "sources_title": "Quellen und Schnittstellen",
+  "sources_title": "Quellen",
   "sources_intro": "Woher Dokumente kommen, welche Regeln beim Einordnen helfen und welche Programme Belegt nutzen dürfen.",
   "scan_title": "Scannen",
   "scan_intro": "Lege ein Trennblatt zwischen die Belege eines Stapels und scanne alles in eine PDF. Aus dem Eingangsordner (oder beim Hochladen über die Schnittstelle mit trennen=1) teilt Belegt den Stapel an jedem Trennblatt; jedes Teil wird ein eigenes Dokument, das Trennblatt selbst nicht.",
@@ -1338,6 +1338,19 @@
   ],
   "view_compact": "Kompakt",
   "menu": "Menü",
+  "nav_group_documents": "Dokumente",
+  "nav_group_organize": "Ordnen und prüfen",
+  "nav_group_setup": "Einrichten",
+  "nav_inbox_open": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} offenes Dokument",
+        "anzahlPlural=other": "{anzahl} offene Dokumente"
+      }
+    }
+  ],
   "order_tabs_label": "Bereiche der Ordnung",
   "order_filter": "Nach Namen filtern",
   "quick_mode_start": "Schnell einordnen",

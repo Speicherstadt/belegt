@@ -6,7 +6,8 @@ Haben angelehnt, aber ohne YAML-Block mit Tokens: Die Werte stehen in `src/style
 auseinanderlaufen. Nur Tokens, die dort noch fehlen, stehen mit Wert unter „Neue Tokens“.
 
 **Stand:** Im Code stehen heute die Farben `--bg` bis `--onprimary` samt `--ok`, `--warn` und `--danger`, der
-Dunkelmodus, die Fokusregel, der Umbruch langer Prüfwerte, der Leerzustand von Archiv und Eingang und die Bausteine
+Dunkelmodus, die gruppierte Seitenleiste mit dem Menü als Fläche unter 1024 px (samt `--scrim`, `--shadow-float`,
+`--control-h`), die Fokusregel, der Umbruch langer Prüfwerte, der Leerzustand von Archiv und Eingang und die Bausteine
 `ConfirmDialog`, `Einmalwert`, `WasIstDas` und `SelectionBar`. Mit #59 (Postfach-Assistent) kommen hinzu: die
 eingebettete Meldung in drei Teilen, der Ladeknopf „Läuft …“ mit `aria-busy`, der gesperrte „Abbrechen“ mit Grund, der
 Fehler am Feld per `aria-invalid` und das Anlegen in der Karte der Postfächer. Alles, was mit „Vorschlag“ steht (ein Abschnitt trägt es in
@@ -36,7 +37,7 @@ kannst.“ (`app_claim`).
 - Spalten: 4 am Handy, 8 am Tablet, 12 am Desktop; Rinne überall 16 px (bei 1440 px sind Spalten 80 px breit).
 - Seitenrand 16 px am Handy, 24 px ab 768 px. Der Inhalt ist höchstens 1136 px breit (12 × 80 + 11 × 16) und mittig;
   1136 + 2 × 24 + 256 Seitenleiste = 1440.
-- Seitenleiste: 256 px über die volle Seitenhöhe (`sticky`, `100dvh`), dauerhaft erst ab `lg` (1024 px; heute ab `md`).
+- Seitenleiste: 256 px über die volle Seitenhöhe (`sticky`, `100dvh`), dauerhaft erst ab `lg` (1024 px).
   Bei 768 px blieben neben ihr nur 512 px für den Inhalt.
 - Detailseiten sind ab `xl` (1280 px) zweispaltig, 5 + 7 Spalten, sonst eine Spalte; bei 1024 px hätte die Einordnung
   nur 289 px. Das ändert die Spaltenfolge der Dokumentseite (heute Vorschau zuerst, ab `lg` zweispaltig): Links
@@ -124,14 +125,14 @@ als Text daneben: Gesperrtes ist vom Kontrast ausgenommen, der Grund nicht.
 
 ### Neue Tokens (Vorschlag)
 
+`--scrim`, `--shadow-float` und `--control-h` stehen in `src/styles.css`.
+
 | Token | hell | dunkel | Zweck |
 | --- | --- | --- | --- |
 | `--field-border` | `#85858e` | `#71717a` | Rand von Bedienelementen |
-| `--scrim` | `rgb(9 9 11 / 0.5)` | `rgb(0 0 0 / 0.6)` | Fläche hinter Dialogen, statt `bg-black/50` |
-| `--shadow-float` | `0 1px 2px rgb(9 9 11 / 0.06), 0 4px 16px rgb(9 9 11 / 0.1)` | `0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px rgb(0 0 0 / 0.5)` | Schwebendes: Popover, Auswahlleiste, Menü-Fläche |
 | `--shadow-dialog` | `0 8px 32px rgb(9 9 11 / 0.18)` | `0 8px 32px rgb(0 0 0 / 0.6)` | Dialog |
 
-Dazu kommen `--control-h` (40 px, bei `pointer: coarse` 44 px) und `--row-h` (44 px, bei Kompakt 36 px, siehe Tabellen).
+Dazu kommt `--row-h` (44 px, bei Kompakt 36 px, siehe Tabellen).
 
 ## Linien, Rundungen, Ebenen (Vorschlag)
 
@@ -284,17 +285,28 @@ Vorschlag:
 - **Liste:** Zeilen mindestens 56 px, 1 px Linie, Aktionen rechts.
 - **Leerzustand:** ohne Rahmen; ein Symbol auf einer 44-px-Fläche `--subtle`, ein Satz, ein Knopf.
 
-## Navigation (Vorschlag)
+## Navigation
+
+Im Code (`Sidebar.tsx`, `Shell.tsx`): Seitenleiste, Zähler, Eintrag und Menü unter 1024 px.
 
 - **Seitenleiste** mit drei Gruppen: Dokumente (Start, Eingang, Archiv), Ordnen und prüfen (Ordnung, Fristen, Prüfung),
-  Einrichten (Quellen, Workflows, Verfahrensdokumentation, Zugänge, Benachrichtigungen). Das Menüwort ist
-  „Verfahrensdokumentation“ ausgeschrieben, gleich dem Seitentitel.
-- **Zähler** nur am Eingang: gefüllt `--primary`; gespeicherte Ansichten tragen schlichten Text (heute `rounded-full
-  bg-subtle` an den Ansichten).
+  Einrichten (Quellen, Workflows, Verfahrensdokumentation, Zugänge, Benachrichtigungen). Jede Gruppe ist eine Liste, die
+  per `aria-labelledby` auf ihren sichtbaren Namen zeigt (12/16 in `--muted`, 500; keine Überschrift, damit die Folge der
+  Seite ungestört bleibt). Eine Gruppe ohne sichtbaren Eintrag entfällt samt Namen. Menüwort und Seitentitel sind
+  dieselben Wörter („Verfahrensdokumentation“, „Quellen“).
+- **Zähler** nur am Eingang: die offenen Dokumente (Gesamtzahl der Liste „offen“, Abfrage `["dokumente", …]`, damit jede Aktualisierung der Listen sie mitnimmt), gefüllt `--primary`,
+  `rounded-md`, bei 0 keiner; für Screenreader steht der Satz „16 offene Dokumente“ daneben. Gespeicherte Ansichten tragen
+  schlichten Text in `--muted`.
 - **Eintrag:** `--control-h` hoch, inaktiv `--muted`, aktuell `--fg` in 600 auf `--subtle`; die Fläche allein trägt nicht
   (1,1 : 1).
-- **Menü unter 1024 px:** Statt der Seitenleiste steht ein Knopf „Menü“ (`aria-expanded`, Lucide `menu`, offen `x`);
-  die Leiste öffnet als Fläche über dem Inhalt (`z-40`), Escape schließt, nach einem Seitenwechsel klappt sie zu.
+- **Menü unter 1024 px:** Statt der Seitenleiste steht ein Knopf „Menü“ (`aria-expanded`, Lucide `menu`, offen `x`) in
+  einer 56 px hohen Leiste. Die Seitenleiste öffnet darunter als Fläche über dem Inhalt (`fixed`, 256 px, `z-40`,
+  `--shadow-float`), dahinter liegt `--scrim` bis zum Rand; ein Klick darauf schließt. Die Leiste mit „Menü“ bleibt bei
+  offenem Menü oben stehen (`sticky`), der Inhalt ist dann `inert`. Escape, Klick auf die Fläche, Seitenwechsel (auch
+  Zurück) und der Wechsel auf 1024 px oder mehr schließen; Escape gibt den Fokus an den Knopf zurück.
+
+## Navigation (Vorschlag)
+
 - **Suche am Handy (unter 1024 px):** Neben „Menü“ steht ein Lupen-Knopf, 44 × 44, `aria-label="Suchen"`, `aria-expanded`,
   `aria-controls`. Er öffnet die globale Suche als Fläche über dem Inhalt (`z-40`, `--shadow-float`): Der Fokus geht ins
   Suchfeld, Escape schließt, der Fokus kehrt zum Knopf zurück, das Symbol wird zum `x`. Menü und Suche sind nie zugleich
@@ -308,7 +320,7 @@ Vorschlag:
   `src/components/Reiter.tsx`): Text in `--muted`, der aktive in `--fg` mit 2 px Linie unten auf der Linie der Leiste. Der
   Reiter steht in der Adresse (`?bereich=`), damit Links und Zurück funktionieren; der vorgegebene braucht keinen.
   Rechts in der Leiste darf ein kurzer Zustand stehen (etwa „Alle Angaben sind gemacht.“). So geteilt: Ordnung, Quellen
-  (Postfächer, Scannen, Umzug, Schnittstelle), Fristen (Übersicht, Sperren, Vorlagen und Fristen) und Verfahrensdoku
+  (Postfächer, Scannen, Umzug, Schnittstelle), Fristen (Übersicht, Sperren, Vorlagen und Fristen) und Verfahrensdokumentation
   (Angaben, Dokument).
 - **Startseite:** Ohne sichtbaren Seitenkopf: „Start“ steht nur als `h1` für Screenreader und im Tab
   (`PageHeader versteckt`), die Überschrift „Überblick“ steht oben in der Kopfleiste; unter 1024 px ersetzt „Überblick“ als sichtbare `h1` am Anfang des Inhalts die versteckte (Vorschlag). Oben vier Kennzahl-Kacheln

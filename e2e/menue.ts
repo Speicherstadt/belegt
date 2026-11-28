@@ -10,3 +10,9 @@ export async function menueOeffnen(page: Page) {
   await expect(knopf.or(nav).first()).toBeVisible();
   if ((await knopf.isVisible()) && (await knopf.getAttribute("aria-expanded")) !== "true") await knopf.click();
 }
+
+/** Am Handy liegt das offene Menü über dem Inhalt und fängt Klicks ab; vor einem Klick dahinter zuklappen. Am Desktop ohne Wirkung */
+export async function menueSchliessen(page: Page) {
+  const knopf = page.getByRole("button", { name: "Menü" });
+  if ((await knopf.isVisible()) && (await knopf.getAttribute("aria-expanded")) === "true") await knopf.click();
+}

@@ -184,7 +184,7 @@ docker compose exec -T postgres pg_dump -U belegt -Fc belegt > belegt.dump
 ```
 
 Löscht Belegt Mails in einem Postfach ([Nach dem Abholen](eingang.md#nach-dem-abholen)), wähle die Wartezeit dort
-länger als den Abstand zwischen zwei Sicherungen. Beschreibe die Sicherung unter Verfahrensdoku › Angaben (wer die
+länger als den Abstand zwischen zwei Sicherungen. Beschreibe die Sicherung unter Verfahrensdokumentation › Angaben (wer die
 Wiederherstellung prüft, wo das Passwort liegt); sie gehört in die Verfahrensdokumentation.
 
 ## Benachrichtigungen { #benachrichtigungen }
