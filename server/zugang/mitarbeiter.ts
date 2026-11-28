@@ -4,8 +4,9 @@ import { EIGENES_KONTO } from "./konto.ts";
 /*
  * Was ein Mitarbeiter aufrufen darf (docs/zugaenge.md): eine Liste wie beim Prüfer (server/zugang/pruefer.ts), alles
  * andere lehnt die Middleware mit 403 ab. Welche Dokumente er dabei sieht, entscheidet server/zugang/sicht.ts.
- * Nie: Löschungen, Sperren, Fristen, Prüfung, Export, Einstellungen, Zugänge, Tokens, Workflows, Regeln, Quellen,
- * Import, Webhooks, MCP, Teilen per Link, „Öffnen mit …“, Seiten bearbeiten und die Listen von Tags und Co. ändern.
+ * Nie: Löschungen, Sperren, Fristen (nur die Fristvorschau, ohne Sperren), Prüfung, Export, Einstellungen, Zugänge,
+ * Tokens, Workflows, Regeln, Quellen, Import, Webhooks, MCP, Teilen per Link, „Öffnen mit …“, Seiten bearbeiten und
+ * die Listen von Tags und Co. ändern.
  */
 
 const LESEN = [
@@ -17,7 +18,12 @@ const LESEN = [
 ];
 
 /** Mit dem Recht bearbeiten: hochladen, einordnen, Ordnung setzen, Notizen; Vorschläge und Trennblatt dazu */
-const BEARBEITEN_LESEN = [/^\/api\/dokumente\/[^/]+\/vorschlag$/, /^\/api\/trennblatt\.pdf$/, /^\/api\/fristvorlagen$/];
+const BEARBEITEN_LESEN = [
+  /^\/api\/dokumente\/[^/]+\/vorschlag$/,
+  /^\/api\/trennblatt\.pdf$/,
+  /^\/api\/fristvorlagen$/,
+  /^\/api\/fristen\/vorschau$/,
+];
 const BEARBEITEN = [
   /^\/api\/dokumente$/,
   /^\/api\/dokumente\/sammeln$/,

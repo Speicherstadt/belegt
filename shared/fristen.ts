@@ -81,6 +81,8 @@ function jahrVon(datum: string): number {
   const probe = new Date(Date.UTC(jahr, monat - 1, tag));
   if (probe.getUTCMonth() !== monat - 1 || probe.getUTCDate() !== tag)
     throw new Error(`Den Tag ${datum} gibt es nicht`);
+  // Postgres kennt kein Jahr 0, und `bis` hat keine führenden Nullen: Dreistellige Jahre würden falsch gespeichert
+  if (jahr < 1000) throw new Error(`Das Datum ${datum} ist zu früh: Belegt nimmt Jahre ab 1000 an`);
   return jahr;
 }
 
@@ -109,6 +111,8 @@ export function fristende(
     return { bis: optionen.freiwilligBis, grund: "freiwillig" };
   }
   const jahre = gesetzlicheJahre(art, optionen)!;
+  // Das Format hat vier Stellen für das Jahr; ein fünfstelliges Fristende würde als Datum falsch gelesen
+  if (jahr + jahre > 9999) throw new Error("Das Datum liegt zu weit in der Zukunft: Belegt rechnet bis 9999");
   return { bis: `${jahr + jahre}-12-31`, grund: "gesetz" };
 }
 

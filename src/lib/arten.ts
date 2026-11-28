@@ -13,3 +13,14 @@ export const ARTEN: { art: Art; label: () => string }[] = [
 ];
 
 export const artLabel = (art: Art) => ARTEN.find((a) => a.art === art)?.label() ?? art;
+
+/** Der Satz unter der Auswahl: was zu dieser Art gehört, mit Beispielen */
+export const artHilfe: Record<Art, () => string> = {
+  beleg: () => m.classify_help_beleg(),
+  geschaeftsbrief: () => m.classify_help_geschaeftsbrief(),
+  buecher: () => m.classify_help_buecher(),
+  zoll: () => m.classify_help_zoll(),
+  sonstige: () => m.classify_help_sonstige(),
+  freiwillig: () => m.classify_help_freiwillig(),
+  frei: () => m.classify_help_frei(),
+};

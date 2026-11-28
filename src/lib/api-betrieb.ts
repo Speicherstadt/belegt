@@ -110,6 +110,14 @@ export interface Fristvorlage {
   monate: number;
 }
 
+/** Antwort von GET /api/fristen/vorschau; `gesperrt` fehlt für Mitarbeiter */
+export interface FristVorschau {
+  bis: string | null;
+  grund: "gesetz" | "freiwillig" | "keine";
+  jahre: number | null;
+  gesperrt?: boolean;
+}
+
 export interface Sperre {
   id: string;
   grund: string;
@@ -216,6 +224,10 @@ export const betriebApi = {
   fristvorlagen: () => aufruf<Fristvorlage[]>("/api/fristvorlagen"),
   fristvorlageAnlegen: (v: { name: string; monate: number }) => aufruf<Fristvorlage>("/api/fristvorlagen", json(v)),
   fristvorlageLoeschen: (id: string) => aufruf<{ ok: true }>(`/api/fristvorlagen/${id}`, { method: "DELETE" }),
+  fristVorschau: (q: { art: Art; entstanden: string; freiwilligBis?: string }) =>
+    aufruf<FristVorschau>(
+      `/api/fristen/vorschau?${new URLSearchParams(q.freiwilligBis ? { ...q } : { art: q.art, entstanden: q.entstanden })}`,
+    ),
   uebersicht: () => aufruf<Uebersicht>("/api/fristen/uebersicht"),
   pruefung: (dateien = false) =>
     aufruf<{ ok: boolean; befunde: Befund[]; dateienGeprueft?: number; bericht: Bericht }>(

@@ -8,7 +8,7 @@ auseinanderlaufen. Nur Tokens, die dort noch fehlen, stehen mit Wert unter „Ne
 **Stand:** Im Code stehen heute die Farben `--bg` bis `--onprimary` samt `--ok`, `--warn` und `--danger`, der
 Dunkelmodus, die gruppierte Seitenleiste mit dem Menü als Fläche unter 1024 px (samt `--scrim`, `--shadow-float`,
 `--control-h`), die Fokusregel, der Umbruch langer Prüfwerte, der Leerzustand von Archiv und Eingang und die Bausteine
-`ConfirmDialog`, `Einmalwert`, `WasIstDas` und `SelectionBar`. Mit #59 (Postfach-Assistent) kommen hinzu: die
+`ConfirmDialog`, `Einmalwert`, `WasIstDas`, `SelectionBar` und die Fristvorschau. Mit #59 (Postfach-Assistent) kommen hinzu: die
 eingebettete Meldung in drei Teilen, der Ladeknopf „Läuft …“ mit `aria-busy`, der gesperrte „Abbrechen“ mit Grund, der
 Fehler am Feld per `aria-invalid` und das Anlegen in der Karte der Postfächer. Alles, was mit „Vorschlag“ steht (ein Abschnitt trägt es in
 der Überschrift), steht noch nicht im Code oder weicht von ihm ab. Grundlage ist Issue #3; Umsetzungs-Pull-Requests
@@ -450,9 +450,20 @@ Lesen (heute 16 px nur nach Breite). In Zweispaltenlisten steht der Knopf in der
 veröffentlichte Seite, mit einem Anker je Begriff.
 Kein Hover, kein Popover: Beides erreicht weder Tastatur noch Touch zuverlässig.
 
-### Fristvorschau, Tooltip, Pagination, Fortschritt (Vorschlag)
+### Fristvorschau
 
-- **Fristvorschau:** **ein** Hinweis-Kasten mit einer Definitionsliste und `aria-live="polite"`, nicht mehrere Kästen.
+Im Einordnen-Formular (`Classification.tsx`) steht **ein** Hinweis-Kasten direkt über den Knöpfen: `--subtle`, ohne Rand,
+8 px Rundung, 16 px Innenabstand, `aria-live="polite"`, Symbol 16 px in `--muted` (`lock` bei Frist, `info` sonst) und
+höchstens drei kurze Absätze (Titel, Nebenzeile, Sperr-Zusatz; Sätze, keine Definitionsliste). Der Server rechnet
+(`GET /api/fristen/vorschau`), der Browser nie; die Abfrage startet 300 ms nach der letzten Eingabe, ein neues Ergebnis
+ersetzt das alte ohne Bewegung, und das letzte Ergebnis bleibt stehen, bis das neue da ist. Bei „freiwillig“ ohne
+Datum fragt der Browser nicht, der Kasten bleibt neutral. Ist das Dokument in einer Sperre, steht „Zusätzlich gesperrt …“
+im selben Kasten. Fehler stehen ebenfalls dort: der Satz des Servers (400) mit `circle-alert` in `--danger`, bei Netzfehler
+ein ruhiger Satz mit `info`; „Einordnen“ bleibt bedienbar, einen Knopf „Erneut versuchen“ gibt es nicht. Der Hilfetext der
+Art steht ohne Kasten unter dem Feld „Art“, verbunden per `aria-describedby`.
+
+### Tooltip, Pagination, Fortschritt (Vorschlag)
+
 - **Tooltip** nur für Nur-Symbol-Knöpfe, als Wiederholung des `aria-label`, mittig über dem Knopf, nach 500 ms, nur
   Deckkraft. Touch zeigt ihn nie, darum trägt er nie eine Erklärung.
 - **Pagination:** „Vorherige Seite“ und „Nächste Seite“ (Verb mit Objekt), dazu die Anzeige „… Seite 1 von 39“.

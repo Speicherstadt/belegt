@@ -1,4 +1,5 @@
 import { VERSION } from "./gemeinsam.ts";
+import { fristenPfade } from "./openapi-fristen.ts";
 import { feldwert, listenParameter, ordnungPfade, ordnungsFelder } from "./openapi-ordnung.ts";
 import { paperlessPfade } from "./openapi-paperless.ts";
 
@@ -441,6 +442,7 @@ export const openapi = {
         },
       },
     },
+    ...fristenPfade,
     ...ordnungPfade,
     ...paperlessPfade,
   },

@@ -24,6 +24,22 @@ describe.skipIf(!testDatenbankUrl)("Einordnung, Sperren und Übersicht gegen Pos
   });
   afterAll(() => t?.aufraeumen());
 
+  it("lehnt ein Datum vor dem Jahr 1000 mit 400 ab und speichert nichts", async () => {
+    const id = await hochladen("Beleg Jahr 1", "beleg-jahr-1.pdf");
+    const res = await anfrage(`/api/dokumente/${id}/einordnung`, json({ art: "beleg", entstanden: "0001-01-01" }));
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { fehler: string }).fehler).toContain("zu früh");
+    expect(await t.sql`select 1 from einordnungen where dokument_id = ${id}`).toHaveLength(0);
+  });
+
+  it("lehnt ein Fristende nach dem Jahr 9999 mit 400 ab und speichert nichts", async () => {
+    const id = await hochladen("Buch Jahr 9999", "buch-jahr-9999.pdf");
+    const res = await anfrage(`/api/dokumente/${id}/einordnung`, json({ art: "buecher", entstanden: "9999-06-01" }));
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { fehler: string }).fehler).toContain("zu weit in der Zukunft");
+    expect(await t.sql`select 1 from einordnungen where dokument_id = ${id}`).toHaveLength(0);
+  });
+
   it("ordnet ein, rechnet die Frist nach § 147 AO und versiegelt die Einordnung", async () => {
     const id = await hochladen("Beleg 1", "beleg-1.pdf");
     const res = await anfrage(

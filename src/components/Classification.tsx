@@ -3,9 +3,10 @@ import { type FormEvent, useRef, useState } from "react";
 import { bisNachMonaten } from "../../shared/fristvorlage.ts";
 import { darfBearbeiten } from "../../shared/rollen.ts";
 import { type Art, api, type Einordnung, type OrdnungsVorschlag } from "../lib/api.ts";
-import { ARTEN, artLabel } from "../lib/arten.ts";
+import { artLabel } from "../lib/arten.ts";
 import { tag } from "../lib/format.ts";
 import { m } from "../paraglide/messages.js";
+import { ArtFeld, FristVorschau, useFristEingabe } from "./FristVorschau.tsx";
 import { LearnedSuggestion, RuleMatchSuggestion } from "./MatchSuggestions.tsx";
 import { alsAenderung, SuggestionOrder } from "./SuggestionOrder.tsx";
 import { useSchnellTasten } from "./schnellTasten.ts";
@@ -82,6 +83,12 @@ export function Classification({
       ]),
   });
 
+  const formKey = `${JSON.stringify(vorgabe)}:${korrespondent?.id ?? ""}`;
+  const { eingabe, merke, aenderung } = useFristEingabe(formKey, art, {
+    entstanden: vorgabe?.entstanden ?? einordnung?.entstanden ?? eingang.slice(0, 10),
+    freiwilligBis: einordnung?.art === "freiwillig" ? (einordnung.fristBis ?? "") : "",
+  });
+
   function absenden(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     springen.current = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "weiter";
@@ -125,7 +132,7 @@ export function Classification({
       ) : (
         <p className="m-0 text-muted text-sm">{m.classify_none()}</p>
       )}
-      {darfBearbeiten(ich.data) && !offen && (
+      {darfBearbeiten(ich.data) && einordnung && !offen && (
         <button
           type="button"
           onClick={() => setOffen(true)}
@@ -252,23 +259,9 @@ export function Classification({
         </div>
       )}
       {darfBearbeiten(ich.data) && offen && (
-        <form
-          ref={formular}
-          key={`${JSON.stringify(vorgabe)}:${korrespondent?.id ?? ""}`}
-          onSubmit={absenden}
-          className="flex flex-col gap-3"
-        >
+        <form ref={formular} key={formKey} onSubmit={absenden} onChange={aenderung} className="flex flex-col gap-3">
           {schnell && <p className="m-0 rounded-md bg-subtle px-3 py-2 text-muted text-xs">{m.quick_mode_keys()}</p>}
-          <label className="flex flex-col gap-1.5 font-medium text-sm">
-            {m.classify_kind()}
-            <select value={art} onChange={(e) => setArt(e.target.value as Art)} className={feld}>
-              {ARTEN.map((a) => (
-                <option key={a.art} value={a.art}>
-                  {a.label()}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ArtFeld art={art} onArt={setArt} className={feld} />
           <label className="flex flex-col gap-1.5 font-medium text-sm">
             {m.classify_created()}
             <input
@@ -290,7 +283,10 @@ export function Classification({
                   const entstanden = form?.elements.namedItem("entstanden") as HTMLInputElement | null;
                   const bis = form?.elements.namedItem("freiwilligBis") as HTMLInputElement | null;
                   const ende = v && entstanden ? bisNachMonaten(entstanden.value, v.monate) : null;
-                  if (ende && bis) bis.value = ende;
+                  if (ende && bis) {
+                    bis.value = ende;
+                    merke("freiwilligBis", ende);
+                  }
                 }}
                 className={feld}
               >
@@ -345,6 +341,7 @@ export function Classification({
               {m.classify_failed({ meldung: speichern.error.message })}
             </p>
           )}
+          <FristVorschau art={art} entstanden={eingabe.entstanden} freiwilligBis={eingabe.freiwilligBis} />
           <div className="flex flex-wrap gap-2">
             <button
               type="submit"

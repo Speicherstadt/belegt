@@ -18,7 +18,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter Quellen › Schnittstelle an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/archivfassung`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/archivfassung`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`), Tags, Dokumenttypen, Korrespondenten, Felder und die Fristvorschau (`GET /api/fristen/vorschau`),
 mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein, setzt Tags, Dokumenttyp, Korrespondent und Feldwerte und schreibt Notizen; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
@@ -99,6 +99,7 @@ Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Aud
 | `POST /api/dokumente/:id/loeschung` | beantragt die Löschung (sofort gelöscht nur, wenn das Dokument nie anders als frei eingeordnet war); `409` mit Grund, wenn die Frist läuft, eine Sperre greift oder nicht eingeordnet ist |
 | `GET /api/loeschungen`, `POST /api/loeschungen/:id/bestaetigen`, `DELETE /api/loeschungen/:id` | Anträge, Bestätigung durch eine zweite Person (auch die Steuerberatung), Antrag zurückziehen; `GET /api/dokumente/:id/datei` antwortet danach mit `410` |
 | `GET /api/fristen/uebersicht` | Zahlen für die Seite Fristen |
+| `GET /api/fristen/vorschau?art=…&entstanden=…&freiwilligBis=…` | Frist vor dem Einordnen, ohne zu speichern ([`fristen.md`](fristen.md#einordnen)): `{bis, grund, jahre, gesperrt}`; `gesperrt` sagt, ob `entstanden` in einer offenen Sperre liegt, und fehlt für Mitarbeiter und API-Tokens (sie sehen keine Sperren); `400` mit `fehler` bei unbekannter Art, falschem oder nicht vorhandenem Datum, freiwillig ohne Datum; auch für Tokens mit dem Recht lesen und Mitarbeiter mit dem Recht bearbeiten |
 | `GET /api/fristvorlagen`, `POST /api/fristvorlagen` (`name` 1 bis 100 Zeichen, `monate` 1 bis 1200), `DELETE /api/fristvorlagen/:id` | Eigene Fristvorlagen ([`fristen.md`](fristen.md#eigene-vorlagen)); lesen auch Mitarbeiter mit dem Recht bearbeiten, anlegen und löschen nur der Inhaber; `409` bei doppeltem Namen |
 | `GET /api/dokumente/:id/nachweis`, `GET /api/dokumente/:id/nachweis.pdf` | Nachweis über das Original ([`pruefung.md`](pruefung.md#nachweis)): `dokument` (`id`, `dateiname`, `sha256`, `groesse`, `asn`, `eingegangenAm`), `eingangSeq`, `siegel`, `ereignisse` wie beim Verlauf, `zeitstempel` (erster nach dem Eingang oder `null`) und `pruefung` (letzte Prüfung der Kette oder `null`); als PDF dasselbe zum Weitergeben |
 | `GET /api/dokumente/:id/verlauf` | Einträge des Audit-Logs zum Dokument (auch Tags, Dokumenttyp, Korrespondent und Feldwerte, mit `detail`: deren Name; Einordnungen mit `detail`: ihr Korrespondent, wie er beim Einordnen hieß; Ableitungen mit `detail`: Operation und `richtung`: `aus` oder `daraus`) und sein Siegel |
