@@ -61,7 +61,7 @@ Postfächer per IMAP, JMAP, Microsoft 365 oder Google, das Journal deines Mailse
 legt per FTP in den Eingangsordner, das Handy fotografiert oder teilt direkt an Belegt. Alles ist sofort unverändert
 gesichert; im Eingang legst du fest, was es ist.
 
-[Postfächer](eingang.md#postfächer) · [Scannen](scannen.md) · [Unterwegs mit dem Handy](eingang.md#unterwegs-mit-dem-handy)
+[Postfächer](eingang.md#postfaecher) · [Scannen](scannen.md) · [Unterwegs mit dem Handy](eingang.md#unterwegs-mit-dem-handy)
 </div>
 <div class="showcase-phone" markdown>
 ![Eingang am Handy mit Hochladen und Foto aufnehmen, darunter Mail, Scans und XRechnung als Kacheln](assets/screenshot-mobil.png#only-light){ width="454" height="916" loading="lazy" }

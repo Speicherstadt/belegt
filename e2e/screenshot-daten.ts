@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
+import { POSTFACH_PASSWORT } from "./postfach-zugang.ts";
 import { type Brief, brief, CII } from "./screenshot-brief.ts";
 
 /*
@@ -206,7 +207,7 @@ async function ordnungAnlegen(r: Anfragen) {
     ["Fixkosten", "gruen"],
     ["Büro", "violett"],
     ["Material", "orange"],
-  ])
+  ] as const)
     tags[name] = await anlegen(r, "/api/tags", { name, farbe });
   const typen: Record<string, string> = {};
   for (const [name, vorgabeArt] of [
@@ -301,9 +302,10 @@ async function betriebAnlegen(r: Anfragen) {
     "/api/quellen",
     json({
       name: "Buchhaltung",
-      host: "imap.muster-werkstatt.example",
+      // Ein Host unter .test: e2e/server.ts bildet ihn nach, sonst bestünde die Prüfung beim Anlegen nicht
+      host: "imap.muster-werkstatt.test",
       benutzer: "buchhaltung@muster-werkstatt.example",
-      passwort: "erfunden",
+      passwort: POSTFACH_PASSWORT,
     }),
   );
   await r.post("/api/sperren", json({ grund: "Außenprüfung 2023", von: "2023-01-01", bis: "2023-12-31" }));

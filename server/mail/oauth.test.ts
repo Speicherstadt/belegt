@@ -5,6 +5,7 @@ import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { abrufen, type Zugang } from "./abruf.ts";
 import { starten, vorgangLesen } from "./oauth.ts";
+import { GEHEIMNIS_MELDUNG, GRUND_MELDUNG } from "./pruefen.ts";
 
 const schluessel = Buffer.alloc(32, 7);
 const google = { clientId: "client-g", clientSecret: "geheim-g" };
@@ -66,11 +67,14 @@ describe.skipIf(!testDatenbankUrl)("OAuth gegen Postgres", () => {
     const ziel = new URL(start.headers.get("location")!);
     const oauthCookie = start.headers.get("set-cookie")!.split(";")[0]!;
     expect(start.headers.get("set-cookie")).toMatch(/HttpOnly/i);
-    return t.anfrage(
+    const res = await t.anfrage(
       `/api/oauth/rueckkehr?code=${code}&state=${ziel.searchParams.get("state")}`,
       {},
       `${cookie}; ${oauthCookie}`,
     );
+    // Nach dem Anlegen startet der erste Abruf von selbst; die Tests warten ihn ab, damit er nichts durcheinanderbringt
+    await t.abrufeAbwarten();
+    return res;
   }
 
   it("verbindet ein Gmail-Postfach: Refresh-Token nur verschlüsselt, Adresse aus dem ID-Token", async () => {
@@ -87,8 +91,14 @@ describe.skipIf(!testDatenbankUrl)("OAuth gegen Postgres", () => {
       art: "imap",
     });
     expect(entschluesseln(t.schluessel, q!.ciphertext).toString()).toBe("refresh-1");
+    // Der erste Abruf lief mit dem Access-Token des Kontos
+    expect(zuletzt.zugang).toMatchObject({
+      benutzer: "anna@gmail.example",
+      accessToken: "access-für-anna@gmail.example",
+    });
+    expect(q!.letzter_abruf).not.toBeNull();
     // Der Tausch schickte den Verifier, das Geheimnis der App und die Rückkehradresse
-    const tausch = anfragen.at(-1)!;
+    const tausch = anfragen.findLast((a) => a.felder.get("grant_type") === "authorization_code")!;
     expect(tausch.url).toBe("https://oauth2.googleapis.com/token");
     expect(tausch.felder.get("grant_type")).toBe("authorization_code");
     expect(tausch.felder.get("code_verifier")).toMatch(/^[\w-]{40,}$/);
@@ -113,6 +123,49 @@ describe.skipIf(!testDatenbankUrl)("OAuth gegen Postgres", () => {
     expect(anfragen.at(-1)!.felder.get("refresh_token")).toBe("refresh-m1");
     const [neu] = await t.sql`select ciphertext from quellen where id = ${q!.id}`;
     expect(entschluesseln(t.schluessel, neu!.ciphertext).toString()).toBe("refresh-m2");
+
+    // Das Access-Token steht auch in der XOAUTH2-Zeile nie in letzter_fehler oder im Audit-Log
+    const token = "access-für-anna@firma.example";
+    const zeile = Buffer.from(
+      `n,a=anna@firma.example,\x01host=outlook.office365.com\x01port=993\x01auth=Bearer ${token}\x01\x01`,
+    ).toString("base64");
+    const lecken = async () => {
+      throw Object.assign(new Error("Command failed"), {
+        authenticationFailed: true,
+        responseText: `AUTHENTICATE OAUTHBEARER ${zeile} refresh-m2`,
+      });
+    };
+    const leck = await abrufen(t, t.schluessel, q!.id, lecken, { oauth: { microsoft }, abfragen });
+    expect(leck.fehler).toBe(GRUND_MELDUNG.anmeldung);
+    const gespeichert = JSON.stringify(await t.sql`select letzter_fehler from quellen where id = ${q!.id}`);
+    const audit = JSON.stringify(await t.sql`select old_value, new_value from audit_log where table_name = 'quellen'`);
+    for (const text of [gespeichert, audit]) {
+      expect(text).not.toContain(token);
+      expect(text).not.toContain(zeile);
+      expect(text).not.toContain("refresh-m2");
+    }
+
+    // Das gespeicherte Refresh-Token ist auch dann ein Geheimnis, wenn schon der Tausch scheitert
+    const tauschFehler = await abrufen(t, t.schluessel, q!.id, oeffnen, {
+      oauth: { microsoft },
+      abfragen: async () => {
+        throw new Error("Tausch von refresh-m2 abgelehnt");
+      },
+    });
+    expect(tauschFehler.fehler).toBe(GEHEIMNIS_MELDUNG);
+
+    // Auch das neue Refresh-Token, das dieser Abruf erst erhält, ist ein Geheimnis
+    naechstesRefresh = "refresh-m3";
+    const neuesToken = await abrufen(
+      t,
+      t.schluessel,
+      q!.id,
+      async () => {
+        throw new Error("Zugriff mit refresh-m3 abgelehnt");
+      },
+      { oauth: { microsoft }, abfragen },
+    );
+    expect(neuesToken.fehler).toBe(GEHEIMNIS_MELDUNG);
 
     // Ohne eingerichtete App ein Fehler am Postfach, kein Abruf mit leerem Passwort
     const ohne = await abrufen(t, t.schluessel, q!.id, oeffnen, { abfragen });

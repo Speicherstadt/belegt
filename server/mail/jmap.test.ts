@@ -3,6 +3,7 @@ import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import { abrufen } from "./abruf.ts";
 import { jmapHolen } from "./jmap.ts";
+import { GRUND_MELDUNG } from "./pruefen.ts";
 
 const roh = (n: number) =>
   new TextEncoder().encode(
@@ -141,7 +142,7 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
   const holen = () => abrufen(t, t.schluessel, quelle, keinImap, { abfragen: s.abfragen });
 
   beforeAll(async () => {
-    t = await testApp();
+    t = await testApp({ oeffnen: keinImap, abfragen: s.abfragen });
     cookie = (await t.registrieren("anna@example.org")).cookie;
     const res = await t.anfrage(
       "/api/quellen",
@@ -161,6 +162,11 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
     );
     expect(res.status).toBe(201);
     quelle = (await res.json()).id;
+    // Der erste Abruf lief schon (ohne Mails); die Tests beginnen wie bei einem frischen Postfach
+    await t.abrufeAbwarten(quelle);
+    await t.sql`update quellen set jmap_stand = null where id = ${quelle}`;
+    s.zustand.aufrufe.length = 0;
+    s.zustand.mitZugang.length = 0;
   });
   afterAll(() => t?.aufraeumen());
 
@@ -194,9 +200,9 @@ describe.skipIf(!testDatenbankUrl)("JMAP-Abruf gegen Postgres", () => {
 
   it("hält einen Fehler fest, etwa ein falsches Passwort", async () => {
     await t.sql`update quellen set ciphertext = ${(await import("../crypto.ts")).verschluesseln(t.schluessel, Buffer.from("falsch"))} where id = ${quelle}`;
-    expect(await holen()).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: "JMAP: Antwort 401" });
+    expect(await holen()).toEqual({ neu: 0, doppelt: 0, anhaengeVorhanden: 0, fehler: GRUND_MELDUNG.anmeldung });
     const [q] = await t.sql`select letzter_fehler from quellen where id = ${quelle}`;
-    expect(q!.letzter_fehler).toBe("JMAP: Antwort 401");
+    expect(q!.letzter_fehler).toBe(GRUND_MELDUNG.anmeldung);
   });
 });
 

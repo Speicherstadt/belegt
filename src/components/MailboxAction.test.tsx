@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -28,10 +29,10 @@ const quelle: Quelle = {
   loeschenBestaetigtAm: "2026-11-01T10:00:00Z",
 };
 
-const zeigen = (client: QueryClient) =>
+const zeigen = (client: QueryClient, q: Quelle = quelle) =>
   renderToStaticMarkup(
     <QueryClientProvider client={client}>
-      <Formular quelle={quelle} fertig={() => {}} />
+      <Formular quelle={q} fertig={() => {}} />
     </QueryClientProvider>,
   );
 const speichern = (html: string) => /<button type="submit"[^>]*>/.exec(html)![0];
@@ -60,5 +61,12 @@ describe("Aktion nach dem Abholen: Formular", () => {
     const hinweis = /<p role="note"[^>]*>(.*?)<\/p>/.exec(html)![1]!;
     expect(hinweis).toContain("ersten Abruf");
     expect(hinweis).toContain("UIDVALIDITY");
+  });
+
+  it("zeigt Fehlermeldungen in der Fehlerfarbe (DESIGN.md), nicht in einem festen Rot", () => {
+    // Die Fehlerzeilen entstehen erst nach einer Abfrage oder Speicherung; im Markup ist keine erreichbar
+    const quellcode = readFileSync(new URL("./MailboxAction.tsx", import.meta.url), "utf8");
+    expect(quellcode).not.toContain("text-red-");
+    expect(quellcode.match(/text-danger/g)).toHaveLength(2);
   });
 });

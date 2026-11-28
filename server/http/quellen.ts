@@ -1,16 +1,25 @@
 import {
   abrufen,
   type Ordner,
-  QuelleAenderung,
   QuelleEingabe,
-  aendern as quelleAendern,
   anlegen as quelleAnlegen,
   entfernen as quelleEntfernen,
   listen as quellenListen,
   aktivSetzen as quelleSchalten,
 } from "../mail/abruf.ts";
 import { AktionEingabe, aktionEinstellen, ordnerListen, protokoll } from "../mail/aktionen.ts";
+import { fehlerGrund, GRUND_MELDUNG, verbindungPruefen } from "../mail/pruefen.ts";
+import { QuelleAenderung, aendern as quelleAendern } from "../mail/quelle-aendern.ts";
 import { type App, type AppUmgebung, akteur, Id, nurInhaber } from "./gemeinsam.ts";
+
+/** Startet den ersten Abruf einer neuen Quelle, ohne auf ihn zu warten; ein Fehler steht danach in letzter_fehler */
+export function ersterAbruf(umgebung: AppUmgebung, quelleId: string) {
+  if (!umgebung.schluessel || !umgebung.oeffnen) return;
+  abrufen(umgebung, umgebung.schluessel, quelleId, umgebung.oeffnen, {
+    oauth: umgebung.oauth,
+    abfragen: umgebung.abfragen,
+  }).catch(() => console.error(`Erster Abruf der Quelle ${quelleId}: ${GRUND_MELDUNG.unbekannt}`));
+}
 
 export function quellenRouten(app: App, umgebung: AppUmgebung) {
   verwaltungRouten(app, umgebung);
@@ -22,7 +31,9 @@ export function quellenRouten(app: App, umgebung: AppUmgebung) {
 function verwaltungRouten(app: App, umgebung: AppUmgebung) {
   app.get("/api/quellen", async (c) => c.json(await quellenListen(umgebung.db)));
 
+  // Die Prüfung verbindet sich mit jedem Host, den der Server erreicht: nur der Inhaber
   app.post("/api/quellen", async (c) => {
+    if (!nurInhaber(c.get("nutzer"))) return c.json({ fehler: "Nur für den Inhaber" }, 403);
     if (!umgebung.schluessel) return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
     const eingabe = QuelleEingabe.safeParse(await c.req.json().catch(() => null));
     if (!eingabe.success)
@@ -33,7 +44,17 @@ function verwaltungRouten(app: App, umgebung: AppUmgebung) {
         },
         400,
       );
-    return c.json(await quelleAnlegen(umgebung.db, umgebung.schluessel, eingabe.data, akteur(c.get("nutzer"))), 201);
+    if (!umgebung.oeffnen) return c.json({ fehler: "BELEGT_SCHLUESSEL fehlt auf dem Server" }, 503);
+    // Erst prüfen, dann speichern: bei einem Fehler gibt es weder eine Zeile noch einen Audit-Eintrag
+    const pruefung = await verbindungPruefen(eingabe.data, umgebung.oeffnen, {
+      abfragen: umgebung.abfragen,
+      zeitMs: umgebung.pruefZeitMs,
+    });
+    if (!pruefung.ok)
+      return c.json({ fehler: GRUND_MELDUNG[pruefung.grund], grund: pruefung.grund, details: pruefung.details }, 422);
+    const q = await quelleAnlegen(umgebung.db, umgebung.schluessel, eingabe.data, akteur(c.get("nutzer")));
+    ersterAbruf(umgebung, q.id);
+    return c.json(q, 201);
   });
 
   // Ändern und Entfernen wie die Aktionen: nur der Inhaber mit Sitzung
@@ -108,7 +129,7 @@ function abrufRouten(app: App, umgebung: AppUmgebung) {
       });
       return ordner ? c.json({ ordner }) : c.json({ fehler: "Nicht gefunden" }, 404);
     } catch (err) {
-      return c.json({ fehler: `Postfach nicht erreichbar: ${err instanceof Error ? err.message : String(err)}` }, 502);
+      return c.json({ fehler: GRUND_MELDUNG[fehlerGrund(err)] }, 502);
     }
   });
 }
@@ -139,10 +160,7 @@ function aktionRouten(app: App, umgebung: AppUmgebung) {
           abfragen: umgebung.abfragen,
         });
       } catch (err) {
-        return c.json(
-          { fehler: `Postfach nicht erreichbar: ${err instanceof Error ? err.message : String(err)}` },
-          502,
-        );
+        return c.json({ fehler: GRUND_MELDUNG[fehlerGrund(err)] }, 502);
       }
       if (!ordner) return c.json({ fehler: "Nicht gefunden" }, 404);
       ziel = ordner.find((o) => o.id === eingabe.data.ziel) ?? null;

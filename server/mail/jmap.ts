@@ -183,6 +183,12 @@ export async function jmapOrdner(zugang: Zugang, abfragen: Abfragen = fetch): Pr
   return liste.map(ordnerVon(liste));
 }
 
+/** Prüft vor dem Speichern: Sitzung und Ordnerliste, und ob es den Ordner gibt (wie jmapHolen ihn findet) */
+export async function jmapPruefen(zugang: Zugang, abfragen: Abfragen = fetch): Promise<boolean> {
+  const { mailboxen, finden } = await verbinden(zugang, abfragen);
+  return Boolean(finden(await mailboxen(), zugang.ordner));
+}
+
 /**
  * Aktionen an Mails eines Ordners über Email/set (RFC 8621, 4.6): Schlüsselwörter $seen und $flagged setzen, den Ordner
  * in mailboxIds tauschen (andere Ordner der Mail bleiben); Löschen nimmt die Mail aus dem abgeholten Ordner und nur,

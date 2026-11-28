@@ -3,6 +3,7 @@ import { z } from "zod";
 import { oauthAnlegen } from "../mail/abruf.ts";
 import { ANBIETER, codeTauschen, endpunkte, starten, vorgangLesen } from "../mail/oauth.ts";
 import { type App, type AppUmgebung, akteur } from "./gemeinsam.ts";
+import { ersterAbruf } from "./quellen.ts";
 
 const COOKIE = "belegt_oauth";
 
@@ -60,7 +61,7 @@ export function oauthRouten(app: App, umgebung: AppUmgebung) {
     if (fehler || !code || !konfig) return zurueck("abgelehnt");
     try {
       const { adresse, refreshToken } = await codeTauschen(v, konfig, code, rueckkehr, umgebung.abfragen);
-      await oauthAnlegen(
+      const q = await oauthAnlegen(
         umgebung.db,
         umgebung.schluessel,
         {
@@ -73,6 +74,7 @@ export function oauthRouten(app: App, umgebung: AppUmgebung) {
         },
         akteur(c.get("nutzer")),
       );
+      ersterAbruf(umgebung, q.id);
       return zurueck("verbunden");
     } catch (err) {
       console.error(`OAuth: ${err instanceof Error ? err.message : err}`);

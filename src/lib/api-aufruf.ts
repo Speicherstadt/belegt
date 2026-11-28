@@ -13,6 +13,12 @@ export class ApiFehler extends Error {
     readonly vorhanden?: { id: string | null; asn: number | null },
     /** true, wenn die Antwort kein JSON mit fehler/message war (HTML, Klartext, leer: oft ein Proxy) */
     readonly ohneHinweis?: boolean,
+    /** Beim Anlegen eines Postfachs: woran die Prüfung scheiterte; fehlt er, gilt unbekannt */
+    readonly grund?: "anmeldung" | "server" | "ordner" | "zeit" | "unbekannt",
+    /** Rohtext des Servers (ohne Passwort), nur eingeklappt zu zeigen */
+    readonly details?: string,
+    /** Bei 400 (Zod): das Feld, auf das der erste Fehler zeigt (erstes Pfadstück) */
+    readonly feld?: string,
   ) {
     super(message);
   }
@@ -32,6 +38,9 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
     let ergebnis: ApiFehler["ergebnis"];
     let vorhanden: ApiFehler["vorhanden"];
     let ohneHinweis = true;
+    let grund: ApiFehler["grund"];
+    let details: string | undefined;
+    let feld: string | undefined;
     try {
       const json = JSON.parse(text) as {
         fehler?: string;
@@ -39,13 +48,21 @@ export async function antwort(pfad: string, init?: RequestInit): Promise<Respons
         ok?: boolean;
         ergebnisse?: SammelErgebnis[];
         vorhanden?: ApiFehler["vorhanden"];
+        grund?: ApiFehler["grund"];
+        details?: unknown;
       };
       ohneHinweis = (json.fehler ?? json.message) == null;
       meldung = json.fehler ?? json.message ?? meldung;
       if (json.ergebnisse) ergebnis = { ok: false, ergebnisse: json.ergebnisse };
       vorhanden = json.vorhanden;
+      grund = json.grund;
+      // Bei 400 ist details die Liste der Zod-Issues: eine lesbare Zeile, nie das Array
+      const d = json.details;
+      const erster = Array.isArray(d) ? (d[0] as { message?: string; path?: unknown[] } | undefined) : undefined;
+      details = typeof d === "string" ? d : erster?.message;
+      if (typeof erster?.path?.[0] === "string") feld = erster.path[0];
     } catch {}
-    throw new ApiFehler(res.status, meldung, ergebnis, vorhanden, ohneHinweis);
+    throw new ApiFehler(res.status, meldung, ergebnis, vorhanden, ohneHinweis, grund, details, feld);
   }
   return res;
 }

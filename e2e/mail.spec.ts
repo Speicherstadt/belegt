@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { POSTFACH_UNTERBROCHEN, postfachAusfuellen } from "./postfach-zugang.ts";
 
 function rechnungsmail(projekt: string): Buffer {
   const pdf = Buffer.from(`%PDF-1.7\n% Rechnung ${projekt}\n`).toString("base64");
@@ -134,16 +135,15 @@ test("ein Postfach hinzufügen; ein Abruf gegen einen nicht erreichbaren Server 
 }, info) => {
   await page.goto("/quellen");
   const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
-  await postfaecher.getByRole("button", { name: "+ Postfach hinzufügen" }).click();
-  await postfaecher.getByLabel("Name").fill(`rechnung-${info.project.name}`);
-  await postfaecher.getByLabel("Server").fill("127.0.0.1");
-  await postfaecher.getByLabel("Port").fill("1");
-  await postfaecher.getByLabel("Benutzer").fill("rechnung@example.org");
-  await postfaecher.getByLabel("Passwort").fill("geheim-im-test");
-  await postfaecher.getByLabel("TLS").uncheck();
-  await postfaecher.getByRole("button", { name: "Postfach hinzufügen" }).click();
+  await postfachAusfuellen(postfaecher, {
+    name: `rechnung-${info.project.name}`,
+    benutzer: `${POSTFACH_UNTERBROCHEN}-${info.project.name}@example.org`,
+  });
+  await postfaecher.getByRole("button", { name: "Postfach anlegen" }).click();
+  await expect(postfaecher.getByRole("status").filter({ hasText: "Erster Abruf läuft" })).toBeVisible();
   const eintrag = postfaecher.getByRole("listitem").filter({ hasText: `rechnung-${info.project.name}` });
-  await expect(eintrag).toContainText("Noch nicht abgerufen");
+  // Der erste Abruf startet von selbst; der Benutzer „unterbrochen“ kam nur bei der Prüfung hinein, also scheitert er
+  await expect(eintrag).toContainText("Fehler:");
   await eintrag.getByRole("button", { name: "Jetzt abrufen" }).click();
   await expect(eintrag).toContainText("Fehler:");
   await expect(page.getByText("geheim-im-test")).toHaveCount(0);
@@ -169,8 +169,17 @@ test("ein Gmail-Postfach über OAuth verbinden", async ({ page }) => {
     });
   });
   await page.goto("/quellen");
+  const postfaecher = page.locator("section", { has: page.getByRole("heading", { name: "Postfächer" }) });
+  await postfaecher.getByRole("button", { name: "Postfach hinzufügen", exact: true }).click();
+  await expect(postfaecher.getByText("Ordner: INBOX")).toBeVisible();
+  await postfaecher.getByRole("button", { name: "Ändern" }).click();
+  await postfaecher.getByLabel("Ordner").first().fill("Belege");
   await page.getByRole("link", { name: "Mit Google verbinden" }).click();
   await expect(page).toHaveURL(/\/quellen\?oauth=verbunden$/);
-  await expect(page.getByRole("status").filter({ hasText: "Postfach verbunden." })).toBeVisible();
-  await expect(page.getByText(/IMAP \(Google\) · anna@gmail\.example@\s*imap\.gmail\.com/).first()).toBeVisible();
+  const erfolg = page.getByRole("status").filter({ hasText: "Postfach verbunden." });
+  await expect(erfolg).toContainText("Erster Abruf läuft, neue Mails erscheinen im Eingang.");
+  await expect(erfolg.getByRole("link", { name: "Zum Eingang" })).toHaveAttribute("href", "/eingang");
+  await expect(
+    page.getByText(/IMAP \(Google\) · anna@gmail\.example@\s*imap\.gmail\.com:993\/Belege/).first(),
+  ).toBeVisible();
 });

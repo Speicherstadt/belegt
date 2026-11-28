@@ -3,6 +3,7 @@ import { entschluesseln } from "../crypto.ts";
 import { testApp } from "../test-app.ts";
 import { testDatenbankUrl } from "../test-db.ts";
 import type { Oeffnen, Zugang } from "./abruf.ts";
+import { GRUND_MELDUNG } from "./pruefen.ts";
 
 const roh = (n: number) =>
   new TextEncoder().encode(
@@ -22,11 +23,17 @@ function postfach() {
     uidValidity: 1,
     nachrichten: new Map<number, Uint8Array>(),
     fehler: null as string | null,
+    fehlerAntwort: null as string | null,
+    fehlerMerkmale: {} as Record<string, unknown>,
     zuletzt: null as Zugang | null,
   };
   const oeffnen: Oeffnen = async (zugang) => {
     zustand.zuletzt = zugang;
-    if (zustand.fehler) throw new Error(zustand.fehler);
+    if (zustand.fehler)
+      throw Object.assign(new Error(zustand.fehler), {
+        responseText: zustand.fehlerAntwort,
+        ...zustand.fehlerMerkmale,
+      });
     return {
       uidValidity: zustand.uidValidity,
       async *neue(seit) {
@@ -67,6 +74,7 @@ describe.skipIf(!testDatenbankUrl)("IMAP-Abruf gegen Postgres", () => {
     expect(res.status).toBe(201);
     const q = await res.json();
     quelle = q.id;
+    await t.abrufeAbwarten(quelle);
     expect(q).not.toHaveProperty("ciphertext");
     expect(JSON.stringify(await (await anfrage("/api/quellen")).json())).not.toContain("geheim-123");
     const [zeile] = await t.sql`select ciphertext from quellen where id = ${quelle}`;
@@ -112,6 +120,39 @@ describe.skipIf(!testDatenbankUrl)("IMAP-Abruf gegen Postgres", () => {
     const [q] = await t.sql`select letzter_fehler from quellen where id = ${quelle}`;
     expect(q!.letzter_fehler).toBe("Anmeldung abgelehnt");
     p.zustand.fehler = null;
+  });
+
+  it("schreibt nie die Rohantwort des Servers in letzter_fehler und das Audit-Log, auch nicht mit Passwort in jeder Form", async () => {
+    const b64 = (s: string) => Buffer.from(s).toString("base64");
+    const passwort = "geheim-123";
+    const formen = [
+      'LOGIN "rechnung@example.org" "geheim-123" abgelehnt',
+      `AUTHENTICATE PLAIN ${b64("\0rechnung@example.org\0geheim-123")}`,
+      `Basic ${b64("rechnung@example.org:geheim-123")}`,
+      b64(`n,a=rechnung@example.org,\x01auth=Bearer ${passwort}\x01\x01`),
+      Buffer.from("pässwört€x").toString("latin1"),
+      "Ungültige Zugangsdaten",
+    ];
+    for (const merkmale of [{ authenticationFailed: true }, {}]) {
+      for (const antwort of formen) {
+        p.zustand.fehler = "Command failed";
+        p.zustand.fehlerAntwort = antwort;
+        p.zustand.fehlerMerkmale = merkmale;
+        const { fehler } = await abrufen();
+        // Erkannter Grund: fester Satz; sonst nur message, nie responseText
+        const erwartet = "authenticationFailed" in merkmale ? GRUND_MELDUNG.anmeldung : "Command failed";
+        expect(fehler).toBe(erwartet);
+        const [q] = await t.sql`select letzter_fehler from quellen where id = ${quelle}`;
+        expect(q!.letzter_fehler).toBe(erwartet);
+      }
+    }
+    // Der Audit-Trigger kopiert letzter_fehler in das append-only Log
+    const audit = JSON.stringify(await t.sql`select old_value, new_value from audit_log where table_name = 'quellen'`);
+    expect(audit).toContain(GRUND_MELDUNG.anmeldung);
+    for (const f of [passwort, ...formen.slice(1, 5)]) expect(audit).not.toContain(f);
+    p.zustand.fehler = null;
+    p.zustand.fehlerAntwort = null;
+    p.zustand.fehlerMerkmale = {};
   });
 
   it("lehnt ungültige Quellen ab und lässt Quellen aus- und einschalten", async () => {

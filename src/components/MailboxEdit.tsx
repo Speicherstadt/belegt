@@ -178,7 +178,7 @@ export function MailboxEdit({
           type="button"
           onClick={() => setFragen(true)}
           aria-label={m.mailboxes_remove_named({ name: quelle.name })}
-          className="h-8 rounded-md border border-danger px-3 font-medium text-danger hover:bg-subtle"
+          className="h-10 pointer-coarse:h-11 rounded-md border border-danger px-3 font-medium text-danger hover:bg-subtle"
         >
           {m.mailboxes_remove()}
         </button>
@@ -189,7 +189,7 @@ export function MailboxEdit({
           aria-expanded={bearbeiten}
           aria-controls={bearbeiten ? formId : undefined}
           aria-label={m.mailboxes_edit_named({ name: quelle.name })}
-          className="h-8 rounded-md border border-border px-3 font-medium hover:bg-subtle"
+          className="h-10 pointer-coarse:h-11 rounded-md border border-border px-3 font-medium hover:bg-subtle"
         >
           {m.mailboxes_edit()}
         </button>

@@ -29,7 +29,9 @@ describe.skipIf(!testDatenbankUrl)("Postfächer ändern und entfernen", () => {
       passwort: "altes-passwort-1",
     });
     expect(res.status).toBe(201);
-    return ((await res.json()) as { id: string }).id;
+    const { id } = (await res.json()) as { id: string };
+    await t.abrufeAbwarten(id);
+    return id;
   }
   const zeile = async (id: string) =>
     (
@@ -316,6 +318,10 @@ describe.skipIf(!testDatenbankUrl)("Postfächer ändern und entfernen", () => {
     ).toBe(403);
     expect((await t.anfrage(`/api/quellen/${id}`, { method: "DELETE", headers: kopf })).status).toBe(403);
     expect(await zeile(id)).toMatchObject({ name: "geschuetzt@example.org" });
+    // Anlegen prüft die Verbindung zu einem Host des Inhabers: Steuerberatung und Token bekommen 403 vor der Prüfung
+    const neu = JSON.stringify({ name: "x", host: "h.example.org", benutzer: "b", passwort: "p" });
+    expect((await senden("POST", "/api/quellen", JSON.parse(neu), kanzlei)).status).toBe(403);
+    expect((await t.anfrage("/api/quellen", { method: "POST", headers: kopf, body: neu })).status).toBe(403);
   });
 });
 

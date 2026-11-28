@@ -190,7 +190,9 @@ export const betriebApi = {
     aufruf<Quelle>(`/api/quellen/${id}`, { ...json(e), method: "PATCH" }),
   quelleEntfernen: (id: string) => antwort(`/api/quellen/${id}`, { method: "DELETE" }),
   quelleAbrufen: (id: string) =>
-    aufruf<{ neu: number; doppelt: number; fehler: string | null }>(`/api/quellen/${id}/abrufen`, { method: "POST" }),
+    aufruf<{ neu: number; doppelt: number; fehler: string | null; laeuft?: true }>(`/api/quellen/${id}/abrufen`, {
+      method: "POST",
+    }),
   quelleAktion: ({ id, ...e }: AktionEingabe & { id: string }) => aufruf<Quelle>(`/api/quellen/${id}/aktion`, json(e)),
   quelleOrdner: (id: string) => aufruf<{ ordner: PostfachOrdner[] }>(`/api/quellen/${id}/ordner`),
   quelleAktionen: (id: string) => aufruf<AktionenProtokoll>(`/api/quellen/${id}/aktionen`),
