@@ -47,26 +47,32 @@
   height: auto;
   border: 0;
   border-radius: 0.6rem;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 16%), 0 0 20px 1px rgb(255 255 255 / 8%);
-}
-
-[data-md-color-scheme="default"] .md-typeset .showcase-shot img,
-[data-md-color-scheme="default"] .md-typeset .showcase-phone img {
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 8%), 0 0.8rem 2.4rem rgb(0 0 0 / 14%);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 16%),
+    0 0 20px 1px rgb(255 255 255 / 8%);
 }
 
 .md-typeset .showcase-shot--hero img {
   margin: 0 auto 1rem;
 }
 
-[data-md-color-scheme="default"] .md-typeset .showcase-shot--hero img {
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 8%), 0 1.2rem 3.2rem rgb(0 0 0 / 22%);
-}
-
 .md-typeset .showcase-phone img {
   max-width: 16rem;
   margin: 0 auto;
   border-radius: 1.4rem;
+}
+
+[data-md-color-scheme="default"] .md-typeset .showcase-shot img,
+[data-md-color-scheme="default"] .md-typeset .showcase-phone img {
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 8%),
+    0 0.8rem 2.4rem rgb(0 0 0 / 14%);
+}
+
+[data-md-color-scheme="default"] .md-typeset .showcase-shot--hero img {
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 8%),
+    0 1.2rem 3.2rem rgb(0 0 0 / 22%);
 }
 
 .showcase-feature {
