@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { darfBearbeiten } from "../shared/rollen.ts";
 import { DropUpload } from "./components/DropUpload.tsx";
 import { ServerAntwortetNicht } from "./components/Fehlerseiten.tsx";
@@ -25,6 +26,25 @@ export function Shell({ children }: { children: ReactNode }) {
   const [still, setStill] = useState<boolean | null>(null);
   // Menü am Handy; ein Klick auf einen Link darin klappt es wieder zu (Sidebar, onNavigiert)
   const [menue, setMenue] = useState(false);
+  const menueKnopf = useRef<HTMLButtonElement>(null);
+  // Der Wechsel auf die dauerhafte Leiste (ab 1024 px) klappt das Menü zu; den Seitenwechsel meldet die Sidebar
+  useEffect(() => {
+    const breit = window.matchMedia("(min-width: 1024px)");
+    const zuklappen = () => breit.matches && setMenue(false);
+    breit.addEventListener("change", zuklappen);
+    return () => breit.removeEventListener("change", zuklappen);
+  }, []);
+  // Escape schließt das Menü und gibt den Fokus an den Knopf zurück
+  useEffect(() => {
+    if (!menue) return;
+    const schliessen = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenue(false);
+      menueKnopf.current?.focus();
+    };
+    document.addEventListener("keydown", schliessen);
+    return () => document.removeEventListener("keydown", schliessen);
+  }, [menue]);
   useEffect(() => {
     if (!abgemeldet || !status.data || still !== null) return;
     const versuchen = imFrame && !!status.data.oidc && stillAnmeldenErlaubt();
@@ -36,27 +56,38 @@ export function Shell({ children }: { children: ReactNode }) {
     return <ServerAntwortetNicht error={ich.error} erneut={() => void ich.refetch()} />;
   if (!ich.data) return <p className="p-8 text-muted text-sm">{m.loading()}</p>;
   return (
-    <div className="flex min-h-screen flex-col bg-bg text-fg md:flex-row">
+    <div className="flex min-h-screen flex-col bg-bg text-fg lg:flex-row">
       <a
         href="#inhalt"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-onprimary"
       >
         {m.skip_link()}
       </a>
-      {/* Am Handy eine schmale Leiste mit Menü-Knopf statt der ganzen Navigation über dem Inhalt */}
-      <header className="flex items-center justify-between gap-3 border-border border-b bg-side px-4 py-2 md:hidden print:hidden">
+      {/* Unter 1024 px eine schmale Leiste mit Menü-Knopf; die Seitenleiste öffnet darunter als Fläche über dem Inhalt */}
+      <header
+        className={`${menue ? "sticky top-0 z-40 " : ""}flex h-14 items-center justify-between gap-3 border-border border-b bg-side px-4 lg:hidden print:hidden`}
+      >
         <span className="font-semibold">{m.app_name()}</span>
         <button
           type="button"
+          ref={menueKnopf}
           aria-expanded={menue}
           aria-controls="seitenleiste"
           onClick={() => setMenue(!menue)}
-          className="flex h-10 items-center gap-2 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle"
+          className="flex h-(--control-h) items-center gap-2 rounded-md border border-border px-3 font-medium text-sm hover:bg-subtle"
         >
-          <span aria-hidden="true">{menue ? "✕" : "☰"}</span>
+          {menue ? <X aria-hidden="true" className="size-4" /> : <Menu aria-hidden="true" className="size-4" />}
           {m.menu()}
         </button>
       </header>
+      {/* Hinter der offenen Seitenleiste: ein Klick schließt; Tastatur und Menü-Knopf haben Escape und „Menü“ */}
+      {menue && (
+        <div
+          aria-hidden="true"
+          onClick={() => setMenue(false)}
+          className="fixed inset-x-0 top-14 bottom-0 z-40 bg-(--scrim) lg:hidden"
+        />
+      )}
       <Sidebar
         ich={ich.data}
         eingebettet={imFrame}
@@ -65,7 +96,7 @@ export function Shell({ children }: { children: ReactNode }) {
         offen={menue}
         onNavigiert={() => setMenue(false)}
       />
-      <main id="inhalt" className="min-w-0 flex-1">
+      <main id="inhalt" inert={menue} className="min-w-0 flex-1">
         {import.meta.env.MODE === "demo" && <DemoHinweis />}
         {/* Kopfleiste über dem Inhalt: links der Titel der Seite (InKopfzeile), rechts Suche und Verarbeitung; bleibt
             beim Scrollen stehen */}
@@ -84,7 +115,11 @@ export function Shell({ children }: { children: ReactNode }) {
           {ich.data.zweiFaktorEinrichten ? <AccountPage /> : children}
         </div>
       </main>
-      {!ich.data.zweiFaktorEinrichten && darfBearbeiten(ich.data) && <DropUpload />}
+      {!ich.data.zweiFaktorEinrichten && darfBearbeiten(ich.data) && (
+        <div inert={menue}>
+          <DropUpload />
+        </div>
+      )}
     </div>
   );
 }

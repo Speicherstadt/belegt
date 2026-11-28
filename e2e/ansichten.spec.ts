@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { menueOeffnen } from "./menue.ts";
+import { menueOeffnen, menueSchliessen } from "./menue.ts";
 
 const axe = (page: import("@playwright/test").Page) =>
   new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
@@ -65,6 +65,7 @@ test("Suche und Filter als Ansicht speichern und über die Seitenleiste wieder �
   await page.getByRole("button", { name: "Speichern", exact: true }).click();
   await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: `${ansicht} neu` })).toBeVisible();
+  await menueSchliessen(page);
   await page.getByRole("button", { name: `Ansicht „${ansicht} neu“ löschen` }).click();
   await menueOeffnen(page);
   await expect(nav.getByRole("link", { name: `${ansicht} neu` })).toHaveCount(0);

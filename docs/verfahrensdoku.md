@@ -6,7 +6,7 @@ description: >-
 
 # Verfahrensdokumentation
 
-Unter **Verfahrensdoku** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:
+Unter **Verfahrensdokumentation** erzeugt Belegt die Verfahrensdokumentation (GoBD Rz. 151 ff.) bei jedem Aufruf neu:
 Erfassung, Einordnung und Fristen, Unveränderbarkeit (mit der Datenbankanmeldung der App und ihren wirksamen
 Rechten je Art von Tabelle), Löschung, Zugriff und Betrieb mit der Datensicherung: Ziel, Rhythmus, letzte
 Sicherung und letzter Test-Restore, wie der [Backup-Container](betrieb.md#sichern) sie eingetragen hat, und die
