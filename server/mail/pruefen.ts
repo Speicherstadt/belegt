@@ -44,6 +44,7 @@ const ORDNER_FEHLT =
   /nonexistent|doesn'?t exist|does not exist|no such mailbox|unknown mailbox|(folder|mailbox).*not (be )?found|^JMAP: Ordner/i;
 
 type Fehlerform = {
+  name?: unknown;
   message?: unknown;
   code?: unknown;
   authenticationFailed?: unknown;
@@ -65,7 +66,7 @@ export function fehlerGrund(err: unknown): Grund {
   )
     return "anmeldung";
   if (antwort === "NONEXISTENT" || ORDNER_FEHLT.test(text)) return "ordner";
-  if (ZEITUEBERSCHREITUNG.has(code)) return "zeit";
+  if (ZEITUEBERSCHREITUNG.has(code) || e.name === "TimeoutError") return "zeit";
   if (NICHT_ERREICHBAR.has(code) || TLS_FEHLER.test(code) || /^JMAP: (Antwort \d+|Adresse auf fremdem)/.test(text))
     return "server";
   if (text === "fetch failed") return "server";
