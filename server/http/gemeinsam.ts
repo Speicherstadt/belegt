@@ -17,6 +17,8 @@ export type AppUmgebung = Umgebung & {
   schluessel?: Buffer;
   oeffnen?: Oeffnen;
   abrufMinuten?: number;
+  /** Wie lange die Prüfung beim Anlegen eines Postfachs höchstens dauert (ms); Tests setzen es kurz */
+  pruefZeitMs?: number;
   /** Bei Microsoft und Google registrierte Apps für IMAP mit OAuth */
   oauth?: OAuthKonfig;
   /** HTTP nach außen (OAuth); Tests geben eigenes */

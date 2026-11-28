@@ -18,8 +18,14 @@ export const imapOeffnen: Oeffnen = async (zugang) => {
       : { user: zugang.benutzer, pass: zugang.passwort },
     logger: false,
   });
-  await client.connect();
-  const postfach = await client.mailboxOpen(zugang.ordner, { readOnly: !zugang.schreiben });
+  // Scheitert Anmeldung oder Ordner, bleibt sonst die Verbindung bis zum Zeitlimit von imapflow offen
+  const postfach = await (async () => {
+    await client.connect();
+    return client.mailboxOpen(zugang.ordner, { readOnly: !zugang.schreiben });
+  })().catch((err) => {
+    client.close();
+    throw err;
+  });
   const pruefen = (ok: unknown, was: string) => {
     if (!ok) throw new Error(`IMAP: ${was} abgelehnt`);
   };

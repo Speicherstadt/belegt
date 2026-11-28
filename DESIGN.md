@@ -8,9 +8,11 @@ auseinanderlaufen. Nur Tokens, die dort noch fehlen, stehen mit Wert unter „Ne
 **Stand:** Im Code stehen heute die Farben `--bg` bis `--onprimary` samt `--ok`, `--warn` und `--danger`, der
 Dunkelmodus, die gruppierte Seitenleiste mit dem Menü als Fläche unter 1024 px (samt `--scrim`, `--shadow-float`,
 `--control-h`), die Fokusregel, der Umbruch langer Prüfwerte, der Leerzustand von Archiv und Eingang und die Bausteine
-`ConfirmDialog`, `Einmalwert`, `WasIstDas`, `SelectionBar` und die Fristvorschau. Alles, was mit „Vorschlag“ steht (ein
-Abschnitt trägt es in der Überschrift), steht noch nicht im Code oder weicht von ihm ab. Grundlage ist Issue #3;
-Umsetzungs-Pull-Requests (zum Beispiel zu #57, #58, #59) führen jeweils ihren Teil ein und streichen das „Vorschlag“.
+`ConfirmDialog`, `Einmalwert`, `WasIstDas`, `SelectionBar` und die Fristvorschau. Mit #59 (Postfach-Assistent) kommen hinzu: die
+eingebettete Meldung in drei Teilen, der Ladeknopf „Läuft …“ mit `aria-busy`, der gesperrte „Abbrechen“ mit Grund, der
+Fehler am Feld per `aria-invalid` und das Anlegen in der Karte der Postfächer. Alles, was mit „Vorschlag“ steht (ein Abschnitt trägt es in
+der Überschrift), steht noch nicht im Code oder weicht von ihm ab. Grundlage ist Issue #3; Umsetzungs-Pull-Requests
+(zum Beispiel zu #57, #58, #59) führen jeweils ihren Teil ein und streichen das „Vorschlag“.
 
 ## Überblick
 
@@ -157,8 +159,9 @@ Dazu kommt `--row-h` (44 px, bei Kompakt 36 px, siehe Tabellen).
 - Das × an einem Tag ist sichtbar 24 × 24, die Trefferfläche am Touch 44 × 44 (`after:absolute after:-inset-2.5`; beim
   Tag als Link mit Rand `-inset-[11px]`). Kein Ziel unter 24 px (WCAG 2.5.8), zwischen kleinen Zielen mindestens 8 px.
 - Ein Knopf in einer Formularzeile mit `items-end` hat kein `self-start`, sonst steht er höher als die Felder.
-- Verwaltungsseiten (Quellen, Workflows): Jeder Abschnitt ist eine Karte (`verwaltungsKarte`); zuerst steht, was es gibt,
-  das Formular zum Anlegen erscheint erst auf „… anlegen“ (`Ausklappbar`).
+- Verwaltungsseiten (Quellen, Workflows): Jeder Abschnitt ist eine Karte (`verwaltungsKarte`); zuerst steht, was es gibt.
+  Das Anlegen öffnet auf „… hinzufügen“ **in** der Karte und ersetzt deren Inhalt (siehe „Anlegen in einer Karte“);
+  `Ausklappbar` genügt bei einem Formular mit höchstens zwei Feldern.
 
 ## Fokus
 
@@ -184,6 +187,14 @@ Dazu kommt `--row-h` (44 px, bei Kompakt 36 px, siehe Tabellen).
   `aria-invalid`; kein Browser-Blasentext in fremder Sprache. Der Fokus geht auf das erste fehlerhafte Feld.
 - **Gesperrt:** Fläche `--subtle`, Rand `--border`, Schrift `--muted`. **Nur lesen:** Fläche `--subtle`, normaler Rand.
 - **Suchfeld:** Symbol links, Löschknopf rechts (`--control-h`), kein Browser-Kreuz.
+- **Prüfen beim Speichern:** Wo das Speichern eine Verbindung braucht (Postfach), gibt es keinen Knopf „Verbindung testen“.
+  „… anlegen“ prüft zuerst und speichert nur bei Erfolg. Ein Satz oben sagt es („Belegt prüft vor dem Speichern die
+  Verbindung.“). Schlägt es fehl, bleibt jede Eingabe, auch das Passwort, stehen, nichts ist gespeichert, und der
+  Fehler steht als eingebettete Meldung in drei Teilen (siehe Bausteine) über den Feldern. Das betroffene Feld hat
+  `aria-invalid` und verweist per `aria-describedby` auf den Titel der Meldung; der Fokus geht auf die Meldung, ihr
+  Knopf führt ins Feld. Ein zweiter Fehlertext am Feld entfällt, wenn die Meldung direkt darüber steht (sonst läse ein
+  Screenreader ihn doppelt). Beim Lauf sind die Felder gesperrt (`opacity-50`), und eine Zeile neben den Knöpfen nennt
+  den Grund.
 
 ## Knöpfe
 
@@ -208,9 +219,10 @@ Dazu kommt `--row-h` (44 px, bei Kompakt 36 px, siehe Tabellen).
 - Ein gesperrter Knopf (`disabled`) ist nur erlaubt, wenn der Grund sichtbar daneben steht („Nichts geändert“). Vorschlag:
   Der Grund hat eine eigene `id`, auf die der Knopf per `aria-describedby` verweist. Fehlt eine Angabe, bleibt der
   Knopf bedienbar und die Meldung steht am Feld.
-- **Lädt** (Vorschlag): Der Knopf zeigt „Läuft …“ mit kleinem Dreher, mit `aria-busy`, nicht `disabled` oder
+- **Lädt:** Der Knopf zeigt „Läuft …“ mit kleinem Dreher, mit `aria-busy`, nicht `disabled` oder
   `aria-disabled`; er bleibt fokussierbar, eine weitere Betätigung löst aber nichts aus. „Läuft …“ bleibt in voller Farbe (4,5 : 1, auch beim Gefahrknopf); das
-  Gesperrt-Aussehen gilt nur für wirklich Gesperrtes.
+  Gesperrt-Aussehen gilt nur für wirklich Gesperrtes. Ein gesperrter „Abbrechen“ neben dem ladenden Knopf nennt
+  seinen Grund in einer Zeile daneben (`aria-describedby`), wenn ein Abbruch die Anfrage nicht stoppen könnte.
 - **Link-Knopf** (Vorschlag) für Dritt- und Textaktionen: unterstrichen, ohne Rand, `--control-h` hoch.
 - **Segment** (Vorschlag; Darstellung, Seite, Breite): gewählt `--primary` (der aktive Filter
   ebenso).
@@ -253,6 +265,11 @@ Vorschlag:
 
 - **Nie ein Kasten im Kasten und nie eine Karte in der Karte.** `Ausklappbar` öffnet ohne Kasten, mit 1 px Linie oben;
   die Einordnung hat keine vier Kästen.
+- **Anlegen in einer Karte** (Verwaltungsseiten): Ein Formular oder Assistent zum Anlegen **ersetzt den Inhalt der Karte**,
+  statt in ihr auszuklappen: Der Kartentitel bleibt, „Abbrechen“ führt zur Liste zurück, der Fokus kehrt zum Knopf zurück,
+  der das Anlegen geöffnet hat. Das Formular hat keinen eigenen Rand und keine Fläche; Abschnitte trennt eine Linie
+  oben. Umgesetzt für Postfächer (`Mailboxes.tsx`); `Ausklappbar` bleibt für Karten, deren Formular nur ein oder zwei
+  Felder hat.
 - **Hinweis-Kasten** (Hinweis, Vorschau, Einmalwert, eingebettete Meldung, Fristvorschau): ein Kasten auf `--subtle`,
   ohne Rand, 8 px Rundung, Innenabstand 16 px.
 - **Abschnitt** für Seiten ohne Karten: Überschrift, 1 px Linie oben, 24 px Abstand.
@@ -395,10 +412,12 @@ z. B. „Erneut versuchen“). Den Rohtext des Servers gibt es eingeklappt unter
 
 > Der Server antwortet gerade nicht. Deine Dokumente sind nicht verloren. [Erneut versuchen]
 
-- Vorschlag: Eingebettet ist sie ein Hinweis-Kasten mit dem Symbol der Art; der Titel steht bei Fehler in `--danger`,
-  bei Warnung in `--warn`, bei Erfolg und Info nur im Symbol.
+- Eingebettet ist sie ein Hinweis-Kasten mit dem Symbol der Art (`Meldung` mit `eingebettet`: `role="alert"`, Titel ein
+  `p`, kein `h1`); der Titel steht bei Fehler in `--danger`, bei Warnung in `--warn`. Sie hat `tabIndex={-1}` und
+  bekommt beim Erscheinen den Fokus.
 - Fehler an einem Feld: siehe Felder.
-- Erfolg: ein Satz in `role="status"`; er bleibt stehen (kein Toast, WCAG 2.2.1) und verschwindet nach weiteren Änderungen.
+- Erfolg: eine Zeile (`CircleCheck` in `--ok`, Satz, bei Bedarf ein Link) in `role="status"`, ohne Kasten; sie bleibt
+  stehen (kein Toast, WCAG 2.2.1) und verschwindet, wenn der Nutzer die nächste Handlung beginnt.
 - Der Router hat `defaultNotFoundComponent` und `defaultErrorComponent` (`src/components/Fehlerseiten.tsx`, Baustein
   `Meldung.tsx`); eine unbekannte Adresse zeigt die Meldung in der Shell. Schlägt `/api/ich` anders als mit 401
   fehl, zeigt die Shell „Der Server antwortet gerade nicht“ mit „Erneut versuchen“ statt „Lädt …“.

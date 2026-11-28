@@ -282,6 +282,16 @@ export const quellen = pgTable(
   ],
 );
 
+/** Läuft gerade ein Abruf dieses Postfachs, und seit wann (Herzschlag je Mail); ohne Audit, kurzlebig (server/mail/abruf-sperre.ts) */
+export const abrufSperren = pgTable("abruf_sperren", {
+  quelleId: uuid("quelle_id")
+    .primaryKey()
+    .references(() => quellen.id, { onDelete: "cascade" }),
+  /** Kennung des Laufs, der die Sperre hält; nur er setzt den Herzschlag und gibt frei */
+  inhaber: uuid("inhaber").notNull(),
+  seit: timestamp("seit", { withTimezone: true }).notNull(),
+});
+
 /**
  * Angaben zum Betrieb für Verfahrensdokumentation, Z3-Export und Fristen; genau eine Zeile, protokolliert.
  * Was die Software selbst tut, schreibt Belegt in die Verfahrensdokumentation; hier steht nur, was sie nicht wissen kann.

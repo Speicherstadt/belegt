@@ -135,7 +135,9 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über JMAP", () => {
       json({ name, art: "jmap", host: "127.0.0.1", port, tls: false, benutzer: "anna", passwort: "geheim" }),
     );
     expect(res.status).toBe(201);
-    return ((await res.json()) as { id: string }).id;
+    const { id } = (await res.json()) as { id: string };
+    await t.abrufeAbwarten(id);
+    return id;
   }
   const einstellen = (id: string, aktion: Record<string, unknown>) =>
     anfrage(`/api/quellen/${id}/aktion`, json(aktion));

@@ -26,7 +26,9 @@ describe.skipIf(!testDatenbankUrl)("Aktionen im Postfach über IMAP", () => {
       "/api/quellen",
       json({ name: benutzer, host: "imap.example.org", benutzer, passwort: "geheim-123" }),
     );
-    return ((await res.json()) as { id: string }).id;
+    const { id } = (await res.json()) as { id: string };
+    await t.abrufeAbwarten(id);
+    return id;
   }
   const einstellen = (id: string, aktion: Record<string, unknown>) =>
     anfrage(`/api/quellen/${id}/aktion`, json(aktion));

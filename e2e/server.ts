@@ -17,12 +17,15 @@ import { migrierenMitRechten } from "../server/db/migrieren.ts";
 import { erechnungenPruefen } from "../server/erechnung/pruefung.ts";
 import { inhalteErzeugen } from "../server/inhalt/inhalt.ts";
 import { kiVorschlaegeErzeugen } from "../server/ki/vorschlaege.ts";
+import type { Oeffnen } from "../server/mail/abruf.ts";
 import { imapOeffnen } from "../server/mail/imapflow.ts";
+import { testPostfaecher } from "../server/mail/test-postfach.ts";
 import { naechsterImport } from "../server/paperless/ausfuehren.ts";
 import { testPaperless } from "../server/paperless/test-paperless.ts";
 import { vorschaubilderErzeugen } from "../server/vorschaubild/vorschaubild.ts";
 import { weitergeben } from "../server/weitergabe/weitergabe.ts";
 import { workflowsAusfuehren } from "../server/workflows/ausfuehren.ts";
+import { POSTFACH_PASSWORT, POSTFACH_UNTERBROCHEN } from "./postfach-zugang.ts";
 
 /*
  * Server für die E2E-Tests: frische Datenbank neben E2E_DATABASE_URL (sie wird gelöscht und neu angelegt, nie auf echte
@@ -71,6 +74,32 @@ const smtp = new SMTPServer({
 await new Promise<void>((ok) => smtp.listen(SMTP_PORT, "127.0.0.1", ok));
 const absender = "belegt@e2e.example";
 const mail = { absender, versender: smtpVersender({ url: `smtp://127.0.0.1:${SMTP_PORT}?tls=nein`, absender }) };
+/**
+ * Postfächer: Hosts unter .test sind nachgebaut (e2e/postfach-zugang.ts), damit „Postfach anlegen“ seine Prüfung
+ * besteht; alle anderen gehen ins echte Netz. Fehler haben die Form der Fehler von imapflow.
+ */
+const attrappe = testPostfaecher();
+const schonGeoeffnet = new Set<string>();
+const oeffnen: Oeffnen = async (zugang) => {
+  if (!zugang.host.endsWith(".test")) return imapOeffnen(zugang);
+  if (zugang.passwort !== POSTFACH_PASSWORT)
+    throw Object.assign(new Error("Command failed"), {
+      authenticationFailed: true,
+      serverResponseCode: "AUTHENTICATIONFAILED",
+      responseText: "Invalid credentials",
+    });
+  if (!attrappe.konto(zugang.benutzer).ordner.has(zugang.ordner))
+    throw Object.assign(new Error("Command failed"), {
+      serverResponseCode: "NONEXISTENT",
+      responseText: `Mailbox doesn't exist: ${zugang.ordner}`,
+    });
+  if (zugang.benutzer.startsWith(POSTFACH_UNTERBROCHEN)) {
+    if (schonGeoeffnet.has(zugang.benutzer))
+      throw Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" });
+    schonGeoeffnet.add(zugang.benutzer);
+  }
+  return attrappe.oeffnen(zugang);
+};
 const auth = createAuth({
   db,
   secret: "e2e-".repeat(8),
@@ -87,7 +116,7 @@ Bun.serve({
     importOrdner,
     speicherOrdner: verzeichnis,
     mail,
-    oeffnen: imapOeffnen,
+    oeffnen,
     erechnungPruefung: true,
     // Die Seite, die Belegt im Frame zeigen darf; der Test baut sie im Browser nach (e2e/einbetten.spec.ts)
     embedOrigin: "http://localhost:5199",
