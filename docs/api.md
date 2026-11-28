@@ -18,7 +18,7 @@ Browser von einer anderen Adresse als `BETTER_AUTH_URL` (`Origin`, `Sec-Fetch-Si
 
 Programme melden sich statt mit dem Cookie mit einem API-Token an: `Authorization: Bearer belegt_…`. Der Inhaber legt
 Tokens unter Quellen › Schnittstelle an; gespeichert ist nur der Hash. Ein Token mit dem Recht `lesen` liest
-Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/archivfassung`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`) und Tags, Dokumenttypen und Felder,
+Dokumente (`GET /api/dokumente`, `/:id`, `/:id/datei`, `/:id/mail`, `/:id/verlauf`, `/:id/vorschaubild`, `/:id/archivfassung`, `/:id/ableitungen`, `/:id/aehnliche`, `/:id/notizen`), Tags, Dokumenttypen, Korrespondenten, Felder und die Fristvorschau (`GET /api/fristen/vorschau`),
 mit `schreiben` nimmt es zusätzlich Dokumente und Mails auf, ordnet ein, setzt Tags, Dokumenttyp, Korrespondent und Feldwerte und schreibt Notizen; `POST /api/mcp` steht jedem Token offen, mit den Werkzeugen seines Rechts.
 Alles andere antwortet `403`, ein widerrufenes oder falsches Token `401`. Im Audit-Log steht `token:<Name>`.
 
