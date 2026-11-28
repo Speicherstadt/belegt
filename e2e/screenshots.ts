@@ -1,24 +1,16 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { type Browser, expect, type Page, test } from "@playwright/test";
-import { mitRahmen } from "./bildrahmen.ts";
+import { writeFile } from "node:fs/promises";
+import { expect, type Page, test } from "@playwright/test";
 import { demoAufnehmen } from "./demo-aufnahme.ts";
 import { vorbereiten } from "./screenshot-daten.ts";
 
 /*
  * Bilder für README und Doku (docs/assets/screenshot-*.png): erfundene Firmen, Dokumente, Mails, Einordnungen, Tags,
- * Felder, Workflows und Zugänge, dann je Seite hell und dunkel mit Rahmen (bildrahmen.ts). Läuft nur mit
+ * Felder, Workflows und Zugänge, dann je Seite hell und dunkel, ohne Rahmen im Bild. Läuft nur mit
  * DOKU_SCREENSHOTS=1 (bun run docs:screenshots) auf eigenen Ports (playwright.config.ts), nicht in der CI.
  */
 
 const ASSETS = "docs/assets";
-/**
- * Dieselben Bilder ohne Rahmen für Webseiten mit eigenem CSS (speicherstadt.org, teufel-it.de): Dort würde der
- * transparente Rand beim Umwandeln weiß und stünde als Rahmen in der Karte.
- */
-const OHNE_RAHMEN = `${ASSETS}/ohne-rahmen`;
 const MOBIL = { width: 390, height: 844 };
-
-let rahmenBrowser: Browser;
 
 /** Hell und dunkel über den Schalter „Darstellung“ der App (speichert belegt.darstellung), ohne Neuladen */
 async function darstellung(page: Page, modus: "Hell" | "Dunkel") {
@@ -31,7 +23,7 @@ async function darstellung(page: Page, modus: "Hell" | "Dunkel") {
   await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
 }
 
-/** Hell und dunkel mit Rahmen, dazu ohne Rahmen in docs/assets/ohne-rahmen/; oben ein Ausschnitt der Seite (selector), am Handy sonst der Inhalt unter der Navigation */
+/** Hell und dunkel; oben ein Ausschnitt der Seite (selector), am Handy sonst der Inhalt unter der Navigation */
 async function bild(page: Page, name: string, oben?: string) {
   const mobil = page.viewportSize()?.width === MOBIL.width;
   const ziel = oben ?? (mobil ? "#inhalt" : undefined);
@@ -47,16 +39,13 @@ async function bild(page: Page, name: string, oben?: string) {
     const png = await page.screenshot({ animations: "disabled", caret: "hide" });
     const datei = `screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
     const pfad = `${ASSETS}/${datei}`;
-    await writeFile(`${OHNE_RAHMEN}/${datei}`, png);
-    await writeFile(pfad, await mitRahmen(rahmenBrowser, png, modus === "Dunkel" ? "dunkel" : "hell", mobil ? 36 : 12));
+    await writeFile(pfad, png);
   }
   await darstellung(page, "Hell");
 }
 
 test("Bilder für README und Doku", async ({ page, browser }) => {
   test.setTimeout(480_000);
-  rahmenBrowser = browser;
-  await mkdir(OHNE_RAHMEN, { recursive: true });
   const { holz, steuer, material, rechnung, betrag } = await vorbereiten(page);
 
   // Die ZUGFeRD-Rechnung mit Vorschau, Kopfdaten und Prüfung

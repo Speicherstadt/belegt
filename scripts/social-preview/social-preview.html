@@ -28,14 +28,13 @@
   dt { font-weight: 600; color: var(--brand); }
   dd { margin: 0; }
 
-  /* Das Archiv ohne die Navigation der App läuft rechts und unten aus dem Bild; die Bilder tragen 32 px Rand
-     seitlich und 24 px oben (e2e/bildrahmen.ts) */
+  /* Das Archiv ohne die Navigation der App läuft rechts und unten aus dem Bild */
   .shot { position: absolute; left: 508px; top: 56px; width: 900px; height: 700px; border: 1px solid var(--line); border-radius: 12px 0 0 0; overflow: hidden; background: #fff; }
-  .shot img { display: block; margin: -24px 0 0 -273px; }
+  .shot img { display: block; margin: 0 0 0 -241px; }
   /* Handy rechts, unten angeschnitten */
   .phone { position: absolute; right: 40px; top: 176px; width: 244px; height: 504px; padding: 7px 7px 0; background: #09090b; border-radius: 41px 41px 0 0; box-shadow: 0 0 0 1.5px #3f3f46, 0 16px 40px rgba(9, 9, 11, 0.25); }
   .phone .screen { position: relative; height: 100%; border-radius: 34px 34px 0 0; overflow: hidden; padding-top: 30px; background: #fff; }
-  .phone .screen img { display: block; width: 268px; margin: -14px 0 0 -19px; }
+  .phone .screen img { display: block; width: 230px; }
   .phone .time { position: absolute; top: 8px; left: 26px; font-size: 13px; font-weight: 600; }
   .phone .island { position: absolute; top: 7px; left: 50%; width: 72px; height: 20px; margin-left: -36px; border-radius: 10px; background: #000; }
 </style>
