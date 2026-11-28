@@ -61,7 +61,9 @@ test.describe("am Handy", () => {
   test("nach dem Scrollen bleibt der Knopf oben, Tab bleibt in der Leiste, Zurück schließt", async ({ page }) => {
     await page.goto("/archiv");
     await page.evaluate(() => {
-      document.body.style.minHeight = "3000px";
+      // Langen Seiteninhalt in main erzwingen, damit Shell wächst — nicht nur body unterhalb von Shell
+      const main = document.querySelector("main");
+      if (main) main.style.minHeight = "3000px";
     });
     const knopf = page.getByRole("button", { name: "Menü" });
     await knopf.click();
