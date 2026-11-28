@@ -53,8 +53,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.5
-      # Texterkennung: ohne Tesseract und pdftoppm würden die Tests dazu übersprungen
-      - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils
+      # Texterkennung und Postgres-19-Client (für deploy/backup/backup.test.ts gegen postgres:19)
+      - run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu poppler-utils postgresql-client-19
       - run: bun install --frozen-lockfile
       # Bekannte Sicherheitslücken in Abhängigkeiten
       - run: bun audit
