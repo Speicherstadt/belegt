@@ -50,6 +50,7 @@ describe("Fehler einem Grund zuordnen", () => {
     ],
     ["Socket-Zeit", Object.assign(new Error("connect ETIMEDOUT"), { code: "ETIMEDOUT" }), "zeit"],
     ["imapflow-Zeit", Object.assign(new Error("Connection timed out"), { code: "CONNECT_TIMEOUT" }), "zeit"],
+    ["AbortSignal-Zeit", new DOMException("The operation timed out.", "TimeoutError"), "zeit"],
     ["fetch ohne Server", Object.assign(new TypeError("fetch failed"), { cause: { code: "ECONNREFUSED" } }), "server"],
     ["JMAP Anmeldung", new Error("JMAP: Antwort 401"), "anmeldung"],
     ["JMAP Serverfehler", new Error("JMAP: Antwort 502"), "server"],
