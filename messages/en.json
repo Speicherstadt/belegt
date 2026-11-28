@@ -9,7 +9,7 @@
   "nav_retention": "Retention",
   "nav_audit": "Audit",
   "nav_sources": "Sources",
-  "nav_procedure": "Procedure docs",
+  "nav_procedure": "Procedure documentation",
   "inbox_title": "Inbox",
   "inbox_intro": "Everything is already stored unchanged. Here you decide what it is and how long it stays.",
   "inbox_empty_title": "Inbox is empty",
@@ -63,7 +63,7 @@
   "retention_hold": "The period does not end while the records matter for a tax whose assessment period is still open (§ 147 (3) sentence 5 AO). Documents are therefore only deleted after you confirm.",
   "audit_title": "Audit",
   "audit_intro": "Access for tax auditors, data export by the official description standard, audit report and procedure documentation.",
-  "sources_title": "Sources and interfaces",
+  "sources_title": "Sources",
   "sources_intro": "Where documents come from, which rules help with classification and which programs may use Belegt.",
   "scan_title": "Scanning",
   "scan_intro": "Put a separator sheet between the documents of a stack and scan everything into one PDF. From the inbox folder (or when uploading through the API with trennen=1) Belegt splits the stack at each separator sheet; every part becomes its own document, the separator sheet itself does not.",
@@ -1432,6 +1432,19 @@
   ],
   "view_compact": "Compact",
   "menu": "Menu",
+  "nav_group_documents": "Documents",
+  "nav_group_organize": "Organize and check",
+  "nav_group_setup": "Set up",
+  "nav_inbox_open": [
+    {
+      "declarations": ["input anzahl", "local anzahlPlural = anzahl: plural"],
+      "selectors": ["anzahlPlural"],
+      "match": {
+        "anzahlPlural=one": "{anzahl} open document",
+        "anzahlPlural=other": "{anzahl} open documents"
+      }
+    }
+  ],
   "order_tabs_label": "Classification sections",
   "order_filter": "Filter by name",
   "quick_mode_start": "Quick classify",

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { menueOeffnen } from "./menue.ts";
+import { menueOeffnen, menueSchliessen } from "./menue.ts";
 
 test("eine unbekannte Adresse zeigt die Meldung in der Shell, der Knopf führt ins Archiv", async ({ page }) => {
   await page.goto("/gibt-es-nicht");
@@ -12,6 +12,7 @@ test("eine unbekannte Adresse zeigt die Meldung in der Shell, der Knopf führt i
   const ergebnis = await new AxeBuilder({ page }).analyze();
   expect(ergebnis.violations).toEqual([]);
 
+  await menueSchliessen(page);
   await page.getByRole("link", { name: "Zum Archiv" }).click();
   await expect(page).toHaveURL(/\/archiv$/);
 });

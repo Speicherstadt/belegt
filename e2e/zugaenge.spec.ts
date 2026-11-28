@@ -147,7 +147,7 @@ test("ein Mitarbeiter sieht nur die Dokumente seines Sichtbereichs und bearbeite
     await menueOeffnen(kollege);
     const nav = kollege.getByRole("navigation", { name: "Hauptnavigation" });
     await menueOeffnen(kollege);
-    await expect(nav.getByRole("link")).toHaveText(["Start", "Eingang", "Archiv"]);
+    await expect(nav.getByRole("link")).toHaveText(["Start", /^Eingang/, "Archiv"]);
     await menueOeffnen(kollege);
     await nav.getByRole("link", { name: "Archiv" }).click();
     await expect(kollege.getByRole("link", { name: sichtbar })).toBeVisible();

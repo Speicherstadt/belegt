@@ -57,7 +57,7 @@ const ZUSAMMENFUEGEN: Knopf = {
  * Breite vor, ein Panel darüber streckt sich auf sie */
 function Schwebend({ children, leiste }: { children: ReactNode; leiste?: React.Ref<HTMLDivElement> }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-64 print:hidden">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 lg:left-64 print:hidden">
       <div ref={leiste} className="pointer-events-auto relative flex max-w-full flex-col items-center">
         {children}
       </div>
