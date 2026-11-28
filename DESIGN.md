@@ -242,7 +242,7 @@ Vorschlag:
 - Animiert werden nur Farbe, Deckkraft und Skalierung (Ausnahme: der Dreher des Ladeknopfs).
 - Dauern: 100 ms für Farbe und Druck, 160 ms für Popover, 200 ms für Dialog und Menü; das Ausblenden dauert etwa zwei
   Drittel. Kurve für Erscheinen `cubic-bezier(0.23, 1, 0.32, 1)`, für Farbe `ease`.
-- Druck: Ein Knopf skaliert beim Drücken mit dem Zeiger auf 0,97; mit der Tastatur ausgelöst wird nichts animiert.
+- Druck: Ein Knopf skaliert beim Drücken mit dem Zeiger auf 0,97.
 - Hover nur unter `@media (hover: hover)`, damit er am Touch nicht klebt.
 - Was die Tastatur auslöst, wird nie animiert.
 - Laden: Ein Skeleton erscheint erst nach 400 ms, ohne Schimmern.
@@ -367,7 +367,7 @@ Die Bausteine entstehen in eigenen Pull Requests; sie nutzen die Texte aus Parag
 Die Komponente `ConfirmDialog` (`src/components/ConfirmDialog.tsx`) nutzt das native `<dialog>` (`showModal()`); Fokusfalle,
 Escape und die Rückkehr des Fokus zum auslösenden Knopf liefert der Browser. Sie fragt vor Endgültigem, das sonst mit
 einem Klick liefe. Heute im Einsatz: „Jetzt löschen“ bei Dokumenten, die immer frei abgelegt waren, und „Löschung bestätigen“ (Stufe 2,
-auf Dokumentseite und unter Fristen), „Postfach entfernen“ und „Webhook entfernen“ (Stufe 1, unter Quellen). **Noch ohne Rückfrage** (Vorschlag, je ein eigener Pull Request): „Sperre aufheben“,
+auf Dokumentseite und unter Fristen), „Postfach entfernen“ und „Webhook entfernen“ (Stufe 1, unter Quellen) sowie „Passwort zurücksetzen“ (Stufe 1, unter Zugänge). **Noch ohne Rückfrage** (Vorschlag, je ein eigener Pull Request): „Sperre aufheben“,
 Workflow löschen, Token widerrufen, Passkey entfernen und die zweistufigen Inline-Bestätigungen bei Tags, Zugängen,
 Feldern, Dokumenttypen und Korrespondenten, wo ein roter Knopf den ersten ersetzt, ohne „Abbrechen“.
 
