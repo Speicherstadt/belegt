@@ -1,15 +1,15 @@
 {
- "stand": "2026-11-27T19:53:26.877Z",
+ "stand": "2026-11-28T07:57:49.420Z",
  "listen": {
   "alle": [
    {
-    "id": "cdc40969-0320-45e6-b6d3-923c6bde6724",
+    "id": "c248de30-fea6-419d-9f79-cb9fdf6f5d22",
     "sha256": "f4ba0a1f85d563670b917691b4e918079c88cb476bea735b543ddf0dd5eb156c",
     "groesse": 275,
     "mimeType": "message/rfc822",
     "dateiname": "Ihre Rechnung HK-2026-1187.eml",
     "quelle": "mail",
-    "eingegangenAm": "2026-11-27T19:50:34.712Z",
+    "eingegangenAm": "2026-11-28T07:55:09.644Z",
     "asn": 11,
     "art": null,
     "fristBis": null,
@@ -22,13 +22,13 @@
     "ausschnitt": null
    },
    {
-    "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-    "sha256": "70e9eefc758958fd18c78d47371676cc23337005f311c542d3dc8f873cbf7652",
+    "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+    "sha256": "67c4b1dcd3dd4d9ef2ff2d8e87958921247d10d9e9fd641213c50862866938df",
     "groesse": 1241,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2016-05.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.672Z",
+    "eingegangenAm": "2026-11-28T07:55:09.574Z",
     "asn": 10,
     "art": "beleg",
     "fristBis": "2024-12-31",
@@ -36,7 +36,7 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "vorschaubild": true,
@@ -44,13 +44,13 @@
     "ausschnitt": null
    },
    {
-    "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-    "sha256": "d7b86cd1d905cf93107e963a97445f673642cedf140f4aa2ba5c072091439ff2",
+    "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+    "sha256": "2c3bd70e565f9bb89fd89d7ac63c3be02eb4802a57c2853e2b83fcdb7c288289",
     "groesse": 1479,
     "mimeType": "application/pdf",
     "dateiname": "Scan-Bewirtung.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.644Z",
+    "eingegangenAm": "2026-11-28T07:55:09.562Z",
     "asn": 9,
     "art": null,
     "fristBis": null,
@@ -63,13 +63,13 @@
     "ausschnitt": null
    },
    {
-    "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-    "sha256": "97b1c52df5ceb6200744f665ed6c7d214d3c95c046da58c2c7a2bfc402f7d280",
-    "groesse": 1367,
+    "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+    "sha256": "013544206d0606e9b7cf5be62c3e127dc3e01087edb9c4fb5c581352a27529ac",
+    "groesse": 1368,
     "mimeType": "application/pdf",
     "dateiname": "Scan-Tankquittung.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.630Z",
+    "eingegangenAm": "2026-11-28T07:55:09.551Z",
     "asn": 8,
     "art": null,
     "fristBis": null,
@@ -82,26 +82,26 @@
     "ausschnitt": null
    },
    {
-    "id": "84c8b1a5-de69-410a-a4c4-6d3935aa2769",
+    "id": "1e5a78ef-0775-41d0-9479-63267e944955",
     "sha256": "c2e63e246a811a8dd44c238bb31560310b78a0f66600fc989e34a9e733d1a175",
     "groesse": 1474,
     "mimeType": "application/xml",
     "dateiname": "xrechnung-2026-77.xml",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.605Z",
+    "eingegangenAm": "2026-11-28T07:55:09.528Z",
     "asn": 7,
     "art": null,
     "fristBis": null,
     "titel": null,
     "tags": [
      {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
       "name": "Material",
       "farbe": "orange"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": null,
@@ -110,13 +110,13 @@
     "ausschnitt": null
    },
    {
-    "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-    "sha256": "00c0af0ea350062e84dc235c2c86a56849115978a79a49a9d78d50c4b1b0361d",
+    "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+    "sha256": "b6fa800579b6826f40f8a52a9d6c3ef3b520e9bdebbd36589a0c58320d2e9bde",
     "groesse": 1521,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2026-10.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.584Z",
+    "eingegangenAm": "2026-11-28T07:55:09.509Z",
     "asn": 6,
     "art": "beleg",
     "fristBis": "2034-12-31",
@@ -124,7 +124,7 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "vorschaubild": true,
@@ -132,24 +132,24 @@
     "ausschnitt": null
    },
    {
-    "id": "056c0055-0929-46bc-902a-c3bb2d5abb89",
-    "sha256": "d9f301d34374aee9c5a065f26854b7f34ff98df7811890a0b33783e220838616",
+    "id": "21398d0f-fc62-4b4a-a7e5-e832e3e411b9",
+    "sha256": "7c91657b390c6b5acec600529872010751ff2cb80cd500f7fd9caf09f2a2c823",
     "groesse": 1324,
     "mimeType": "application/pdf",
     "dateiname": "Police-Betriebshaftpflicht.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.550Z",
+    "eingegangenAm": "2026-11-28T07:55:09.476Z",
     "asn": 5,
     "art": "freiwillig",
     "fristBis": "2032-12-31",
     "titel": "Betriebshaftpflicht",
     "tags": [],
     "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
      "name": "Vertrag"
     },
     "korrespondent": {
-     "id": "cb653882-5597-4fce-8a02-4f68c132b0d5",
+     "id": "732d3252-f293-4251-8873-f4cc567726ca",
      "name": "Nordlicht Versicherung AG"
     },
     "vorschaubild": true,
@@ -157,27 +157,27 @@
     "ausschnitt": null
    },
    {
-    "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-    "sha256": "6e47459db38d205322d0d1ef3677738a419e8592106ba99e88e3b229d9f013ea",
+    "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+    "sha256": "241e9d33d2e73eb581c6970bc93fcdae081e30f610b74e524e46473cb4c506cd",
     "groesse": 1544,
     "mimeType": "application/pdf",
     "dateiname": "Angebot-Hobelbank.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.515Z",
+    "eingegangenAm": "2026-11-28T07:55:09.443Z",
     "asn": 4,
     "art": "geschaeftsbrief",
     "fristBis": "2032-12-31",
     "titel": "Angebot Hobelbank",
     "tags": [
      {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
       "name": "Büro",
       "farbe": "violett"
      }
     ],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "eecceb8c-cc96-42c0-bb36-cc25d08e78e7",
+     "id": "ae5b8702-4193-4827-8945-e758f6698798",
      "name": "Maschinenbau Petersen KG"
     },
     "vorschaubild": true,
@@ -185,35 +185,35 @@
     "ausschnitt": null
    },
    {
-    "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-    "sha256": "027cd874d2d8c54313bbca0f471c63d9d562b0aaa4be819dfc6f25c51aa1dd01",
+    "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+    "sha256": "f522ace1b55e163287017a6a3f262ed4dd3590debd052f534b3cde1c64b0ad5c",
     "groesse": 1394,
     "mimeType": "application/pdf",
     "dateiname": "Mietvertrag-Werkstatt.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.467Z",
+    "eingegangenAm": "2026-11-28T07:55:09.395Z",
     "asn": 3,
     "art": "freiwillig",
     "fristBis": "2034-02-28",
     "titel": "Mietvertrag Werkstatt",
     "tags": [
      {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
       "name": "Büro",
       "farbe": "violett"
      },
      {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
       "name": "Fixkosten",
       "farbe": "gruen"
      }
     ],
     "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
      "name": "Vertrag"
     },
     "korrespondent": {
-     "id": "d2270368-e71f-4dab-b677-6c2ca41ed3b4",
+     "id": "f91abbba-2f9e-4d9a-aa30-a9a62794285f",
      "name": "Hausverwaltung Lindenhof"
     },
     "vorschaubild": true,
@@ -221,35 +221,35 @@
     "ausschnitt": null
    },
    {
-    "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-    "sha256": "09e03b1c3cf2e049f6a61f2418e47a5ac7b49f4b2e297540029458e6fb8d14bf",
+    "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+    "sha256": "f8bc2f5ed18fc058d9a4d75b36097ec03703e63ebbc6eb4aefe78b41f134c301",
     "groesse": 2534,
     "mimeType": "application/pdf",
     "dateiname": "HK-2026-1187.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.447Z",
+    "eingegangenAm": "2026-11-28T07:55:09.370Z",
     "asn": 2,
     "art": "beleg",
     "fristBis": "2034-12-31",
     "titel": "Rechnung HK-2026-1187",
     "tags": [
      {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
       "name": "Material",
       "farbe": "orange"
      },
      {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
       "name": "Steuer 2026",
       "farbe": "blau"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": {
-     "id": "9fe6cbef-902b-4710-961b-14178bdeb508",
+     "id": "e5f2422f-5288-4f89-b69d-db9e8c948a79",
      "name": "Holzhandel Kranich GmbH"
     },
     "vorschaubild": true,
@@ -257,35 +257,35 @@
     "ausschnitt": null
    },
    {
-    "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-    "sha256": "dac71265b3431841d2f7ab21bf7faa2da9cda9e88ca6d8e9e5ecbfda86889f53",
+    "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+    "sha256": "c5e12774b012a250aaa9a260218f55c6f9027bbf3132056fefd4da2ac3293bd9",
     "groesse": 1504,
     "mimeType": "application/pdf",
     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.364Z",
+    "eingegangenAm": "2026-11-28T07:55:09.301Z",
     "asn": 1,
     "art": "beleg",
     "fristBis": "2034-12-31",
     "titel": "Strom Oktober",
     "tags": [
      {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
       "name": "Fixkosten",
       "farbe": "gruen"
      },
      {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
       "name": "Steuer 2026",
       "farbe": "blau"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": {
-     "id": "8b51ffb8-2f86-4cdf-b7b0-78efe74d72e4",
+     "id": "07b1fdf7-e6b9-468c-b9df-5f2f21af6530",
      "name": "Stadtwerke Musterstadt"
     },
     "vorschaubild": true,
@@ -295,13 +295,13 @@
   ],
   "offen": [
    {
-    "id": "cdc40969-0320-45e6-b6d3-923c6bde6724",
+    "id": "c248de30-fea6-419d-9f79-cb9fdf6f5d22",
     "sha256": "f4ba0a1f85d563670b917691b4e918079c88cb476bea735b543ddf0dd5eb156c",
     "groesse": 275,
     "mimeType": "message/rfc822",
     "dateiname": "Ihre Rechnung HK-2026-1187.eml",
     "quelle": "mail",
-    "eingegangenAm": "2026-11-27T19:50:34.712Z",
+    "eingegangenAm": "2026-11-28T07:55:09.644Z",
     "asn": 11,
     "art": null,
     "fristBis": null,
@@ -314,13 +314,13 @@
     "ausschnitt": null
    },
    {
-    "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-    "sha256": "d7b86cd1d905cf93107e963a97445f673642cedf140f4aa2ba5c072091439ff2",
+    "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+    "sha256": "2c3bd70e565f9bb89fd89d7ac63c3be02eb4802a57c2853e2b83fcdb7c288289",
     "groesse": 1479,
     "mimeType": "application/pdf",
     "dateiname": "Scan-Bewirtung.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.644Z",
+    "eingegangenAm": "2026-11-28T07:55:09.562Z",
     "asn": 9,
     "art": null,
     "fristBis": null,
@@ -333,13 +333,13 @@
     "ausschnitt": null
    },
    {
-    "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-    "sha256": "97b1c52df5ceb6200744f665ed6c7d214d3c95c046da58c2c7a2bfc402f7d280",
-    "groesse": 1367,
+    "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+    "sha256": "013544206d0606e9b7cf5be62c3e127dc3e01087edb9c4fb5c581352a27529ac",
+    "groesse": 1368,
     "mimeType": "application/pdf",
     "dateiname": "Scan-Tankquittung.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.630Z",
+    "eingegangenAm": "2026-11-28T07:55:09.551Z",
     "asn": 8,
     "art": null,
     "fristBis": null,
@@ -352,26 +352,26 @@
     "ausschnitt": null
    },
    {
-    "id": "84c8b1a5-de69-410a-a4c4-6d3935aa2769",
+    "id": "1e5a78ef-0775-41d0-9479-63267e944955",
     "sha256": "c2e63e246a811a8dd44c238bb31560310b78a0f66600fc989e34a9e733d1a175",
     "groesse": 1474,
     "mimeType": "application/xml",
     "dateiname": "xrechnung-2026-77.xml",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.605Z",
+    "eingegangenAm": "2026-11-28T07:55:09.528Z",
     "asn": 7,
     "art": null,
     "fristBis": null,
     "titel": null,
     "tags": [
      {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
       "name": "Material",
       "farbe": "orange"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": null,
@@ -382,13 +382,13 @@
   ],
   "pflicht": [
    {
-    "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-    "sha256": "70e9eefc758958fd18c78d47371676cc23337005f311c542d3dc8f873cbf7652",
+    "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+    "sha256": "67c4b1dcd3dd4d9ef2ff2d8e87958921247d10d9e9fd641213c50862866938df",
     "groesse": 1241,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2016-05.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.672Z",
+    "eingegangenAm": "2026-11-28T07:55:09.574Z",
     "asn": 10,
     "art": "beleg",
     "fristBis": "2024-12-31",
@@ -396,7 +396,7 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "vorschaubild": true,
@@ -404,13 +404,13 @@
     "ausschnitt": null
    },
    {
-    "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-    "sha256": "00c0af0ea350062e84dc235c2c86a56849115978a79a49a9d78d50c4b1b0361d",
+    "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+    "sha256": "b6fa800579b6826f40f8a52a9d6c3ef3b520e9bdebbd36589a0c58320d2e9bde",
     "groesse": 1521,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2026-10.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.584Z",
+    "eingegangenAm": "2026-11-28T07:55:09.509Z",
     "asn": 6,
     "art": "beleg",
     "fristBis": "2034-12-31",
@@ -418,7 +418,7 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "vorschaubild": true,
@@ -426,27 +426,27 @@
     "ausschnitt": null
    },
    {
-    "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-    "sha256": "6e47459db38d205322d0d1ef3677738a419e8592106ba99e88e3b229d9f013ea",
+    "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+    "sha256": "241e9d33d2e73eb581c6970bc93fcdae081e30f610b74e524e46473cb4c506cd",
     "groesse": 1544,
     "mimeType": "application/pdf",
     "dateiname": "Angebot-Hobelbank.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.515Z",
+    "eingegangenAm": "2026-11-28T07:55:09.443Z",
     "asn": 4,
     "art": "geschaeftsbrief",
     "fristBis": "2032-12-31",
     "titel": "Angebot Hobelbank",
     "tags": [
      {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
       "name": "Büro",
       "farbe": "violett"
      }
     ],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "eecceb8c-cc96-42c0-bb36-cc25d08e78e7",
+     "id": "ae5b8702-4193-4827-8945-e758f6698798",
      "name": "Maschinenbau Petersen KG"
     },
     "vorschaubild": true,
@@ -454,35 +454,35 @@
     "ausschnitt": null
    },
    {
-    "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-    "sha256": "09e03b1c3cf2e049f6a61f2418e47a5ac7b49f4b2e297540029458e6fb8d14bf",
+    "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+    "sha256": "f8bc2f5ed18fc058d9a4d75b36097ec03703e63ebbc6eb4aefe78b41f134c301",
     "groesse": 2534,
     "mimeType": "application/pdf",
     "dateiname": "HK-2026-1187.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.447Z",
+    "eingegangenAm": "2026-11-28T07:55:09.370Z",
     "asn": 2,
     "art": "beleg",
     "fristBis": "2034-12-31",
     "titel": "Rechnung HK-2026-1187",
     "tags": [
      {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
       "name": "Material",
       "farbe": "orange"
      },
      {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
       "name": "Steuer 2026",
       "farbe": "blau"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": {
-     "id": "9fe6cbef-902b-4710-961b-14178bdeb508",
+     "id": "e5f2422f-5288-4f89-b69d-db9e8c948a79",
      "name": "Holzhandel Kranich GmbH"
     },
     "vorschaubild": true,
@@ -490,35 +490,35 @@
     "ausschnitt": null
    },
    {
-    "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-    "sha256": "dac71265b3431841d2f7ab21bf7faa2da9cda9e88ca6d8e9e5ecbfda86889f53",
+    "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+    "sha256": "c5e12774b012a250aaa9a260218f55c6f9027bbf3132056fefd4da2ac3293bd9",
     "groesse": 1504,
     "mimeType": "application/pdf",
     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.364Z",
+    "eingegangenAm": "2026-11-28T07:55:09.301Z",
     "asn": 1,
     "art": "beleg",
     "fristBis": "2034-12-31",
     "titel": "Strom Oktober",
     "tags": [
      {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
       "name": "Fixkosten",
       "farbe": "gruen"
      },
      {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
       "name": "Steuer 2026",
       "farbe": "blau"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung"
     },
     "korrespondent": {
-     "id": "8b51ffb8-2f86-4cdf-b7b0-78efe74d72e4",
+     "id": "07b1fdf7-e6b9-468c-b9df-5f2f21af6530",
      "name": "Stadtwerke Musterstadt"
     },
     "vorschaubild": true,
@@ -528,24 +528,24 @@
   ],
   "freiwillig": [
    {
-    "id": "056c0055-0929-46bc-902a-c3bb2d5abb89",
-    "sha256": "d9f301d34374aee9c5a065f26854b7f34ff98df7811890a0b33783e220838616",
+    "id": "21398d0f-fc62-4b4a-a7e5-e832e3e411b9",
+    "sha256": "7c91657b390c6b5acec600529872010751ff2cb80cd500f7fd9caf09f2a2c823",
     "groesse": 1324,
     "mimeType": "application/pdf",
     "dateiname": "Police-Betriebshaftpflicht.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.550Z",
+    "eingegangenAm": "2026-11-28T07:55:09.476Z",
     "asn": 5,
     "art": "freiwillig",
     "fristBis": "2032-12-31",
     "titel": "Betriebshaftpflicht",
     "tags": [],
     "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
      "name": "Vertrag"
     },
     "korrespondent": {
-     "id": "cb653882-5597-4fce-8a02-4f68c132b0d5",
+     "id": "732d3252-f293-4251-8873-f4cc567726ca",
      "name": "Nordlicht Versicherung AG"
     },
     "vorschaubild": true,
@@ -553,35 +553,35 @@
     "ausschnitt": null
    },
    {
-    "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-    "sha256": "027cd874d2d8c54313bbca0f471c63d9d562b0aaa4be819dfc6f25c51aa1dd01",
+    "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+    "sha256": "f522ace1b55e163287017a6a3f262ed4dd3590debd052f534b3cde1c64b0ad5c",
     "groesse": 1394,
     "mimeType": "application/pdf",
     "dateiname": "Mietvertrag-Werkstatt.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.467Z",
+    "eingegangenAm": "2026-11-28T07:55:09.395Z",
     "asn": 3,
     "art": "freiwillig",
     "fristBis": "2034-02-28",
     "titel": "Mietvertrag Werkstatt",
     "tags": [
      {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
       "name": "Büro",
       "farbe": "violett"
      },
      {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
       "name": "Fixkosten",
       "farbe": "gruen"
      }
     ],
     "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
      "name": "Vertrag"
     },
     "korrespondent": {
-     "id": "d2270368-e71f-4dab-b677-6c2ca41ed3b4",
+     "id": "f91abbba-2f9e-4d9a-aa30-a9a62794285f",
      "name": "Hausverwaltung Lindenhof"
     },
     "vorschaubild": true,
@@ -592,13 +592,13 @@
   "frei": [],
   "loeschbar": [
    {
-    "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-    "sha256": "70e9eefc758958fd18c78d47371676cc23337005f311c542d3dc8f873cbf7652",
+    "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+    "sha256": "67c4b1dcd3dd4d9ef2ff2d8e87958921247d10d9e9fd641213c50862866938df",
     "groesse": 1241,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2016-05.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.672Z",
+    "eingegangenAm": "2026-11-28T07:55:09.574Z",
     "asn": 10,
     "art": "beleg",
     "fristBis": "2024-12-31",
@@ -606,7 +606,7 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "vorschaubild": true,
@@ -622,7 +622,7 @@
    "status": 200,
    "json": [
     {
-     "id": "ebadc5f8-9145-4859-945a-bc162f895bdd",
+     "id": "f5b78a49-fd5e-4f53-bcdb-4dbf554a0b9c",
      "name": "Steuer 2026",
      "parameter": {
       "suche": "Rechnung"
@@ -686,6 +686,15 @@
        "insert": true,
        "update": false,
        "delete": false,
+       "truncate": false,
+       "trigger": false
+      },
+      {
+       "tabelle": "abruf_sperren",
+       "select": true,
+       "insert": true,
+       "update": true,
+       "delete": true,
        "truncate": false,
        "trigger": false
       },
@@ -1339,389 +1348,26 @@
     }
    }
   },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a": {
    "status": 200,
    "json": {
-    "id": "056c0055-0929-46bc-902a-c3bb2d5abb89",
-    "sha256": "d9f301d34374aee9c5a065f26854b7f34ff98df7811890a0b33783e220838616",
-    "groesse": 1324,
-    "mimeType": "application/pdf",
-    "dateiname": "Police-Betriebshaftpflicht.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.550Z",
-    "asn": 5,
-    "einordnung": {
-     "id": "c893524a-62aa-4ebc-b9b6-9ddb484f592d",
-     "dokumentId": "056c0055-0929-46bc-902a-c3bb2d5abb89",
-     "art": "freiwillig",
-     "entstanden": "2026-01-02",
-     "fristBis": "2032-12-31",
-     "titel": "Betriebshaftpflicht",
-     "korrespondent": "Nordlicht Versicherung AG",
-     "erstelltAm": "2026-11-27T19:50:34.559Z"
-    },
-    "vormalsAnders": true,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [],
-    "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
-     "name": "Vertrag",
-     "vorgabeArt": null
-    },
-    "korrespondent": {
-     "id": "cb653882-5597-4fce-8a02-4f68c132b0d5",
-     "name": "Nordlicht Versicherung AG"
-    },
-    "felder": []
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-     "asn": 10,
-     "dateiname": "Kontoauszug-2016-05.pdf",
-     "titel": "Kontoauszug Mai 2016",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "70a34b30c8f49855.pdf"
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "2e044e3e2d265946.pdf"
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 307,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "3dced51730d7008b.jpg"
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 59,
-      "at": "2026-11-27T19:50:34.550Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 60,
-      "at": "2026-11-27T19:50:34.550Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 64,
-      "at": "2026-11-27T19:50:34.559Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "einordnungen",
-      "detail": "Nordlicht Versicherung AG"
-     },
-     {
-      "seq": 65,
-      "at": "2026-11-27T19:50:34.559Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 66,
-      "at": "2026-11-27T19:50:34.559Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_korrespondenten",
-      "detail": "Nordlicht Versicherung AG"
-     },
-     {
-      "seq": 67,
-      "at": "2026-11-27T19:50:34.569Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_dokumenttypen",
-      "detail": "Vertrag"
-     }
-    ],
-    "siegel": "447086c75b8caf910b1e33539ebc4ce97712a6ffe4ec45de5a2c87e654c5e206"
-   }
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "f3e47fbb9f7af816.jpg"
-  },
-  "/api/dokumente/056c0055-0929-46bc-902a-c3bb2d5abb89/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6": {
-   "status": 200,
-   "json": {
-    "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-    "sha256": "97b1c52df5ceb6200744f665ed6c7d214d3c95c046da58c2c7a2bfc402f7d280",
-    "groesse": 1367,
-    "mimeType": "application/pdf",
-    "dateiname": "Scan-Tankquittung.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.630Z",
-    "asn": 8,
-    "einordnung": null,
-    "vormalsAnders": false,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [],
-    "dokumenttyp": null,
-    "korrespondent": null,
-    "felder": []
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-     "asn": 4,
-     "dateiname": "Angebot-Hobelbank.pdf",
-     "titel": "Angebot Hobelbank",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "370be0cd14ac629e.pdf"
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "d6c9b4254c218f38.pdf"
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 230,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "5a0b50e0c4b13fe7.jpg"
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 82,
-      "at": "2026-11-27T19:50:34.630Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 83,
-      "at": "2026-11-27T19:50:34.630Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     }
-    ],
-    "siegel": "bc909c52739a5c164c8c7242aded0063465e59b985bec4e9cd7be69e3a74d544"
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "16cac8154c3126e5.jpg"
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/vorschlag": {
-   "status": 200,
-   "json": {
-    "vorschlag": null,
-    "zuordnung": null,
-    "gelernt": null,
-    "erechnung": null,
-    "ki": null,
-    "import": null
-   }
-  },
-  "/api/dokumente/141b6a3c-5cc3-483d-9a73-348c975c92d6/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46": {
-   "status": 200,
-   "json": {
-    "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-    "sha256": "00c0af0ea350062e84dc235c2c86a56849115978a79a49a9d78d50c4b1b0361d",
+    "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+    "sha256": "b6fa800579b6826f40f8a52a9d6c3ef3b520e9bdebbd36589a0c58320d2e9bde",
     "groesse": 1521,
     "mimeType": "application/pdf",
     "dateiname": "Kontoauszug-2026-10.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.584Z",
+    "eingegangenAm": "2026-11-28T07:55:09.509Z",
     "asn": 6,
     "einordnung": {
-     "id": "c39980ab-a3d3-41d9-874c-11f3def3ce0f",
-     "dokumentId": "2d1bceed-2b56-4a73-bb46-462f01108b46",
+     "id": "5ee208be-1eda-4ce9-ad83-b695ec9a1705",
+     "dokumentId": "185f605c-3b68-4a63-9337-5e9b4500058a",
      "art": "beleg",
      "entstanden": "2026-10-31",
      "fristBis": "2034-12-31",
      "titel": "Kontoauszug Oktober",
      "korrespondent": "Musterbank eG",
-     "erstelltAm": "2026-11-27T19:50:34.594Z"
+     "erstelltAm": "2026-11-28T07:55:09.517Z"
     },
     "vormalsAnders": true,
     "loeschung": null,
@@ -1730,24 +1376,24 @@
     "tags": [],
     "dokumenttyp": null,
     "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG"
     },
     "felder": []
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/ableitungen": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/ableitungen": {
    "status": 200,
    "json": {
     "aus": [],
     "daraus": []
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/aehnliche": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/aehnliche": {
    "status": 200,
    "json": [
     {
-     "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
+     "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
      "asn": 10,
      "dateiname": "Kontoauszug-2016-05.pdf",
      "titel": "Kontoauszug Mai 2016",
@@ -1755,7 +1401,7 @@
      "vorschaubild": true
     },
     {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
      "asn": 1,
      "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
      "titel": "Strom Oktober",
@@ -1763,7 +1409,7 @@
      "vorschaubild": true
     },
     {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
      "asn": 3,
      "dateiname": "Mietvertrag-Werkstatt.pdf",
      "titel": "Mietvertrag Werkstatt",
@@ -1771,7 +1417,7 @@
      "vorschaubild": true
     },
     {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
      "asn": 9,
      "dateiname": "Scan-Bewirtung.pdf",
      "titel": null,
@@ -1780,17 +1426,17 @@
     }
    ]
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/datei": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/datei": {
    "status": 200,
    "typ": "application/pdf",
-   "datei": "b1b17789c3617123.pdf"
+   "datei": "a6d4ecaffa957c4e.pdf"
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/datei?ansicht=1": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/datei?ansicht=1": {
    "status": 200,
    "typ": "application/pdf",
-   "datei": "f3c0b9c0bab98b3b.pdf"
+   "datei": "40f799df73dc41ef.pdf"
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/inhalt": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/inhalt": {
    "status": 200,
    "json": {
     "erechnung": null,
@@ -1800,38 +1446,38 @@
     "pruefung": null
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/links": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/links": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/mail": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/mail": {
    "status": 404,
    "json": {
     "fehler": "Keine Mail"
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/notizen": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/notizen": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/seiten": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/seiten": {
    "status": 200,
    "json": {
     "anzahl": 1
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/seiten/1": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/seiten/1": {
    "status": 200,
    "typ": "image/jpeg",
-   "datei": "ad49d2da4a38b049.jpg"
+   "datei": "7eb2411e7167271e.jpg"
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/verlauf": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/verlauf": {
    "status": 200,
    "json": {
     "ereignisse": [
      {
       "seq": 68,
-      "at": "2026-11-27T19:50:34.584Z",
+      "at": "2026-11-28T07:55:09.509Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokumente",
@@ -1839,7 +1485,7 @@
      },
      {
       "seq": 69,
-      "at": "2026-11-27T19:50:34.584Z",
+      "at": "2026-11-28T07:55:09.509Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
@@ -1847,7 +1493,7 @@
      },
      {
       "seq": 73,
-      "at": "2026-11-27T19:50:34.594Z",
+      "at": "2026-11-28T07:55:09.517Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "einordnungen",
@@ -1855,7 +1501,7 @@
      },
      {
       "seq": 74,
-      "at": "2026-11-27T19:50:34.594Z",
+      "at": "2026-11-28T07:55:09.517Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
@@ -1863,1133 +1509,35 @@
      },
      {
       "seq": 75,
-      "at": "2026-11-27T19:50:34.594Z",
+      "at": "2026-11-28T07:55:09.517Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokument_korrespondenten",
       "detail": "Musterbank eG"
      }
     ],
-    "siegel": "586b9f710976f4f2ad7ae27b48eebae8a8ed5960cbeaf152c84713ae26aaf8cc"
+    "siegel": "09e4be30274b8d7ce05bc041e8821495d805442536e05bfbaba0a213fac6daa1"
    }
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/vorschaubild": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/vorschaubild": {
    "status": 200,
    "typ": "image/jpeg",
-   "datei": "a558599e5aeb56cc.jpg"
+   "datei": "92d78efe5d5d88d2.jpg"
   },
-  "/api/dokumente/2d1bceed-2b56-4a73-bb46-462f01108b46/weitergaben": {
+  "/api/dokumente/185f605c-3b68-4a63-9337-5e9b4500058a/weitergaben": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955": {
    "status": 200,
    "json": {
-    "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-    "sha256": "09e03b1c3cf2e049f6a61f2418e47a5ac7b49f4b2e297540029458e6fb8d14bf",
-    "groesse": 2534,
-    "mimeType": "application/pdf",
-    "dateiname": "HK-2026-1187.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.447Z",
-    "asn": 2,
-    "einordnung": {
-     "id": "783a36d9-4265-4a4e-b5bc-1d0bc6fa72fc",
-     "dokumentId": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "art": "beleg",
-     "entstanden": "2026-11-03",
-     "fristBis": "2034-12-31",
-     "titel": "Rechnung HK-2026-1187",
-     "korrespondent": "Holzhandel Kranich GmbH",
-     "erstelltAm": "2026-11-27T19:50:40.773Z"
-    },
-    "vormalsAnders": true,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [
-     {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
-      "name": "Material",
-      "farbe": "orange"
-     },
-     {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
-      "name": "Steuer 2026",
-      "farbe": "blau"
-     }
-    ],
-    "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
-     "name": "Rechnung",
-     "vorgabeArt": "beleg"
-    },
-    "korrespondent": {
-     "id": "9fe6cbef-902b-4710-961b-14178bdeb508",
-     "name": "Holzhandel Kranich GmbH"
-    },
-    "felder": [
-     {
-      "feldId": "5e08e7a0-ed3d-4cdc-96c0-792d397cef32",
-      "name": "Betrag",
-      "typ": "betrag",
-      "wert": 147560
-     }
-    ]
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-     "asn": 4,
-     "dateiname": "Angebot-Hobelbank.pdf",
-     "titel": "Angebot Hobelbank",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-     "asn": 8,
-     "dateiname": "Scan-Tankquittung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "c3c72a195712e9e2.pdf"
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "0bab91cd5ba8e001.pdf"
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": {
-     "typ": "380",
-     "datum": "2026-11-03",
-     "nummer": "HK-2026-1187",
-     "syntax": "cii",
-     "kaeufer": "Muster Werkstatt GmbH",
-     "waehrung": "EUR",
-     "bruttoCent": 147560,
-     "verkaeufer": "Holzhandel Kranich GmbH"
-    },
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 443,
-    "pruefung": {
-     "gueltig": true,
-     "szenario": "EN16931 (CII)",
-     "fehler": 0,
-     "warnungen": 0,
-     "meldungen": [],
-     "geprueftAm": "2026-11-27T19:50:36.585Z"
-    }
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "9534c4f52f880498.jpg"
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 35,
-      "at": "2026-11-27T19:50:34.447Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 36,
-      "at": "2026-11-27T19:50:34.447Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 130,
-      "at": "2026-11-27T19:50:40.773Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "einordnungen",
-      "detail": "Holzhandel Kranich GmbH"
-     },
-     {
-      "seq": 131,
-      "at": "2026-11-27T19:50:40.773Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 132,
-      "at": "2026-11-27T19:50:40.773Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_korrespondenten",
-      "detail": "Holzhandel Kranich GmbH"
-     },
-     {
-      "seq": 133,
-      "at": "2026-11-27T19:50:40.782Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Steuer 2026"
-     },
-     {
-      "seq": 134,
-      "at": "2026-11-27T19:50:40.782Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Material"
-     },
-     {
-      "seq": 135,
-      "at": "2026-11-27T19:50:40.782Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_dokumenttypen",
-      "detail": "Rechnung"
-     },
-     {
-      "seq": 136,
-      "at": "2026-11-27T19:50:40.782Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "feldwerte",
-      "detail": "Betrag"
-     }
-    ],
-    "siegel": "9e6014a00e469e3c8b43e359b2ce75fd5572721df9474209b2296607d653dd7f"
-   }
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "3b744f463f8cef45.jpg"
-  },
-  "/api/dokumente/2e141748-be44-4510-bc76-a7edbcaddcc6/weitergaben": {
-   "status": 200,
-   "json": [
-    {
-     "id": "3429b398-5473-48be-9c71-1431230ce4e3",
-     "workflowName": "Rechnungen an die Buchhaltung",
-     "ziel": "buchhaltung.example",
-     "stand": "gesendet",
-     "versuche": 1,
-     "letzterVersuch": "2026-11-27T19:50:42.215Z",
-     "naechsterVersuch": null,
-     "httpStatus": 201,
-     "fehler": null,
-     "gesendetAm": "2026-11-27T19:50:42.215Z"
-    }
-   ]
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13": {
-   "status": 200,
-   "json": {
-    "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-    "sha256": "dac71265b3431841d2f7ab21bf7faa2da9cda9e88ca6d8e9e5ecbfda86889f53",
-    "groesse": 1504,
-    "mimeType": "application/pdf",
-    "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.364Z",
-    "asn": 1,
-    "einordnung": {
-     "id": "87882a30-4bb2-4d17-a50b-5879cce5d990",
-     "dokumentId": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "art": "beleg",
-     "entstanden": "2026-10-31",
-     "fristBis": "2034-12-31",
-     "titel": "Strom Oktober",
-     "korrespondent": "Stadtwerke Musterstadt",
-     "erstelltAm": "2026-11-27T19:50:34.393Z"
-    },
-    "vormalsAnders": true,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [
-     {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
-      "name": "Fixkosten",
-      "farbe": "gruen"
-     },
-     {
-      "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
-      "name": "Steuer 2026",
-      "farbe": "blau"
-     }
-    ],
-    "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
-     "name": "Rechnung",
-     "vorgabeArt": "beleg"
-    },
-    "korrespondent": {
-     "id": "8b51ffb8-2f86-4cdf-b7b0-78efe74d72e4",
-     "name": "Stadtwerke Musterstadt"
-    },
-    "felder": [
-     {
-      "feldId": "5e08e7a0-ed3d-4cdc-96c0-792d397cef32",
-      "name": "Betrag",
-      "typ": "betrag",
-      "wert": 8420
-     }
-    ]
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-     "asn": 6,
-     "dateiname": "Kontoauszug-2026-10.pdf",
-     "titel": "Kontoauszug Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-     "asn": 8,
-     "dateiname": "Scan-Tankquittung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "7aa38f14bf621966.pdf"
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "a745b5287838b307.pdf"
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 350,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "f10f66e4f0751841.jpg"
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 26,
-      "at": "2026-11-27T19:50:34.364Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 27,
-      "at": "2026-11-27T19:50:34.364Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 31,
-      "at": "2026-11-27T19:50:34.393Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "einordnungen",
-      "detail": "Stadtwerke Musterstadt"
-     },
-     {
-      "seq": 32,
-      "at": "2026-11-27T19:50:34.393Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 33,
-      "at": "2026-11-27T19:50:34.393Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_korrespondenten",
-      "detail": "Stadtwerke Musterstadt"
-     },
-     {
-      "seq": 34,
-      "at": "2026-11-27T19:50:34.414Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "feldwerte",
-      "detail": "Betrag"
-     },
-     {
-      "seq": 116,
-      "at": "2026-11-27T19:50:36.221Z",
-      "akteur": "workflow:Stadtwerke als Fixkosten",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Fixkosten"
-     },
-     {
-      "seq": 117,
-      "at": "2026-11-27T19:50:36.221Z",
-      "akteur": "workflow:Stadtwerke als Fixkosten",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Steuer 2026"
-     },
-     {
-      "seq": 118,
-      "at": "2026-11-27T19:50:36.221Z",
-      "akteur": "workflow:Stadtwerke als Fixkosten",
-      "aktion": "INSERT",
-      "tabelle": "dokument_dokumenttypen",
-      "detail": "Rechnung"
-     }
-    ],
-    "siegel": "0af6388ebc46891c6ad9db4a2cae55a60a4c28299321cb57afd91d9152d66e55"
-   }
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "6f7970172268d3df.jpg"
-  },
-  "/api/dokumente/35748a60-b3b3-41a9-8ff8-3c6932a0fa13/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9": {
-   "status": 200,
-   "json": {
-    "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-    "sha256": "027cd874d2d8c54313bbca0f471c63d9d562b0aaa4be819dfc6f25c51aa1dd01",
-    "groesse": 1394,
-    "mimeType": "application/pdf",
-    "dateiname": "Mietvertrag-Werkstatt.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.467Z",
-    "asn": 3,
-    "einordnung": {
-     "id": "76997bbc-80bc-49aa-a736-58523c5f6942",
-     "dokumentId": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "art": "freiwillig",
-     "entstanden": "2024-03-01",
-     "fristBis": "2034-02-28",
-     "titel": "Mietvertrag Werkstatt",
-     "korrespondent": "Hausverwaltung Lindenhof",
-     "erstelltAm": "2026-11-27T19:50:34.482Z"
-    },
-    "vormalsAnders": true,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [
-     {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
-      "name": "Büro",
-      "farbe": "violett"
-     },
-     {
-      "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
-      "name": "Fixkosten",
-      "farbe": "gruen"
-     }
-    ],
-    "dokumenttyp": {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
-     "name": "Vertrag",
-     "vorgabeArt": null
-    },
-    "korrespondent": {
-     "id": "d2270368-e71f-4dab-b677-6c2ca41ed3b4",
-     "name": "Hausverwaltung Lindenhof"
-    },
-    "felder": []
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-     "asn": 6,
-     "dateiname": "Kontoauszug-2026-10.pdf",
-     "titel": "Kontoauszug Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "056c0055-0929-46bc-902a-c3bb2d5abb89",
-     "asn": 5,
-     "dateiname": "Police-Betriebshaftpflicht.pdf",
-     "titel": "Betriebshaftpflicht",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-     "asn": 4,
-     "dateiname": "Angebot-Hobelbank.pdf",
-     "titel": "Angebot Hobelbank",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "f2ea948276395de1.pdf"
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "b2031dac03a00e18.pdf"
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 356,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "215cc1c89d949615.jpg"
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 39,
-      "at": "2026-11-27T19:50:34.467Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 40,
-      "at": "2026-11-27T19:50:34.467Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 44,
-      "at": "2026-11-27T19:50:34.482Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "einordnungen",
-      "detail": "Hausverwaltung Lindenhof"
-     },
-     {
-      "seq": 45,
-      "at": "2026-11-27T19:50:34.482Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 46,
-      "at": "2026-11-27T19:50:34.482Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_korrespondenten",
-      "detail": "Hausverwaltung Lindenhof"
-     },
-     {
-      "seq": 47,
-      "at": "2026-11-27T19:50:34.494Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Fixkosten"
-     },
-     {
-      "seq": 48,
-      "at": "2026-11-27T19:50:34.494Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_tags",
-      "detail": "Büro"
-     },
-     {
-      "seq": 49,
-      "at": "2026-11-27T19:50:34.494Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_dokumenttypen",
-      "detail": "Vertrag"
-     }
-    ],
-    "siegel": "891bc58dd5985e1f1958431696077012ab3a8e4b8b7527059b30096d1626927a"
-   }
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "cb4b1df53790c5ee.jpg"
-  },
-  "/api/dokumente/5a139a9d-668c-4df8-9eef-a58927f43cd9/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d": {
-   "status": 200,
-   "json": {
-    "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-    "sha256": "70e9eefc758958fd18c78d47371676cc23337005f311c542d3dc8f873cbf7652",
-    "groesse": 1241,
-    "mimeType": "application/pdf",
-    "dateiname": "Kontoauszug-2016-05.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.672Z",
-    "asn": 10,
-    "einordnung": {
-     "id": "de044176-deb5-427f-a8f2-918201ceebc0",
-     "dokumentId": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-     "art": "beleg",
-     "entstanden": "2016-05-31",
-     "fristBis": "2024-12-31",
-     "titel": "Kontoauszug Mai 2016",
-     "korrespondent": "Musterbank eG",
-     "erstelltAm": "2026-11-27T19:50:34.684Z"
-    },
-    "vormalsAnders": true,
-    "loeschung": {
-     "id": "bd2544e0-22d1-4a76-82bb-6790c5421ab0",
-     "dokumentId": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
-     "beantragtVon": "nutzer:anna@example.org",
-     "beantragtAm": "2026-11-27T19:50:34.695Z",
-     "bestaetigtVon": null,
-     "bestaetigtAm": null
-    },
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [],
-    "dokumenttyp": null,
-    "korrespondent": {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
-     "name": "Musterbank eG"
-    },
-    "felder": []
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-     "asn": 6,
-     "dateiname": "Kontoauszug-2026-10.pdf",
-     "titel": "Kontoauszug Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-     "asn": 9,
-     "dateiname": "Scan-Bewirtung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "76cab57cd8c045d6.pdf"
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "0150a6c16ba38e3d.pdf"
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 222,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "1bee1135493a59dd.jpg"
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 90,
-      "at": "2026-11-27T19:50:34.672Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 91,
-      "at": "2026-11-27T19:50:34.672Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 94,
-      "at": "2026-11-27T19:50:34.684Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "einordnungen",
-      "detail": "Musterbank eG"
-     },
-     {
-      "seq": 95,
-      "at": "2026-11-27T19:50:34.684Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     },
-     {
-      "seq": 96,
-      "at": "2026-11-27T19:50:34.684Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokument_korrespondenten",
-      "detail": "Musterbank eG"
-     }
-    ],
-    "siegel": "e16aa39c7bfb5cd97dd682861be3c1761ac39f0398ce219042a4149feb9fff7d"
-   }
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "83825223e0dd1b3a.jpg"
-  },
-  "/api/dokumente/619afbe1-3528-44f7-82d0-4dc7033e1d8d/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8": {
-   "status": 200,
-   "json": {
-    "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
-    "sha256": "d7b86cd1d905cf93107e963a97445f673642cedf140f4aa2ba5c072091439ff2",
-    "groesse": 1479,
-    "mimeType": "application/pdf",
-    "dateiname": "Scan-Bewirtung.pdf",
-    "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.644Z",
-    "asn": 9,
-    "einordnung": null,
-    "vormalsAnders": false,
-    "loeschung": null,
-    "ansicht": false,
-    "archivfassung": false,
-    "tags": [],
-    "dokumenttyp": null,
-    "korrespondent": null,
-    "felder": []
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/ableitungen": {
-   "status": 200,
-   "json": {
-    "aus": [],
-    "daraus": []
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/aehnliche": {
-   "status": 200,
-   "json": [
-    {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
-     "asn": 1,
-     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
-     "titel": "Strom Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
-     "asn": 8,
-     "dateiname": "Scan-Tankquittung.pdf",
-     "titel": null,
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "2d1bceed-2b56-4a73-bb46-462f01108b46",
-     "asn": 6,
-     "dateiname": "Kontoauszug-2026-10.pdf",
-     "titel": "Kontoauszug Oktober",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-     "asn": 4,
-     "dateiname": "Angebot-Hobelbank.pdf",
-     "titel": "Angebot Hobelbank",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    }
-   ]
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/datei": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "a7653b26284e85a5.pdf"
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/datei?ansicht=1": {
-   "status": 200,
-   "typ": "application/pdf",
-   "datei": "2911cb52208cf051.pdf"
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/inhalt": {
-   "status": 200,
-   "json": {
-    "erechnung": null,
-    "fehler": null,
-    "ocr": false,
-    "textLaenge": 310,
-    "pruefung": null
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/links": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/mail": {
-   "status": 404,
-   "json": {
-    "fehler": "Keine Mail"
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/notizen": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/seiten": {
-   "status": 200,
-   "json": {
-    "anzahl": 1
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/seiten/1": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "df3f752938b57e2b.jpg"
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/verlauf": {
-   "status": 200,
-   "json": {
-    "ereignisse": [
-     {
-      "seq": 86,
-      "at": "2026-11-27T19:50:34.644Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "dokumente",
-      "detail": null
-     },
-     {
-      "seq": 87,
-      "at": "2026-11-27T19:50:34.644Z",
-      "akteur": "nutzer:anna@example.org",
-      "aktion": "INSERT",
-      "tabelle": "seals",
-      "detail": null
-     }
-    ],
-    "siegel": "0359680a2162c7abca02eb948d44e10c8b9b43b64a977be6896c6a643f4a0823"
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/vorschaubild": {
-   "status": 200,
-   "typ": "image/jpeg",
-   "datei": "8ba1ee1b07aa6939.jpg"
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/vorschlag": {
-   "status": 200,
-   "json": {
-    "vorschlag": null,
-    "zuordnung": null,
-    "gelernt": null,
-    "erechnung": null,
-    "ki": null,
-    "import": null
-   }
-  },
-  "/api/dokumente/71295331-bafb-4832-8ed4-c0a240bb6ed8/weitergaben": {
-   "status": 200,
-   "json": []
-  },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769": {
-   "status": 200,
-   "json": {
-    "id": "84c8b1a5-de69-410a-a4c4-6d3935aa2769",
+    "id": "1e5a78ef-0775-41d0-9479-63267e944955",
     "sha256": "c2e63e246a811a8dd44c238bb31560310b78a0f66600fc989e34a9e733d1a175",
     "groesse": 1474,
     "mimeType": "application/xml",
     "dateiname": "xrechnung-2026-77.xml",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.605Z",
+    "eingegangenAm": "2026-11-28T07:55:09.528Z",
     "asn": 7,
     "einordnung": null,
     "vormalsAnders": false,
@@ -2998,13 +1546,13 @@
     "archivfassung": false,
     "tags": [
      {
-      "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
       "name": "Material",
       "farbe": "orange"
      }
     ],
     "dokumenttyp": {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung",
      "vorgabeArt": "beleg"
     },
@@ -3012,18 +1560,18 @@
     "felder": []
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/ableitungen": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/ableitungen": {
    "status": 200,
    "json": {
     "aus": [],
     "daraus": []
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/aehnliche": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/aehnliche": {
    "status": 200,
    "json": [
     {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
      "asn": 2,
      "dateiname": "HK-2026-1187.pdf",
      "titel": "Rechnung HK-2026-1187",
@@ -3031,7 +1579,7 @@
      "vorschaubild": true
     },
     {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
      "asn": 1,
      "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
      "titel": "Strom Oktober",
@@ -3039,7 +1587,7 @@
      "vorschaubild": true
     },
     {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
      "asn": 9,
      "dateiname": "Scan-Bewirtung.pdf",
      "titel": null,
@@ -3047,7 +1595,7 @@
      "vorschaubild": true
     },
     {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
      "asn": 3,
      "dateiname": "Mietvertrag-Werkstatt.pdf",
      "titel": "Mietvertrag Werkstatt",
@@ -3055,7 +1603,7 @@
      "vorschaubild": true
     },
     {
-     "id": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
+     "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
      "asn": 10,
      "dateiname": "Kontoauszug-2016-05.pdf",
      "titel": "Kontoauszug Mai 2016",
@@ -3064,17 +1612,17 @@
     }
    ]
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/datei": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/datei": {
    "status": 200,
    "typ": "application/xml",
-   "datei": "87f7a4b00a0f13c6.xml"
+   "datei": "9f4ffdab020328c6.xml"
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/datei?ansicht=1": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/datei?ansicht=1": {
    "status": 200,
    "typ": "application/xml",
-   "datei": "6ac4e5791ec67e50.xml"
+   "datei": "ef83d93bb1b6d4d0.xml"
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/inhalt": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/inhalt": {
    "status": 200,
    "json": {
     "erechnung": {
@@ -3096,31 +1644,31 @@
      "fehler": 0,
      "warnungen": 0,
      "meldungen": [],
-     "geprueftAm": "2026-11-27T19:50:37.781Z"
+     "geprueftAm": "2026-11-28T07:55:12.152Z"
     }
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/links": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/links": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/mail": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/mail": {
    "status": 404,
    "json": {
     "fehler": "Keine Mail"
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/notizen": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/notizen": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/verlauf": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/verlauf": {
    "status": 200,
    "json": {
     "ereignisse": [
      {
       "seq": 76,
-      "at": "2026-11-27T19:50:34.605Z",
+      "at": "2026-11-28T07:55:09.528Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokumente",
@@ -3128,7 +1676,7 @@
      },
      {
       "seq": 77,
-      "at": "2026-11-27T19:50:34.605Z",
+      "at": "2026-11-28T07:55:09.528Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
@@ -3136,7 +1684,7 @@
      },
      {
       "seq": 80,
-      "at": "2026-11-27T19:50:34.615Z",
+      "at": "2026-11-28T07:55:09.537Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokument_tags",
@@ -3144,17 +1692,17 @@
      },
      {
       "seq": 81,
-      "at": "2026-11-27T19:50:34.615Z",
+      "at": "2026-11-28T07:55:09.537Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokument_dokumenttypen",
       "detail": "Rechnung"
      }
     ],
-    "siegel": "225ec95c62ce372e7b76c6a3f2b997f36c92815155689f838377aa0bc6d1552a"
+    "siegel": "fc14be51c6a6ddcbe1b508c1aa04c1deb3f06df7b54a6b1fbe2be23e41da4700"
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/vorschlag": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/vorschlag": {
    "status": 200,
    "json": {
     "vorschlag": null,
@@ -3174,20 +1722,1051 @@
     "import": null
    }
   },
-  "/api/dokumente/84c8b1a5-de69-410a-a4c4-6d3935aa2769/weitergaben": {
+  "/api/dokumente/1e5a78ef-0775-41d0-9479-63267e944955/weitergaben": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724": {
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9": {
    "status": 200,
    "json": {
-    "id": "cdc40969-0320-45e6-b6d3-923c6bde6724",
+    "id": "21398d0f-fc62-4b4a-a7e5-e832e3e411b9",
+    "sha256": "7c91657b390c6b5acec600529872010751ff2cb80cd500f7fd9caf09f2a2c823",
+    "groesse": 1324,
+    "mimeType": "application/pdf",
+    "dateiname": "Police-Betriebshaftpflicht.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.476Z",
+    "asn": 5,
+    "einordnung": {
+     "id": "6d48256e-f15e-45ae-a6d9-5f4e9e66d235",
+     "dokumentId": "21398d0f-fc62-4b4a-a7e5-e832e3e411b9",
+     "art": "freiwillig",
+     "entstanden": "2026-01-02",
+     "fristBis": "2032-12-31",
+     "titel": "Betriebshaftpflicht",
+     "korrespondent": "Nordlicht Versicherung AG",
+     "erstelltAm": "2026-11-28T07:55:09.486Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [],
+    "dokumenttyp": {
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
+     "name": "Vertrag",
+     "vorgabeArt": null
+    },
+    "korrespondent": {
+     "id": "732d3252-f293-4251-8873-f4cc567726ca",
+     "name": "Nordlicht Versicherung AG"
+    },
+    "felder": []
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+     "asn": 10,
+     "dateiname": "Kontoauszug-2016-05.pdf",
+     "titel": "Kontoauszug Mai 2016",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "785d10aaac63ea0e.pdf"
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "7e12d23fcaab5b4b.pdf"
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 307,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "fc133c22227c24c9.jpg"
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 59,
+      "at": "2026-11-28T07:55:09.476Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 60,
+      "at": "2026-11-28T07:55:09.476Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 64,
+      "at": "2026-11-28T07:55:09.486Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "einordnungen",
+      "detail": "Nordlicht Versicherung AG"
+     },
+     {
+      "seq": 65,
+      "at": "2026-11-28T07:55:09.486Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 66,
+      "at": "2026-11-28T07:55:09.486Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_korrespondenten",
+      "detail": "Nordlicht Versicherung AG"
+     },
+     {
+      "seq": 67,
+      "at": "2026-11-28T07:55:09.496Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_dokumenttypen",
+      "detail": "Vertrag"
+     }
+    ],
+    "siegel": "36523ada05d071224af29fe296028656fbd47ed6a1844d3704511a53fd4b294c"
+   }
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "abe5c0e2d0cf8304.jpg"
+  },
+  "/api/dokumente/21398d0f-fc62-4b4a-a7e5-e832e3e411b9/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04": {
+   "status": 200,
+   "json": {
+    "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+    "sha256": "241e9d33d2e73eb581c6970bc93fcdae081e30f610b74e524e46473cb4c506cd",
+    "groesse": 1544,
+    "mimeType": "application/pdf",
+    "dateiname": "Angebot-Hobelbank.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.443Z",
+    "asn": 4,
+    "einordnung": {
+     "id": "7a40b4ae-efa2-47c7-b467-c8d4fccc057e",
+     "dokumentId": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+     "art": "geschaeftsbrief",
+     "entstanden": "2026-09-15",
+     "fristBis": "2032-12-31",
+     "titel": "Angebot Hobelbank",
+     "korrespondent": "Maschinenbau Petersen KG",
+     "erstelltAm": "2026-11-28T07:55:09.452Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [
+     {
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
+      "name": "Büro",
+      "farbe": "violett"
+     }
+    ],
+    "dokumenttyp": null,
+    "korrespondent": {
+     "id": "ae5b8702-4193-4827-8945-e758f6698798",
+     "name": "Maschinenbau Petersen KG"
+    },
+    "felder": []
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+     "asn": 8,
+     "dateiname": "Scan-Tankquittung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "ec56797b4f16d0c7.pdf"
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "8e41c3aabf4aee70.pdf"
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 355,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "4db98fbe4a177469.jpg"
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 50,
+      "at": "2026-11-28T07:55:09.443Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 51,
+      "at": "2026-11-28T07:55:09.443Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 55,
+      "at": "2026-11-28T07:55:09.452Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "einordnungen",
+      "detail": "Maschinenbau Petersen KG"
+     },
+     {
+      "seq": 56,
+      "at": "2026-11-28T07:55:09.452Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 57,
+      "at": "2026-11-28T07:55:09.452Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_korrespondenten",
+      "detail": "Maschinenbau Petersen KG"
+     },
+     {
+      "seq": 58,
+      "at": "2026-11-28T07:55:09.462Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Büro"
+     }
+    ],
+    "siegel": "5e9f1b43c034701a465a32d086b848641d9ce74c690d604e8b5cb3b079580739"
+   }
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "06cecfec6bda0303.jpg"
+  },
+  "/api/dokumente/4850a32d-e132-4d90-ba7e-76e7289d3d04/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db": {
+   "status": 200,
+   "json": {
+    "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+    "sha256": "f8bc2f5ed18fc058d9a4d75b36097ec03703e63ebbc6eb4aefe78b41f134c301",
+    "groesse": 2534,
+    "mimeType": "application/pdf",
+    "dateiname": "HK-2026-1187.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.370Z",
+    "asn": 2,
+    "einordnung": {
+     "id": "df3eca9c-a02e-4308-a5da-e00ab36c4c88",
+     "dokumentId": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "art": "beleg",
+     "entstanden": "2026-11-03",
+     "fristBis": "2034-12-31",
+     "titel": "Rechnung HK-2026-1187",
+     "korrespondent": "Holzhandel Kranich GmbH",
+     "erstelltAm": "2026-11-28T07:55:14.859Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [
+     {
+      "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
+      "name": "Material",
+      "farbe": "orange"
+     },
+     {
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
+      "name": "Steuer 2026",
+      "farbe": "blau"
+     }
+    ],
+    "dokumenttyp": {
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
+     "name": "Rechnung",
+     "vorgabeArt": "beleg"
+    },
+    "korrespondent": {
+     "id": "e5f2422f-5288-4f89-b69d-db9e8c948a79",
+     "name": "Holzhandel Kranich GmbH"
+    },
+    "felder": [
+     {
+      "feldId": "c1a89b7c-2e6b-4f20-8ebb-5b260613fe73",
+      "name": "Betrag",
+      "typ": "betrag",
+      "wert": 147560
+     }
+    ]
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+     "asn": 4,
+     "dateiname": "Angebot-Hobelbank.pdf",
+     "titel": "Angebot Hobelbank",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+     "asn": 8,
+     "dateiname": "Scan-Tankquittung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "c18d17b5db075d58.pdf"
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "3fc06a3fdb4449d0.pdf"
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": {
+     "typ": "380",
+     "datum": "2026-11-03",
+     "nummer": "HK-2026-1187",
+     "syntax": "cii",
+     "kaeufer": "Muster Werkstatt GmbH",
+     "waehrung": "EUR",
+     "bruttoCent": 147560,
+     "verkaeufer": "Holzhandel Kranich GmbH"
+    },
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 443,
+    "pruefung": {
+     "gueltig": true,
+     "szenario": "EN16931 (CII)",
+     "fehler": 0,
+     "warnungen": 0,
+     "meldungen": [],
+     "geprueftAm": "2026-11-28T07:55:11.043Z"
+    }
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "8839ace14cef9f05.jpg"
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 35,
+      "at": "2026-11-28T07:55:09.370Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 36,
+      "at": "2026-11-28T07:55:09.370Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 132,
+      "at": "2026-11-28T07:55:14.859Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "einordnungen",
+      "detail": "Holzhandel Kranich GmbH"
+     },
+     {
+      "seq": 133,
+      "at": "2026-11-28T07:55:14.859Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 134,
+      "at": "2026-11-28T07:55:14.859Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_korrespondenten",
+      "detail": "Holzhandel Kranich GmbH"
+     },
+     {
+      "seq": 135,
+      "at": "2026-11-28T07:55:14.870Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Steuer 2026"
+     },
+     {
+      "seq": 136,
+      "at": "2026-11-28T07:55:14.870Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Material"
+     },
+     {
+      "seq": 137,
+      "at": "2026-11-28T07:55:14.870Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_dokumenttypen",
+      "detail": "Rechnung"
+     },
+     {
+      "seq": 138,
+      "at": "2026-11-28T07:55:14.870Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "feldwerte",
+      "detail": "Betrag"
+     }
+    ],
+    "siegel": "4ac7d8104c084b630995f22e5897748f834e28fa4453e9ad701120b2fc60de09"
+   }
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "dc7e1e9a3eb70c7f.jpg"
+  },
+  "/api/dokumente/93debcf5-11ce-449b-8bde-4bb5d2dff2db/weitergaben": {
+   "status": 200,
+   "json": [
+    {
+     "id": "948dee79-c93d-4306-9335-a2ba0efa558c",
+     "workflowName": "Rechnungen an die Buchhaltung",
+     "ziel": "buchhaltung.example",
+     "stand": "gesendet",
+     "versuche": 1,
+     "letzterVersuch": "2026-11-28T07:55:16.681Z",
+     "naechsterVersuch": null,
+     "httpStatus": 201,
+     "fehler": null,
+     "gesendetAm": "2026-11-28T07:55:16.681Z"
+    }
+   ]
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de": {
+   "status": 200,
+   "json": {
+    "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+    "sha256": "2c3bd70e565f9bb89fd89d7ac63c3be02eb4802a57c2853e2b83fcdb7c288289",
+    "groesse": 1479,
+    "mimeType": "application/pdf",
+    "dateiname": "Scan-Bewirtung.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.562Z",
+    "asn": 9,
+    "einordnung": null,
+    "vormalsAnders": false,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [],
+    "dokumenttyp": null,
+    "korrespondent": null,
+    "felder": []
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+     "asn": 8,
+     "dateiname": "Scan-Tankquittung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+     "asn": 6,
+     "dateiname": "Kontoauszug-2026-10.pdf",
+     "titel": "Kontoauszug Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+     "asn": 4,
+     "dateiname": "Angebot-Hobelbank.pdf",
+     "titel": "Angebot Hobelbank",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "623f048f4186fa27.pdf"
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "57ff1e8c436a5632.pdf"
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 310,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "e9061e11cb2b09bd.jpg"
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 86,
+      "at": "2026-11-28T07:55:09.562Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 87,
+      "at": "2026-11-28T07:55:09.562Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     }
+    ],
+    "siegel": "238f526888d3de5dd47858183c32a69e80fdd2c4d0926204dbb4d90d674ebad9"
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "8d8f8a2555db9a4e.jpg"
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/vorschlag": {
+   "status": 200,
+   "json": {
+    "vorschlag": null,
+    "zuordnung": null,
+    "gelernt": null,
+    "erechnung": null,
+    "ki": null,
+    "import": null
+   }
+  },
+  "/api/dokumente/974e7db0-4252-4d52-abb4-8540c1c835de/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269": {
+   "status": 200,
+   "json": {
+    "id": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+    "sha256": "67c4b1dcd3dd4d9ef2ff2d8e87958921247d10d9e9fd641213c50862866938df",
+    "groesse": 1241,
+    "mimeType": "application/pdf",
+    "dateiname": "Kontoauszug-2016-05.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.574Z",
+    "asn": 10,
+    "einordnung": {
+     "id": "4fad56b9-f3f0-4b8b-b47d-a11b45cab6a7",
+     "dokumentId": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+     "art": "beleg",
+     "entstanden": "2016-05-31",
+     "fristBis": "2024-12-31",
+     "titel": "Kontoauszug Mai 2016",
+     "korrespondent": "Musterbank eG",
+     "erstelltAm": "2026-11-28T07:55:09.597Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": {
+     "id": "9bcb3b89-032f-4d19-bc49-09fcdef5c3dc",
+     "dokumentId": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
+     "beantragtVon": "nutzer:anna@example.org",
+     "beantragtAm": "2026-11-28T07:55:09.614Z",
+     "bestaetigtVon": null,
+     "bestaetigtAm": null
+    },
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [],
+    "dokumenttyp": null,
+    "korrespondent": {
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
+     "name": "Musterbank eG"
+    },
+    "felder": []
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+     "asn": 6,
+     "dateiname": "Kontoauszug-2026-10.pdf",
+     "titel": "Kontoauszug Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "a68fcbf5e4e69ea9.pdf"
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "e30528c4cbab81e6.pdf"
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 222,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "a8966eadcb83d187.jpg"
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 90,
+      "at": "2026-11-28T07:55:09.574Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 91,
+      "at": "2026-11-28T07:55:09.574Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 94,
+      "at": "2026-11-28T07:55:09.597Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "einordnungen",
+      "detail": "Musterbank eG"
+     },
+     {
+      "seq": 95,
+      "at": "2026-11-28T07:55:09.597Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 96,
+      "at": "2026-11-28T07:55:09.597Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_korrespondenten",
+      "detail": "Musterbank eG"
+     }
+    ],
+    "siegel": "61afee655f3ec22b59c9a16d7d62383db1351a1cf1dd3bce41f03864180bf38f"
+   }
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "c038f6dd38ca6c1f.jpg"
+  },
+  "/api/dokumente/9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22": {
+   "status": 200,
+   "json": {
+    "id": "c248de30-fea6-419d-9f79-cb9fdf6f5d22",
     "sha256": "f4ba0a1f85d563670b917691b4e918079c88cb476bea735b543ddf0dd5eb156c",
     "groesse": 275,
     "mimeType": "message/rfc822",
     "dateiname": "Ihre Rechnung HK-2026-1187.eml",
     "quelle": "mail",
-    "eingegangenAm": "2026-11-27T19:50:34.712Z",
+    "eingegangenAm": "2026-11-28T07:55:09.644Z",
     "asn": 11,
     "einordnung": null,
     "vormalsAnders": false,
@@ -3200,18 +2779,18 @@
     "felder": []
    }
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/ableitungen": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/ableitungen": {
    "status": 200,
    "json": {
     "aus": [],
     "daraus": []
    }
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/aehnliche": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/aehnliche": {
    "status": 200,
    "json": [
     {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
      "asn": 2,
      "dateiname": "HK-2026-1187.pdf",
      "titel": "Rechnung HK-2026-1187",
@@ -3219,7 +2798,7 @@
      "vorschaubild": true
     },
     {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
      "asn": 1,
      "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
      "titel": "Strom Oktober",
@@ -3227,7 +2806,7 @@
      "vorschaubild": true
     },
     {
-     "id": "84c8b1a5-de69-410a-a4c4-6d3935aa2769",
+     "id": "1e5a78ef-0775-41d0-9479-63267e944955",
      "asn": 7,
      "dateiname": "xrechnung-2026-77.xml",
      "titel": null,
@@ -3236,25 +2815,25 @@
     }
    ]
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/datei": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/datei": {
    "status": 200,
    "typ": "message/rfc822",
-   "datei": "f914a7933a9c96d0.eml"
+   "datei": "866f20314db5ba2d.eml"
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/datei?ansicht=1": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/datei?ansicht=1": {
    "status": 200,
    "typ": "message/rfc822",
-   "datei": "bc754ad6df7d1011.eml"
+   "datei": "60f5abf4d79e1560.eml"
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/inhalt": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/inhalt": {
    "status": 200,
    "json": null
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/links": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/links": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/mail": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/mail": {
    "status": 200,
    "json": {
     "messageId": "<screenshot-1@holzhandel-kranich.example>",
@@ -3268,7 +2847,7 @@
     "anhaenge": [],
     "unterhaltung": [
      {
-      "dokumentId": "cdc40969-0320-45e6-b6d3-923c6bde6724",
+      "dokumentId": "c248de30-fea6-419d-9f79-cb9fdf6f5d22",
       "betreff": "Ihre Rechnung HK-2026-1187",
       "von": "rechnung@holzhandel-kranich.example",
       "gesendetAm": "2026-11-03T08:12:00.000Z"
@@ -3277,35 +2856,35 @@
     "ausMail": null
    }
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/notizen": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/notizen": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/verlauf": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/verlauf": {
    "status": 200,
    "json": {
     "ereignisse": [
      {
-      "seq": 98,
-      "at": "2026-11-27T19:50:34.712Z",
+      "seq": 100,
+      "at": "2026-11-28T07:55:09.644Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokumente",
       "detail": null
      },
      {
-      "seq": 99,
-      "at": "2026-11-27T19:50:34.712Z",
+      "seq": 101,
+      "at": "2026-11-28T07:55:09.644Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
       "detail": null
      }
     ],
-    "siegel": "778f0712af3f2a96e7fb957d309bff0d6029dae4f41268ab335b9e173bd2829f"
+    "siegel": "bd775e6ee090cc4830bab38749758dce4f8804fa9c021c11d36e8d38d210a69d"
    }
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/vorschlag": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/vorschlag": {
    "status": 200,
    "json": {
     "vorschlag": null,
@@ -3316,78 +2895,44 @@
     "import": null
    }
   },
-  "/api/dokumente/cdc40969-0320-45e6-b6d3-923c6bde6724/weitergaben": {
+  "/api/dokumente/c248de30-fea6-419d-9f79-cb9fdf6f5d22/weitergaben": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a": {
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29": {
    "status": 200,
    "json": {
-    "id": "e7317067-b0ff-4016-af9a-92b16262688a",
-    "sha256": "6e47459db38d205322d0d1ef3677738a419e8592106ba99e88e3b229d9f013ea",
-    "groesse": 1544,
+    "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
+    "sha256": "013544206d0606e9b7cf5be62c3e127dc3e01087edb9c4fb5c581352a27529ac",
+    "groesse": 1368,
     "mimeType": "application/pdf",
-    "dateiname": "Angebot-Hobelbank.pdf",
+    "dateiname": "Scan-Tankquittung.pdf",
     "quelle": "upload",
-    "eingegangenAm": "2026-11-27T19:50:34.515Z",
-    "asn": 4,
-    "einordnung": {
-     "id": "17a02131-6699-4ac2-a358-b5c332a8377a",
-     "dokumentId": "e7317067-b0ff-4016-af9a-92b16262688a",
-     "art": "geschaeftsbrief",
-     "entstanden": "2026-09-15",
-     "fristBis": "2032-12-31",
-     "titel": "Angebot Hobelbank",
-     "korrespondent": "Maschinenbau Petersen KG",
-     "erstelltAm": "2026-11-27T19:50:34.524Z"
-    },
-    "vormalsAnders": true,
+    "eingegangenAm": "2026-11-28T07:55:09.551Z",
+    "asn": 8,
+    "einordnung": null,
+    "vormalsAnders": false,
     "loeschung": null,
     "ansicht": false,
     "archivfassung": false,
-    "tags": [
-     {
-      "id": "44524547-f3fb-43d9-80ff-a776a7723082",
-      "name": "Büro",
-      "farbe": "violett"
-     }
-    ],
+    "tags": [],
     "dokumenttyp": null,
-    "korrespondent": {
-     "id": "eecceb8c-cc96-42c0-bb36-cc25d08e78e7",
-     "name": "Maschinenbau Petersen KG"
-    },
+    "korrespondent": null,
     "felder": []
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/ableitungen": {
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/ableitungen": {
    "status": 200,
    "json": {
     "aus": [],
     "daraus": []
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/aehnliche": {
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/aehnliche": {
    "status": 200,
    "json": [
     {
-     "id": "2e141748-be44-4510-bc76-a7edbcaddcc6",
-     "asn": 2,
-     "dateiname": "HK-2026-1187.pdf",
-     "titel": "Rechnung HK-2026-1187",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "5a139a9d-668c-4df8-9eef-a58927f43cd9",
-     "asn": 3,
-     "dateiname": "Mietvertrag-Werkstatt.pdf",
-     "titel": "Mietvertrag Werkstatt",
-     "mimeType": "application/pdf",
-     "vorschaubild": true
-    },
-    {
-     "id": "71295331-bafb-4832-8ed4-c0a240bb6ed8",
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
      "asn": 9,
      "dateiname": "Scan-Bewirtung.pdf",
      "titel": null,
@@ -3395,7 +2940,7 @@
      "vorschaubild": true
     },
     {
-     "id": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
      "asn": 1,
      "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
      "titel": "Strom Oktober",
@@ -3403,7 +2948,447 @@
      "vorschaubild": true
     },
     {
-     "id": "141b6a3c-5cc3-483d-9a73-348c975c92d6",
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+     "asn": 4,
+     "dateiname": "Angebot-Hobelbank.pdf",
+     "titel": "Angebot Hobelbank",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "bb80e8a63e024de2.pdf"
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "b5d8c4b8d564f1a9.pdf"
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 230,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "9192c620ef0f5578.jpg"
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 82,
+      "at": "2026-11-28T07:55:09.551Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 83,
+      "at": "2026-11-28T07:55:09.551Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     }
+    ],
+    "siegel": "0309ed5ccc9d1b83876eb182ced5cd22d0583a43b25d95a47ce3f11725bd54e4"
+   }
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "fda5f0175b1e7073.jpg"
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/vorschlag": {
+   "status": 200,
+   "json": {
+    "vorschlag": null,
+    "zuordnung": null,
+    "gelernt": null,
+    "erechnung": null,
+    "ki": null,
+    "import": null
+   }
+  },
+  "/api/dokumente/d644e490-476e-422e-9c9f-ad81272e5f29/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3": {
+   "status": 200,
+   "json": {
+    "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+    "sha256": "f522ace1b55e163287017a6a3f262ed4dd3590debd052f534b3cde1c64b0ad5c",
+    "groesse": 1394,
+    "mimeType": "application/pdf",
+    "dateiname": "Mietvertrag-Werkstatt.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.395Z",
+    "asn": 3,
+    "einordnung": {
+     "id": "652a42b5-f739-4936-9c3a-80e85549a242",
+     "dokumentId": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "art": "freiwillig",
+     "entstanden": "2024-03-01",
+     "fristBis": "2034-02-28",
+     "titel": "Mietvertrag Werkstatt",
+     "korrespondent": "Hausverwaltung Lindenhof",
+     "erstelltAm": "2026-11-28T07:55:09.409Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [
+     {
+      "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
+      "name": "Büro",
+      "farbe": "violett"
+     },
+     {
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
+      "name": "Fixkosten",
+      "farbe": "gruen"
+     }
+    ],
+    "dokumenttyp": {
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
+     "name": "Vertrag",
+     "vorgabeArt": null
+    },
+    "korrespondent": {
+     "id": "f91abbba-2f9e-4d9a-aa30-a9a62794285f",
+     "name": "Hausverwaltung Lindenhof"
+    },
+    "felder": []
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+     "asn": 6,
+     "dateiname": "Kontoauszug-2026-10.pdf",
+     "titel": "Kontoauszug Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "asn": 1,
+     "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+     "titel": "Strom Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "21398d0f-fc62-4b4a-a7e5-e832e3e411b9",
+     "asn": 5,
+     "dateiname": "Police-Betriebshaftpflicht.pdf",
+     "titel": "Betriebshaftpflicht",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "4850a32d-e132-4d90-ba7e-76e7289d3d04",
+     "asn": 4,
+     "dateiname": "Angebot-Hobelbank.pdf",
+     "titel": "Angebot Hobelbank",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    }
+   ]
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/datei": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "7f44d538418fce6d.pdf"
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/datei?ansicht=1": {
+   "status": 200,
+   "typ": "application/pdf",
+   "datei": "ba7a6027dde234eb.pdf"
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/inhalt": {
+   "status": 200,
+   "json": {
+    "erechnung": null,
+    "fehler": null,
+    "ocr": false,
+    "textLaenge": 356,
+    "pruefung": null
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/links": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/mail": {
+   "status": 404,
+   "json": {
+    "fehler": "Keine Mail"
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/notizen": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/seiten": {
+   "status": 200,
+   "json": {
+    "anzahl": 1
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/seiten/1": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "f899f90d330fb1ac.jpg"
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/verlauf": {
+   "status": 200,
+   "json": {
+    "ereignisse": [
+     {
+      "seq": 39,
+      "at": "2026-11-28T07:55:09.395Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokumente",
+      "detail": null
+     },
+     {
+      "seq": 40,
+      "at": "2026-11-28T07:55:09.395Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 44,
+      "at": "2026-11-28T07:55:09.409Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "einordnungen",
+      "detail": "Hausverwaltung Lindenhof"
+     },
+     {
+      "seq": 45,
+      "at": "2026-11-28T07:55:09.409Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "seals",
+      "detail": null
+     },
+     {
+      "seq": 46,
+      "at": "2026-11-28T07:55:09.409Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_korrespondenten",
+      "detail": "Hausverwaltung Lindenhof"
+     },
+     {
+      "seq": 47,
+      "at": "2026-11-28T07:55:09.421Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Fixkosten"
+     },
+     {
+      "seq": 48,
+      "at": "2026-11-28T07:55:09.421Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Büro"
+     },
+     {
+      "seq": 49,
+      "at": "2026-11-28T07:55:09.421Z",
+      "akteur": "nutzer:anna@example.org",
+      "aktion": "INSERT",
+      "tabelle": "dokument_dokumenttypen",
+      "detail": "Vertrag"
+     }
+    ],
+    "siegel": "e649ca758b9c8c16efaf74a1eab05620a2a5f04e07e5cc743969cf73a1464335"
+   }
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/vorschaubild": {
+   "status": 200,
+   "typ": "image/jpeg",
+   "datei": "fb55cf9d123ced24.jpg"
+  },
+  "/api/dokumente/d935e3d0-bd71-49ca-87d9-015e945194e3/weitergaben": {
+   "status": 200,
+   "json": []
+  },
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93": {
+   "status": 200,
+   "json": {
+    "id": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+    "sha256": "c5e12774b012a250aaa9a260218f55c6f9027bbf3132056fefd4da2ac3293bd9",
+    "groesse": 1504,
+    "mimeType": "application/pdf",
+    "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
+    "quelle": "upload",
+    "eingegangenAm": "2026-11-28T07:55:09.301Z",
+    "asn": 1,
+    "einordnung": {
+     "id": "3dce0890-c84e-48f6-a09f-2cf63720c153",
+     "dokumentId": "f29a469a-aaec-4587-b2fa-de21a569aa93",
+     "art": "beleg",
+     "entstanden": "2026-10-31",
+     "fristBis": "2034-12-31",
+     "titel": "Strom Oktober",
+     "korrespondent": "Stadtwerke Musterstadt",
+     "erstelltAm": "2026-11-28T07:55:09.323Z"
+    },
+    "vormalsAnders": true,
+    "loeschung": null,
+    "ansicht": false,
+    "archivfassung": false,
+    "tags": [
+     {
+      "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
+      "name": "Fixkosten",
+      "farbe": "gruen"
+     },
+     {
+      "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
+      "name": "Steuer 2026",
+      "farbe": "blau"
+     }
+    ],
+    "dokumenttyp": {
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
+     "name": "Rechnung",
+     "vorgabeArt": "beleg"
+    },
+    "korrespondent": {
+     "id": "07b1fdf7-e6b9-468c-b9df-5f2f21af6530",
+     "name": "Stadtwerke Musterstadt"
+    },
+    "felder": [
+     {
+      "feldId": "c1a89b7c-2e6b-4f20-8ebb-5b260613fe73",
+      "name": "Betrag",
+      "typ": "betrag",
+      "wert": 8420
+     }
+    ]
+   }
+  },
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/ableitungen": {
+   "status": 200,
+   "json": {
+    "aus": [],
+    "daraus": []
+   }
+  },
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/aehnliche": {
+   "status": 200,
+   "json": [
+    {
+     "id": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
+     "asn": 2,
+     "dateiname": "HK-2026-1187.pdf",
+     "titel": "Rechnung HK-2026-1187",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "185f605c-3b68-4a63-9337-5e9b4500058a",
+     "asn": 6,
+     "dateiname": "Kontoauszug-2026-10.pdf",
+     "titel": "Kontoauszug Oktober",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d935e3d0-bd71-49ca-87d9-015e945194e3",
+     "asn": 3,
+     "dateiname": "Mietvertrag-Werkstatt.pdf",
+     "titel": "Mietvertrag Werkstatt",
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "974e7db0-4252-4d52-abb4-8540c1c835de",
+     "asn": 9,
+     "dateiname": "Scan-Bewirtung.pdf",
+     "titel": null,
+     "mimeType": "application/pdf",
+     "vorschaubild": true
+    },
+    {
+     "id": "d644e490-476e-422e-9c9f-ad81272e5f29",
      "asn": 8,
      "dateiname": "Scan-Tankquittung.pdf",
      "titel": null,
@@ -3412,113 +3397,137 @@
     }
    ]
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/datei": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/datei": {
    "status": 200,
    "typ": "application/pdf",
-   "datei": "9aa4a8e25663d15c.pdf"
+   "datei": "d9a0793d3b3bb3b5.pdf"
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/datei?ansicht=1": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/datei?ansicht=1": {
    "status": 200,
    "typ": "application/pdf",
-   "datei": "d5e20d445fa58f8f.pdf"
+   "datei": "a650093a4c4bede2.pdf"
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/inhalt": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/inhalt": {
    "status": 200,
    "json": {
     "erechnung": null,
     "fehler": null,
     "ocr": false,
-    "textLaenge": 355,
+    "textLaenge": 350,
     "pruefung": null
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/links": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/links": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/mail": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/mail": {
    "status": 404,
    "json": {
     "fehler": "Keine Mail"
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/notizen": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/notizen": {
    "status": 200,
    "json": []
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/seiten": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/seiten": {
    "status": 200,
    "json": {
     "anzahl": 1
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/seiten/1": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/seiten/1": {
    "status": 200,
    "typ": "image/jpeg",
-   "datei": "fbaa158efdb26c47.jpg"
+   "datei": "9eb1aafb878257ee.jpg"
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/verlauf": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/verlauf": {
    "status": 200,
    "json": {
     "ereignisse": [
      {
-      "seq": 50,
-      "at": "2026-11-27T19:50:34.515Z",
+      "seq": 26,
+      "at": "2026-11-28T07:55:09.301Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokumente",
       "detail": null
      },
      {
-      "seq": 51,
-      "at": "2026-11-27T19:50:34.515Z",
+      "seq": 27,
+      "at": "2026-11-28T07:55:09.301Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
       "detail": null
      },
      {
-      "seq": 55,
-      "at": "2026-11-27T19:50:34.524Z",
+      "seq": 31,
+      "at": "2026-11-28T07:55:09.323Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "einordnungen",
-      "detail": "Maschinenbau Petersen KG"
+      "detail": "Stadtwerke Musterstadt"
      },
      {
-      "seq": 56,
-      "at": "2026-11-27T19:50:34.524Z",
+      "seq": 32,
+      "at": "2026-11-28T07:55:09.323Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "seals",
       "detail": null
      },
      {
-      "seq": 57,
-      "at": "2026-11-27T19:50:34.524Z",
+      "seq": 33,
+      "at": "2026-11-28T07:55:09.323Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
       "tabelle": "dokument_korrespondenten",
-      "detail": "Maschinenbau Petersen KG"
+      "detail": "Stadtwerke Musterstadt"
      },
      {
-      "seq": 58,
-      "at": "2026-11-27T19:50:34.535Z",
+      "seq": 34,
+      "at": "2026-11-28T07:55:09.341Z",
       "akteur": "nutzer:anna@example.org",
       "aktion": "INSERT",
+      "tabelle": "feldwerte",
+      "detail": "Betrag"
+     },
+     {
+      "seq": 116,
+      "at": "2026-11-28T07:55:10.726Z",
+      "akteur": "workflow:Stadtwerke als Fixkosten",
+      "aktion": "INSERT",
       "tabelle": "dokument_tags",
-      "detail": "Büro"
+      "detail": "Fixkosten"
+     },
+     {
+      "seq": 117,
+      "at": "2026-11-28T07:55:10.726Z",
+      "akteur": "workflow:Stadtwerke als Fixkosten",
+      "aktion": "INSERT",
+      "tabelle": "dokument_tags",
+      "detail": "Steuer 2026"
+     },
+     {
+      "seq": 118,
+      "at": "2026-11-28T07:55:10.726Z",
+      "akteur": "workflow:Stadtwerke als Fixkosten",
+      "aktion": "INSERT",
+      "tabelle": "dokument_dokumenttypen",
+      "detail": "Rechnung"
      }
     ],
-    "siegel": "0eb4e517dfb024e9d0158c35a8e2bc09075be954d1ad96cff8175ccdd4d53203"
+    "siegel": "7a3871e8eb8b73be044c395671cca6f954e91ca339ec2b0e81512688d762805f"
    }
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/vorschaubild": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/vorschaubild": {
    "status": 200,
    "typ": "image/jpeg",
-   "datei": "e7bc06aa092b2fdb.jpg"
+   "datei": "3e3aa5ee62b5179d.jpg"
   },
-  "/api/dokumente/e7317067-b0ff-4016-af9a-92b16262688a/weitergaben": {
+  "/api/dokumente/f29a469a-aaec-4587-b2fa-de21a569aa93/weitergaben": {
    "status": 200,
    "json": []
   },
@@ -3526,33 +3535,33 @@
    "status": 200,
    "json": [
     {
-     "id": "45e1698c-f40e-4471-ac82-1cb7efb4f7cf",
+     "id": "ebddec57-70bb-4c19-8a13-ef489253b766",
      "name": "Kontoauszug",
      "vorgabeArt": "beleg",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.253Z",
+     "erstelltAm": "2026-11-28T07:55:09.194Z",
      "anzahl": 0
     },
     {
-     "id": "9267d8e6-0e64-41d9-8680-537d8a4b9416",
+     "id": "e535b319-d9cc-4e90-843e-cb23ffad9af1",
      "name": "Rechnung",
      "vorgabeArt": "beleg",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.228Z",
+     "erstelltAm": "2026-11-28T07:55:09.177Z",
      "anzahl": 3
     },
     {
-     "id": "a44545b1-9a99-4d72-8f46-ccd89a4583db",
+     "id": "2d38ad04-4ba3-4c3a-a07e-4abff266294b",
      "name": "Vertrag",
      "vorgabeArt": null,
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.242Z",
+     "erstelltAm": "2026-11-28T07:55:09.186Z",
      "anzahl": 2
     }
    ]
@@ -3572,25 +3581,25 @@
     "aufbewahrungsort": "Server und Sicherungen im Büro in Musterstadt, Deutschland.",
     "serverbetrieb": "Anna Muster betreibt den Server selbst und spielt Updates monatlich ein.",
     "schluesselablage": "Im Tresor des Büros.",
-    "geaendertAm": "2026-11-27T19:50:34.752Z"
+    "geaendertAm": "2026-11-28T07:55:09.737Z"
    }
   },
   "/api/felder": {
    "status": 200,
    "json": [
     {
-     "id": "5e08e7a0-ed3d-4cdc-96c0-792d397cef32",
+     "id": "c1a89b7c-2e6b-4f20-8ebb-5b260613fe73",
      "name": "Betrag",
      "typ": "betrag",
      "optionen": [],
-     "erstelltAm": "2026-11-27T19:50:34.262Z"
+     "erstelltAm": "2026-11-28T07:55:09.203Z"
     },
     {
-     "id": "edb6d097-5f74-42c6-a0d3-6bd24d25cb24",
+     "id": "5965376d-603d-4b5b-ab60-b2b021db711f",
      "name": "Fällig am",
      "typ": "datum",
      "optionen": [],
-     "erstelltAm": "2026-11-27T19:50:34.273Z"
+     "erstelltAm": "2026-11-28T07:55:09.214Z"
     }
    ]
   },
@@ -3608,6 +3617,15 @@
     "loeschbar": 1
    }
   },
+  "/api/fristen/vorschau?art=beleg&entstanden=2026-11-28": {
+   "status": 200,
+   "json": {
+    "bis": "2034-12-31",
+    "grund": "gesetz",
+    "jahre": 8,
+    "gesperrt": false
+   }
+  },
   "/api/fristvorlagen": {
    "status": 200,
    "json": []
@@ -3615,7 +3633,7 @@
   "/api/ich": {
    "status": 200,
    "json": {
-    "id": "c6kOAUZWtAJFAtl5lYazdvj1yDpWRExy",
+    "id": "JLTCa7kVoiURUwOcy9WYtscS6lzdDf9j",
     "email": "anna@example.org",
     "role": "inhaber"
    }
@@ -3624,12 +3642,12 @@
    "status": 200,
    "json": {
     "lauf": {
-     "geprueftAm": "2026-11-27T19:51:05.044Z",
+     "geprueftAm": "2026-11-28T07:55:37.052Z",
      "ok": true,
      "befunde": 0,
      "befundListe": [],
-     "eintraege": 142,
-     "dauerMs": 14,
+     "eintraege": 144,
+     "dauerMs": 12,
      "ausgeloestVon": "nutzer:anna@example.org"
     },
     "zeitstempel": null
@@ -3649,57 +3667,57 @@
    "status": 200,
    "json": [
     {
-     "id": "d2270368-e71f-4dab-b677-6c2ca41ed3b4",
+     "id": "f91abbba-2f9e-4d9a-aa30-a9a62794285f",
      "name": "Hausverwaltung Lindenhof",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.482Z",
+     "erstelltAm": "2026-11-28T07:55:09.409Z",
      "anzahl": 1
     },
     {
-     "id": "9fe6cbef-902b-4710-961b-14178bdeb508",
+     "id": "e5f2422f-5288-4f89-b69d-db9e8c948a79",
      "name": "Holzhandel Kranich GmbH",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:40.773Z",
+     "erstelltAm": "2026-11-28T07:55:14.859Z",
      "anzahl": 1
     },
     {
-     "id": "eecceb8c-cc96-42c0-bb36-cc25d08e78e7",
+     "id": "ae5b8702-4193-4827-8945-e758f6698798",
      "name": "Maschinenbau Petersen KG",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.524Z",
+     "erstelltAm": "2026-11-28T07:55:09.452Z",
      "anzahl": 1
     },
     {
-     "id": "4e5bcf9e-6732-4320-8474-5c12f89d086a",
+     "id": "96a265e5-d127-4a0f-bdd4-7269aafb518d",
      "name": "Musterbank eG",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.594Z",
+     "erstelltAm": "2026-11-28T07:55:09.517Z",
      "anzahl": 2
     },
     {
-     "id": "cb653882-5597-4fce-8a02-4f68c132b0d5",
+     "id": "732d3252-f293-4251-8873-f4cc567726ca",
      "name": "Nordlicht Versicherung AG",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.559Z",
+     "erstelltAm": "2026-11-28T07:55:09.486Z",
      "anzahl": 1
     },
     {
-     "id": "8b51ffb8-2f86-4cdf-b7b0-78efe74d72e4",
+     "id": "07b1fdf7-e6b9-468c-b9df-5f2f21af6530",
      "name": "Stadtwerke Musterstadt",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.393Z",
+     "erstelltAm": "2026-11-28T07:55:09.323Z",
      "anzahl": 1
     }
    ]
@@ -3708,11 +3726,11 @@
    "status": 200,
    "json": [
     {
-     "id": "bd2544e0-22d1-4a76-82bb-6790c5421ab0",
-     "dokumentId": "619afbe1-3528-44f7-82d0-4dc7033e1d8d",
+     "id": "9bcb3b89-032f-4d19-bc49-09fcdef5c3dc",
+     "dokumentId": "9e1caf8d-aeaa-4bcf-b339-7ede3ebaf269",
      "dateiname": "Kontoauszug-2016-05.pdf",
      "beantragtVon": "nutzer:anna@example.org",
-     "beantragtAm": "2026-11-27T19:50:34.695Z",
+     "beantragtAm": "2026-11-28T07:55:09.614Z",
      "bestaetigtVon": null,
      "bestaetigtAm": null
     }
@@ -3745,12 +3763,12 @@
     "ok": true,
     "befunde": [],
     "bericht": {
-     "zeitpunkt": "2026-11-27T19:51:30.123Z",
-     "pruefwert": "Nr. 143 · 6f7af5b2014d6a64ef4ed0be31724be0f899ef2f44f387a22347e9ee04f1c768",
+     "zeitpunkt": "2026-11-28T07:56:00.695Z",
+     "pruefwert": "Nr. 145 · 75151e69242962a22bbc5b73fb4329ad08fa965101444e01da4d1f5c77855b18",
      "dokumente": 11,
      "geloescht": 0,
      "siegel": 30,
-     "protokoll": 143,
+     "protokoll": 145,
      "zeitstempel": null
     }
    }
@@ -3759,20 +3777,20 @@
    "status": 200,
    "json": [
     {
-     "id": "fc88c2ac-d353-4ade-832d-e95a11dbb327",
+     "id": "0947038e-c26e-4863-9647-a27c1090f53f",
      "name": "Buchhaltung",
-     "host": "imap.muster-werkstatt.example",
+     "host": "imap.muster-werkstatt.test",
      "port": 993,
      "tls": true,
      "benutzer": "buchhaltung@muster-werkstatt.example",
      "ordner": "INBOX",
      "letzteUid": 0,
-     "uidValidity": null,
-     "letzterAbruf": null,
+     "uidValidity": 1,
+     "letzterAbruf": "2026-11-28T07:55:09.698Z",
      "letzterFehler": null,
-     "letzterErfolg": null,
+     "letzterErfolg": "2026-11-28T07:55:09.698Z",
      "aktiv": true,
-     "erstelltAm": "2026-11-27T19:50:34.722Z",
+     "erstelltAm": "2026-11-28T07:55:09.680Z",
      "art": "imap",
      "jmapStand": null,
      "oauth": null,
@@ -3795,11 +3813,11 @@
    "status": 200,
    "json": [
     {
-     "id": "a1dcf13f-7389-429d-9ebc-11bc959f9033",
+     "id": "61bd2889-8856-48be-a992-4cb96e66a949",
      "grund": "Außenprüfung 2023",
      "von": "2023-01-01",
      "bis": "2023-12-31",
-     "angelegtAm": "2026-11-27T19:50:34.730Z",
+     "angelegtAm": "2026-11-28T07:55:09.700Z",
      "aufgehobenAm": null
     }
    ]
@@ -3835,21 +3853,21 @@
      "dokumente": 0
     },
     "speicher": {
-     "bytes": 15657,
+     "bytes": 15658,
      "dateien": 11,
      "datentraeger": {
       "gesamt": 154993672192,
-      "frei": 86917914624
+      "frei": 86911832064
      }
     },
     "quellen": {
      "postfaecher": [
       {
-       "id": "fc88c2ac-d353-4ade-832d-e95a11dbb327",
+       "id": "0947038e-c26e-4863-9647-a27c1090f53f",
        "name": "Buchhaltung",
        "art": "imap",
        "aktiv": true,
-       "letzterAbruf": null,
+       "letzterAbruf": "2026-11-28T07:55:09.698Z",
        "letzterFehler": null
       }
      ],
@@ -3862,7 +3880,7 @@
    "status": 200,
    "json": {
     "ansichten": [
-     "ebadc5f8-9145-4859-945a-bc162f895bdd"
+     "f5b78a49-fd5e-4f53-bcdb-4dbf554a0b9c"
     ]
    }
   },
@@ -3883,43 +3901,43 @@
    "status": 200,
    "json": [
     {
-     "id": "44524547-f3fb-43d9-80ff-a776a7723082",
+     "id": "c553d796-ab44-4f91-88ac-83d1df6c7bd5",
      "name": "Büro",
      "farbe": "violett",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.198Z",
+     "erstelltAm": "2026-11-28T07:55:09.148Z",
      "anzahl": 2
     },
     {
-     "id": "5be2d5b7-0e31-4865-a083-3e72da4f892a",
+     "id": "5ae97357-1ac7-4455-8706-15636defbe2c",
      "name": "Fixkosten",
      "farbe": "gruen",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.185Z",
+     "erstelltAm": "2026-11-28T07:55:09.135Z",
      "anzahl": 2
     },
     {
-     "id": "448feb93-9339-47e4-adcf-ae65125b3795",
+     "id": "4643a9d6-59f1-4479-9b68-9a40fae07bc2",
      "name": "Material",
      "farbe": "orange",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.208Z",
+     "erstelltAm": "2026-11-28T07:55:09.160Z",
      "anzahl": 2
     },
     {
-     "id": "6e448771-5dd0-4e21-9147-a493ef59f4fc",
+     "id": "caa45531-1ebe-4c09-b179-43a87ca5ca33",
      "name": "Steuer 2026",
      "farbe": "blau",
      "abgleich": "automatisch",
      "abgleichText": "",
      "grossKleinEgal": true,
-     "erstelltAm": "2026-11-27T19:50:34.149Z",
+     "erstelltAm": "2026-11-28T07:55:09.114Z",
      "anzahl": 2
     }
    ]
@@ -3939,7 +3957,7 @@
    "json": {
     "titel": "Verfahrensdokumentation Muster Werkstatt GmbH",
     "stand": {
-     "datum": "2026-11-27",
+     "datum": "2026-11-28",
      "programm": "Belegt",
      "version": "0.1.0"
     },
@@ -3952,7 +3970,7 @@
        "Anschrift: Musterweg 1, 12345 Musterstadt",
        "Verantwortlich: Anna Muster",
        "Ort der Aufbewahrung: Server und Sicherungen im Büro in Musterstadt, Deutschland.",
-       "Stand des Archivs: 11 Dokumente, davon 1 Mail und 0 nach Ablauf der Frist gelöscht; 143 Einträge im Protokoll."
+       "Stand des Archivs: 11 Dokumente, davon 1 Mail und 0 nach Ablauf der Frist gelöscht; 145 Einträge im Protokoll."
       ]
      },
      {
@@ -3969,7 +3987,7 @@
        "E-Rechnungen (XRechnung, ZUGFeRD, Factur-X) prüft Belegt nach dem Eingang mit dem Validator der Koordinierungsstelle für IT-Standards (KoSIT) und dessen Konfiguration für XRechnung gegen XRechnung oder EN 16931; der Prüfdienst läuft auf dem eigenen Server ohne Internet. Das Ergebnis (gültig oder ungültig, Szenario, die ersten Fehler und Warnungen) steht auf der Seite des Dokuments. Es ist abgeleitet wie die Fassungen oben, ändert weder Original noch Einordnung und geht mit der Löschung des Dokuments mit."
       ],
       "liste": [
-       "Postfach „Buchhaltung“: buchhaltung@muster-werkstatt.example auf imap.muster-werkstatt.example, Ordner INBOX; nach dem Abholen: keine Aktion, nur lesend"
+       "Postfach „Buchhaltung“: buchhaltung@muster-werkstatt.example auf imap.muster-werkstatt.test, Ordner INBOX; nach dem Abholen: keine Aktion, nur lesend"
       ]
      },
      {
@@ -4006,9 +4024,9 @@
        "Die Dateien liegen im Dateisystem des Servers.",
        "Die Prüfung rechnet die Kette Eintrag für Eintrag nach, vergleicht den Kopf mit dem letzten Eintrag und jedes Siegel mit dem heutigen Inhalt seiner Zeile; sie meldet Lücken in der Nummerierung, falsche Verweise auf den Vorgänger und abweichende Inhalte. Die Kette verhindert keine Änderung durch jemanden, der die Datenbank selbst verändern kann; sie macht sie sichtbar (Rz. 60).",
        "Aufrufen lässt sie sich unter „Prüfung“; dort vergleicht sie auf Wunsch auch jede Datei mit ihrem Hash.",
-       "Der Worker prüft Kette, Kopf und Siegel einmal am Tag und hält jeden Lauf mit Zeitpunkt, Ergebnis, Befunden und Zahl der Einträge in einer Tabelle fest, die nur anwächst; die Startseite zeigt den letzten Lauf, meldet er Befunde, geht eine Benachrichtigung hinaus, und der Inhaber kann einen Lauf sofort starten. Der letzte gespeicherte Lauf vom 2026-11-27 meldete keine Befunde.",
+       "Der Worker prüft Kette, Kopf und Siegel einmal am Tag und hält jeden Lauf mit Zeitpunkt, Ergebnis, Befunden und Zahl der Einträge in einer Tabelle fest, die nur anwächst; die Startseite zeigt den letzten Lauf, meldet er Befunde, geht eine Benachrichtigung hinaus, und der Inhaber kann einen Lauf sofort starten. Der letzte gespeicherte Lauf vom 2026-11-28 meldete keine Befunde.",
        "Bei Erstellung dieses Dokuments meldete die Prüfung von Kette, Kopf und Siegeln keine Befunde.",
-       "Der Prüfwert ist Nummer und Hash des letzten Eintrags im Protokoll. Außerhalb des Servers aufbewahrt zeigt er später, ob das Protokoll bis zu diesem Eintrag nachträglich verändert wurde. Bei Erstellung dieses Dokuments: Nr. 143 · 6f7af5b2014d6a64ef4ed0be31724be0f899ef2f44f387a22347e9ee04f1c768."
+       "Der Prüfwert ist Nummer und Hash des letzten Eintrags im Protokoll. Außerhalb des Servers aufbewahrt zeigt er später, ob das Protokoll bis zu diesem Eintrag nachträglich verändert wurde. Bei Erstellung dieses Dokuments: Nr. 145 · 75151e69242962a22bbc5b73fb4329ad08fa965101444e01da4d1f5c77855b18."
       ],
       "liste": [
        "Versiegelt: Dokumente, ab dem Einfügen",
@@ -4021,7 +4039,7 @@
        "Versiegelt: Zeitstempel zum Kopf der Kette, ab dem Einfügen",
        "Nur lesen (5): audit_chain, audit_log, backup_status, sealed_tables, seals",
        "Nur ergänzen (lesen und einfügen) (15): ableitungen, archivnummern, benachrichtigungen, dokumente, einordnungen, freigabe_abrufe, freigabe_widerrufe, freigaben, import_eintraege, kettenpruefungen, mail_anhaenge, mail_verweise, mails, postfach_aktionen, zeitstempel",
-       "Lesen und schreiben, Sperren prüfen die Trigger (50): account, ansichten, api_tokens, archivfassungen, dokument_dokumenttypen, dokument_korrespondenten, dokument_tags, dokumenttypen, einladungen, einlieferungen, einstellungen, erechnung_pruefungen, felder, feldwerte, fristvorlagen, gespeicherte_ansichten, import_zuordnungen, importe, inhalte, ki_vorschlaege, klassifikator, korrespondenten, loeschungen, notiz_widerrufe, notizen, objektsperren, offene_entfernungen, paperless_quellen, passkey, passwort_links, postfach_mails, quellen, regeln, session, sperren, start_kacheln, suchtexte, tags, two_factor, user, verification, vorschaubilder, webhook_ereignisse, webhook_zustellungen, webhooks, weitergaben, workflow_geheimnisse, workflow_laeufe, workflows, zuordnung_vorschlaege"
+       "Lesen und schreiben, Sperren prüfen die Trigger (51): abruf_sperren, account, ansichten, api_tokens, archivfassungen, dokument_dokumenttypen, dokument_korrespondenten, dokument_tags, dokumenttypen, einladungen, einlieferungen, einstellungen, erechnung_pruefungen, felder, feldwerte, fristvorlagen, gespeicherte_ansichten, import_zuordnungen, importe, inhalte, ki_vorschlaege, klassifikator, korrespondenten, loeschungen, notiz_widerrufe, notizen, objektsperren, offene_entfernungen, paperless_quellen, passkey, passwort_links, postfach_mails, quellen, regeln, session, sperren, start_kacheln, suchtexte, tags, two_factor, user, verification, vorschaubilder, webhook_ereignisse, webhook_zustellungen, webhooks, weitergaben, workflow_geheimnisse, workflow_laeufe, workflows, zuordnung_vorschlaege"
       ]
      },
      {
@@ -4041,7 +4059,7 @@
        "Programme greifen mit einem API-Token zu, das der Inhaber anlegt und widerrufen kann. Ein Token liest Dokumente, mit dem Recht zu schreiben nimmt es zusätzlich Dokumente auf und ordnet sie ein; löschen, bestätigen und Einstellungen ändern kann es nicht. Im Protokoll steht das Token als Akteur."
       ],
       "liste": [
-       "anna@example.org: Inhaber, seit 2026-11-27, ohne zweiten Faktor"
+       "anna@example.org: Inhaber, seit 2026-11-28, ohne zweiten Faktor"
       ]
      },
      {
@@ -4073,7 +4091,7 @@
    "status": 200,
    "json": [
     {
-     "id": "b4462f71-71bd-4ad6-8d4e-bd8b432d8d8a",
+     "id": "892c7fd8-f463-4e8b-97e4-6b2cd7d61346",
      "name": "Stadtwerke als Fixkosten",
      "reihenfolge": 0,
      "aktiv": true,
@@ -4085,27 +4103,27 @@
       {
        "art": "tagsHinzu",
        "tags": [
-        "5be2d5b7-0e31-4865-a083-3e72da4f892a",
-        "6e448771-5dd0-4e21-9147-a493ef59f4fc"
+        "5ae97357-1ac7-4455-8706-15636defbe2c",
+        "caa45531-1ebe-4c09-b179-43a87ca5ca33"
        ]
       },
       {
        "art": "dokumenttyp",
-       "dokumenttyp": "9267d8e6-0e64-41d9-8680-537d8a4b9416"
+       "dokumenttyp": "e535b319-d9cc-4e90-843e-cb23ffad9af1"
       }
      ],
      "anhalten": false,
-     "erstelltAm": "2026-11-27T19:50:34.292Z"
+     "erstelltAm": "2026-11-28T07:55:09.232Z"
     },
     {
-     "id": "406f1d3b-f4de-4640-bba4-9dc57fc835fe",
+     "id": "daa429ad-1679-409a-82ae-1669daafa0fb",
      "name": "Rechnungen an die Buchhaltung",
      "reihenfolge": 1,
      "aktiv": true,
      "ausloeser": "eingeordnet",
      "bedingungen": {
       "tags": [
-       "6e448771-5dd0-4e21-9147-a493ef59f4fc"
+       "caa45531-1ebe-4c09-b179-43a87ca5ca33"
       ]
      },
      "aktionen": [
@@ -4126,7 +4144,7 @@
       }
      ],
      "anhalten": false,
-     "erstelltAm": "2026-11-27T19:50:34.306Z"
+     "erstelltAm": "2026-11-28T07:55:09.245Z"
     }
    ]
   },
@@ -4134,10 +4152,10 @@
    "status": 200,
    "json": [
     {
-     "id": "0cad4db7-76f5-41d4-93ff-09ffc6647a6f",
-     "workflowId": "406f1d3b-f4de-4640-bba4-9dc57fc835fe",
+     "id": "42239830-c7f6-46e5-89b3-1949cdbf6378",
+     "workflowId": "daa429ad-1679-409a-82ae-1669daafa0fb",
      "workflowName": "Rechnungen an die Buchhaltung",
-     "dokumentId": "2e141748-be44-4510-bc76-a7edbcaddcc6",
+     "dokumentId": "93debcf5-11ce-449b-8bde-4bb5d2dff2db",
      "asn": 2,
      "dateiname": "HK-2026-1187.pdf",
      "ausloeser": "eingeordnet",
@@ -4149,13 +4167,13 @@
       }
      ],
      "fehler": null,
-     "zeitpunkt": "2026-11-27T19:50:41.338Z"
+     "zeitpunkt": "2026-11-28T07:55:15.873Z"
     },
     {
-     "id": "479ce59f-5b46-4b61-bbd9-528a678a6257",
-     "workflowId": "b4462f71-71bd-4ad6-8d4e-bd8b432d8d8a",
+     "id": "bfda9593-0aac-422a-b7ff-cd98fdb84bf1",
+     "workflowId": "892c7fd8-f463-4e8b-97e4-6b2cd7d61346",
      "workflowName": "Stadtwerke als Fixkosten",
-     "dokumentId": "35748a60-b3b3-41a9-8ff8-3c6932a0fa13",
+     "dokumentId": "f29a469a-aaec-4587-b2fa-de21a569aa93",
      "asn": 1,
      "dateiname": "Stadtwerke-Rechnung-Oktober.pdf",
      "ausloeser": "eingang",
@@ -4164,17 +4182,17 @@
       {
        "art": "tagsHinzu",
        "tags": [
-        "5be2d5b7-0e31-4865-a083-3e72da4f892a",
-        "6e448771-5dd0-4e21-9147-a493ef59f4fc"
+        "5ae97357-1ac7-4455-8706-15636defbe2c",
+        "caa45531-1ebe-4c09-b179-43a87ca5ca33"
        ]
       },
       {
        "art": "dokumenttyp",
-       "dokumenttyp": "9267d8e6-0e64-41d9-8680-537d8a4b9416"
+       "dokumenttyp": "e535b319-d9cc-4e90-843e-cb23ffad9af1"
       }
      ],
      "fehler": null,
-     "zeitpunkt": "2026-11-27T19:50:36.221Z"
+     "zeitpunkt": "2026-11-28T07:55:10.726Z"
     }
    ]
   },
@@ -4187,27 +4205,27 @@
    "json": {
     "einladungen": [
      {
-      "id": "c980d772-8fe9-4201-a999-9b0ae8e81944",
+      "id": "abe7b0cb-6cc8-45eb-b341-986604923d7b",
       "rolle": "steuerberatung",
       "zeitraumVon": null,
       "zeitraumBis": null,
       "recht": null,
       "sichtbereich": null,
-      "erstelltAm": "2026-11-27T19:50:34.744Z",
-      "gueltigBis": "2026-11-30T19:50:34.745Z",
+      "erstelltAm": "2026-11-28T07:55:09.728Z",
+      "gueltigBis": "2026-12-01T07:55:09.729Z",
       "eingeloestAm": null,
       "eingeloestVon": null,
       "zurueckgezogenAm": null
      },
      {
-      "id": "465794c8-44d3-4ef5-b80a-2560a034f13d",
+      "id": "a8f365ef-2fd3-40bb-8b45-c8965af9ce11",
       "rolle": "pruefer",
       "zeitraumVon": "2023-01-01",
       "zeitraumBis": "2023-12-31",
       "recht": null,
       "sichtbereich": null,
-      "erstelltAm": "2026-11-27T19:50:34.737Z",
-      "gueltigBis": "2026-11-30T19:50:34.738Z",
+      "erstelltAm": "2026-11-28T07:55:09.717Z",
+      "gueltigBis": "2026-12-01T07:55:09.718Z",
       "eingeloestAm": null,
       "eingeloestVon": null,
       "zurueckgezogenAm": null
@@ -4215,7 +4233,7 @@
     ],
     "zugaenge": [
      {
-      "id": "c6kOAUZWtAJFAtl5lYazdvj1yDpWRExy",
+      "id": "JLTCa7kVoiURUwOcy9WYtscS6lzdDf9j",
       "email": "anna@example.org",
       "rolle": "inhaber",
       "zeitraumVon": null,
@@ -4223,7 +4241,7 @@
       "recht": null,
       "sichtbereich": null,
       "entzogenAm": null,
-      "erstelltAm": "2026-11-27T19:50:33.045Z",
+      "erstelltAm": "2026-11-28T07:55:08.153Z",
       "passwort": true,
       "zweiFaktor": {
        "totp": false,
