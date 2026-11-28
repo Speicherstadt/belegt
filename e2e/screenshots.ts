@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { type Browser, expect, type Page, test } from "@playwright/test";
 import { mitRahmen } from "./bildrahmen.ts";
 import { demoAufnehmen } from "./demo-aufnahme.ts";
@@ -11,6 +11,11 @@ import { vorbereiten } from "./screenshot-daten.ts";
  */
 
 const ASSETS = "docs/assets";
+/**
+ * Dieselben Bilder ohne Rahmen für Webseiten mit eigenem CSS (speicherstadt.org, teufel-it.de): Dort würde der
+ * transparente Rand beim Umwandeln weiß und stünde als Rahmen in der Karte.
+ */
+const OHNE_RAHMEN = `${ASSETS}/ohne-rahmen`;
 const MOBIL = { width: 390, height: 844 };
 
 let rahmenBrowser: Browser;
@@ -26,7 +31,7 @@ async function darstellung(page: Page, modus: "Hell" | "Dunkel") {
   await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
 }
 
-/** Hell und dunkel mit Rahmen; oben ein Ausschnitt der Seite (selector), am Handy sonst der Inhalt unter der Navigation */
+/** Hell und dunkel mit Rahmen, dazu ohne Rahmen in docs/assets/ohne-rahmen/; oben ein Ausschnitt der Seite (selector), am Handy sonst der Inhalt unter der Navigation */
 async function bild(page: Page, name: string, oben?: string) {
   const mobil = page.viewportSize()?.width === MOBIL.width;
   const ziel = oben ?? (mobil ? "#inhalt" : undefined);
@@ -40,7 +45,9 @@ async function bild(page: Page, name: string, oben?: string) {
     // Sonst von oben: ein Klick vorher (etwa „Jetzt prüfen“ auf der Startseite) hat die Seite gescrollt
     else await page.evaluate(() => window.scrollTo(0, 0));
     const png = await page.screenshot({ animations: "disabled", caret: "hide" });
-    const pfad = `${ASSETS}/screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
+    const datei = `screenshot-${name}${modus === "Dunkel" ? "-dunkel" : ""}.png`;
+    const pfad = `${ASSETS}/${datei}`;
+    await writeFile(`${OHNE_RAHMEN}/${datei}`, png);
     await writeFile(pfad, await mitRahmen(rahmenBrowser, png, modus === "Dunkel" ? "dunkel" : "hell", mobil ? 36 : 12));
   }
   await darstellung(page, "Hell");
@@ -49,6 +56,7 @@ async function bild(page: Page, name: string, oben?: string) {
 test("Bilder für README und Doku", async ({ page, browser }) => {
   test.setTimeout(480_000);
   rahmenBrowser = browser;
+  await mkdir(OHNE_RAHMEN, { recursive: true });
   const { holz, steuer, material, rechnung, betrag } = await vorbereiten(page);
 
   // Die ZUGFeRD-Rechnung mit Vorschau, Kopfdaten und Prüfung
