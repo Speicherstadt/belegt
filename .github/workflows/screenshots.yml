@@ -1,6 +1,7 @@
 name: Screenshots erneuern
 
-# Nimmt die Bilder für README und Doku neu auf (docs/assets/screenshot-*.png, hell und dunkel, und docs/social-preview.png)
+# Nimmt die Bilder für README und Doku neu auf (docs/assets/screenshot-*.png, hell und dunkel, dazu ohne Rahmen in docs/assets/ohne-rahmen/, und
+# docs/social-preview.png)
 # und mit denselben Daten die Antworten für die Demo (demo/, e2e/demo-aufnahme.ts). Sie committet, was sich geändert
 # hat: bun run docs:screenshots (e2e/screenshots.ts) im Playwright-Image, damit Browser
 # und Schriften bei jedem Lauf gleich sind. Nach einer Änderung am Aussehen von Hand starten (Actions → Screenshots
@@ -29,6 +30,7 @@ jobs:
       # demo als Ordner, damit auch gelöschte Dateien der Aufnahme mitgehen
       paths: |
         docs/assets/screenshot-*.png
+        docs/assets/ohne-rahmen/screenshot-*.png
         docs/social-preview.png
         demo
       commit-message: Screenshots erneuert
